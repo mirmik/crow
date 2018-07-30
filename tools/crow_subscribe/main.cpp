@@ -13,8 +13,13 @@ void subscribe_handler(crow::packet* pack) {
 	gxx::println(dat);
 }
 
+void undelivered_handler(crow::packet* pack) {
+	gxx::println("Crowker access error");
+	exit(-1);
+}
+
 int main(int argc, char* argv[]) {
-	//crow::enable_diagnostic();
+	crow::undelivered_handler = undelivered_handler;
 
 	crow::link_gate(&ugate, G1_UDPGATE);
 	ugate.open();
@@ -35,6 +40,8 @@ int main(int argc, char* argv[]) {
 	std::string theme = argv[optind];
 
 	crow::set_publish_host(crow::host(getenv("CROWKER")));
+	crow::set_publish_qos(crow::QoS(2));
+
 	crow::subscribe_handler = subscribe_handler;
 
 	crow::subscribe(theme.data(), theme.size());

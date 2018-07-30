@@ -67,7 +67,7 @@ namespace crow {
 	};*/
 
 	void publish(const char* theme, size_t thmsz, const char* data, size_t datsz);
-	void subscribe(const char* theme, size_t thmsz, crow::QoS qos = crow::QoS(0), uint16_t ackquant = DEFAULT_ACKQUANT);
+	void subscribe(const char* theme, size_t thmsz);
 
 
 	extern void(*subscribe_handler)(crow::packet* pack);

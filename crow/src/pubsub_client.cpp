@@ -2,6 +2,7 @@
 
 crow::host brocker_host;
 crow::QoS brocker_qos = crow::QoS(0);
+uint16_t brocker_ackquant = DEFAULT_ACKQUANT;
 
 void(*crow::subscribe_handler)(crow::packet* pack);
 
@@ -29,14 +30,14 @@ void crow::publish(const char* theme, size_t thmsz, const char* data, size_t dat
 	crow::send(brocker_host.data, brocker_host.size, iov, 4, G1_G3TYPE, brocker_qos, DEFAULT_ACKQUANT);
 }
 
-void crow::subscribe(const char* theme, size_t thmsz, crow::QoS qos, uint16_t ackquant) {
+void crow::subscribe(const char* theme, size_t thmsz) {
 	crow::subheader_pubsub subps;
 	crow::subheader_pubsub_control subps_c;
 
 	subps.type = crow::frame_type::SUBSCRIBE;
 	subps.thmsz = thmsz;
-	subps_c.qos = qos;
-	subps_c.ackquant = ackquant;
+	subps_c.qos = brocker_qos;
+	subps_c.ackquant = brocker_ackquant;
 
 	gxx::iovec iov[4] = {
 		{ &subps, sizeof(subps) },
@@ -44,7 +45,7 @@ void crow::subscribe(const char* theme, size_t thmsz, crow::QoS qos, uint16_t ac
 		{ theme, thmsz },
 	};
 
-	crow::send(brocker_host.data, brocker_host.size, iov, 3, G1_G3TYPE, brocker_qos, ackquant);	
+	crow::send(brocker_host.data, brocker_host.size, iov, 3, G1_G3TYPE, brocker_qos);	
 }
 
 
