@@ -4,6 +4,7 @@
 import licant
 from licant.cxx_modules import application
 from licant.libs import include
+import os
 
 licant.libs.include("gxx")
 licant.libs.include("crow")
@@ -24,5 +25,10 @@ application("crowker",
 	],
 	cxx_flags = ""
 )
+
+@licant.routine
+def install():
+	licant.do("crowker")
+	os.system("cp crowker /usr/local/bin")
 
 licant.ex("crowker")
