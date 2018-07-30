@@ -136,8 +136,6 @@ void crow::channel::incoming_packet(crow::packet* pack) {
 		return;
 	}*/
 
-	gxx::println("HERE!!! ", (uint8_t)sh2->ftype);
-
 	switch(sh2->ftype) {
 		case crow::Frame::HANDSHAKE:
 			gxx::println("HANDSHAKE");
@@ -159,8 +157,7 @@ void crow::channel::incoming_packet(crow::packet* pack) {
 			break;
 		case crow::Frame::DATA:
 			gxx::println("DATA");
-			//incoming_packet(pack);
-			gxx::println("OUT_DATA");
+			incoming_data_packet(pack);
 			return;
 		case crow::Frame::REFUSE:
 			gxx::println("REFUSE");
@@ -228,4 +225,12 @@ void crow::__channel_send(crow::channel* ch, const char* data, size_t size) {
 
 uint16_t crow::dynport() {
 	return 512;
+}
+
+void crow::channel::handshake(const crow::host& host, uint16_t rid, crow::QoS qos, uint16_t ackquant) {
+	crow::handshake(this, rid, host.data, host.size, qos, ackquant);
+}
+
+int crow::channel::send(const char* data, size_t size) {
+	crow::__channel_send(this, data, size);
 }

@@ -23,7 +23,6 @@ void crow::__node_send(uint16_t sid, uint16_t rid, const uint8_t* raddr, size_t 
 
 
 void crow::incoming_node_packet(crow::packet* pack) {
-	gxx::println("incoming_node_packet");
 	auto sh = get_subheader(pack);
 	for ( auto& srvs: crow::nodes ) {
 		if (srvs.id == sh->rid) {

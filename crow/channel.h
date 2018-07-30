@@ -32,6 +32,9 @@ namespace crow {
 		void incoming_packet(crow::packet* pack) override final;
 		virtual void incoming_data_packet(crow::packet* pack) = 0;
 		channel() { dlist_init(&lnk); }
+
+		void handshake(const crow::host& host, uint16_t rid, crow::QoS qos = crow::QoS(1), uint16_t ackquant = 200);
+		int send(const char* data, size_t size);
 	};
 
 	struct subheader_channel {

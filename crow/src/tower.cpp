@@ -8,6 +8,7 @@
 #include <gxx/algorithm.h>
 #include <gxx/util/string.h>
 #include <gxx/syslock.h>
+#include <gxx/util/hexer.h>
 #include <gxx/print/stdprint.h>
 
 gxx::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
@@ -36,10 +37,10 @@ crow::gateway* crow::find_target_gateway(const crow::packet* pack) {
 }
 
 void crow::release(crow::packet* pack) {
-	gxx::syslock().lock();
+	gxx::system_lock();
 	if (pack->released_by_tower) crow::utilize(pack);
 	else pack->released_by_world = true;
-	gxx::syslock().unlock();
+	gxx::system_unlock();
 }
 
 void crow::tower_release(crow::packet* pack) {
@@ -333,4 +334,16 @@ void crow::spin() {
 		for (auto& gate : gateways) gate.nonblock_onestep();
 		crow::onestep();
 	}
+}
+
+crow::host::host(const char* addr) {
+	int prelen = strlen(addr);
+	data = (uint8_t*)malloc(prelen);
+	int len = hexer(data, prelen, addr, prelen);
+	size = len;
+	data = (uint8_t*)realloc(data, len);
+}
+
+crow::host::~host() {
+	free(data);
 }

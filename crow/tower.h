@@ -17,6 +17,13 @@ namespace crow {
 		WrongAddress,
 	};
 
+	struct host {
+		uint8_t* data;
+		size_t size;
+		host(const char* str);
+		~host();
+	};
+
 	///Список врат.
 	extern gxx::dlist<crow::gateway, &crow::gateway::lnk> gateways;
 	extern gxx::dlist<crow::packet, &crow::packet::lnk> incoming;
