@@ -14,11 +14,18 @@ gxx::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
 gxx::dlist<crow::packet, &crow::packet::lnk> crow::travelled;
 gxx::dlist<crow::packet, &crow::packet::lnk> crow::incoming;
 gxx::dlist<crow::packet, &crow::packet::lnk> crow::outters;
-void(*crow::incoming_handler)(crow::packet* pack) = nullptr;
+void(*crow::user_type_handler)(crow::packet* pack) = nullptr;
 void(*crow::undelivered_handler)(crow::packet* pack) = nullptr;
 void(*crow::traveling_handler)(crow::packet* pack) = nullptr;
 void(*crow::transit_handler)(crow::packet* pack) = nullptr;
 
+static void __traveling_handler(crow::packet* pack) {
+	gxx::print("travel: "); crow::println(pack);
+}
+
+void crow::enable_diagnostic() {
+	crow::traveling_handler = __traveling_handler;
+}
 
 crow::gateway* crow::find_target_gateway(const crow::packet* pack) {
 	uint8_t gidx = *pack->stageptr();
@@ -88,6 +95,15 @@ void crow::travel_error(crow::packet* pack) {
 	crow::utilize(pack);
 }
 
+void crow::incoming_handler(crow::packet* pack) {
+	switch(pack->header.type) {
+		case G1_G0TYPE: crow::incoming_node_packet(pack); break;
+		default: 
+			if (crow::user_type_handler) crow::user_type_handler(pack);
+			else crow::release(pack);
+	}
+}
+
 void crow::do_travel(crow::packet* pack) {
 	if (traveling_handler) traveling_handler(pack);
 	if (pack->header.stg == pack->header.alen) {
@@ -105,8 +121,10 @@ void crow::do_travel(crow::packet* pack) {
 		}
 		if (pack->ingate) crow::quality_notify(pack);	
 		else crow::tower_release(pack);
-		if (!pack->header.noexec && crow::incoming_handler) crow::incoming_handler(pack);
+
+		if (!pack->header.noexec) crow::incoming_handler(pack);
 		else crow::release(pack);
+
 		return;
 	} 
 	else {

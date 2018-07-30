@@ -1,8 +1,12 @@
 import licant.modules
 
 licant.modules.module("crow",
+	srcdir = "crow/src",
 	sources = [
-		"crow/src/tower.cpp", "crow/src/packet.cpp",
+		"tower.cpp", 
+		"packet.cpp",
+		"node.cpp",
+		"channel.cpp"
 	],
 	include_paths=["."]
 )
@@ -25,8 +29,14 @@ licant.modules.module("crow.time", "chrono",
 	]
 )
 
-licant.modules.module("crow.node",
-	sources = [
-		"crow/src/node.cpp"
-	]
-)
+#licant.modules.module("crow.node",
+#	sources = [
+#		"crow/src/node.cpp"
+#	]
+#)
+
+#licant.modules.module("crow.channel",
+#	sources = [
+#		"crow/src/node.cpp"
+#	]
+#)

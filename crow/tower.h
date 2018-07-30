@@ -61,7 +61,7 @@ namespace crow {
 	void send_ack(crow::packet* pack);
 	void send_ack2(crow::packet* pack);
 
-	extern void (*incoming_handler)(crow::packet* pack);
+	extern void (*user_type_handler)(crow::packet* pack);
 	extern void (*traveling_handler)(crow::packet* pack);
 	extern void (*transit_handler)(crow::packet* pack);
 
@@ -74,6 +74,12 @@ namespace crow {
 	void onestep();
 	void onestep_travel_only();
 	void spin();
+
+	void incoming_handler(crow::packet* pack);
+	void incoming_node_packet(crow::packet* pack);
+	//void incoming_channel_packet(crow::packet* pack);
+
+	void enable_diagnostic();
 }
 
 #endif

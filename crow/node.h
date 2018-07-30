@@ -30,9 +30,7 @@ namespace crow {
 
 	/// Добавить сервис к ядру.
 	void link_node(crow::node* srvs, uint16_t id);
-	void incoming_node_packet(crow::packet* pack);
-
-	void __send(uint16_t sid, uint16_t rid, const uint8_t* raddr, size_t rlen, const char* data, size_t size, crow::QoS qos);
+	void __node_send(uint16_t sid, uint16_t rid, const uint8_t* raddr, size_t rlen, const char* data, size_t size, crow::QoS qos);
 }
 
 #endif

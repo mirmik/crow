@@ -8,7 +8,7 @@
 
 gxx::dlist<crow::node, &crow::node::lnk> crow::nodes;
 
-void crow::__send(uint16_t sid, uint16_t rid, const uint8_t* raddr, size_t rsize, const char* data, size_t size, crow::QoS qos) {		
+void crow::__node_send(uint16_t sid, uint16_t rid, const uint8_t* raddr, size_t rsize, const char* data, size_t size, crow::QoS qos) {		
 	crow::subheader sh;
 	sh.sid = sid;
 	sh.rid = rid;
@@ -23,6 +23,7 @@ void crow::__send(uint16_t sid, uint16_t rid, const uint8_t* raddr, size_t rsize
 
 
 void crow::incoming_node_packet(crow::packet* pack) {
+	gxx::println("incoming_node_packet");
 	auto sh = get_subheader(pack);
 	for ( auto& srvs: crow::nodes ) {
 		if (srvs.id == sh->rid) {
@@ -30,7 +31,7 @@ void crow::incoming_node_packet(crow::packet* pack) {
 			return;
 		}
 	}
-	gxx::println("crow: unresolved node. release packet");
+	gxx::fprintln("crow: unresolved node {}. release packet", (uint16_t)sh->rid);
 	crow::release(pack);	
 }
 
