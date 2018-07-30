@@ -349,6 +349,18 @@ crow::host::host(const char* addr) {
 	data = (uint8_t*)realloc(data, len);
 }
 
+crow::host::host(const uint8_t* addr, size_t size) {
+	this->data = (uint8_t*)malloc(size);
+	this->size = size;
+	memcpy(data, addr, size);
+}
+
+crow::host::host(const host& oth) {
+	this->data = (uint8_t*)malloc(oth.size);
+	this->size = oth.size;
+	memcpy(data, oth.data, size);	
+}
+
 crow::host::~host() {
 	free(data);
 }
