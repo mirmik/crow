@@ -1,5 +1,6 @@
 #include <crow/tower.h>
 #include <crow/pubsub.h>
+#include <gxx/print/stdprint.h>
 #include <crow/gates/udpgate.h>
 #include <thread>
 #include <getopt.h>
@@ -10,7 +11,7 @@ void subscribe_handler(crow::packet* pack) {
 	auto thm = crow::pubsub_theme(pack);
 	auto dat = crow::pubsub_data(pack);
 
-	gxx::println(dat);
+	gxx::println(gxx::dstring(dat));
 }
 
 void undelivered_handler(crow::packet* pack) {
