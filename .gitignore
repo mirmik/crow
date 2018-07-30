@@ -31,6 +31,6 @@
 *.out
 *.app
 
-ctrans
-crowker
+tools/ctrans/ctrans
+tools/crowker/crowker
 target
