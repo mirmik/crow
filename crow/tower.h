@@ -3,8 +3,8 @@
 @brief tower file
 */
 
-#ifndef G1_TOWER_H
-#define G1_TOWER_H
+#ifndef CROW_TOWER_H
+#define CROW_TOWER_H
 
 #include <gxx/container/dlist.h>
 #include <crow/gateway.h>
@@ -69,6 +69,7 @@ namespace crow {
 	void send_ack2(crow::packet* pack);
 
 	extern void (*user_type_handler)(crow::packet* pack);
+	extern void (*user_incoming_handler)(crow::packet* pack);
 	extern void (*traveling_handler)(crow::packet* pack);
 	extern void (*transit_handler)(crow::packet* pack);
 
@@ -84,6 +85,7 @@ namespace crow {
 
 	void incoming_handler(crow::packet* pack);
 	void incoming_node_packet(crow::packet* pack);
+	void incoming_pubsub_packet(crow::packet* pack);
 	//void incoming_channel_packet(crow::packet* pack);
 
 	void enable_diagnostic();

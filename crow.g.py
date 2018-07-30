@@ -29,6 +29,18 @@ licant.modules.module("crow.time", "chrono",
 	]
 )
 
+licant.modules.module("crow.pubsub", "client",
+	sources = [
+		"crow/src/pubsub_client.cpp",
+	]
+)
+
+licant.modules.module("crow.pubsub", "brocker",
+	sources = [
+		"crow/src/pubsub_brocker.cpp",
+	]
+)
+
 #licant.modules.module("crow.node",
 #	sources = [
 #		"crow/src/node.cpp"

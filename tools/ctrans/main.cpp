@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 	}
 	else udpgate.open();
 
-	crow::incoming_handler = incoming_handler;
+	crow::user_incoming_handler = incoming_handler;
 	crow::traveling_handler = traveling_handler;
 	crow::transit_handler = transit_handler;
 	crow::link_gate(&udpgate, G1_UDPGATE);

@@ -16,6 +16,7 @@ gxx::dlist<crow::packet, &crow::packet::lnk> crow::travelled;
 gxx::dlist<crow::packet, &crow::packet::lnk> crow::incoming;
 gxx::dlist<crow::packet, &crow::packet::lnk> crow::outters;
 void(*crow::user_type_handler)(crow::packet* pack) = nullptr;
+void(*crow::user_incoming_handler)(crow::packet* pack) = nullptr;
 void(*crow::undelivered_handler)(crow::packet* pack) = nullptr;
 void(*crow::traveling_handler)(crow::packet* pack) = nullptr;
 void(*crow::transit_handler)(crow::packet* pack) = nullptr;
@@ -99,6 +100,7 @@ void crow::travel_error(crow::packet* pack) {
 void crow::incoming_handler(crow::packet* pack) {
 	switch(pack->header.type) {
 		case G1_G0TYPE: crow::incoming_node_packet(pack); break;
+		case G1_G3TYPE: crow::incoming_pubsub_packet(pack); break;
 		default: 
 			if (crow::user_type_handler) crow::user_type_handler(pack);
 			else crow::release(pack);
@@ -123,7 +125,10 @@ void crow::do_travel(crow::packet* pack) {
 		if (pack->ingate) crow::quality_notify(pack);	
 		else crow::tower_release(pack);
 
-		if (!pack->header.noexec) crow::incoming_handler(pack);
+		if (!pack->header.noexec) {
+			if (crow::user_incoming_handler) crow::user_incoming_handler(pack);
+			else crow::incoming_handler(pack);
+		}
 		else crow::release(pack);
 
 		return;
