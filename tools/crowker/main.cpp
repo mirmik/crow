@@ -16,6 +16,7 @@ int main(int argc, char* argv[]) {
 
 	const struct option long_options[] = {
 		{"udp", required_argument, NULL, 'u'},
+		{"debug", no_argument, NULL, 'd'},
 		{"sniffer", no_argument, NULL, 's'},
 		{NULL,0,NULL,0}
 	};
@@ -25,6 +26,7 @@ int main(int argc, char* argv[]) {
 	while ((opt = getopt_long(argc, argv, "us", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'u': udpport = atoi(optarg); break;
+			case 'd': crow::enable_diagnostic(); break;
 			case 's': sniffer_option = true; break;
 			case 0: break;
 		}
