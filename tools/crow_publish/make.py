@@ -18,6 +18,7 @@ application("crow_publish",
 		("crow.pubsub", "client"),
 		
 		("gxx", "posix"),
+		("gxx.trent"),
 		("gxx.inet", "posix"),
 		("gxx.print", "cout"),
 		("gxx.dprint", "cout"),

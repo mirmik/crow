@@ -5,13 +5,24 @@
 #include <thread>
 #include <getopt.h>
 
+#include <sstream>
+
+#include <gxx/trent/trent.h>
+#include <gxx/trent/gbson.h>
+
 crow::udpgate ugate;
+bool gbson_flag = false;
 
 void subscribe_handler(crow::packet* pack) {
 	auto thm = crow::pubsub_theme(pack);
 	auto dat = crow::pubsub_data(pack);
 
-	gxx::println(gxx::dstring(dat));
+	if (!gbson_flag) gxx::println(gxx::dstring(dat)); 
+	else {
+		std::string str(dat.data(), dat.size());
+		std::stringstream strm(str);
+		gxx::trent tr = gxx::gbson::parse(strm);
+	}
 }
 
 void undelivered_handler(crow::packet* pack) {
@@ -25,6 +36,7 @@ int main(int argc, char* argv[]) {
 	const struct option long_options[] = {
 		{"crowker", required_argument, NULL, 'c'},
 		{"debug", no_argument, NULL, 'd'},
+		{"gbson", no_argument, NULL, 'g'},
 		{NULL,0,NULL,0}
 	};
 
@@ -34,6 +46,7 @@ int main(int argc, char* argv[]) {
 		switch (opt) {
 			case 'c': crowker = optarg; break;
 			case 'd': crow::enable_diagnostic(); break;
+			case 'g': gbson_flag = true;
 			case 0: break;
 		}
 	}

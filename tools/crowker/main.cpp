@@ -12,8 +12,6 @@ void sniffer_travel_handler(crow::packet* pack) {
 }
 
 int main(int argc, char* argv[]) {
-	crow::enable_diagnostic();
-
 	const struct option long_options[] = {
 		{"udp", required_argument, NULL, 'u'},
 		{"debug", no_argument, NULL, 'd'},

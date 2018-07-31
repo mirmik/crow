@@ -4,33 +4,65 @@
 #include <thread>
 #include <getopt.h>
 
+#include <gxx/trent/trent.h>
+#include <gxx/trent/json.h>
+#include <gxx/trent/gbson.h>
+
+#include <sstream>
+
 crow::udpgate ugate;
+bool gbson_parse = false;
 
 int main(int argc, char* argv[]) {
 	crow::link_gate(&ugate, G1_UDPGATE);
 	ugate.open();
 
-	if (argc != 3) {
+	const char* crowker = getenv("CROWKER");
+
+	const struct option long_options[] = {
+		{"crowker", required_argument, NULL, 'c'},
+		{"debug", no_argument, NULL, 'd'},
+		{"gbson", no_argument, NULL, 'g'},
+		{NULL,0,NULL,0}
+	};
+
+    int long_index =0;
+	int opt= 0;
+	while ((opt = getopt_long(argc, argv, "c", long_options, &long_index)) != -1) {
+		switch (opt) {
+			case 'c': crowker = optarg; break;
+			case 'g': gbson_parse = true;
+			case 'd': crow::enable_diagnostic(); break;
+			case 0: break;
+		}
+	}
+
+	if (argc - optind != 2) {
 		gxx::println("Usage: crow_publish theme data");
 		exit(-1);
 	}
 
-	if (getenv("CROWKER") == nullptr) {
+	if (crowker == nullptr) {
 		gxx::println("Enviroment variable CROWKER doesn't setted");
 		exit(-1);
 	}
 
-	//gxx::println("brocker: ", getenv("CROWKER"));
-	//gxx::println("theme: ", argv[optind]);
-	//gxx::println("data: ", argv[optind+1]);
-
 	std::string theme = argv[optind];
 	std::string data = argv[optind+1];
 
-	crow::set_publish_host(crow::host(getenv("CROWKER")));
+	crow::set_publish_host(crow::host(crowker));
+	
+	if (gbson_parse) {
+		std::stringstream istrm(data);
+		std::stringstream ostrm;
+		gxx::trent tr = gxx::json::parse(istrm).unwrap();
+		gxx::gbson::dump(tr, ostrm);
 
-	crow::publish(theme.data(), theme.size(), data.data(), data.size());
-
+		auto ostr = ostrm.str();
+		crow::publish(theme.data(), theme.size(), ostr.data(), ostr.size());
+	} else {
+		crow::publish(theme.data(), theme.size(), data.data(), data.size());
+	}
 	crow::onestep_travel_only();
 }
 
