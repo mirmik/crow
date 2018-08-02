@@ -53,13 +53,12 @@ int main(int argc, char* argv[]) {
 	crow::set_publish_host(crow::host(crowker));
 	
 	if (gbson_parse) {
+		char buf[256];
 		std::stringstream istrm(data);
-		std::stringstream ostrm;
 		gxx::trent tr = gxx::json::parse(istrm).unwrap();
-		gxx::gbson::dump(tr, ostrm);
+		int len = gxx::gbson::dump(tr, buf, 256);
 
-		auto ostr = ostrm.str();
-		crow::publish(theme.data(), theme.size(), ostr.data(), ostr.size());
+		crow::publish(theme.data(), theme.size(), buf, len);
 	} else {
 		crow::publish(theme.data(), theme.size(), data.data(), data.size());
 	}

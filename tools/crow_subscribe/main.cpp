@@ -19,9 +19,11 @@ void subscribe_handler(crow::packet* pack) {
 
 	if (!gbson_flag) gxx::println(gxx::dstring(dat)); 
 	else {
-		std::string str(dat.data(), dat.size());
-		std::stringstream strm(str);
-		gxx::trent tr = gxx::gbson::parse(strm);
+		//std::string str(dat.data(), dat.size());
+		//std::stringstream strm(str);
+		gxx::trent tr;
+		gxx::gbson::load(tr, dat.data(), dat.size());
+		gxx::println(tr);
 	}
 }
 
