@@ -52,49 +52,11 @@ namespace crow {
 		return gxx::buffer(pack->dataptr() + sizeof(subheader_pubsub) + sizeof(subheader_pubsub_data) + shps->thmsz, shps_d->datsz);		
 	}
 
-	/*struct subscribe {
-		theme* 		tptr;
-
-		union {
-			struct { ///< g3 
-				crow::QoS qos;
-			};
-
-			struct { ///< g2 socket
-								
-			};
-		};
-	};*/
-
 	void publish(const char* theme, size_t thmsz, const char* data, size_t datsz);
 	void subscribe(const char* theme, size_t thmsz);
-
-
-	extern void(*subscribe_handler)(crow::packet* pack);
 	
-	//extern crow::host brocker_host;
 	void set_publish_host(const crow::host& brocker_host);
 	void set_publish_qos(crow::QoS qos);
-
-	/*struct subscriber {
-		std::unordered_map<std::string, subscribe> themes;	
-
-		uint8_t* 	raddr_ptr;
-		size_t 		raddr_len;
-	
-		uint8_t 	proto;
-
-		
-	};*/
-
-	/*struct theme {
-		std::unordered_map<std::string, subscriber*> subscribers;
-	};
-
-	void incoming(g1::packet* pack);
-	void incoming_dataframe(const char* data, size_t size);*/
-
-
 }
 
 #endif

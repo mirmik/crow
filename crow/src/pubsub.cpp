@@ -4,13 +4,7 @@ crow::host brocker_host;
 crow::QoS brocker_qos = crow::QoS(0);
 uint16_t brocker_ackquant = DEFAULT_ACKQUANT;
 
-void(*crow::subscribe_handler)(crow::packet* pack);
-
-void crow::incoming_pubsub_packet(crow::packet* pack) {
-	//crow::println(pack);
-	if (subscribe_handler) subscribe_handler(pack);
-	else crow::release(pack);
-}
+void(*crow::pubsub_handler)(crow::packet* pack);
 
 void crow::publish(const char* theme, size_t thmsz, const char* data, size_t datsz) {
 	crow::subheader_pubsub subps;
@@ -49,5 +43,10 @@ void crow::subscribe(const char* theme, size_t thmsz) {
 }
 
 
-void crow::set_publish_host(const crow::host& host) { brocker_host = host; }
-void crow::set_publish_qos(crow::QoS qos) { brocker_qos = qos; }
+void crow::set_publish_host(const crow::host& host) { 
+	brocker_host = host; 
+}
+
+void crow::set_publish_qos(crow::QoS qos) { 
+	brocker_qos = qos; 
+}

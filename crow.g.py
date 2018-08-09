@@ -6,7 +6,8 @@ licant.modules.module("crow",
 		"tower.cpp", 
 		"packet.cpp",
 		"node.cpp",
-		"channel.cpp"
+		"channel.cpp",
+		"pubsub.cpp"
 	],
 	include_paths=["."]
 )
@@ -28,27 +29,3 @@ licant.modules.module("crow.time", "chrono",
 		"crow/src/stdtime.cpp"
 	]
 )
-
-licant.modules.module("crow.pubsub", "client",
-	sources = [
-		"crow/src/pubsub_client.cpp",
-	]
-)
-
-licant.modules.module("crow.pubsub", "brocker",
-	sources = [
-		"crow/src/pubsub_brocker.cpp",
-	]
-)
-
-#licant.modules.module("crow.node",
-#	sources = [
-#		"crow/src/node.cpp"
-#	]
-#)
-
-#licant.modules.module("crow.channel",
-#	sources = [
-#		"crow/src/node.cpp"
-#	]
-#)

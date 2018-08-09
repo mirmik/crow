@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
 	crow::set_publish_host(crow::host(crowker));
 	crow::set_publish_qos(crow::QoS(2));
 
-	crow::subscribe_handler = subscribe_handler;
+	crow::pubsub_handler = subscribe_handler;
 
 	crow::subscribe(theme.data(), theme.size());
 	crow::spin();

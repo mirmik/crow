@@ -100,7 +100,10 @@ void crow::travel_error(crow::packet* pack) {
 void crow::incoming_handler(crow::packet* pack) {
 	switch(pack->header.type) {
 		case G1_G0TYPE: crow::incoming_node_packet(pack); break;
-		case G1_G3TYPE: crow::incoming_pubsub_packet(pack); break;
+		case G1_G3TYPE: 
+			if (crow::pubsub_handler) crow::pubsub_handler(pack); 
+			else crow::release(pack);
+			break;
 		default: 
 			if (crow::user_type_handler) crow::user_type_handler(pack);
 			else crow::release(pack);

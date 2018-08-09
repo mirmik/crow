@@ -15,7 +15,6 @@ application("crow_subscribe",
 		("crow"),
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
-		("crow.pubsub", "client"),
 		
 		("gxx", "posix"),
 		("gxx.trent"),

@@ -99,6 +99,7 @@ namespace crow {
 	/// Обработчик недоставленного пакета. Определяется локальным софтом.
 	/// Освобождение должно производиться функцией tower_release.
 	extern void(*undelivered_handler)(crow::packet* pack);
+	extern void(*pubsub_handler)(crow::packet* pack);
 
 	uint16_t millis();
 

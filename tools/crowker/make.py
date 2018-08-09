@@ -15,7 +15,6 @@ application("crowker",
 		("crow"),
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
-		("crow.pubsub", "brocker"),
 		
 		("gxx", "posix"),
 		("gxx.inet", "posix"),
