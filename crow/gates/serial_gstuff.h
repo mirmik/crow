@@ -16,7 +16,7 @@ namespace crow {
 
 
 		serial_gstuff_gate(gxx::io::iostream* strm) : strm(strm), sender(*strm) {
-			recver.debug_mode(false);
+			recver.debug_mode(true);
 			recver.set_callback(gxx::make_delegate(&serial_gstuff_gate::handler, this));
 		}
 
@@ -35,6 +35,7 @@ namespace crow {
 			char c;
 			int len = strm->read(&c, 1);
 			if (len == 1) {
+				dprln("readbyte");
 				recver.newchar(c);
 			}
 		}
