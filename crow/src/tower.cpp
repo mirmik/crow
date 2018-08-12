@@ -133,10 +133,10 @@ void crow::do_travel(crow::packet* pack) {
 			}
 			if (pack->header.qos == crow::BinaryACK) {
 				for (auto& inc : crow::incoming) {
-					/*
+					
 					GXX_PRINT(inc.header.seqid == pack->header.seqid);
 					GXX_PRINT(inc.header.alen == pack->header.alen);
-					GXX_PRINT(memcmp(inc.addrptr(), pack->addrptr(), inc.header.alen) == 0);*/
+					GXX_PRINT(memcmp(inc.addrptr(), pack->addrptr(), inc.header.alen) == 0);
 
 					if (inc.header.seqid == pack->header.seqid && 
 						inc.header.alen == pack->header.alen &&
@@ -344,8 +344,9 @@ void crow::onestep() {
 
 	gxx::for_each_safe(crow::incoming.begin(), crow::incoming.end(), [&](crow::packet& pack) {
 		if (curtime - pack.last_request_time > pack.header.ackquant) {
-			dlist_del(&pack.lnk);
-			if (++pack.ackcount == 5) crow::utilize(&pack);
+			if (++pack.ackcount == 5) {
+				crow::utilize(&pack);
+			}
 			else {
 				pack.last_request_time = curtime;
 				crow::send_ack(&pack);
