@@ -68,6 +68,20 @@ void incoming_pubsub_packet(crow::packet* pack) {
 	crow::release(pack); 
 }
 
+void undelivered_handler(crow::packet* pack) {
+	if (pack->header.type == G1_G3TYPE) {
+		auto shps = get_subheader_pubsub(pack);
+
+		if (shps->type == crow::frame_type::PUBLISH) {
+			std::string theme(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_data), shps->thmsz);
+			auto& thm = themes[theme];
+			thm.subs.erase(crow::subscriber(crow::host(pack->addrptr(), pack->header.alen), true, pack->header.qos, pack->header.ackquant));
+		}
+	}
+	
+	crow::utilize(pack);
+}
+
 void crow::theme::publish(const std::string& data) {
 	crow::subheader_pubsub subps;
 	crow::subheader_pubsub_data subps_d;
