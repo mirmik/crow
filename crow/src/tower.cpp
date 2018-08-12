@@ -133,6 +133,12 @@ void crow::do_travel(crow::packet* pack) {
 			}
 			if (pack->header.qos == crow::BinaryACK) {
 				for (auto& inc : crow::incoming) {
+
+					GXX_PRINT(inc.header.seqid == pack->header.seqid);
+					GXX_PRINT(inc.header.alen == pack->header.alen);
+					GXX_PRINT(memcpy(inc.addrptr(), pack->addrptr(), inc.header.alen) == 0);
+
+
 					if (inc.header.seqid == pack->header.seqid && 
 						inc.header.alen == pack->header.alen &&
 						memcpy(inc.addrptr(), pack->addrptr(), inc.header.alen) == 0) 
