@@ -65,9 +65,6 @@ namespace crow {
 	///Вызывается на только что отправленный пакет. Башня или уничтожает его, или кеширует для контроля качества.
 	void return_to_tower(crow::packet* pack, status sts);
 
-	///Вызывается на принятый пакет. Выполняет кеширование (если надо) и отправку ACK пакетов.
-	void quality_notify(crow::packet* pack);
-
 	///Подключить врата к башне.
 	inline void link_gate(crow::gateway* gate, uint8_t id) { 
 		//logger.debug("gateway {} added", id);
