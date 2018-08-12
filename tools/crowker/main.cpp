@@ -104,6 +104,7 @@ void crow::theme::publish(const std::string& data) {
 
 int main(int argc, char* argv[]) {
 	crow::pubsub_handler = incoming_pubsub_packet;
+	crow::undelivered_handler = undelivered_handler;
 
 	const struct option long_options[] = {
 		{"udp", required_argument, NULL, 'u'},
