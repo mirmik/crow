@@ -113,21 +113,9 @@ void crow::incoming_handler(crow::packet* pack) {
 void crow::do_travel(crow::packet* pack) {
 	if (traveling_handler) traveling_handler(pack);
 	if (pack->header.stg == pack->header.alen) {
-		if (pack->header.qos == crow::QoS(2)) {
-			for (auto& inc : crow::incoming) {
-				if (inc.header.seqid == pack->header.seqid && 
-					inc.header.alen == pack->header.alen &&
-					memcpy(inc.addrptr(), pack->addrptr(), inc.header.alen) == 0) 
-				{
-					crow::send_ack(pack);
-					crow::utilize(pack);
-					return;
-				}
-			}
-		}
-
 		//Ветка доставленного пакета.
 		crow::revert_address(pack);
+
 		if (pack->header.ack) {
 			switch(pack->header.type) {
 				case G1_ACK_TYPE: utilize_from_outers(pack); break;
@@ -138,11 +126,23 @@ void crow::do_travel(crow::packet* pack) {
 			crow::utilize(pack);
 			return;
 		}
+
 		if (pack->ingate) {
 			if (pack->header.qos == crow::TargetACK || pack->header.qos == crow::BinaryACK) {
 				crow::send_ack(pack);
 			}
-			if (pack->header.qos == crow::BinaryACK) add_to_incoming_list(pack);
+			if (pack->header.qos == crow::BinaryACK) {
+				for (auto& inc : crow::incoming) {
+					if (inc.header.seqid == pack->header.seqid && 
+						inc.header.alen == pack->header.alen &&
+						memcpy(inc.addrptr(), pack->addrptr(), inc.header.alen) == 0) 
+					{
+						crow::utilize(pack);
+						return;
+					}
+				}
+				add_to_incoming_list(pack);
+			}
 			else crow::tower_release(pack);
 		}
 		else crow::tower_release(pack);
