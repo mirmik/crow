@@ -76,6 +76,7 @@ void undelivered_handler(crow::packet* pack) {
 			std::string theme(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_data), shps->thmsz);
 			auto& thm = themes[theme];
 			thm.subs.erase(crow::subscriber(crow::host(pack->addrptr(), pack->header.alen), true, pack->header.qos, pack->header.ackquant));
+			gxx::fprintln("G3_REFUSE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(pack->addrptr(), pack->header.alen));
 		}
 	}
 	
