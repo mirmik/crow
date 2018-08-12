@@ -341,7 +341,10 @@ void crow::onestep() {
 		if (curtime - pack.last_request_time > pack.header.ackquant) {
 			dlist_del(&pack.lnk);
 			if (++pack.ackcount == 5) crow::utilize(&pack);
-			else crow::send_ack(&pack);	
+			else {
+				pack.last_request_time = curtime;
+				crow::send_ack(&pack);
+			}	
 		}
 	});
 	lock.unlock();
