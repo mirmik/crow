@@ -367,3 +367,7 @@ crow::host::host(const host& oth) {
 crow::host::~host() {
 	free(data);
 }
+
+void crow::print_dump(crow::packet* pack) {
+	gxx::println(gxx::dstring(&pack->header, pack->header.flen));
+} 

@@ -82,6 +82,7 @@ namespace crow {
 	void release(crow::packet* pack);
 	void tower_release(crow::packet* pack);
 	void print(crow::packet* pack);
+	void print_dump(crow::packet* pack);
 	void println(crow::packet* pack);
 	void print_to(gxx::io::ostream& out, crow::packet* pack);
 	void println_to(gxx::io::ostream& out, crow::packet* pack);

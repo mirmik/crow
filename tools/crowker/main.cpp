@@ -17,31 +17,30 @@ void sniffer_travel_handler(crow::packet* pack) {
 }
 
 void brocker_publish(const std::string& theme, const std::string& data) {
-	gxx::println("brocker_publish");
-	gxx::println("theme: ", theme);
-	gxx::println("data: ", data);	
+	int subs = 0;
 
 	try {
 		auto& thm = themes.at(theme);
 		thm.publish(data);
+		subs = thm.subs.size();
 	} catch (std::exception ex) {
-		gxx::println("unres theme");
+		subs = 0;
 	}
+
+	gxx::fprintln("PUBLISH: (theme: {}, data: {}, subs: {})", theme, data, subs);
 }
 
-void brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, crow::QoS qos, uint16_t ackquant) {
-	gxx::println("add subscribe");
-
+void g3_brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, crow::QoS qos, uint16_t ackquant) {
 	crow::host host(raddr, rlen);
 
 	if (themes.count(theme) == 0) {
 		themes[theme] = crow::theme(theme);
 	}
 
-	GXX_PRINT(theme);
-
 	auto& thm = themes[theme];
 	thm.subs.emplace(host, true, qos, ackquant);
+
+	gxx::fprintln("G3_SUBSCRIBE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(raddr, rlen));
 }
 
 
@@ -50,18 +49,20 @@ void incoming_pubsub_packet(crow::packet* pack) {
 
 	switch(shps->type) {
 		case crow::frame_type::PUBLISH: {
+			//gxx::println("crow::frame_type::PUBLISH");
 			auto shps_d = crow::get_subheader_pubsub_data(pack);
 			std::string theme(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_data), shps->thmsz);
 			std::string data(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_data) + shps->thmsz, shps_d->datsz);
 			brocker_publish(theme, data);			
 		} break;
 		case crow::frame_type::SUBSCRIBE: {
+			//gxx::println("crow::frame_type::SUBSCRIBE");
 			auto shps_c = crow::get_subheader_pubsub_control(pack);
 			std::string theme(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_control), shps->thmsz);
-			brocker_subscribe(pack->addrptr(), pack->addrsize(), theme, shps_c->qos, shps_c->ackquant);			
+			g3_brocker_subscribe(pack->addrptr(), pack->addrsize(), theme, shps_c->qos, shps_c->ackquant);			
 		} break;
 		default: {
-			gxx::println("unresolved pubsub frame type");
+			gxx::println("unresolved pubsub frame type", (uint8_t)shps->type);
 		} break;
 	}
 	crow::release(pack); 

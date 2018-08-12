@@ -7,7 +7,7 @@
 namespace crow {
 	struct theme;
 
-	enum class frame_type {
+	enum class frame_type : uint8_t {
 		SUBSCRIBE = 0,
 		PUBLISH = 1,
 		MESSAGE = 2,

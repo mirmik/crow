@@ -1,29 +1,29 @@
 #ifndef G0_ECHO_H
 #define G0_ECHO_H
 
-#include <g0/service.h>
-#include <g0/core.h>
+#include <crow/tower.h>
+#include <crow/node.h>
 
-namespace g0 {
-
-	struct echo_service : public basic_service {
+namespace crow {
+	struct echo_node : public node {
 		bool quite;
-		echo_service(bool quite = false) : quite(quite) {}
-		void incoming_message(g0::message* msg) override {
+
+		echo_node(bool quite = false) : quite(quite) {}
+
+		void incoming_packet(crow::packet* pack) override {
 			if (!quite) {
-				gxx::fprintln("echo service incoming_message {0}", gxx::buffer(msg->data, msg->size));
+				/*gxx::fprintln("echo service incoming_message {0}", gxx::buffer(msg->data, msg->size));
 				GXX_PRINT(msg->sid);
 				GXX_PRINT(msg->rid);
 				GXX_PRINT(msg->pack->header.alen);
-				gxx::writeln(msg->data, msg->size);
-				
+				gxx::writeln(msg->data, msg->size);*/				
 			}
-			
 
+			auto sh = crow::get_subheader(pack);
+			auto ds = crow::get_datasect(pack);
 
-			if (msg->pack == nullptr) g0::send(id, msg->sid, msg->data, msg->size);
-			else g0::send(id, msg->sid, msg->pack->addrptr(), msg->pack->header.alen, msg->data, msg->size, g1::QoS(0));
-			g0::utilize(msg);
+			crow::__node_send(id, sh->sid, pack->addrptr(), pack->header.alen, ds.data(), ds.size(), crow::QoS(0));
+			crow::release(pack);
 		}
 	};
 

@@ -4,6 +4,7 @@
 #include <gxx/container/dlist.h>
 #include <gxx/datastruct/iovec.h>
 #include <crow/packet.h>
+#include <crow/tower.h>
 
 namespace crow {
 	struct node {
@@ -30,7 +31,10 @@ namespace crow {
 
 	/// Добавить сервис к ядру.
 	void link_node(crow::node* srvs, uint16_t id);
-	void __node_send(uint16_t sid, uint16_t rid, const uint8_t* raddr, size_t rlen, const char* data, size_t size, crow::QoS qos);
+	void __node_send(uint16_t sid, uint16_t rid, 
+		const void* raddr, size_t rlen, 
+		const void* data, size_t size, 
+		crow::QoS qos, uint16_t ackquant = DEFAULT_ACKQUANT);
 }
 
 #endif
