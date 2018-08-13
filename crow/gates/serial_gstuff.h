@@ -10,7 +10,11 @@
 
 #include <gxx/io/std.h>
 
+#include <mutex>
+
 namespace crow {
+	std::mutex mtx;
+
 	struct serial_gstuff_gate : public gateway {
 		gxx::gstuff::automate recver;
 		//gxx::gstuff::sender sender;
@@ -33,7 +37,9 @@ namespace crow {
 			sender.write((char*)&pack->header, pack->header.flen);
 			sender.end_message();
 
+			mtx.lock();
 			ser->write((uint8_t*)str.data(), str.size());
+			mtx.unlock();
 
 			crow::return_to_tower(pack, crow::status::Sended);
 		}

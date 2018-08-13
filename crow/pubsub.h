@@ -40,6 +40,8 @@ namespace crow {
 		return (subheader_pubsub_control*) (pack->dataptr() + sizeof(subheader_pubsub));
 	}
 
+	gxx::buffer pubsub_message_datasect(crow::packet* pack);
+
 	static inline gxx::buffer pubsub_theme(crow::packet* pack) {
 		auto shps = crow::get_subheader_pubsub(pack);
 		auto shps_d = crow::get_subheader_pubsub_data(pack);
@@ -52,8 +54,10 @@ namespace crow {
 		return gxx::buffer(pack->dataptr() + sizeof(subheader_pubsub) + sizeof(subheader_pubsub_data) + shps->thmsz, shps_d->datsz);		
 	}
 
-	void publish(const char* theme, size_t thmsz, const char* data, size_t datsz);
-	void subscribe(const char* theme, size_t thmsz);
+	void publish(const void* theme, size_t thmsz, const void* data, size_t datsz);
+	void publish(const char* theme, const char* data);
+	void subscribe(const void* theme, size_t thmsz, crow::QoS qos = crow::QoS(2));
+	void subscribe(const char* theme, crow::QoS qos = crow::QoS(2));
 	
 	void set_publish_host(const crow::host& brocker_host);
 	void set_publish_qos(crow::QoS qos);

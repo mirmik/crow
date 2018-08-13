@@ -146,10 +146,13 @@ void crow::do_travel(crow::packet* pack) {
 						return;
 					}
 				}
+				gxx::system_lock();
 				add_to_incoming_list(pack);
+				gxx::system_unlock();
 			}
 			else crow::tower_release(pack);
 		}
+		//Если пакет отправлен из данного нода, обслуживание не требуется
 		else crow::tower_release(pack);
 
 		if (!pack->header.noexec) {
