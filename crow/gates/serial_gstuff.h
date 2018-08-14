@@ -1,7 +1,10 @@
+/**
+	@file
+*/
+
 #ifndef G1_GATES_SERIAL_GSTUFF_H
 #define G1_GATES_SERIAL_GSTUFF_H
 
-#include <crow/tower.h>
 #include <crow/gateway.h>
 #include <gxx/gstuff/sender.h>
 #include <gxx/gstuff/automate.h>

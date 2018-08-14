@@ -10,7 +10,7 @@
 #include <gxx/buffer.h>
 #include <gxx/datastruct/dlist_head.h>
 
-#define G1_PACKED __attribute__((packed))
+#include <crow/defs.h>
 
 namespace crow {
 	struct gateway;
@@ -79,9 +79,19 @@ namespace crow {
 		void revert_stage(uint8_t gateindex);
 	} G1_PACKED;
 
+
+	/**
+	 * Выделить память для пакета.
+	 * 
+	 * Выделяет adlen + sizeof(crow::packet) байт
+	 * @param adlen Суммарная длина адреса и данных в выделяемом пакете. 
+	 */ 
 	packet* allocate_packet(size_t adlen); 
+	
 	packet* create_packet(gateway* ingate, size_t addrsize, size_t datasize); 
 	void packet_initialization(crow::packet* pack, gateway* ingate); 
+	
+	///Вернуть память выделенную для пакета pack
 	void utilize_packet(packet* pack);
 
 	void utilize(packet* pack);

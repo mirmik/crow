@@ -6,45 +6,15 @@
 #ifndef CROW_TOWER_H
 #define CROW_TOWER_H
 
-#define DEFAULT_ACKQUANT 200
-
-#include <gxx/container/dlist.h>
 #include <crow/gateway.h>
-#include <gxx/print.h>
 #include <gxx/datastruct/iovec.h>
+
+#include <gxx/print.h> //for gxx::io::ostream
 
 namespace crow {
 	enum class status : uint8_t {
 		Sended,
 		WrongAddress,
-	};
-
-	struct host {
-		uint8_t* data;
-		size_t size;
-		host() = default;
-		host(const host& oth);
-		host(const uint8_t* addr, size_t size);
-		host(const char* str);
-		host& operator=(const host& oth) { 
-			data = (uint8_t*)malloc(oth.size);
-			memcpy(data, oth.data, oth.size);
-			size = oth.size;
-			return *this;
-		}
-
-		bool operator!= (const host& oth) const {
-			return size != oth.size || memcmp(data, oth.data, size) != 0;
-		}
-
-		bool operator== (const host& oth) const {
-			return size == oth.size && memcmp(data, oth.data, size) == 0;
-		}
-
-		~host();
-		/*bool operator<(const host& oth) const {
-			return memcmp(data, oth.data, size) < 0;
-		}*/
 	};
 
 	///Список врат.
@@ -75,9 +45,9 @@ namespace crow {
 
 	crow::gateway* find_target_gateway(const crow::packet* pack);
 
-
 	void release(crow::packet* pack);
 	void tower_release(crow::packet* pack);
+
 	void print(crow::packet* pack);
 	void print_dump(crow::packet* pack);
 	void println(crow::packet* pack);

@@ -3,8 +3,6 @@
 */
 
 #include <crow/packet.h>
-#include <crow/tower.h>
-
 #include <gxx/panic.h>
 #include <gxx/syslock.h>
 

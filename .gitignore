@@ -36,3 +36,6 @@ tools/crowker/crowker
 tools/crow_subscribe/crow_subscribe
 tools/crow_publish/crow_publish
 target
+
+dox/html
+dox/latex

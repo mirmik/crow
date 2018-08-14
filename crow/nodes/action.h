@@ -1,3 +1,7 @@
+/**
+	@file
+*/
+
 #ifndef G0_ACTION_H
 #define G0_ACTION_H
 

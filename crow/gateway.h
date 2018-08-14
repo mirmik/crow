@@ -1,8 +1,11 @@
+/**
+	@file
+*/
+
 #ifndef G1_GATEWAY_H
 #define G1_GATEWAY_H
 
 #include <crow/packet.h>
-#include <crow/indexes.h>
 #include <gxx/container/dlist.h>
 
 namespace crow {

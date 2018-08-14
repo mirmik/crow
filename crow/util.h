@@ -1,3 +1,7 @@
+/**
+	@file
+*/
+
 #ifndef G1_UTIL_H
 #define G1_UTIL_H
 

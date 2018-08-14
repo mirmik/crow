@@ -1,3 +1,7 @@
+/**
+	@file
+*/
+
 #ifndef G1_INDEXES_H
 #define G1_INDEXES_H
 
@@ -10,7 +14,10 @@
 #define G1_ACK22_TYPE 2
 
 #define G1_G0TYPE 3
-//#define G1_G2TYPE 4
 #define G1_G3TYPE 4
+
+#define DEFAULT_ACKQUANT 200
+
+#define G1_PACKED __attribute__((packed))
 
 #endif

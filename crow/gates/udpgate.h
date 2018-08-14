@@ -1,9 +1,11 @@
+/**
+	@file
+*/
+
 #ifndef G1_GATES_UDPGATE_H
 #define G1_GATES_UDPGATE_H
 
-#include <crow/tower.h>
 #include <crow/gateway.h>
-#include <crow/indexes.h>
 #include <gxx/inet/dgramm.h>
 #include <gxx/util/hexascii.h>
 

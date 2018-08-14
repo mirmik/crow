@@ -1,140 +1,16 @@
 #include <crow/channel.h>
+#include <crow/tower.h>
 #include <gxx/datastruct/iovec.h>
+#include <gxx/print.h>
 
-/*gxx::dlist<crow::channel, &crow::channel::lnk> crow::channels;
-*/
 void crow::link_channel(crow::channel* ch, uint16_t id) {
 	ch->id = id;
 	crow::nodes.move_back(*ch);
 }
-/*
-crow::channel* crow::get_channel(uint16_t id) {
-	for (auto& ch : crow::channels) {;
-		if (ch.id == id) return &ch;
-	}
-	return nullptr;
-}*/
-/*
-void unknown_port(crow::packet* pack) {
-	crow::subheader* rsh = crow::get_subheader(pack);
-	crow::subheader sh;
-
-	sh.sid = 0;
-	sh.rid = rsh->sid;
-	sh.frame_id = 0;
-	sh.ftype = crow::Frame::REFUSE;
-
-	crow::send(pack->addrptr(), pack->addrsize(), (const char*)&sh, sizeof(crow::subheader), G1_G2TYPE, crow::QoS(2), pack->header.ackquant);
-}
-*/
-/*void crow::incoming(crow::packet* pack) {
-	gxx::println("crow::incomming");
-	crow::println(pack);
-
-	crow::subheader* sh = crow::get_subheader(pack);
-	crow::channel* ch = get_channel(sh->rid);
-
-	gxx::fprintln("crow subheader: sid={}, rid={}", (uint16_t)sh->sid, (uint16_t)sh->rid);
-	dprhex(ch);
-
-	if (ch == nullptr) {
-		gxx::println("warn: packet to unrecognized port");
-		unknown_port(pack);
-		crow::release(pack);
-		return;
-	}
-
-	switch(sh->ftype) {
-		case crow::Frame::HANDSHAKE:
-			gxx::println("HANDSHAKE");
-			if (ch->state == crow::State::INIT) {
-				crow::subheader_handshake* shh = crow::get_subheader_handshake(pack);
-				ch->rid = sh->sid;
-				ch->qos = shh->qos;
-				ch->ackquant = shh->ackquant;
-				ch->raddr_ptr = malloc(pack->header.alen);
-				memcpy(ch->raddr_ptr, pack->addrptr(), pack->header.alen);
-				ch->raddr_len = pack->header.alen;
-				ch->state = crow::State::CONNECTED;
-
-			}
-			else {
-				unknown_port(pack);
-			}
-			break;
-		case crow::Frame::DATA:
-			gxx::println("DATA");
-			ch->incoming_packet(pack);
-			gxx::println("OUT_DATA");
-			return;
-		case crow::Frame::REFUSE:
-			gxx::println("REFUSE");
-			ch->state = crow::State::DISCONNECTED;
-			break;
-		default: break;
-	}
-	crow::release(pack);
-}*/
-/*
-	gxx::fprintln("crow: incomming for socket {} from remote socket {}", rsock->port, sh->sendport);
-
-	switch( rsock->state ) {
-		case crow::crow_socket_state::WAIT_HANDSHAKE: {
-			gxx::println("trace: WAIT_HANDSHAKE");
-			if (sh->type == crow::crow_frame_type::HANDSHAKE) {
-				gxx::println("handshake event");
-	
-				rsock->raddr_ptr = (uint8_t*)strndup((const char*)pack->addrptr(), pack->addrsize());
-				rsock->raddr_len = pack->addrsize();
-				rsock->rport = sh->sendport;
-
-				rsock->state = crow::crow_socket_state::BRIDGE;
-				if (rsock->handler) rsock->handler(rsock->privdata, crow::event_type::HANDSHAKE);
-			} else {
-				gxx::println("warn: received DATA frame in WAIT_HANDSHAKE state");
-			}
-			crow::release(pack);
-			return;
-		}
-
-		case crow::crow_socket_state::BRIDGE: {
-			gxx::println("trace: BRIDGE");
-			if (pack->addrsize() == rsock->raddr_len && strncmp((const char*)pack->addrptr(), (const char*)rsock->raddr_ptr, rsock->raddr_len) == 0) {
-				//gxx::println("datapackage");
-				//rsock->messages.move_back(pack);
-
-				//Добавить в список сообщений в соответствии с порядковым номером.
-				add_to_messages_list(rsock, pack, sh);
-
-				if (rsock->handler) rsock->handler(rsock->privdata, crow::event_type::NEWDATA);
-				return;
-			}
-			else {
-				gxx::println("warn: message to BRIDGE socket with wrong address");
-			}
-			crow::release(pack);
-			return;
-		}
-
-		default:
-			gxx::println("warn: unrecognized socket_state state");
-	}
-*/
-//}
 
 void crow::channel::incoming_packet(crow::packet* pack) {
 	crow::subheader* sh0 = crow::get_subheader(pack);
 	crow::subheader_channel* sh2 = crow::get_subheader_channel(pack);
-	
-	/*gxx::fprintln("crow subheader: sid={}, rid={}", (uint16_t)sh->sid, (uint16_t)sh->rid);
-	dprhex(ch);
-
-	if (ch == nullptr) {
-		gxx::println("warn: packet to unrecognized port");
-		unknown_port(pack);
-		crow::release(pack);
-		return;
-	}*/
 
 	switch(sh2->ftype) {
 		case crow::Frame::HANDSHAKE:

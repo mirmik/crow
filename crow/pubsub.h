@@ -1,8 +1,12 @@
+/**
+	@file
+*/
+
 #ifndef CROW_PUBSUB_H
 #define CROW_PUBSUB_H
 
 #include <crow/tower.h>
-//#include <unordered_map>
+#include <crow/host.h>
 
 namespace crow {
 	struct theme;

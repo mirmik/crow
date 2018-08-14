@@ -1,7 +1,6 @@
 #ifndef G0_ECHO_H
 #define G0_ECHO_H
 
-#include <crow/tower.h>
 #include <crow/node.h>
 
 namespace crow {

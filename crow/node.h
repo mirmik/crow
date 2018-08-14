@@ -1,10 +1,14 @@
+/**
+	@file
+*/
+
 #ifndef G0_CORE_H
 #define G0_CORE_H
 
 #include <gxx/container/dlist.h>
 #include <gxx/datastruct/iovec.h>
 #include <crow/packet.h>
-#include <crow/tower.h>
+//#include <crow/tower.h>
 
 namespace crow {
 	struct node {

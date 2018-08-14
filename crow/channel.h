@@ -1,8 +1,12 @@
+/**
+	@file
+*/
+
 #ifndef G2_CORE_H
 #define G2_CORE_H
 
 #include <crow/node.h>
-#include <crow/tower.h>
+#include <crow/host.h>
 #include <gxx/syslock.h>
 #include <gxx/event/delegate.h>
 
