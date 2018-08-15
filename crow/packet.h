@@ -6,95 +6,115 @@
 #ifndef CROW_PACKAGE_H
 #define CROW_PACKAGE_H
 
-#include <cstdint>
-#include <gxx/buffer.h>
-#include <gxx/datastruct/dlist.h>
+#include <stdint.h>
+#include <stdlib.h>
 
+#include <gxx/datastruct/dlist.h>
 #include <crow/defs.h>
 
-namespace crow {
-	struct gateway;
+struct crow_gw;
 
-	/// Качество обслуживания.
-	enum QoS : uint8_t {
-		WithoutACK = 0, ///< one
-		TargetACK = 1, ///< two
-		BinaryACK = 2 ///< three
+/// Качество обслуживания.
+#define CROW_WITHOUT_ACK 0
+#define	CROW_TARGET_ACK 1
+#define CROW_BINARY_ACK 2
+
+/**
+	@brief Структура заголовок пакета. 
+	@details Заголовок пакета располагается в первых байтах пакета.
+	за заголовком следует поле адреса переменной длины, а за ним данные.
+*/
+typedef struct crow_header {
+	union {
+		uint8_t pflag; ///< Флаги пакета
+		struct {
+			uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф. передается в типе.
+			uint8_t vaddr : 1; ///< Поле указатель виртуального адреса @todo
+			uint8_t noexec : 1; ///< Флаг предотвращает исполнение пакета. Используется для запросов существования
+			uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
+		};
 	};
+	uint16_t 	flen; ///< Полная длина пакета
+	uint8_t 	alen; ///< Длина поля адреса.
+	uint8_t 	stg; ///< Поля стадии. Используется для того, чтобы цепочка врат знала, какую часть адреса обрабатывать.
+	uint16_t 	ackquant; ///< Таймаут для пересылки пакета.
+	uint16_t 	seqid; ///< Порядковый номер пакета. Присваивается отправителем.
+	uint8_t 	qos; ///< Поле качества обслуживания.
+} G1_PACKED crow_header_t;
 
-	/**
-		@brief Структура заголовок пакета. 
-		@details Заголовок пакета располагается в первых байтах пакета.
-		за заголовком следует поле адреса переменной длины, а за ним данные.
-	*/
-	struct packet_header {
-		union {
-			uint8_t pflag; ///< Флаги пакета
-			struct {
-				uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф. передается в типе.
-//				uint8_t vaddr : 1; ///< Поле указатель виртуального адреса @todo
-				uint8_t noexec : 1; ///< Флаг предотвращает исполнение пакета. Используется для запросов существования
-				uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
-			};
+typedef struct crow_packet {
+	struct dlist_head 	lnk; ///< Для подключения в списки башни crow.
+	struct dlist_head 	ulnk; ///< Для подключения в список пользователя и зависимых протоколов.
+	struct crow_gw* 	ingate; ///< gate, которым пакет прибыл в систему.
+	uint16_t 			last_request_time; ///< @todo
+	uint8_t 			ackcount; ///< @todo
+	uint8_t 			status;
+	union {
+		uint8_t flags; ///< Местные флаги
+		struct {
+			uint8_t released_by_world : 1;
+			uint8_t released_by_tower : 1;
 		};
-		uint16_t flen; ///< Полная длина пакета
-		uint8_t alen; ///< Длина поля адреса.
-		uint8_t stg; ///< Поля стадии. Используется для того, чтобы цепочка врат знала, какую часть адреса обрабатывать.
-		uint16_t ackquant; ///< Таймаут для пересылки пакета.
-		uint16_t seqid; ///< Порядковый номер пакета. Присваивается отправителем.
-		QoS qos; ///< Поле качества обслуживания.
-	} G1_PACKED;
-
-	struct packet {
-		dlist_head lnk; ///< Для подключения в списки башни crow.
-		dlist_head ulnk; ///< Для подключения в список пользователя и зависимых протоколов.
-		crow::gateway* ingate; ///< gate, которым пакет прибыл в систему.
-		uint16_t last_request_time; ///< @todo
-		uint8_t ackcount; ///< @todo
-		uint8_t status;
-
-		union {
-			uint8_t flags; ///< Местные флаги
-			struct {
-				uint8_t released_by_world : 1;
-				uint8_t released_by_tower : 1;
-			};
-		};
-
-		packet_header header;
-
-		uint8_t* addrptr() const { return (uint8_t*)(&header + 1); }
-		char* dataptr() const { return (char*)(&header + 1) + header.alen; }
-		uint8_t* stageptr() const { return (uint8_t*)(&header + 1) + header.stg; }
-		char* endptr() const { return (char*)(&header) + header.flen; }
-
-		size_t addrsize() { return header.alen; }
-		size_t blocksize() { return header.flen; }
-		size_t datasize() { return header.flen - header.alen - sizeof(packet_header); }
-
-		void pushaddr(uint8_t u8) { addrptr()[header.stg++] = u8; }
-	
-		void revert_stage(void* addr1, uint8_t size1, void* addr2, uint8_t size2, uint8_t gateindex);
-		void revert_stage(void* addr, uint8_t size, uint8_t gateindex);
-		void revert_stage(uint8_t gateindex);
-	} G1_PACKED;
+	};
+	struct crow_header header;
+} G1_PACKED crow_packet_t;
 
 
-	/**
-	 * Выделить память для пакета.
-	 * 
-	 * Выделяет adlen + sizeof(crow::packet) байт
-	 * @param adlen Суммарная длина адреса и данных в выделяемом пакете. 
-	 */ 
-	packet* allocate_packet(size_t adlen); 
-	
-	packet* create_packet(gateway* ingate, size_t addrsize, size_t datasize); 
-	void packet_initialization(crow::packet* pack, gateway* ingate); 
-	
-	///Вернуть память выделенную для пакета pack
-	void utilize_packet(packet* pack);
+__BEGIN_DECLS
 
-	void utilize(packet* pack);
+static inline uint8_t* crow_packet_addrptr(struct crow_packet* pack) { 
+	return (uint8_t*)(&pack->header + 1); 
 }
+
+static inline char* crow_packet_dataptr(struct crow_packet* pack) { 
+	return (char*)(&pack->header + 1) + pack->header.alen; 
+}
+
+#define crow_packet_stageptr(pack) ((uint8_t*)(&pack->header + 1) + pack->header.stg)
+//static inline uint8_t* crow_packet_stageptr(struct crow_packet* pack) { 
+//	return (uint8_t*)(&pack->header + 1) + pack->header.stg; 
+//}
+
+static inline char* crow_packet_endptr(struct crow_packet* pack) { 
+	return (char*)(&pack->header) + pack->header.flen; 
+}
+
+static inline size_t crow_packet_addrsize(struct crow_packet* pack) { 
+	return pack->header.alen; 
+}
+
+static inline size_t crow_packet_blocksize(struct crow_packet* pack) { 
+	return pack->header.flen; 
+}
+
+static inline size_t crow_packet_datasize(struct crow_packet* pack) { 
+	return pack->header.flen - pack->header.alen - sizeof(crow_header_t); 
+}
+
+void crow_packet_revert_2(struct crow_packet* pack, void* addr1, uint8_t size1, void* addr2, uint8_t size2, uint8_t gateindex);
+void crow_packet_revert_1(struct crow_packet* pack, void* addr, uint8_t size, uint8_t gateindex);
+void crow_packet_revert_g(struct crow_packet* pack, uint8_t gateindex);
+
+///
+void crow_packet_initialization(struct crow_packet* pack, struct crow_gw* ingate); 
+
+/**
+ * Выделить память для пакета.
+ * 
+ * Выделяет adlen + sizeof(crow_packet_t) байт
+ * @param adlen Суммарная длина адреса и данных в выделяемом пакете. 
+ */ 
+crow_packet_t* crow_allocate_packet(size_t adlen); 
+
+///Вернуть память выделенную для пакета pack
+void crow_deallocate_packet(crow_packet_t* pack);
+
+///
+crow_packet_t* crow_create_packet(struct crow_gw* ingate, size_t addrsize, size_t datasize); 
+
+///
+void crow_utilize(crow_packet_t* pack);
+
+__END_DECLS
 
 #endif

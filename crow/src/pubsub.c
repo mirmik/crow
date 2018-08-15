@@ -1,11 +1,11 @@
 #include <crow/pubsub.h>
 
-crow::host brocker_host;
+/*crow::host brocker_host;
 crow::QoS brocker_qos = crow::QoS(0);
 uint16_t brocker_ackquant = DEFAULT_ACKQUANT;
-
-void(*crow::pubsub_handler)(crow::packet* pack);
-
+*/
+void(*crow_pubsub_handler)(crow_packet_t* pack);
+/*
 void crow::publish(const void* theme, size_t thmsz, const void* data, size_t datsz) {
 	crow::subheader_pubsub subps;
 	crow::subheader_pubsub_data subps_d;
@@ -63,4 +63,4 @@ gxx::buffer crow::pubsub_message_datasect(crow::packet* pack) {
 	auto shps = crow::get_subheader_pubsub(pack);
 	auto shps_d = crow::get_subheader_pubsub_data(pack);
 	return gxx::buffer(pack->dataptr() + sizeof(subheader_pubsub) + sizeof(subheader_pubsub_data) + shps->thmsz, shps_d->datsz);	
-}
+}*/

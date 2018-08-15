@@ -7,80 +7,75 @@
 #define CROW_TOWER_H
 
 #include <crow/gateway.h>
-#include <gxx/datastruct/iovec.h>
+#include <sys/uio.h>
 
-#include <gxx/print.h> //for gxx::io::ostream
+#define CROW_SENDED 0
+#define CROW_WRONG_ADDRESS -1
 
-namespace crow {
-	enum class status : uint8_t {
-		Sended,
-		WrongAddress,
-	};
+///Список врат.
+extern struct dlist_head crow_gateways;
+//extern dlist_head incoming;
+//extern dlist_head outters;
+//extern dlist_head travelled;
 
-	///Список врат.
-	extern gxx::dlist<crow::gateway, &crow::gateway::lnk> gateways;
-	extern gxx::dlist<crow::packet, &crow::packet::lnk> incoming;
-	extern gxx::dlist<crow::packet, &crow::packet::lnk> outters;
-	extern gxx::dlist<crow::packet, &crow::packet::lnk> travelled;
+__BEGIN_DECLS
 
-	///Переместить пакет дальше по конвееру врат.
-	void travel_error(crow::packet* pack); 
-	void travel(crow::packet* pack); 
-	void do_travel(crow::packet* pack); 
+///Переместить пакет дальше по конвееру врат.
+void crow_travel_error(crow_packet_t* pack); 
+void crow_travel(crow_packet_t* pack); 
+void crow_do_travel(crow_packet_t* pack); 
 	
-	void transport(crow::packet* pack); 
-	void send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type = 0, crow::QoS qos = (crow::QoS)0, uint16_t ackquant = 200);
-	void send(const void* addr, uint8_t asize, const gxx::iovec* vec, size_t veclen, uint8_t type = 0, crow::QoS qos = (crow::QoS)0, uint16_t ackquant = 200);
+void crow_transport(crow_packet_t* pack); 
+void crow_send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant);
+void crow_send_v(const void* addr, uint8_t asize, const struct iovec* vec, size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant);
 	
-	///Вызывается на только что отправленный пакет. Башня или уничтожает его, или кеширует для контроля качества.
-	void return_to_tower(crow::packet* pack, status sts);
+///Вызывается на только что отправленный пакет. Башня или уничтожает его, или кеширует для контроля качества.
+void crow_return_to_tower(crow_packet_t* pack, uint8_t sts);
 
-	///Подключить врата к башне.
-	inline void link_gate(crow::gateway* gate, uint8_t id) { 
-		//logger.debug("gateway {} added", id);
-		gateways.move_back(*gate);
-		gate->id = id; 
-	} 
+///Подключить врата к башне.
+static inline void crow_link_gate(struct crow_gw* gate, uint8_t id) { 
+	gate->id = id; 
+	dlist_move_back(&crow_gateways, &gate->lnk);
+} 
 
 
-	crow::gateway* find_target_gateway(const crow::packet* pack);
+struct crow_gw* crow_find_target_gateway(const crow_packet_t* pack);
 
-	void release(crow::packet* pack);
-	void tower_release(crow::packet* pack);
+void crow_release(crow_packet_t* pack);
+void crow_tower_release(crow_packet_t* pack);
 
-	void print(crow::packet* pack);
-	void print_dump(crow::packet* pack);
-	void println(crow::packet* pack);
-	void print_to(gxx::io::ostream& out, crow::packet* pack);
-	void println_to(gxx::io::ostream& out, crow::packet* pack);
+void crow_print(crow_packet_t* pack);
+void crow_println(crow_packet_t* pack);
+void crow_print_dump(crow_packet_t* pack);
 
-	void revert_address(crow::packet* pack);
+void crow_revert_address(crow_packet_t* pack);
 
-	void send_ack(crow::packet* pack);
-	void send_ack2(crow::packet* pack);
+void crow_send_ack(crow_packet_t* pack);
+void crow_send_ack2(crow_packet_t* pack);
 
-	extern void (*user_type_handler)(crow::packet* pack);
-	extern void (*user_incoming_handler)(crow::packet* pack);
-	extern void (*traveling_handler)(crow::packet* pack);
-	extern void (*transit_handler)(crow::packet* pack);
+extern void (*crow_user_type_handler)(crow_packet_t* pack);
+extern void (*crow_user_incoming_handler)(crow_packet_t* pack);
+extern void (*crow_traveling_handler)(crow_packet_t* pack);
+extern void (*crow_transit_handler)(crow_packet_t* pack);
 
-	/// Обработчик недоставленного пакета. Определяется локальным софтом.
-	/// Освобождение должно производиться функцией tower_release.
-	extern void(*undelivered_handler)(crow::packet* pack);
-	extern void(*pubsub_handler)(crow::packet* pack);
+/// Обработчик недоставленного пакета. Определяется локальным софтом.
+/// Освобождение должно производиться функцией tower_release.
+extern void(*crow_undelivered_handler)(crow_packet_t* pack);
+extern void(*crow_pubsub_handler)(crow_packet_t* pack);
 
-	uint16_t millis();
+uint16_t crow_millis();
 
-	void onestep();
-	void onestep_travel_only();
-	void spin();
+void crow_onestep();
+void crow_onestep_travel_only();
+void crow_spin();
 
-	void incoming_handler(crow::packet* pack);
-	void incoming_node_packet(crow::packet* pack);
-	void incoming_pubsub_packet(crow::packet* pack);
-	//void incoming_channel_packet(crow::packet* pack);
+void crow_incoming_handler(crow_packet_t* pack);
+void crow_incoming_node_packet(crow_packet_t* pack);
+void crow_incoming_pubsub_packet(crow_packet_t* pack);
+//void incoming_channel_packet(crow_packet_t* pack);
 
-	void enable_diagnostic();
-}
+void crow_enable_diagnostic();
+
+__END_DECLS
 
 #endif

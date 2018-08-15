@@ -8,8 +8,8 @@
 #include <crow/node.h>
 #include <crow/host.h>
 #include <gxx/syslock.h>
-#include <gxx/event/delegate.h>
-
+//#include <gxx/event/delegate.h>
+/*
 namespace crow {
 	enum class State {
 		INIT,
@@ -26,7 +26,7 @@ namespace crow {
 	struct channel : public crow::node {
 		/*dlist_head lnk;
 		uint16_t id;*/
-		uint16_t rid;
+	/*	uint16_t rid;
 		void * raddr_ptr;
 		size_t raddr_len; 
 		crow::QoS qos;
@@ -95,6 +95,6 @@ namespace crow {
 	}
 
 	uint16_t dynport();
-};
+};*/
 
 #endif

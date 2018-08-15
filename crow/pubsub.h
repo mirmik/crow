@@ -8,63 +8,62 @@
 #include <crow/tower.h>
 #include <crow/host.h>
 
-namespace crow {
-	struct theme;
+struct crow_theme;
 
-	enum class frame_type : uint8_t {
-		SUBSCRIBE = 0,
-		PUBLISH = 1,
-		MESSAGE = 2,
-	};
+#define SUBSCRIBE 	0
+#define PUBLISH 	1
+#define MESSAGE 	2
 
-	struct subheader_pubsub {
-		frame_type type;
-		uint8_t thmsz;
-	} G1_PACKED;
+typedef struct crow_subheader_pubsub {
+	uint8_t type;
+	uint8_t thmsz;
+} G1_PACKED crow_subheader_pubsub_t;
 
-	struct subheader_pubsub_data {
-		uint8_t datsz;
-	} G1_PACKED;
+typedef struct subheader_pubsub_data {
+	uint8_t datsz;
+} G1_PACKED crow_subheader_pubsub_data_t;
 
-	struct subheader_pubsub_control {
-		crow::QoS qos;
-		uint16_t ackquant;
-	} G1_PACKED;
+typedef struct subheader_pubsub_control {
+	uint8_t qos;
+	uint16_t ackquant;
+} G1_PACKED crow_subheader_pubsub_control_t;
 
+__BEGIN_DECLS
 
-	static inline subheader_pubsub* get_subheader_pubsub(crow::packet* pack) {
-		return (subheader_pubsub*) pack->dataptr();
-	}
-
-	static inline subheader_pubsub_data* get_subheader_pubsub_data(crow::packet* pack) {
-		return (subheader_pubsub_data*) (pack->dataptr() + sizeof(subheader_pubsub));
-	}
-
-	static inline subheader_pubsub_control* get_subheader_pubsub_control(crow::packet* pack) {
-		return (subheader_pubsub_control*) (pack->dataptr() + sizeof(subheader_pubsub));
-	}
-
-	gxx::buffer pubsub_message_datasect(crow::packet* pack);
-
-	static inline gxx::buffer pubsub_theme(crow::packet* pack) {
-		auto shps = crow::get_subheader_pubsub(pack);
-		auto shps_d = crow::get_subheader_pubsub_data(pack);
-		return gxx::buffer(pack->dataptr() + sizeof(subheader_pubsub) + sizeof(subheader_pubsub_data), shps->thmsz);
-	}
-
-	static inline gxx::buffer pubsub_data(crow::packet* pack) {
-		auto shps = crow::get_subheader_pubsub(pack);
-		auto shps_d = crow::get_subheader_pubsub_data(pack);
-		return gxx::buffer(pack->dataptr() + sizeof(subheader_pubsub) + sizeof(subheader_pubsub_data) + shps->thmsz, shps_d->datsz);		
-	}
-
-	void publish(const void* theme, size_t thmsz, const void* data, size_t datsz);
-	void publish(const char* theme, const char* data);
-	void subscribe(const void* theme, size_t thmsz, crow::QoS qos = crow::QoS(2));
-	void subscribe(const char* theme, crow::QoS qos = crow::QoS(2));
-	
-	void set_publish_host(const crow::host& brocker_host);
-	void set_publish_qos(crow::QoS qos);
+static inline crow_subheader_pubsub_t* get_subheader_pubsub(crow_packet_t* pack) {
+	return (crow_subheader_pubsub_t*) crow_packet_dataptr(pack);
 }
+
+static inline crow_subheader_pubsub_data_t* get_subheader_pubsub_data(crow_packet_t* pack) {
+	return (crow_subheader_pubsub_data_t*) (crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub_t));
+}
+
+static inline crow_subheader_pubsub_control_t* get_subheader_pubsub_control(crow_packet_t* pack) {
+	return (crow_subheader_pubsub_control_t*) (crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub_t));
+}
+
+//gxx::buffer pubsub_message_datasect(crow_packet_t* pack);
+
+/*static inline gxx::buffer pubsub_theme(crow_packet_t* pack) {
+	crow_subheader_pubsub_t* shps = crow::get_subheader_pubsub(pack);
+	crow_subheader_pubsub_t* shps_d = crow::get_subheader_pubsub_data(pack);
+	return gxx::buffer(crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub_t) + sizeof(crow_subheader_pubsub_data_t), shps->thmsz);
+}
+
+static inline gxx::buffer pubsub_data(crow_packet_t* pack) {
+	crow_subheader_pubsub_t* shps = crow::get_subheader_pubsub(pack);
+	crow_subheader_pubsub_t* shps_d = crow::get_subheader_pubsub_data(pack);
+	return gxx::buffer(crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub_t) + sizeof(crow_subheader_pubsub_data_t) + shps->thmsz, shps_d->datsz);		
+}*/
+
+void crow_publish_buffer(const char* theme, const void* data, size_t datsz);
+void crow_publish(const char* theme, const char* data);
+//void crow_subscribe(const void* theme, size_t thmsz, uint8_t qos);
+void crow_subscribe(const char* theme, uint8_t qos);
+
+//void crow_set_publish_host(const crow::host& brocker_host);
+//void crow_set_publish_qos(crow::QoS qos);
+
+__END_DECLS
 
 #endif

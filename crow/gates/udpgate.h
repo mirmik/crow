@@ -9,7 +9,7 @@
 #include <gxx/inet/dgramm.h>
 #include <gxx/util/hexascii.h>
 
-namespace crow {
+/*namespace crow {
 	struct udpgate : public gateway {
 		gxx::inet::udp_socket sock;
 		crow::packet* block = nullptr;
@@ -68,7 +68,7 @@ namespace crow {
 		return g;
 	}*/
 
-	udpgate* create_udpgate(uint16_t port, uint8_t id = G1_UDPGATE);
-}
+/*	udpgate* create_udpgate(uint16_t port, uint8_t id = G1_UDPGATE);
+}*/
 
 #endif

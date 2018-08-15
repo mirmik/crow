@@ -1,8 +1,8 @@
 #include <crow/channel.h>
 #include <crow/tower.h>
-#include <gxx/datastruct/iovec.h>
-#include <gxx/print.h>
+#include <sys/uio.h>
 
+/*
 void crow::link_channel(crow::channel* ch, uint16_t id) {
 	ch->id = id;
 	crow::nodes.move_back(*ch);
@@ -110,3 +110,4 @@ void crow::channel::handshake(const crow::host& host, uint16_t rid, crow::QoS qo
 int crow::channel::send(const char* data, size_t size) {
 	crow::__channel_send(this, data, size);
 }
+*/

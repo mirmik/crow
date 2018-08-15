@@ -1,13 +1,11 @@
 #include <crow/tower.h>
 #include <crow/gates/udpgate.h>
 #include <crow/gates/serial_gstuff.h>
-#include <gxx/log/target2.h>
 #include <gxx/util/hexer.h>
 #include <gxx/io/file.h>
 #include <gxx/serial/serial.h>
 
 #include <gxx/print/stdprint.h>
-
 #include <thread>
 
 #include <iostream>
@@ -22,33 +20,33 @@ bool sniffer;
 bool echo;
 bool dump;
 
-gxx::log::colored_stdout_target console_target;
+//gxx::log::colored_stdout_target console_target;
 
-void incoming_handler(crow::packet* pack) {
+void incoming_handler(crow_packet_t* pack) {
 	if (echo) {
-		crow::send(pack->addrptr(), pack->header.alen, pack->dataptr(), pack->datasize());
+		crow_send(crow_packet_addrptr(pack), pack->header.alen, crow_packet_dataptr(pack), crow_packet_datasize(pack), 0, 0, 300);
 	}
-	gxx::print("incoming: "); 
+	//gxx::print("incoming: "); 
 	
-	if (packmon) {	
+	/*if (packmon) {	
 		if (dump) crow::print_dump(pack);
 		else crow::print(pack); 
 		gxx::println();
 	} else {
 		gxx::println(gxx::dstring(pack->dataptr(), pack->datasize()));
-	}
+	}*/
 	
-	crow::release(pack);
+	crow_release(pack);
 }
 
-void traveling_handler(crow::packet* pack) {}
+void traveling_handler(crow_packet_t* pack) {}
 
-void transit_handler(crow::packet* pack) {
+void transit_handler(crow_packet_t* pack) {
 	if (sniffer) {
-		gxx::print("transit: ");
-		if (dump) crow::print_dump(pack);
-		else crow::print(pack); 
-		gxx::println();
+		//gxx::print("transit: ");
+		//if (dump) crow::print_dump(pack);
+		//else crow::print(pack); 
+		//gxx::println();
 	}
 }
 
@@ -57,7 +55,7 @@ void console_listener() {
 	while(1) {
 		std::getline(std::cin, in);
 		in += '\n';
-		crow::send(addr, addrsize, in.data(), in.size(), 0, (crow::QoS) 0);
+		crow_send(addr, addrsize, in.data(), in.size(), 0, 0, 200);
 	}
 }
 
@@ -100,16 +98,16 @@ int main(int argc, char* argv[]) {
 	}
 	else udpgate.open();
 
-	crow::user_incoming_handler = incoming_handler;
-	crow::traveling_handler = traveling_handler;
-	crow::transit_handler = transit_handler;
-	crow::link_gate(&udpgate, G1_UDPGATE);
+	crow_user_incoming_handler = incoming_handler;
+	crow_traveling_handler = traveling_handler;
+	crow_transit_handler = transit_handler;
+	crow_link_gate(&udpgate, G1_UDPGATE);
 	
 	if (!serial_port.empty()) {
 		auto ser = new serial::Serial(serial_port, 115200);
 		//auto* serial = new gxx::io::file(ser->fd());
 		auto* serialgate = new crow::serial_gstuff_gate(ser);
-		crow::link_gate(serialgate, 42);
+		crow_link_gate(serialgate, 42);
 	}
 
 	if (optind < argc) {
@@ -122,6 +120,6 @@ int main(int argc, char* argv[]) {
 		thr->detach();
 	}
 
-	crow::spin();
+	crow_spin();
 }
 
