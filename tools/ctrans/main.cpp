@@ -88,8 +88,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	crow_gw_t* udpgate = crow_create_udpgate(udpport, G1_UDPGATE);
-	if (udpgate == NULL) {
+	if (crow_create_udpgate(udpport, G1_UDPGATE) == NULL) {
 		perror("udpgate open");
 		exit(-1);
 	}
@@ -97,13 +96,16 @@ int main(int argc, char* argv[]) {
 	crow_user_incoming_handler = incoming_handler;
 	crow_traveling_handler = traveling_handler;
 	crow_transit_handler = transit_handler;
-	crow_link_gate(udpgate, G1_UDPGATE);
 	
 	if (!serial_port.empty()) {
-		auto ser = new serial::Serial(serial_port, 115200);
+		if (crow_create_serialgate(serial_port.c_str(), 115200, 42) == NULL) {
+			perror("serialgate open");
+			exit(-1);
+		}				
+		//auto ser = new serial::Serial(serial_port, 115200);
 		//auto* serial = new gxx::io::file(ser->fd());
-		auto* serialgate = new crow::serial_gstuff_gate(ser);
-		crow_link_gate(serialgate, 42);
+		//auto* serialgate = new crow::serial_gstuff_gate(ser);
+		//crow_link_gate(serialgate, 42);
 	}
 
 	if (optind < argc) {
