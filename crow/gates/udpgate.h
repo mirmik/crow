@@ -6,10 +6,10 @@
 #define G1_GATES_UDPGATE_H
 
 #include <crow/gateway.h>
-#include <gxx/inet/dgramm.h>
-#include <gxx/util/hexascii.h>
+//#include <gxx/util/hexascii.h>
 
-/*namespace crow {
+/*#ifdef __cplusplus
+namespace crow {
 	struct udpgate : public gateway {
 		gxx::inet::udp_socket sock;
 		crow::packet* block = nullptr;
@@ -60,15 +60,34 @@
 			return 0;
 		}
 	};
+}
+#endif*/
 
-	/*inline crow::udpgate* make_udpgate(uint16_t port) {
-		auto g = new udpgate;
-		g->open(port);
-		crow::link_gate(g, G1_UDPGATE);
-		return g;
-	}*/
+void crow_udpgate_send(crow_gw_t* gw, crow_packet_t* pack);
+void crow_udpgate_nblock_onestep(crow_gw_t* gw);
 
-/*	udpgate* create_udpgate(uint16_t port, uint8_t id = G1_UDPGATE);
-}*/
+const crow_gw_operations crow_udpgate_ops = {
+	.send = crow_udpgate_send,
+	.nblock_onestep = crow_udpgate_nblock_onestep
+};
+
+typedef struct crow_udpgate {
+	struct crow_gw gw;
+	int sock;
+	crow_packet_t* bloc;	
+} crow_udpgate_t;
+
+__BEGIN_DECLS
+
+void crow_udpgate_open(crow_udpgate_t* gw, uint16_t port);
+
+static inline crow_gw_t* crow_create_udpgate(uint16_t port, uint8_t id) {
+	crow_udpgate_t* g = (crow_udpgate*) malloc(sizeof(crow_udpgate));
+	crow_udpgate_open(g, port); // TODO: should return NULL on error
+	crow_link_gate(&g->gw, id);
+	return &g->gw;
+}
+
+__END_DECLS
 
 #endif

@@ -59,7 +59,7 @@ void console_listener() {
 	}
 }
 
-int udpport = -1;
+uint16_t udpport = 0;
 std::string serial_port;
 int serialfd;
 
@@ -88,20 +88,16 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	crow::udpgate udpgate;
-	if (udpport != -1) { 
-		int ret = udpgate.open(udpport);
-		if (ret < 0) {
-			perror("udpgate open");
-			exit(-1);
-		}
+	crow_gw_t* udpgate = crow_create_udpgate(udpport, G1_UDPGATE);
+	if (udpgate == NULL) {
+		perror("udpgate open");
+		exit(-1);
 	}
-	else udpgate.open();
-
+		
 	crow_user_incoming_handler = incoming_handler;
 	crow_traveling_handler = traveling_handler;
 	crow_transit_handler = transit_handler;
-	crow_link_gate(&udpgate, G1_UDPGATE);
+	crow_link_gate(udpgate, G1_UDPGATE);
 	
 	if (!serial_port.empty()) {
 		auto ser = new serial::Serial(serial_port, 115200);
