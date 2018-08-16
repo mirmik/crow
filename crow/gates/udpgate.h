@@ -6,6 +6,14 @@
 #define G1_GATES_UDPGATE_H
 
 #include <crow/gateway.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <string.h>
+
+__BEGIN_DECLS
+
 //#include <gxx/util/hexascii.h>
 
 /*#ifdef __cplusplus
@@ -30,25 +38,11 @@ namespace crow {
 				crow::packet_initialization(pack, this);				
 				pack->revert_stage(&in.port, 2, &in.addr, 4, G1_UDPGATE);
 				crow::travel(pack);
-			}
-		}
-
-		void nonblock_onestep() override {
-			if (block == nullptr) block = (crow::packet*) malloc(128 + sizeof(crow::packet) - sizeof(crow::packet_header));
-
-			gxx::inet::netaddr in;
-			int len = sock.recvfrom((char*)&block->header, 128, &in);
-			if (len <= 0) return;			
-			crow::packet_initialization(block, this);
-
-			block->revert_stage(&in.port, 2, &in.addr, 4, G1_UDPGATE);
-
-			auto pack = block;
-			block = nullptr;
 			
-			crow::travel(pack);
 		}
+*/
 
+/*
 		int open(int port) {
 			int ret = sock.bind("0.0.0.0", port);
 			if (ret >= 0) sock.nonblock(true);
@@ -63,8 +57,6 @@ namespace crow {
 }
 #endif*/
 
-__BEGIN_DECLS
-
 void crow_udpgate_send(crow_gw_t* gw, crow_packet_t* pack);
 void crow_udpgate_nblock_onestep(crow_gw_t* gw);
 
@@ -76,7 +68,7 @@ const crow_gw_operations crow_udpgate_ops = {
 typedef struct crow_udpgate {
 	struct crow_gw gw;
 	int sock;
-	crow_packet_t* bloc;	
+	crow_packet_t* block;	
 } crow_udpgate_t;
 
 void crow_udpgate_open(crow_udpgate_t* gw, uint16_t port);
@@ -87,6 +79,33 @@ static inline crow_gw_t* crow_create_udpgate(uint16_t port, uint8_t id) {
 	crow_link_gate(&g->gw, id);
 	return &g->gw;
 }
+
+inline void crow_udpgate_nblock_onestep(crow_gw_t* g) {
+	crow_udpgate_t* udpgate = mcast_out(g, crow_udpgate_t, gw);
+	if (!udpgate->block) udpgate->block = 
+		(crow_packet_t*) malloc(128 + sizeof(crow_packet_t) - sizeof(crow_header_t));
+
+
+	struct sockaddr_in sender;
+	socklen_t sendsize = sizeof(sender);
+	memset(&sender, 0, sizeof(sender));
+
+	recvfrom(udpgate->sock, &udpgate->block->header, 128, 0, (sockaddr*) &sender, &sendsize);
+	/*gxx::inet::netaddr in;
+	int len = sock.recvfrom((char*)&block->header, 128, &in);
+	if (len <= 0) return;*/
+	crow_packet_initialization(udpgate->block, g);
+
+	uint32_t ip = ntohl(sender.sin_port);
+	uint16_t port = ntohs(sender.sin_addr.s_addr);
+	crow_packet_revert_2(udpgate->block, &ip, 2, &port, 4, G1_UDPGATE);
+
+	crow_packet_t* pack = udpgate->block;
+	udpgate->block = NULL;
+			
+	crow_travel(pack);
+}
+
 
 __END_DECLS
 
