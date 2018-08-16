@@ -63,6 +63,8 @@ namespace crow {
 }
 #endif*/
 
+__BEGIN_DECLS
+
 void crow_udpgate_send(crow_gw_t* gw, crow_packet_t* pack);
 void crow_udpgate_nblock_onestep(crow_gw_t* gw);
 
@@ -76,8 +78,6 @@ typedef struct crow_udpgate {
 	int sock;
 	crow_packet_t* bloc;	
 } crow_udpgate_t;
-
-__BEGIN_DECLS
 
 void crow_udpgate_open(crow_udpgate_t* gw, uint16_t port);
 

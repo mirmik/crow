@@ -5,6 +5,8 @@
 #ifndef G1_GATES_SERIAL_GSTUFF_H
 #define G1_GATES_SERIAL_GSTUFF_H
 
+#include <crow/gateway.h>
+
 /*#include <crow/gateway.h>
 #include <gxx/gstuff/sender.h>
 #include <gxx/gstuff/automate.h>
@@ -77,5 +79,33 @@ namespace crow {
 		}
 	};
 }*/
+
+__BEGIN_DECLS
+
+void crow_serialgate_send(crow_gw_t* gw, crow_packet_t* pack);
+void crow_serialgate_nblock_onestep(crow_gw_t* gw);
+
+const crow_gw_operations crow_serialgate_ops = {
+	.send = crow_serialgate_send,
+	.nblock_onestep = crow_serialgate_nblock_onestep
+};
+
+typedef struct crow_serialgate {
+	struct crow_gw gw;
+	void* privdata;
+	//int sock;
+	//crow_packet_t* bloc;	
+} crow_serialgate_t;
+
+void crow_serialgate_open(crow_serialgate_t* gw, uint16_t port);
+
+crow_gw_t* crow_create_serialgate(const char* path, uint16_t baudrate, uint8_t id);/* {
+	crow_serialgate_t* g = (crow_serialgate*) malloc(sizeof(crow_serialgate));
+	crow_serialgate_open(g, port); // TODO: should return NULL on error
+	crow_link_gate(&g->gw, id);
+	return &g->gw;
+}*/
+
+__END_DECLS
 
 #endif
