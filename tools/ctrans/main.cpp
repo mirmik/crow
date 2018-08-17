@@ -1,10 +1,11 @@
 #include <crow/tower.h>
 #include <crow/gates/udpgate.h>
-#include <crow/gates/serial_gstuff.h>
+//#include <crow/gates/serial_gstuff.h>
 #include <gxx/util/hexer.h>
 #include <gxx/io/file.h>
-#include <gxx/serial/serial.h>
+//#include <gxx/serial/serial.h>
 
+#include <gxx/util/string.h>
 #include <gxx/print/stdprint.h>
 #include <thread>
 
@@ -23,18 +24,17 @@ bool dump;
 //gxx::log::colored_stdout_target console_target;
 
 void incoming_handler(crow_packet_t* pack) {
+	gxx::print("incoming: "); 
 	if (echo) {
 		crow_send(crow_packet_addrptr(pack), pack->header.alen, crow_packet_dataptr(pack), crow_packet_datasize(pack), 0, 0, 300);
 	}
-	//gxx::print("incoming: "); 
 	
-	/*if (packmon) {	
-		if (dump) crow::print_dump(pack);
-		else crow::print(pack); 
+	if (packmon) {	
+		crow_print(pack); 
 		gxx::println();
 	} else {
-		gxx::println(gxx::dstring(pack->dataptr(), pack->datasize()));
-	}*/
+		gxx::println(gxx::dstring(crow_packet_dataptr(pack), crow_packet_datasize(pack)));
+	}
 	
 	crow_release(pack);
 }
@@ -43,10 +43,8 @@ void traveling_handler(crow_packet_t* pack) {}
 
 void transit_handler(crow_packet_t* pack) {
 	if (sniffer) {
-		//gxx::print("transit: ");
-		//if (dump) crow::print_dump(pack);
-		//else crow::print(pack); 
-		//gxx::println();
+		gxx::print("transit: ");
+		crow_print(pack); 
 	}
 }
 
@@ -97,7 +95,7 @@ int main(int argc, char* argv[]) {
 	crow_traveling_handler = traveling_handler;
 	crow_transit_handler = transit_handler;
 	
-	if (!serial_port.empty()) {
+	/*if (!serial_port.empty()) {
 		if (crow_create_serialgate(serial_port.c_str(), 115200, 42) == NULL) {
 			perror("serialgate open");
 			exit(-1);
@@ -106,7 +104,7 @@ int main(int argc, char* argv[]) {
 		//auto* serial = new gxx::io::file(ser->fd());
 		//auto* serialgate = new crow::serial_gstuff_gate(ser);
 		//crow_link_gate(serialgate, 42);
-	}
+	}*/
 
 	if (optind < argc) {
 		addrsize = hexer(addr, 128, argv[optind], strlen(argv[optind]));

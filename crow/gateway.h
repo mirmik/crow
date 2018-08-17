@@ -17,7 +17,7 @@ struct crow_gw_operations;
 typedef struct crow_gw {
 	struct dlist_head lnk; ///< встроенное поле списка.
 	uint16_t id; ///< номер врат.
-	struct crow_gw_operations* ops;
+	const struct crow_gw_operations* ops;
 } crow_gw_t;
 	
 struct crow_gw_operations {
@@ -25,8 +25,8 @@ struct crow_gw_operations {
 	void(*nblock_onestep)(struct crow_gw*);
 };
 
-static inline void crow_gw_init(crow_gw_t* gw) {
+/*static inline void crow_gw_init(crow_gw_t* gw) {
 	dlist_init(&gw->lnk);
-}
+}*/
 
 #endif

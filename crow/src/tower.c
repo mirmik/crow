@@ -91,17 +91,17 @@ void qos_release_from_incoming(crow_packet_t* pack) {
 
 void add_to_incoming_list(crow_packet_t* pack) {
 	pack->last_request_time = crow_millis();
-	dlist_move_back(&crow_incoming, &pack->lnk);
+	dlist_move_back(&pack->lnk, &crow_incoming);
 }
 
 void add_to_outters_list(crow_packet_t* pack) {
 	pack->last_request_time = crow_millis();
-	dlist_move_back(&crow_outters, &pack->lnk);
+	dlist_move_back(&pack->lnk, &crow_outters);
 }
 
 void crow_travel(crow_packet_t* pack) {
 	system_lock();
-	dlist_move_back(&crow_travelled, &pack->lnk);
+	dlist_add_back(&pack->lnk, &crow_travelled);
 	system_unlock();
 }
 
@@ -249,37 +249,6 @@ void crow_return_to_tower(crow_packet_t* pack, uint8_t sts) {
 	system_unlock();
 }
 
-/*void crow_print(crow_packet_t* pack) {
-	crow:print_to(*gxx::standart_output, pack);
-}
-
-void crow_println(crow_packet_t* pack) {
-	crow:print_to(*gxx::standart_output, pack);
-	gxx::print_to(*gxx::standart_output, "\n");
-}
-
-void crow_print_to(gxx::io::ostream& out, crow_packet_t* pack) {
-	gxx::fprint_to(out, "("
-		"qos:{}, "
-		"ack:{}, "
-		"alen:{}, "
-		"type:{}, "
-		"addr:{}, "
-		"stg:{}, "
-		"data:{}, "
-		"released:{}"
-		")", 
-		pack->header.qos,
-		(uint8_t)pack->header.ack, 
-		pack->header.alen, 
-		(uint8_t)pack->header.type, 
-		gxx::hexascii_encode((const uint8_t*)crow_packet_addrptr(pack), pack->header.alen), 
-		pack->header.stg, 
-		gxx::dstring(pack->dataptr(), pack->datasize()), 
-		pack->flags
-	);
-}*/
-
 void crow_revert_address(crow_packet_t* pack) {
 	uint8_t* first = crow_packet_addrptr(pack);
 	uint8_t* last = crow_packet_addrptr(pack) + pack->header.alen;
@@ -334,7 +303,9 @@ void crow_onestep() {
 
 	while(1) {
 		system_lock();
-		if (dlist_empty(&crow_travelled)) break;
+		if (dlist_empty(&crow_travelled)) { 
+			break;
+		}
 		pack = dlist_first_entry(&crow_travelled, crow_packet_t, lnk);
 		dlist_del(&pack->lnk);
 		system_unlock();

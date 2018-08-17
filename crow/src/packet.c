@@ -21,6 +21,7 @@ crow_packet_t* crow_create_packet(crow_gw_t* ingate, size_t addrsize, size_t dat
 	pack -> header.stg = 0;
 
 	dlist_init(&pack->lnk);
+	dlist_init(&pack->ulnk);
 	pack -> ingate = ingate;
 	pack -> ackcount = 0; 
 	pack -> flags = 0;
@@ -30,6 +31,7 @@ crow_packet_t* crow_create_packet(crow_gw_t* ingate, size_t addrsize, size_t dat
 
 void crow_packet_initialization(crow_packet_t* pack, crow_gw_t* ingate) { 
 	dlist_init(&pack->lnk);
+	dlist_init(&pack->ulnk);
 	pack -> ingate = ingate;
 	pack -> ackcount = 0; 
 	pack -> flags = 0;

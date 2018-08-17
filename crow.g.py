@@ -11,7 +11,8 @@ licant.modules.module("crow",
 		"packet.c",
 		"node.c",
 		"channel.c",
-		"pubsub.c"
+		"pubsub.c",
+		"print.cpp",
 	],
 	include_paths=["."]
 )

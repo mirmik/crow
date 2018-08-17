@@ -9,6 +9,8 @@
 #include <crow/gateway.h>
 #include <sys/uio.h>
 
+#include <gxx/debug/dprint.h>
+
 #define CROW_SENDED 0
 #define CROW_WRONG_ADDRESS -1
 
@@ -35,7 +37,7 @@ void crow_return_to_tower(crow_packet_t* pack, uint8_t sts);
 ///Подключить врата к башне.
 static inline void crow_link_gate(struct crow_gw* gate, uint8_t id) { 
 	gate->id = id; 
-	dlist_move_back(&crow_gateways, &gate->lnk);
+	dlist_add_back(&gate->lnk, &crow_gateways); 
 } 
 
 
@@ -44,12 +46,7 @@ struct crow_gw* crow_find_target_gateway(const crow_packet_t* pack);
 void crow_release(crow_packet_t* pack);
 void crow_tower_release(crow_packet_t* pack);
 
-void crow_print(crow_packet_t* pack);
-void crow_println(crow_packet_t* pack);
-void crow_print_dump(crow_packet_t* pack);
-
 void crow_revert_address(crow_packet_t* pack);
-
 void crow_send_ack(crow_packet_t* pack);
 void crow_send_ack2(crow_packet_t* pack);
 
@@ -75,6 +72,9 @@ void crow_incoming_pubsub_packet(crow_packet_t* pack);
 //void incoming_channel_packet(crow_packet_t* pack);
 
 void crow_enable_diagnostic();
+
+void crow_print(crow_packet_t* pack);
+void crow_println(crow_packet_t* pack);
 
 __END_DECLS
 

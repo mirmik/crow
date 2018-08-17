@@ -66,7 +66,7 @@ typedef struct crow_udpgate {
 	crow_packet_t* block;	
 } crow_udpgate_t;
 
-void crow_udpgate_open(crow_udpgate_t* gw, uint16_t port);
+int crow_udpgate_open(crow_udpgate_t* gw, uint16_t port);
 crow_gw_t* crow_create_udpgate(uint16_t port, uint8_t id);
 
 __END_DECLS
