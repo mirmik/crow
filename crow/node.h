@@ -6,7 +6,7 @@
 #define G0_CORE_H
 
 #include <gxx/container/dlist.h>
-#include <gxx/datastruct/iovec.h>
+#include <sys/uio.h>
 #include <crow/packet.h>
 //#include <crow/tower.h>
 

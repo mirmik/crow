@@ -7,7 +7,7 @@
 #define CROW_TOWER_H
 
 #include <crow/gateway.h>
-#include <gxx/datastruct/iovec.h>
+#include <sys/uio.h>
 
 #include <gxx/print.h> //for gxx::io::ostream
 
@@ -30,7 +30,7 @@ namespace crow {
 	
 	void transport(crow::packet* pack); 
 	void send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type = 0, crow::QoS qos = (crow::QoS)0, uint16_t ackquant = 200);
-	void send(const void* addr, uint8_t asize, const gxx::iovec* vec, size_t veclen, uint8_t type = 0, crow::QoS qos = (crow::QoS)0, uint16_t ackquant = 200);
+	void send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen, uint8_t type = 0, crow::QoS qos = (crow::QoS)0, uint16_t ackquant = 200);
 	
 	///Вызывается на только что отправленный пакет. Башня или уничтожает его, или кеширует для контроля качества.
 	void return_to_tower(crow::packet* pack, status sts);

@@ -17,7 +17,6 @@ application("ctrans",
 		("crow.time", "chrono"),
 		
 		("gxx", "posix"),
-		("gxx.log2", "impl"),
 		("gxx.inet", "posix"),
 		("gxx.print", "cout"),
 		("gxx.dprint", "cout"),

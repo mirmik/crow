@@ -1,6 +1,6 @@
 #include <crow/channel.h>
 #include <crow/tower.h>
-#include <gxx/datastruct/iovec.h>
+#include <sys/uio.h>
 #include <gxx/print.h>
 
 void crow::link_channel(crow::channel* ch, uint16_t id) {
@@ -73,14 +73,14 @@ void crow::handshake(crow::channel* ch, uint16_t rid, const void* raddr_ptr, siz
 	ch->qos = shh.qos = qos;
 	ch->ackquant = shh.ackquant = ackquant;
 
-	gxx::iovec vec[] = {
+	iovec vec[] = {
 		{&sh0, sizeof(sh0)},
 		{&sh2, sizeof(sh2)},
 		{&shh, sizeof(shh)},
 	};
 
 	ch->state = crow::State::CONNECTED;
-	crow::send(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(gxx::iovec), G1_G0TYPE, crow::QoS(2), ackquant);
+	crow::send(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec), G1_G0TYPE, crow::QoS(2), ackquant);
 }
 
 void crow::__channel_send(crow::channel* ch, const char* data, size_t size) {
@@ -91,12 +91,12 @@ void crow::__channel_send(crow::channel* ch, const char* data, size_t size) {
 	sh2.frame_id = ch->fid++;
 	sh2.ftype = crow::Frame::DATA;	
 
-	gxx::iovec vec[] = {
+	iovec vec[] = {
 		{&sh0, sizeof(sh0)},
 		{&sh2, sizeof(sh2)},
-		{data, size},
+		{(void*)data, size},
 	};
-	crow::send(ch->raddr_ptr, ch->raddr_len, vec, sizeof(vec) / sizeof(gxx::iovec), G1_G0TYPE, ch->qos, ch->ackquant);
+	crow::send(ch->raddr_ptr, ch->raddr_len, vec, sizeof(vec) / sizeof(iovec), G1_G0TYPE, ch->qos, ch->ackquant);
 }
 
 uint16_t crow::dynport() {

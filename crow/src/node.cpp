@@ -12,9 +12,9 @@ void crow::__node_send(uint16_t sid, uint16_t rid, const void* raddr, size_t rsi
 	sh.sid = sid;
 	sh.rid = rid;
 
-	gxx::iovec iov[2] = {
+	iovec iov[2] = {
 		{ &sh, sizeof(sh) },
-		{ data, size }
+		{ (void*)data, size }
 	};
 
 	crow::send(raddr, rsize, iov, 2, G1_G0TYPE, qos, ackquant);

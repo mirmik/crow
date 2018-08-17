@@ -201,13 +201,13 @@ void crow::send(const void* addr, uint8_t asize, const char* data, uint16_t dsiz
 	crow::transport(pack);
 }
 
-void crow::send(const void* addr, uint8_t asize, const gxx::iovec* vec, size_t veclen, uint8_t type, crow::QoS qos, uint16_t ackquant) {
+void crow::send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen, uint8_t type, crow::QoS qos, uint16_t ackquant) {
 	size_t dsize = 0;
-	const gxx::iovec* it = vec;
-	const gxx::iovec* const eit = vec + veclen;
+	const iovec* it = vec;
+	const iovec* const eit = vec + veclen;
 
 	for (; it != eit; ++it) {
-		dsize += it->size;
+		dsize += it->iov_len;
 	}
 
 	crow::packet* pack = crow::create_packet(nullptr, asize, dsize);
@@ -220,8 +220,8 @@ void crow::send(const void* addr, uint8_t asize, const gxx::iovec* vec, size_t v
 	it = vec;
 	char* dst = pack->dataptr(); 
 	for (; it != eit; ++it) {
-		memcpy(dst, it->data, it->size);
-		dst += it->size;
+		memcpy(dst, it->iov_base, it->iov_len);
+		dst += it->iov_len;
 	}
 	
 	crow::transport(pack);

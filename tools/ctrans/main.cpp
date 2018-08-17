@@ -1,7 +1,6 @@
 #include <crow/tower.h>
 #include <crow/gates/udpgate.h>
 #include <crow/gates/serial_gstuff.h>
-#include <gxx/log/target2.h>
 #include <gxx/util/hexer.h>
 #include <gxx/io/file.h>
 #include <gxx/serial/serial.h>
@@ -22,7 +21,7 @@ bool sniffer;
 bool echo;
 bool dump;
 
-gxx::log::colored_stdout_target console_target;
+//gxx::log::colored_stdout_target console_target;
 
 void incoming_handler(crow::packet* pack) {
 	if (echo) {

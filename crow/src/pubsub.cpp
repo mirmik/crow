@@ -14,11 +14,11 @@ void crow::publish(const void* theme, size_t thmsz, const void* data, size_t dat
 	subps.thmsz = thmsz;
 	subps_d.datsz = datsz;
 
-	gxx::iovec iov[4] = {
+	iovec iov[4] = {
 		{ &subps, sizeof(subps) },
 		{ &subps_d, sizeof(subps_d) },
-		{ theme, thmsz },
-		{ data, datsz },
+		{ (void*)theme, thmsz },
+		{ (void*)data, datsz },
 	};
 
 	crow::send(brocker_host.data, brocker_host.size, iov, 4, G1_G3TYPE, brocker_qos, DEFAULT_ACKQUANT);
@@ -37,10 +37,10 @@ void crow::subscribe(const void* theme, size_t thmsz, crow::QoS qos) {
 	subps_c.qos = qos;
 	subps_c.ackquant = brocker_ackquant;
 
-	gxx::iovec iov[4] = {
+	iovec iov[4] = {
 		{ &subps, sizeof(subps) },
 		{ &subps_c, sizeof(subps_c) },
-		{ theme, thmsz },
+		{ (void*)theme, thmsz },
 	};
 
 	crow::send(brocker_host.data, brocker_host.size, iov, 3, G1_G3TYPE, crow::QoS(2));	
