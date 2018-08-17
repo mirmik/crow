@@ -214,7 +214,7 @@ void crow::send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen
 	pack->header.type = type;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
-	//if (addr) 
+	
 	memcpy(pack->addrptr(), addr, asize);
 
 	it = vec;
