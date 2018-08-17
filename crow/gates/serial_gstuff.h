@@ -5,7 +5,7 @@
 #ifndef G1_GATES_SERIAL_GSTUFF_H
 #define G1_GATES_SERIAL_GSTUFF_H
 
-#include <crow/gateway.h>
+#include <crow/tower.h>
 
 /*#include <crow/gateway.h>
 #include <gxx/gstuff/sender.h>
@@ -93,8 +93,6 @@ const crow_gw_operations crow_serialgate_ops = {
 typedef struct crow_serialgate {
 	struct crow_gw gw;
 	void* privdata;
-	//int sock;
-	//crow_packet_t* bloc;	
 } crow_serialgate_t;
 
 void crow_serialgate_open(crow_serialgate_t* gw, uint16_t port);

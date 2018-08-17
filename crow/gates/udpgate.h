@@ -6,11 +6,6 @@
 #define G1_GATES_UDPGATE_H
 
 #include <crow/gateway.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <string.h>
 
 __BEGIN_DECLS
 
@@ -60,7 +55,7 @@ namespace crow {
 void crow_udpgate_send(crow_gw_t* gw, crow_packet_t* pack);
 void crow_udpgate_nblock_onestep(crow_gw_t* gw);
 
-const crow_gw_operations crow_udpgate_ops = {
+const struct crow_gw_operations crow_udpgate_ops = {
 	.send = crow_udpgate_send,
 	.nblock_onestep = crow_udpgate_nblock_onestep
 };
@@ -72,40 +67,7 @@ typedef struct crow_udpgate {
 } crow_udpgate_t;
 
 void crow_udpgate_open(crow_udpgate_t* gw, uint16_t port);
-
-static inline crow_gw_t* crow_create_udpgate(uint16_t port, uint8_t id) {
-	crow_udpgate_t* g = (crow_udpgate*) malloc(sizeof(crow_udpgate));
-	crow_udpgate_open(g, port); // TODO: should return NULL on error
-	crow_link_gate(&g->gw, id);
-	return &g->gw;
-}
-
-inline void crow_udpgate_nblock_onestep(crow_gw_t* g) {
-	crow_udpgate_t* udpgate = mcast_out(g, crow_udpgate_t, gw);
-	if (!udpgate->block) udpgate->block = 
-		(crow_packet_t*) malloc(128 + sizeof(crow_packet_t) - sizeof(crow_header_t));
-
-
-	struct sockaddr_in sender;
-	socklen_t sendsize = sizeof(sender);
-	memset(&sender, 0, sizeof(sender));
-
-	recvfrom(udpgate->sock, &udpgate->block->header, 128, 0, (sockaddr*) &sender, &sendsize);
-	/*gxx::inet::netaddr in;
-	int len = sock.recvfrom((char*)&block->header, 128, &in);
-	if (len <= 0) return;*/
-	crow_packet_initialization(udpgate->block, g);
-
-	uint32_t ip = ntohl(sender.sin_port);
-	uint16_t port = ntohs(sender.sin_addr.s_addr);
-	crow_packet_revert_2(udpgate->block, &ip, 2, &port, 4, G1_UDPGATE);
-
-	crow_packet_t* pack = udpgate->block;
-	udpgate->block = NULL;
-			
-	crow_travel(pack);
-}
-
+crow_gw_t* crow_create_udpgate(uint16_t port, uint8_t id);
 
 __END_DECLS
 

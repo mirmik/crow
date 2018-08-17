@@ -24,7 +24,13 @@ licant.modules.module("crow.allocator", "malloc",
 
 licant.modules.module("crow.udpgate",
 	sources = [
-		"crow/src/udpgate.cpp"
+		"crow/gates/udpgate.c"
+	]
+)
+
+licant.modules.module("crow.serialgate",
+	sources = [
+		"crow/gates/serialgate.cpp"
 	]
 )
 

@@ -15,6 +15,9 @@ application("ctrans",
 		("crow"),
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
+	
+		("crow.udpgate"),
+		("crow.serialgate"),
 		
 		("gxx", "posix"),
 		("gxx.inet", "posix"),
