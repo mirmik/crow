@@ -44,20 +44,24 @@ void crow_utilize(crow_packet_t* pack) {
 	system_unlock();
 }
 
-void crow_packet_revert_2(crow_packet_t* pack, void* addr1, uint8_t size1, void* addr2, uint8_t size2, uint8_t gateindex) {
-	*(crow_packet_stageptr(pack) + size1 + size2) = gateindex;
-	memcpy(crow_packet_stageptr(pack), addr1, size1);
-	memcpy(crow_packet_stageptr(pack) + size1, addr2, size2);
-	pack->header.stg += 1 + size1 + size2;
-}
-
-void crow_packet_revert_1(crow_packet_t* pack, void* addr, uint8_t size, uint8_t gateindex) {
-	*(crow_packet_stageptr(pack) + size) = gateindex;
-	memcpy(crow_packet_stageptr(pack), addr, size);
-	pack->header.stg += 1 + size;
-}
-
 void crow_packet_revert_g(crow_packet_t* pack, uint8_t gateindex) {
 	*crow_packet_stageptr(pack) = gateindex;
 	++pack->header.stg;
+}
+
+void crow_packet_revert(crow_packet_t* pack, struct iovec* vec, size_t veclen) {
+	struct iovec* it = vec + veclen - 1;
+	struct iovec* eit = vec - 1;
+
+	size_t sz = 0;
+	char* tgt = crow_packet_stageptr(pack);
+
+	for (; it != eit; --it) {
+		sz += it->iov_len;
+		char* ptr = it->iov_base + it->iov_len;
+		char* eptr = it->iov_base;
+		while(ptr != eptr) 
+			*tgt++ = *--ptr;
+	}
+	pack->header.stg += sz;
 }

@@ -15,6 +15,7 @@
 uint8_t addr[128];
 int addrsize;
 
+uint8_t qos = 0;
 bool raw;
 bool packmon;
 bool sniffer;
@@ -53,7 +54,7 @@ void console_listener() {
 	while(1) {
 		std::getline(std::cin, in);
 		in += '\n';
-		crow_send(addr, addrsize, in.data(), in.size(), 0, 0, 200);
+		crow_send(addr, addrsize, in.data(), in.size(), 0, qos, 200);
 	}
 }
 
@@ -64,6 +65,7 @@ int serialfd;
 int main(int argc, char* argv[]) {
 	const struct option long_options[] = {
 		{"udp", required_argument, NULL, 'u'},
+		{"qos", required_argument, NULL, 'q'},
 		{"serial", required_argument, NULL, 'S'},
 		{"sniffer", no_argument, NULL, 's'},
 		{"pack", no_argument, NULL, 'v'},
@@ -74,8 +76,9 @@ int main(int argc, char* argv[]) {
 
     int long_index =0;
 	int opt= 0;
-	while ((opt = getopt_long(argc, argv, "uvSsed", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "uvSsedq", long_options, &long_index)) != -1) {
 		switch (opt) {
+			case 'q': qos = atoi(optarg); break;
 			case 'u': udpport = atoi(optarg); break;
 			case 'S': serial_port = optarg; break;
 			case 's': sniffer = true; break;

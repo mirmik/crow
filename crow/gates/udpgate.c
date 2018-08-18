@@ -8,14 +8,10 @@
 #include <string.h>
 #include <fcntl.h>
 
-#include <gxx/debug/dprint.h>
-
 void crow_udpgate_nblock_onestep(crow_gw_t* g) {
-
 	crow_udpgate_t* udpgate = mcast_out(g, crow_udpgate_t, gw);
 	if (!udpgate->block) udpgate->block = 
 		(crow_packet_t*) malloc(128 + sizeof(crow_packet_t) - sizeof(crow_header_t));
-
 
 	struct sockaddr_in sender;
 	socklen_t sendsize = sizeof(sender);
@@ -26,13 +22,16 @@ void crow_udpgate_nblock_onestep(crow_gw_t* g) {
 
 	crow_packet_initialization(udpgate->block, g);
 
-	uint32_t ip = ntohl(sender.sin_port);
-	uint16_t port = ntohs(sender.sin_addr.s_addr);
-	crow_packet_revert_2(udpgate->block, &ip, 2, &port, 4, G1_UDPGATE);
-
+	struct iovec vec[3] = {
+		{ &g->id, 1 },
+		{ &sender.sin_addr.s_addr, 4 },
+		{ &sender.sin_port, 2 }
+	};
+	crow_packet_revert(udpgate->block, vec, 3);
+	
 	crow_packet_t* pack = udpgate->block;
 	udpgate->block = NULL;
-			
+
 	crow_travel(pack);
 }
 
@@ -55,14 +54,12 @@ int crow_udpgate_open(crow_udpgate_t* g, uint16_t  port) {
 
 crow_gw_t* crow_create_udpgate(uint16_t port, uint8_t id) {
 	crow_udpgate_t* g = (crow_udpgate_t*) malloc(sizeof(crow_udpgate_t));
-	//crow_gw_init(&g->gw);
 	g->block = NULL;
 	crow_udpgate_open(g, port); // TODO: should return NULL on error
 	crow_link_gate(&g->gw, id);
 	g->gw.ops = &crow_udpgate_ops;
 	return &g->gw;
 }
-
 
 void crow_udpgate_send(crow_gw_t* g, crow_packet_t* pack)  {
 	crow_udpgate_t* udpgate = (crow_udpgate_t*) g;
@@ -73,9 +70,10 @@ void crow_udpgate_send(crow_gw_t* g, crow_packet_t* pack)  {
 	socklen_t iplen = sizeof(struct sockaddr_in);
 	memset(&ipaddr, 0, iplen);
 
+	//Конвертация не требуется, т.к. crow использует сетевой порядок записи адреса. 
 	ipaddr.sin_port = *port;
 	ipaddr.sin_addr.s_addr = *addr;
-
+	
 	sendto(udpgate->sock, (const char*)&pack->header, pack->header.flen, 0, (struct sockaddr*)&ipaddr, iplen);
 	crow_return_to_tower(pack, CROW_SENDED);
 }

@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <sys/uio.h>
 
 #include <gxx/datastruct/dlist.h>
 #include <crow/defs.h>
@@ -91,9 +92,8 @@ static inline size_t crow_packet_datasize(struct crow_packet* pack) {
 	return pack->header.flen - pack->header.alen - sizeof(crow_header_t); 
 }
 
-void crow_packet_revert_2(struct crow_packet* pack, void* addr1, uint8_t size1, void* addr2, uint8_t size2, uint8_t gateindex);
-void crow_packet_revert_1(struct crow_packet* pack, void* addr, uint8_t size, uint8_t gateindex);
 void crow_packet_revert_g(struct crow_packet* pack, uint8_t gateindex);
+void crow_packet_revert(struct crow_packet* pack, struct iovec* vec, size_t veclen);
 
 ///
 void crow_packet_initialization(struct crow_packet* pack, struct crow_gw* ingate); 
