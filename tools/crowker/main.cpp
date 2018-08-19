@@ -2,6 +2,7 @@
 #include <crow/brocker.h>
 #include <crow/gates/udpgate.h>
 #include <thread>
+#include <sys/uio.h>
 #include <getopt.h>
 
 #include <unordered_map>
@@ -91,11 +92,11 @@ void crow::theme::publish(const std::string& data) {
 	subps.thmsz = name.size();
 	subps_d.datsz = data.size();
 
-	gxx::iovec vec[4] = {
+	struct iovec vec[4] = {
 		{ &subps, sizeof(subps) },
 		{ &subps_d, sizeof(subps_d) },
-		{name.data(), name.size()},
-		{data.data(), data.size()}
+		{(void*)name.data(), name.size()},
+		{(void*)data.data(), data.size()}
 	};
 
 	for (auto& sub : subs) {
