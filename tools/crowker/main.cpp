@@ -9,6 +9,7 @@
 #include <gxx/print/stdprint.h>
 
 int udpport = -1;
+bool quite = false;
 bool sniffer_option = false;
 std::unordered_map<std::string, crow::theme> themes;
 
@@ -28,7 +29,7 @@ void brocker_publish(const std::string& theme, const std::string& data) {
 		subs = 0;
 	}
 
-	gxx::fprintln("PUBLISH: (theme: {}, data: {}, subs: {})", theme, data, subs);
+	if (!quite) gxx::fprintln("PUBLISH: (theme: {}, data: {}, subs: {})", theme, data, subs);
 }
 
 void g3_brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, crow::QoS qos, uint16_t ackquant) {
@@ -41,7 +42,7 @@ void g3_brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme,
 	auto& thm = themes[theme];
 	thm.subs.emplace(host, true, qos, ackquant);
 
-	gxx::fprintln("G3_SUBSCRIBE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(raddr, rlen));
+	if (!quite) gxx::fprintln("G3_SUBSCRIBE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(raddr, rlen));
 }
 
 
@@ -77,7 +78,7 @@ void undelivered_handler(crow::packet* pack) {
 			std::string theme(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_data), shps->thmsz);
 			auto& thm = themes[theme];
 			thm.subs.erase(crow::subscriber(crow::host(pack->addrptr(), pack->header.alen), true, pack->header.qos, pack->header.ackquant));
-			gxx::fprintln("G3_REFUSE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(pack->addrptr(), pack->header.alen));
+			if (!quite) gxx::fprintln("G3_REFUSE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(pack->addrptr(), pack->header.alen));
 		}
 	}
 	
@@ -111,17 +112,19 @@ int main(int argc, char* argv[]) {
 	const struct option long_options[] = {
 		{"udp", required_argument, NULL, 'u'},
 		{"debug", no_argument, NULL, 'd'},
+		{"quite", no_argument, NULL, 'q'},
 		{"sniffer", no_argument, NULL, 's'},
 		{NULL,0,NULL,0}
 	};
 
     int long_index =0;
 	int opt= 0;
-	while ((opt = getopt_long(argc, argv, "us", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "usqd", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'u': udpport = atoi(optarg); break;
 			case 'd': crow::enable_diagnostic(); break;
 			case 's': sniffer_option = true; break;
+			case 'q': quite = true; break;
 			case 0: break;
 		}
 	}
