@@ -43,7 +43,7 @@ void crow::subscribe(const void* theme, size_t thmsz, crow::QoS qos) {
 		{ (void*)theme, thmsz },
 	};
 
-	crow::send(brocker_host.data, brocker_host.size, iov, 3, G1_G3TYPE, crow::QoS(2));	
+	crow::send(brocker_host.data, brocker_host.size, iov, 3, G1_G3TYPE, qos);	
 }
 
 void crow::subscribe(const char* theme, crow::QoS qos) {

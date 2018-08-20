@@ -11,6 +11,7 @@
 #include <gxx/trent/gbson.h>
 
 crow::udpgate ugate;
+int qos = 2;
 bool gbson_flag = false;
 
 void subscribe_handler(crow::packet* pack) {
@@ -39,16 +40,18 @@ int main(int argc, char* argv[]) {
 		{"crowker", required_argument, NULL, 'c'},
 		{"debug", no_argument, NULL, 'd'},
 		{"gbson", no_argument, NULL, 'g'},
+		{"qos", required_argument, NULL, 'q'},
 		{NULL,0,NULL,0}
 	};
 
     int long_index =0;
 	int opt= 0;
-	while ((opt = getopt_long(argc, argv, "c", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "cdgq", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'c': crowker = optarg; break;
 			case 'd': crow::enable_diagnostic(); break;
 			case 'g': gbson_flag = true;
+			case 'q': qos = atoi(optarg);
 			case 0: break;
 		}
 	}
@@ -74,7 +77,7 @@ int main(int argc, char* argv[]) {
 	std::string theme = argv[optind];
 
 	crow::set_publish_host(crow::host(crowker));
-	crow::set_publish_qos(crow::QoS(2));
+	crow::set_publish_qos(crow::QoS(qos));
 
 	crow::pubsub_handler = subscribe_handler;
 
