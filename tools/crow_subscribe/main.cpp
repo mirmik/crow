@@ -77,11 +77,9 @@ int main(int argc, char* argv[]) {
 	std::string theme = argv[optind];
 
 	crow::set_publish_host(crow::host(crowker));
-	crow::set_publish_qos(crow::QoS(qos));
-
 	crow::pubsub_handler = subscribe_handler;
 
-	crow::subscribe(theme.data(), theme.size());
+	crow::subscribe(theme.data(), theme.size(), crow::QoS(qos));
 	crow::spin();
 }
 

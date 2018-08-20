@@ -60,8 +60,8 @@ namespace crow {
 
 	void publish(const void* theme, size_t thmsz, const void* data, size_t datsz);
 	void publish(const char* theme, const char* data);
-	void subscribe(const void* theme, size_t thmsz, crow::QoS qos = crow::QoS(2));
-	void subscribe(const char* theme, crow::QoS qos = crow::QoS(2));
+	void subscribe(const void* theme, size_t thmsz, crow::QoS qos);
+	void subscribe(const char* theme, crow::QoS qos);
 	
 	void set_publish_host(const crow::host& brocker_host);
 	void set_publish_qos(crow::QoS qos);
