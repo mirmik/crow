@@ -52,14 +52,14 @@ void crow::tower_release(crow::packet* pack) {
 	gxx::syslock().unlock();
 }
 
-void utilize_from_outers(crow::packet* pack) {
+void release_from_outers(crow::packet* pack) {
 	for (auto& el : crow::outters) {
 		if (
 			el.header.seqid == pack->header.seqid && 
 			pack->header.alen == el.header.alen && 
 			!memcmp(el.addrptr(), pack->addrptr(), pack->header.alen)
 		) {
-			crow::utilize(&el);
+			crow::tower_release(&el);
 			return;
 		}
 	}
@@ -94,7 +94,11 @@ void crow::travel(crow::packet* pack) {
 }
 
 void crow::travel_error(crow::packet* pack) {
-	crow::utilize(pack);
+	if (pack->ingate == nullptr)
+		crow::tower_release(pack);
+	else {
+		crow::utilize(pack);
+	}
 }
 
 void crow::incoming_handler(crow::packet* pack) {
@@ -118,8 +122,8 @@ void crow::do_travel(crow::packet* pack) {
 
 		if (pack->header.ack) {
 			switch(pack->header.type) {
-				case G1_ACK_TYPE: utilize_from_outers(pack); break;
-				case G1_ACK21_TYPE: utilize_from_outers(pack); send_ack2(pack); break;
+				case G1_ACK_TYPE: release_from_outers(pack); break;
+				case G1_ACK21_TYPE: release_from_outers(pack); send_ack2(pack); break;
 				case G1_ACK22_TYPE: qos_release_from_incoming(pack); break;
 				default: break;
 			}
@@ -190,7 +194,7 @@ void crow::transport(crow::packet* pack) {
 }
 
 //void crow::send(crow::address& addr, const char* data, size_t len, uint8_t type, crow::QoS qos, uint16_t ackquant) {
-void crow::send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, crow::QoS qos, uint16_t ackquant) {
+crow::packet* crow::no_release_send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, crow::QoS qos, uint16_t ackquant) {
 	crow::packet* pack = crow::create_packet(nullptr, asize, dsize);
 	pack->header.type = type;
 	pack->header.qos = qos;
@@ -198,10 +202,12 @@ void crow::send(const void* addr, uint8_t asize, const char* data, uint16_t dsiz
 	//if (addr) 
 	memcpy(pack->addrptr(), addr, asize);
 	memcpy(pack->dataptr(), data, dsize);
+
 	crow::transport(pack);
+	return pack;
 }
 
-void crow::send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen, uint8_t type, crow::QoS qos, uint16_t ackquant) {
+crow::packet* crow::no_release_send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen, uint8_t type, crow::QoS qos, uint16_t ackquant) {
 	size_t dsize = 0;
 	const iovec* it = vec;
 	const iovec* const eit = vec + veclen;
@@ -225,6 +231,19 @@ void crow::send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen
 	}
 	
 	crow::transport(pack);
+	return pack;
+}
+
+void crow::send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, crow::QoS qos, uint16_t ackquant) {
+	auto pack = no_release_send(addr, asize, data, dsize, type, qos, ackquant);
+	crow::release(pack);
+	return;
+}
+
+void crow::send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen, uint8_t type, crow::QoS qos, uint16_t ackquant) {
+	auto pack = no_release_send(addr, asize, vec, veclen, type, qos, ackquant);
+	crow::release(pack);
+	return;
 }
 
 void crow::return_to_tower(crow::packet* pack, crow::status sts) {
@@ -288,8 +307,8 @@ void crow::send_ack(crow::packet* pack) {
 	ack->header.ack = 1;
 	ack->header.qos = crow::QoS::WithoutACK;
 	ack->header.seqid = pack->header.seqid;
-	memcpy(ack->addrptr(), pack->addrptr(), pack->header.alen);
 	ack->released_by_world = true;
+	memcpy(ack->addrptr(), pack->addrptr(), pack->header.alen);
 	crow::travel(ack);
 }
 
@@ -299,6 +318,7 @@ void crow::send_ack2(crow::packet* pack) {
 	ack->header.ack = 1;
 	ack->header.qos = crow::QoS::WithoutACK;
 	ack->header.seqid = pack->header.seqid;
+	ack->released_by_world = true;
 	memcpy(ack->addrptr(), pack->addrptr(), pack->header.alen);
 	crow::travel(ack);
 }
@@ -338,7 +358,7 @@ void crow::onestep() {
 			dlist_del(&pack.lnk);
 			if (++pack.ackcount == 5) {
 				if (crow::undelivered_handler) crow::undelivered_handler(&pack);
-				else crow::utilize(&pack);
+				else crow::tower_release(&pack);
 			} else {
 				crow::travel(&pack);
 			}		

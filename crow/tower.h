@@ -29,8 +29,12 @@ namespace crow {
 	void do_travel(crow::packet* pack); 
 	
 	void transport(crow::packet* pack); 
-	void send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type = 0, crow::QoS qos = (crow::QoS)0, uint16_t ackquant = 200);
-	void send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen, uint8_t type = 0, crow::QoS qos = (crow::QoS)0, uint16_t ackquant = 200);
+	void send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, crow::QoS qos, uint16_t ackquant);
+	void send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen, uint8_t type, crow::QoS qos, uint16_t ackquant);
+
+	crow::packet* no_release_send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, crow::QoS qos, uint16_t ackquant);
+	crow::packet* no_release_send(const void* addr, uint8_t asize, const iovec* vec, size_t veclen, uint8_t type, crow::QoS qos, uint16_t ackquant);
+	
 	
 	///Вызывается на только что отправленный пакет. Башня или уничтожает его, или кеширует для контроля качества.
 	void return_to_tower(crow::packet* pack, status sts);

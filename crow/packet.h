@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <gxx/buffer.h>
 #include <gxx/datastruct/dlist.h>
+#include <gxx/buffer.h>
 
 #include <crow/defs.h>
 
@@ -71,6 +72,8 @@ namespace crow {
 		size_t addrsize() { return header.alen; }
 		size_t blocksize() { return header.flen; }
 		size_t datasize() { return header.flen - header.alen - sizeof(packet_header); }
+
+		gxx::buffer datasect() { return gxx::buffer(dataptr(), datasize()); }
 
 		void pushaddr(uint8_t u8) { addrptr()[header.stg++] = u8; }
 	
