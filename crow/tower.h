@@ -16,9 +16,6 @@
 
 ///Список врат.
 extern struct dlist_head crow_gateways;
-//extern dlist_head incoming;
-//extern dlist_head outters;
-//extern dlist_head travelled;
 
 __BEGIN_DECLS
 
@@ -37,7 +34,7 @@ void crow_return_to_tower(crow_packet_t* pack, uint8_t sts);
 ///Подключить врата к башне.
 static inline void crow_link_gate(struct crow_gw* gate, uint8_t id) { 
 	gate->id = id; 
-	dlist_add_back(&gate->lnk, &crow_gateways); 
+	dlist_add_tail(&gate->lnk, &crow_gateways); 
 } 
 
 

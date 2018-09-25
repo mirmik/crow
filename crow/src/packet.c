@@ -3,6 +3,7 @@
 */
 
 #include <string.h>
+#include <stdio.h>
 
 #include <crow/packet.h>
 #include <crow/gateway.h>
@@ -39,7 +40,8 @@ void crow_packet_initialization(crow_packet_t* pack, crow_gw_t* ingate) {
 
 void crow_utilize(crow_packet_t* pack) {
 	system_lock();
-	dlist_del(&pack->lnk);
+	//dlist_del(&pack->lnk); // Очищается в tower_release
+	dlist_del(&pack->ulnk);
 	crow_deallocate_packet(pack);
 	system_unlock();
 }

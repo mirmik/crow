@@ -34,7 +34,7 @@ void crow_incoming_node_packet(crow_packet_t* pack) {
 
 void crow_link_node(crow_node_t* srv, uint16_t id) {
 	srv->id = id;
-	dlist_move_back(&srv->lnk, &crow_nodes);
+	dlist_move_tail(&srv->lnk, &crow_nodes);
 }
 
 /*crow::test_node* crow::create_test_node(int port) {

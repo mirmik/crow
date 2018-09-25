@@ -1,16 +1,16 @@
 #include <crow/tower.h>
 #include <crow/gates/udpgate.h>
-//#include <crow/gates/serial_gstuff.h>
 #include <gxx/util/hexer.h>
-#include <gxx/io/file.h>
-//#include <gxx/serial/serial.h>
 
-#include <gxx/util/string.h>
-#include <gxx/print/stdprint.h>
-#include <thread>
-
-#include <iostream>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 #include <getopt.h>
+#include <pthread.h>
+#include <signal.h>
+
+#include <readline/readline.h>
+#include <readline/history.h>
 
 uint8_t addr[128];
 int addrsize;
@@ -25,44 +25,68 @@ bool dump;
 //gxx::log::colored_stdout_target console_target;
 
 void incoming_handler(crow_packet_t* pack) {
-	gxx::print("incoming: "); 
+	dpr("incoming: \n"); 
 	if (echo) {
 		crow_send(crow_packet_addrptr(pack), pack->header.alen, crow_packet_dataptr(pack), crow_packet_datasize(pack), 0, 0, 300);
 	}
 	
 	if (packmon) {	
 		crow_print(pack); 
-		gxx::println();
+		//gxx::println();
 	} else {
-		gxx::println(gxx::dstring(crow_packet_dataptr(pack), crow_packet_datasize(pack)));
+		//gxx::println(gxx::dstring(crow_packet_dataptr(pack), crow_packet_datasize(pack)));
 	}
 	
 	crow_release(pack);
 }
 
-void traveling_handler(crow_packet_t* pack) {}
+void traveling_handler(crow_packet_t* pack) {
+	printf("travel\n");
+}
 
 void transit_handler(crow_packet_t* pack) {
 	if (sniffer) {
-		gxx::print("transit: ");
+		dpr("transit: ");
 		crow_print(pack); 
 	}
 }
 
-void console_listener() {
-	std::string in;
-	while(1) {
-		std::getline(std::cin, in);
-		in += '\n';
-		crow_send(addr, addrsize, in.data(), in.size(), 0, qos, 200);
+void* console_listener(void* arg) {
+	(void) arg;
+
+  	char* input;
+  	int len;
+
+	rl_catch_signals = 0;
+  	while(1) {	
+ 	   input = readline("");
+    	
+    	if (!input)
+    	  break;
+		add_history(input);
+	
+		len = strlen(input);
+		input[len] = '\n';
+		input[len + 1] = '\0';
+		crow_send(addr, addrsize, input, len+1, 0, qos, 200);
 	}
+
+	exit(0);
 }
 
 uint16_t udpport = 0;
-std::string serial_port;
-int serialfd;
+//std::string serial_port;
+//int serialfd;
+
+//void signal_handler(int sig) {
+//	exit(sig);
+//}
 
 int main(int argc, char* argv[]) {
+	pthread_t console_thread;
+
+	//signal(SIGINT, signal_handler);
+
 	const struct option long_options[] = {
 		{"udp", required_argument, NULL, 'u'},
 		{"qos", required_argument, NULL, 'q'},
@@ -80,7 +104,7 @@ int main(int argc, char* argv[]) {
 		switch (opt) {
 			case 'q': qos = atoi(optarg); break;
 			case 'u': udpport = atoi(optarg); break;
-			case 'S': serial_port = optarg; break;
+			//case 'S': serial_port = optarg; break;
 			case 's': sniffer = true; break;
 			case 'v': packmon = true; break;
 			case 'e': echo = true; break;
@@ -112,11 +136,16 @@ int main(int argc, char* argv[]) {
 	if (optind < argc) {
 		addrsize = hexer(addr, 128, argv[optind], strlen(argv[optind]));
 		if (addrsize < 0) {
-			gxx::println("Wrong address format");
+			dprln("Wrong address format");
 			exit(-1);
-		}	
-		auto thr = new std::thread(console_listener);
-		thr->detach();
+		}
+	} else {
+		addrsize = 0;
+	}	
+		
+	if (pthread_create(&console_thread, NULL, console_listener, NULL)) {
+		fprintf(stderr, "Error creating thread\n");
+		return 1;
 	}
 
 	crow_spin();

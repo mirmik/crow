@@ -52,6 +52,11 @@ int crow_udpgate_open(crow_udpgate_t* g, uint16_t  port) {
 	return ret;
 }
 
+const struct crow_gw_operations crow_udpgate_ops = {
+	.send = crow_udpgate_send,
+	.nblock_onestep = crow_udpgate_nblock_onestep
+};
+
 crow_gw_t* crow_create_udpgate(uint16_t port, uint8_t id) {
 	crow_udpgate_t* g = (crow_udpgate_t*) malloc(sizeof(crow_udpgate_t));
 	g->block = NULL;

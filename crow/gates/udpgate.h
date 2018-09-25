@@ -55,11 +55,6 @@ namespace crow {
 void crow_udpgate_send(crow_gw_t* gw, crow_packet_t* pack);
 void crow_udpgate_nblock_onestep(crow_gw_t* gw);
 
-const struct crow_gw_operations crow_udpgate_ops = {
-	.send = crow_udpgate_send,
-	.nblock_onestep = crow_udpgate_nblock_onestep
-};
-
 typedef struct crow_udpgate {
 	struct crow_gw gw;
 	int sock;
