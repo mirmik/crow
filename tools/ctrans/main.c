@@ -79,13 +79,14 @@ uint16_t udpport = 0;
 //int serialfd;
 
 //void signal_handler(int sig) {
+//	printf("dadas\n");
 //	exit(sig);
 //}
 
 int main(int argc, char* argv[]) {
 	pthread_t console_thread;
 
-	//signal(SIGINT, signal_handler);
+//	signal(SIGINT, signal_handler);
 
 	const struct option long_options[] = {
 		{"udp", required_argument, NULL, 'u'},
