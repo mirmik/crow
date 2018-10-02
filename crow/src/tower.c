@@ -15,22 +15,22 @@
 #include <gxx/debug/dprint.h>
 
 /*gxx::dlist<crow_gw_t, &crow_gw_t::lnk> crow_gw_ts;
-gxx::dlist<crow_packet_t, &crow_packet_t::lnk> crow_travelled;
-gxx::dlist<crow_packet_t, &crow_packet_t::lnk> crow_incoming;
-gxx::dlist<crow_packet_t, &crow_packet_t::lnk> crow_outters;*/
+gxx::dlist<crowket_t, &crowket_t::lnk> crow_travelled;
+gxx::dlist<crowket_t, &crowket_t::lnk> crow_incoming;
+gxx::dlist<crowket_t, &crowket_t::lnk> crow_outters;*/
 
 DLIST_HEAD(crow_gateways);
 DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
 
-void(*crow_user_type_handler)(crow_packet_t* pack) = NULL;
-void(*crow_user_incoming_handler)(crow_packet_t* pack) = NULL;
-void(*crow_undelivered_handler)(crow_packet_t* pack) = NULL;
-void(*crow_traveling_handler)(crow_packet_t* pack) = NULL;
-void(*crow_transit_handler)(crow_packet_t* pack) = NULL;
+void(*crow_user_type_handler)(crowket_t* pack) = NULL;
+void(*crow_user_incoming_handler)(crowket_t* pack) = NULL;
+void(*crow_undelivered_handler)(crowket_t* pack) = NULL;
+void(*crow_traveling_handler)(crowket_t* pack) = NULL;
+void(*crow_transit_handler)(crowket_t* pack) = NULL;
 
-static void __diagnostic_traveling_handler(crow_packet_t* pack) {
+static void __diagnostic_traveling_handler(crowket_t* pack) {
 	debug_print("travel: "); //crow_println(pack);
 }
 
@@ -38,8 +38,8 @@ void crow_enable_diagnostic() {
 	crow_traveling_handler = __diagnostic_traveling_handler;
 }
 
-crow_gw_t* crow_find_target_gateway(const crow_packet_t* pack) {
-	uint8_t gidx = *crow_packet_stageptr(pack);
+crow_gw_t* crow_find_target_gateway(const crowket_t* pack) {
+	uint8_t gidx = *crowket_stageptr(pack);
 	crow_gw_t* g;
 	dlist_for_each_entry(g, &crow_gateways, lnk) {
 		if (g->id == gidx) return g;
@@ -47,7 +47,7 @@ crow_gw_t* crow_find_target_gateway(const crow_packet_t* pack) {
 	return NULL;
 }
 
-void crow_release(crow_packet_t* pack) {
+void crow_release(crowket_t* pack) {
 	system_lock();
 
 	if (pack->released_by_tower) crow_utilize(pack);
@@ -56,7 +56,7 @@ void crow_release(crow_packet_t* pack) {
 	system_unlock();
 }
 
-void crow_tower_release(crow_packet_t* pack) {
+void crow_tower_release(crowket_t* pack) {
 	system_lock();
 	
 	dlist_del(&pack->lnk);
@@ -66,13 +66,13 @@ void crow_tower_release(crow_packet_t* pack) {
 	system_unlock();
 }
 
-void utilize_from_outers(crow_packet_t* pack) {
-	crow_packet_t* it;
+void utilize_from_outers(crowket_t* pack) {
+	crowket_t* it;
 	dlist_for_each_entry(it, &crow_outters, lnk) {
 		if (
 			it->header.seqid == pack->header.seqid && 
 			pack->header.alen == it->header.alen && 
-			!memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack), pack->header.alen)
+			!memcmp(crowket_addrptr(it), crowket_addrptr(pack), pack->header.alen)
 		) {
 			crow_utilize(it);
 			return;
@@ -80,12 +80,12 @@ void utilize_from_outers(crow_packet_t* pack) {
 	}
 }
 
-void qos_release_from_incoming(crow_packet_t* pack) {
-	crow_packet_t* it;
+void qos_release_from_incoming(crowket_t* pack) {
+	crowket_t* it;
 	dlist_for_each_entry(it, &crow_outters, lnk) {
 		if (it->header.seqid == pack->header.seqid && 
 			pack->header.alen == it->header.alen && 
-			!memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack), pack->header.alen)
+			!memcmp(crowket_addrptr(it), crowket_addrptr(pack), pack->header.alen)
 		) {
 			crow_tower_release(it);
 			return;
@@ -93,27 +93,27 @@ void qos_release_from_incoming(crow_packet_t* pack) {
 	}
 }
 
-void add_to_incoming_list(crow_packet_t* pack) {
+void add_to_incoming_list(crowket_t* pack) {
 	pack->last_request_time = crow_millis();
 	dlist_move_tail(&pack->lnk, &crow_incoming);
 }
 
-void add_to_outters_list(crow_packet_t* pack) {
+void add_to_outters_list(crowket_t* pack) {
 	pack->last_request_time = crow_millis();
 	dlist_move_tail(&pack->lnk, &crow_outters);
 }
 
-void crow_travel(crow_packet_t* pack) {
+void crow_travel(crowket_t* pack) {
 	system_lock();
 	dlist_add_tail(&pack->lnk, &crow_travelled);
 	system_unlock();
 }
 
-void crow_travel_error(crow_packet_t* pack) {
+void crow_travel_error(crowket_t* pack) {
 	crow_utilize(pack);
 }
 
-void crow_incoming_handler(crow_packet_t* pack) {
+void crow_incoming_handler(crowket_t* pack) {
 	switch(pack->header.type) {
 		case G1_G0TYPE: crow_incoming_node_packet(pack); break;
 		case G1_G3TYPE: 
@@ -126,7 +126,7 @@ void crow_incoming_handler(crow_packet_t* pack) {
 	}
 }
 
-void crow_do_travel(crow_packet_t* pack) {
+void crow_do_travel(crowket_t* pack) {
 	if (crow_traveling_handler) 
 		crow_traveling_handler(pack);
 	
@@ -153,11 +153,11 @@ void crow_do_travel(crow_packet_t* pack) {
 			
 			if (pack->header.qos == CROW_BINARY_ACK) 
 			{
-				crow_packet_t* inc;
+				crowket_t* inc;
 				dlist_for_each_entry(inc, &crow_incoming, lnk) {
 					if (inc->header.seqid == pack->header.seqid && 
 						inc->header.alen == pack->header.alen &&
-						memcmp(crow_packet_addrptr(inc), crow_packet_addrptr(pack), inc->header.alen) == 0) 
+						memcmp(crowket_addrptr(inc), crowket_addrptr(pack), inc->header.alen) == 0) 
 					{
 						crow_utilize(pack);
 						return;
@@ -202,7 +202,7 @@ void crow_do_travel(crow_packet_t* pack) {
 }
 
 uint16_t __seqcounter = 0;
-void crow_transport(crow_packet_t* pack) {
+void crow_transport(crowket_t* pack) {
 	pack->header.stg = 0;
 	pack->header.ack = 0;
 	system_lock();
@@ -213,13 +213,13 @@ void crow_transport(crow_packet_t* pack) {
 
 //void crow_send(crow_address& addr, const char* data, size_t len, uint8_t type, uint8_t qos, uint16_t ackquant) {
 void crow_send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant) {
-	crow_packet_t* pack = crow_create_packet(NULL, asize, dsize);
+	crowket_t* pack = crow_create_packet(NULL, asize, dsize);
 	pack->header.type = type;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
 	//if (addr) 
-	memcpy(crow_packet_addrptr(pack), addr, asize);
-	memcpy(crow_packet_dataptr(pack), data, dsize);
+	memcpy(crowket_addrptr(pack), addr, asize);
+	memcpy(crowket_dataptr(pack), data, dsize);
 	crow_transport(pack);
 }
 
@@ -232,15 +232,15 @@ void crow_send_v(const void* addr, uint8_t asize, const struct iovec* vec, size_
 		dsize += it->iov_len;
 	}
 
-	crow_packet_t* pack = crow_create_packet(NULL, asize, dsize);
+	crowket_t* pack = crow_create_packet(NULL, asize, dsize);
 	pack->header.type = type;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
 	//if (addr) 
-	memcpy(crow_packet_addrptr(pack), addr, asize);
+	memcpy(crowket_addrptr(pack), addr, asize);
 
 	it = vec;
-	char* dst = crow_packet_dataptr(pack); 
+	char* dst = crowket_dataptr(pack); 
 	for (; it != eit; ++it) {
 		memcpy(dst, it->iov_base, it->iov_len);
 		dst += it->iov_len;
@@ -249,7 +249,7 @@ void crow_send_v(const void* addr, uint8_t asize, const struct iovec* vec, size_
 	crow_transport(pack);
 }
 
-void crow_return_to_tower(crow_packet_t* pack, uint8_t sts) {
+void crow_return_to_tower(crowket_t* pack, uint8_t sts) {
 	system_lock();
 	if (pack->ingate != NULL) {
 		//Пакет был отправлен, и он нездешний. Уничтожить.
@@ -263,9 +263,9 @@ void crow_return_to_tower(crow_packet_t* pack, uint8_t sts) {
 	system_unlock();
 }
 
-void crow_revert_address(crow_packet_t* pack) {
-	uint8_t* first = crow_packet_addrptr(pack);
-	uint8_t* last = crow_packet_addrptr(pack) + pack->header.alen;
+void crow_revert_address(crowket_t* pack) {
+	uint8_t* first = crowket_addrptr(pack);
+	uint8_t* last = crowket_addrptr(pack) + pack->header.alen;
 	while ((first != last) && (first != --last)) {
         char tmp = *last;
         *last = *first;
@@ -273,24 +273,24 @@ void crow_revert_address(crow_packet_t* pack) {
     }
 }
 
-void crow_send_ack(crow_packet_t* pack) {
-	crow_packet_t* ack = crow_create_packet(NULL, pack->header.alen, 0);
+void crow_send_ack(crowket_t* pack) {
+	crowket_t* ack = crow_create_packet(NULL, pack->header.alen, 0);
 	ack->header.type = pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
 	ack->header.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
 	ack->header.seqid = pack->header.seqid;
-	memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack), pack->header.alen);
+	memcpy(crowket_addrptr(ack), crowket_addrptr(pack), pack->header.alen);
 	ack->released_by_world = true;
 	crow_travel(ack);
 }
 
-void crow_send_ack2(crow_packet_t* pack) {
-	crow_packet_t* ack = crow_create_packet(NULL, pack->header.alen, 0);
+void crow_send_ack2(crowket_t* pack) {
+	crowket_t* ack = crow_create_packet(NULL, pack->header.alen, 0);
 	ack->header.type = G1_ACK22_TYPE;
 	ack->header.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
 	ack->header.seqid = pack->header.seqid;
-	memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack), pack->header.alen);
+	memcpy(crowket_addrptr(ack), crowket_addrptr(pack), pack->header.alen);
 	crow_travel(ack);
 }
 
@@ -300,7 +300,7 @@ void crow_onestep_travel_only() {
 		system_lock();
 		bool empty = dlist_empty(&crow_travelled);
 		if (empty) break;
-		crow_packet_t* pack = dlist_first_entry(&crow_travelled, crow_packet_t, lnk);
+		crowket_t* pack = dlist_first_entry(&crow_travelled, crowket_t, lnk);
 		dlist_del(&pack->lnk);
 		system_unlock();
 		crow_do_travel(pack);
@@ -312,22 +312,22 @@ void crow_onestep_travel_only() {
 	@todo Переделать очередь пакетов, выстроив их в порядке работы таймеров. 
 */
 void crow_onestep() {
-	crow_packet_t* pack;
-	crow_packet_t* n;
+	crowket_t* pack;
+	crowket_t* n;
 
 	while(1) {
 		system_lock();
 		if (dlist_empty(&crow_travelled)) { 
 			break;
 		}
-		pack = dlist_first_entry(&crow_travelled, crow_packet_t, lnk);
+		pack = dlist_first_entry(&crow_travelled, crowket_t, lnk);
 		dlist_del_init(&pack->lnk);
 		system_unlock();
 		crow_do_travel(pack);
 	} 
 
 	uint16_t curtime = crow_millis();
-	//gxx::for_each_safe(crow_outters.begin(), crow_outters.end(), [&](crow_packet_t& pack) {
+	//gxx::for_each_safe(crow_outters.begin(), crow_outters.end(), [&](crowket_t& pack) {
 	dlist_for_each_entry_safe(pack, n, &crow_outters, lnk) {
 		if (curtime - pack->last_request_time > pack->header.ackquant) {
 			dlist_del_init(&pack->lnk);
@@ -388,6 +388,6 @@ crow_host::~host() {
 	free(data);
 }*/
 
-/*void crow_print_dump(crow_packet_t* pack) {
+/*void crow_print_dump(crowket_t* pack) {
 	gxx::println(gxx::dstring(&pack->header, pack->header.flen));
 } */

@@ -82,7 +82,7 @@ namespace crow {
 
 __BEGIN_DECLS
 
-void crow_serialgate_send(crow_gw_t* gw, crow_packet_t* pack);
+void crow_serialgate_send(crow_gw_t* gw, crowket_t* pack);
 void crow_serialgate_nblock_onestep(crow_gw_t* gw);
 
 const crow_gw_operations crow_serialgate_ops = {

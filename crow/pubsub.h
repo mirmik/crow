@@ -30,30 +30,30 @@ typedef struct subheader_pubsub_control {
 
 __BEGIN_DECLS
 
-static inline crow_subheader_pubsub_t* get_subheader_pubsub(crow_packet_t* pack) {
-	return (crow_subheader_pubsub_t*) crow_packet_dataptr(pack);
+static inline crow_subheader_pubsub_t* get_subheader_pubsub(crowket_t* pack) {
+	return (crow_subheader_pubsub_t*) crowket_dataptr(pack);
 }
 
-static inline crow_subheader_pubsub_data_t* get_subheader_pubsub_data(crow_packet_t* pack) {
-	return (crow_subheader_pubsub_data_t*) (crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub_t));
+static inline crow_subheader_pubsub_data_t* get_subheader_pubsub_data(crowket_t* pack) {
+	return (crow_subheader_pubsub_data_t*) (crowket_dataptr(pack) + sizeof(crow_subheader_pubsub_t));
 }
 
-static inline crow_subheader_pubsub_control_t* get_subheader_pubsub_control(crow_packet_t* pack) {
-	return (crow_subheader_pubsub_control_t*) (crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub_t));
+static inline crow_subheader_pubsub_control_t* get_subheader_pubsub_control(crowket_t* pack) {
+	return (crow_subheader_pubsub_control_t*) (crowket_dataptr(pack) + sizeof(crow_subheader_pubsub_t));
 }
 
-//gxx::buffer pubsub_message_datasect(crow_packet_t* pack);
+//gxx::buffer pubsub_message_datasect(crowket_t* pack);
 
-/*static inline gxx::buffer pubsub_theme(crow_packet_t* pack) {
+/*static inline gxx::buffer pubsub_theme(crowket_t* pack) {
 	crow_subheader_pubsub_t* shps = crow::get_subheader_pubsub(pack);
 	crow_subheader_pubsub_t* shps_d = crow::get_subheader_pubsub_data(pack);
-	return gxx::buffer(crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub_t) + sizeof(crow_subheader_pubsub_data_t), shps->thmsz);
+	return gxx::buffer(crowket_dataptr(pack) + sizeof(crow_subheader_pubsub_t) + sizeof(crow_subheader_pubsub_data_t), shps->thmsz);
 }
 
-static inline gxx::buffer pubsub_data(crow_packet_t* pack) {
+static inline gxx::buffer pubsub_data(crowket_t* pack) {
 	crow_subheader_pubsub_t* shps = crow::get_subheader_pubsub(pack);
 	crow_subheader_pubsub_t* shps_d = crow::get_subheader_pubsub_data(pack);
-	return gxx::buffer(crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub_t) + sizeof(crow_subheader_pubsub_data_t) + shps->thmsz, shps_d->datsz);		
+	return gxx::buffer(crowket_dataptr(pack) + sizeof(crow_subheader_pubsub_t) + sizeof(crow_subheader_pubsub_data_t) + shps->thmsz, shps_d->datsz);		
 }*/
 
 void crow_publish_buffer(const char* theme, const void* data, size_t datsz);

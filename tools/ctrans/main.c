@@ -1,6 +1,7 @@
 #include <crow/tower.h>
 #include <crow/gates/udpgate.h>
 #include <gxx/util/hexer.h>
+#include <gxx/util/dstring.h>
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -20,31 +21,28 @@ bool raw;
 bool packmon;
 bool sniffer;
 bool echo;
-bool dump;
 
-//gxx::log::colored_stdout_target console_target;
-
-void incoming_handler(crow_packet_t* pack) {
-	dpr("incoming: \n"); 
+void incoming_handler(crowket_t* pack) {
+	dpr("incoming: "); 
+	
 	if (echo) {
-		crow_send(crow_packet_addrptr(pack), pack->header.alen, crow_packet_dataptr(pack), crow_packet_datasize(pack), 0, 0, 300);
+		crow_send(crowket_addrptr(pack), pack->header.alen, crowket_dataptr(pack), crowket_datasize(pack), 0, 0, 300);
 	}
 	
 	if (packmon) {	
-		crow_print(pack); 
-		//gxx::println();
+		crow_println(pack); 
 	} else {
-		//gxx::println(gxx::dstring(crow_packet_dataptr(pack), crow_packet_datasize(pack)));
+		char buf[10000];
+		bytes_to_dstring(buf, crowket_dataptr(pack), crowket_datasize(pack));		
+		printf("%s\n", buf);
 	}
 	
 	crow_release(pack);
 }
 
-void traveling_handler(crow_packet_t* pack) {
-	printf("travel\n");
-}
+void traveling_handler(crowket_t* pack) {}
 
-void transit_handler(crow_packet_t* pack) {
+void transit_handler(crowket_t* pack) {
 	if (sniffer) {
 		dpr("transit: ");
 		crow_print(pack); 
@@ -89,13 +87,12 @@ int main(int argc, char* argv[]) {
 //	signal(SIGINT, signal_handler);
 
 	const struct option long_options[] = {
-		{"udp", required_argument, NULL, 'u'},
-		{"qos", required_argument, NULL, 'q'},
-		{"serial", required_argument, NULL, 'S'},
-		{"sniffer", no_argument, NULL, 's'},
-		{"pack", no_argument, NULL, 'v'},
-		{"echo", no_argument, NULL, 'e'},
-		{"dump", no_argument, NULL, 'd'},
+		{"udp", required_argument, NULL, 'u'}, //udp порт для 12-ого гейта.
+		{"qos", required_argument, NULL, 'q'}, //qos отправляемых сообщений. 0 по умолчанию
+		{"serial", required_argument, NULL, 'S'}, //serial...
+		{"sniffer", no_argument, NULL, 's'}, //Вывод проходных пакетов.
+		{"pack", no_argument, NULL, 'v'}, //Подробная информация о входящих пакетах.
+		{"echo", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
 		{NULL,0,NULL,0}
 	};
 
@@ -109,7 +106,6 @@ int main(int argc, char* argv[]) {
 			case 's': sniffer = true; break;
 			case 'v': packmon = true; break;
 			case 'e': echo = true; break;
-			case 'd': dump = true; break;
 			case 0: break;
 		}
 	}

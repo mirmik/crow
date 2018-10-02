@@ -52,13 +52,13 @@ namespace crow {
 }
 #endif*/
 
-void crow_udpgate_send(crow_gw_t* gw, crow_packet_t* pack);
+void crow_udpgate_send(crow_gw_t* gw, crowket_t* pack);
 void crow_udpgate_nblock_onestep(crow_gw_t* gw);
 
 typedef struct crow_udpgate {
 	struct crow_gw gw;
 	int sock;
-	crow_packet_t* block;	
+	crowket_t* block;	
 } crow_udpgate_t;
 
 int crow_udpgate_open(crow_udpgate_t* gw, uint16_t port);

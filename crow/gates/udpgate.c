@@ -11,7 +11,7 @@
 void crow_udpgate_nblock_onestep(crow_gw_t* g) {
 	crow_udpgate_t* udpgate = mcast_out(g, crow_udpgate_t, gw);
 	if (!udpgate->block) udpgate->block = 
-		(crow_packet_t*) malloc(128 + sizeof(crow_packet_t) - sizeof(crow_header_t));
+		(crowket_t*) malloc(128 + sizeof(crowket_t) - sizeof(crow_header_t));
 
 	struct sockaddr_in sender;
 	socklen_t sendsize = sizeof(sender);
@@ -20,16 +20,16 @@ void crow_udpgate_nblock_onestep(crow_gw_t* g) {
 	int len = recvfrom(udpgate->sock, &udpgate->block->header, 128, 0, (struct sockaddr*) &sender, &sendsize);
 	if (len <= 0) return;
 
-	crow_packet_initialization(udpgate->block, g);
+	crowket_initialization(udpgate->block, g);
 
 	struct iovec vec[3] = {
 		{ &g->id, 1 },
 		{ &sender.sin_addr.s_addr, 4 },
 		{ &sender.sin_port, 2 }
 	};
-	crow_packet_revert(udpgate->block, vec, 3);
+	crowket_revert(udpgate->block, vec, 3);
 	
-	crow_packet_t* pack = udpgate->block;
+	crowket_t* pack = udpgate->block;
 	udpgate->block = NULL;
 
 	crow_travel(pack);
@@ -66,10 +66,10 @@ crow_gw_t* crow_create_udpgate(uint16_t port, uint8_t id) {
 	return &g->gw;
 }
 
-void crow_udpgate_send(crow_gw_t* g, crow_packet_t* pack)  {
+void crow_udpgate_send(crow_gw_t* g, crowket_t* pack)  {
 	crow_udpgate_t* udpgate = (crow_udpgate_t*) g;
-	uint32_t* addr = (uint32_t*)(crow_packet_stageptr(pack) + 1);
-	uint16_t* port = (uint16_t*)(crow_packet_stageptr(pack) + 5);
+	uint32_t* addr = (uint32_t*)(crowket_stageptr(pack) + 1);
+	uint16_t* port = (uint16_t*)(crowket_stageptr(pack) + 5);
 
 	struct sockaddr_in 	ipaddr;
 	socklen_t iplen = sizeof(struct sockaddr_in);

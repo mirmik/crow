@@ -11,7 +11,7 @@
 typedef struct crow_node {
 	struct dlist_head lnk;
 	uint16_t id;
-	void (*incoming_packet)(struct crow_node* node, crow_packet_t* pack);
+	void (*incoming_packet)(struct crow_node* node, crowket_t* pack);
 } crow_node_t;
 
 typedef struct crow_subheader {
@@ -25,8 +25,8 @@ static inline void crow_node_init(crow_node_t* node) {
 	dlist_init(&node->lnk); 
 }
 
-static inline crow_subheader_t* crow_get_subheader(crow_packet_t* pack) {
-	return (crow_subheader_t*) crow_packet_dataptr(pack);
+static inline crow_subheader_t* crow_get_subheader(crowket_t* pack) {
+	return (crow_subheader_t*) crowket_dataptr(pack);
 }
 
 /*static inline gxx::buffer crow_get_datasect(crow::packet* pack) {

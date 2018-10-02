@@ -21,7 +21,7 @@ typedef struct crow_gw {
 } crow_gw_t;
 	
 struct crow_gw_operations {
-	void(*send)(struct crow_gw*, crow_packet_t*);
+	void(*send)(struct crow_gw*, crowket_t*);
 	void(*nblock_onestep)(struct crow_gw*);
 };
 

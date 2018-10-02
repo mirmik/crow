@@ -9,9 +9,9 @@
 #include <crow/gateway.h>
 #include <gxx/syslock.h>
 
-crow_packet_t* crow_create_packet(crow_gw_t* ingate, size_t addrsize, size_t datasize) { 
+crowket_t* crow_create_packet(crow_gw_t* ingate, size_t addrsize, size_t datasize) { 
 	system_lock();
-	crow_packet_t* pack = crow_allocate_packet(addrsize + datasize);
+	crowket_t* pack = crow_allocate_packet(addrsize + datasize);
 	system_unlock();
 	
 	pack -> header.flen = sizeof(crow_header_t) + addrsize + datasize;
@@ -30,7 +30,7 @@ crow_packet_t* crow_create_packet(crow_gw_t* ingate, size_t addrsize, size_t dat
 	return pack;
 }
 
-void crow_packet_initialization(crow_packet_t* pack, crow_gw_t* ingate) { 
+void crowket_initialization(crowket_t* pack, crow_gw_t* ingate) { 
 	dlist_init(&pack->lnk);
 	dlist_init(&pack->ulnk);
 	pack -> ingate = ingate;
@@ -38,7 +38,7 @@ void crow_packet_initialization(crow_packet_t* pack, crow_gw_t* ingate) {
 	pack -> flags = 0;
 }
 
-void crow_utilize(crow_packet_t* pack) {
+void crow_utilize(crowket_t* pack) {
 	system_lock();
 	//dlist_del(&pack->lnk); // Очищается в tower_release
 	dlist_del(&pack->ulnk);
@@ -46,17 +46,17 @@ void crow_utilize(crow_packet_t* pack) {
 	system_unlock();
 }
 
-void crow_packet_revert_g(crow_packet_t* pack, uint8_t gateindex) {
-	*crow_packet_stageptr(pack) = gateindex;
+void crowket_revert_g(crowket_t* pack, uint8_t gateindex) {
+	*crowket_stageptr(pack) = gateindex;
 	++pack->header.stg;
 }
 
-void crow_packet_revert(crow_packet_t* pack, struct iovec* vec, size_t veclen) {
+void crowket_revert(crowket_t* pack, struct iovec* vec, size_t veclen) {
 	struct iovec* it = vec + veclen - 1;
 	struct iovec* eit = vec - 1;
 
 	size_t sz = 0;
-	char* tgt = crow_packet_stageptr(pack);
+	char* tgt = crowket_stageptr(pack);
 
 	for (; it != eit; --it) {
 		sz += it->iov_len;

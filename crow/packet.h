@@ -43,7 +43,7 @@ typedef struct crow_header {
 	uint8_t 	qos; ///< Поле качества обслуживания.
 } G1_PACKED crow_header_t;
 
-typedef struct crow_packet {
+typedef struct crowket {
 	struct dlist_head 	lnk; ///< Для подключения в списки башни crow.
 	struct dlist_head 	ulnk; ///< Для подключения в список пользователя и зависимых протоколов.
 	struct crow_gw* 	ingate; ///< gate, которым пакет прибыл в систему.
@@ -58,62 +58,62 @@ typedef struct crow_packet {
 		};
 	};
 	struct crow_header header;
-} G1_PACKED crow_packet_t;
+} G1_PACKED crowket_t;
 
 
 __BEGIN_DECLS
 
-static inline uint8_t* crow_packet_addrptr(struct crow_packet* pack) { 
+static inline uint8_t* crowket_addrptr(struct crowket* pack) { 
 	return (uint8_t*)(&pack->header + 1); 
 }
 
-static inline char* crow_packet_dataptr(struct crow_packet* pack) { 
+static inline char* crowket_dataptr(struct crowket* pack) { 
 	return (char*)(&pack->header + 1) + pack->header.alen; 
 }
 
-#define crow_packet_stageptr(pack) ((uint8_t*)(&pack->header + 1) + pack->header.stg)
-//static inline uint8_t* crow_packet_stageptr(struct crow_packet* pack) { 
+#define crowket_stageptr(pack) ((uint8_t*)(&pack->header + 1) + pack->header.stg)
+//static inline uint8_t* crowket_stageptr(struct crowket* pack) { 
 //	return (uint8_t*)(&pack->header + 1) + pack->header.stg; 
 //}
 
-static inline char* crow_packet_endptr(struct crow_packet* pack) { 
+static inline char* crowket_endptr(struct crowket* pack) { 
 	return (char*)(&pack->header) + pack->header.flen; 
 }
 
-static inline size_t crow_packet_addrsize(struct crow_packet* pack) { 
+static inline size_t crowket_addrsize(struct crowket* pack) { 
 	return pack->header.alen; 
 }
 
-static inline size_t crow_packet_blocksize(struct crow_packet* pack) { 
+static inline size_t crowket_blocksize(struct crowket* pack) { 
 	return pack->header.flen; 
 }
 
-static inline size_t crow_packet_datasize(struct crow_packet* pack) { 
+static inline size_t crowket_datasize(struct crowket* pack) { 
 	return pack->header.flen - pack->header.alen - sizeof(crow_header_t); 
 }
 
-void crow_packet_revert_g(struct crow_packet* pack, uint8_t gateindex);
-void crow_packet_revert(struct crow_packet* pack, struct iovec* vec, size_t veclen);
+void crowket_revert_g(struct crowket* pack, uint8_t gateindex);
+void crowket_revert(struct crowket* pack, struct iovec* vec, size_t veclen);
 
 ///
-void crow_packet_initialization(struct crow_packet* pack, struct crow_gw* ingate); 
+void crowket_initialization(struct crowket* pack, struct crow_gw* ingate); 
 
 /**
  * Выделить память для пакета.
  * 
- * Выделяет adlen + sizeof(crow_packet_t) байт
+ * Выделяет adlen + sizeof(crowket_t) байт
  * @param adlen Суммарная длина адреса и данных в выделяемом пакете. 
  */ 
-crow_packet_t* crow_allocate_packet(size_t adlen); 
+crowket_t* crow_allocate_packet(size_t adlen); 
 
 ///Вернуть память выделенную для пакета pack
-void crow_deallocate_packet(crow_packet_t* pack);
+void crow_deallocate_packet(crowket_t* pack);
 
 ///
-crow_packet_t* crow_create_packet(struct crow_gw* ingate, size_t addrsize, size_t datasize); 
+crowket_t* crow_create_packet(struct crow_gw* ingate, size_t addrsize, size_t datasize); 
 
 ///
-void crow_utilize(crow_packet_t* pack);
+void crow_utilize(crowket_t* pack);
 
 __END_DECLS
 
