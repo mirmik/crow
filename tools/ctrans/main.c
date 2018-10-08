@@ -1,9 +1,11 @@
 #include <crow/tower.h>
 #include <crow/gates/udpgate.h>
+#include <crow/gates/serial_gstuff.h>
 #include <gxx/util/hexer.h>
 #include <gxx/util/dstring.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <getopt.h>
@@ -73,6 +75,7 @@ void* console_listener(void* arg) {
 }
 
 uint16_t udpport = 0;
+char* serial_port = NULL;
 //std::string serial_port;
 //int serialfd;
 
@@ -102,7 +105,10 @@ int main(int argc, char* argv[]) {
 		switch (opt) {
 			case 'q': qos = atoi(optarg); break;
 			case 'u': udpport = atoi(optarg); break;
-			//case 'S': serial_port = optarg; break;
+			case 'S':
+				serial_port = (char*) malloc(strlen(optarg) + 1); 
+				strcpy(serial_port, optarg); 
+				break;
 			case 's': sniffer = true; break;
 			case 'v': packmon = true; break;
 			case 'e': echo = true; break;
@@ -129,6 +135,13 @@ int main(int argc, char* argv[]) {
 		//auto* serialgate = new crow::serial_gstuff_gate(ser);
 		//crow_link_gate(serialgate, 42);
 	}*/
+
+	if (serial_port != NULL) {
+		if (crow_create_serial_gstuff(serial_port, 115200, 42) == NULL) {
+			perror("serialgate open");
+			exit(-1);
+		}				
+	}
 
 	if (optind < argc) {
 		addrsize = hexer(addr, 128, argv[optind], strlen(argv[optind]));

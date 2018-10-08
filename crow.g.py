@@ -29,9 +29,9 @@ licant.modules.module("crow.udpgate",
 	]
 )
 
-licant.modules.module("crow.serialgate",
+licant.modules.module("crow.serial_gstuff",
 	sources = [
-		"crow/gates/serialgate.cpp"
+		"crow/gates/serial_gstuff.c"
 	]
 )
 

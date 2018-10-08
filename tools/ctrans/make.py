@@ -17,7 +17,7 @@ application("ctrans",
 		("crow.time", "chrono"),
 	
 		("crow.udpgate"),
-#		("crow.serialgate"),
+		("crow.serial_gstuff"),
 		
 		("gxx", "posix"),
 		("gxx.inet", "posix"),
