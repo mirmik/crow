@@ -8,6 +8,22 @@
 #include <crow/tower.h>
 #include <crow/gateway.h>
 
+struct crow_serial_gstuff {
+	struct crow_gw gw;
+	struct crowket * rpack;
+
+	struct gstuff_automate recver;
+	struct gstuff_sender sender;
+
+} crow_serial_gstuff;
+
+__BEGIN_DECLS
+
+//void crow_serial_gstuff_open(struct crow_serial_gstuff* gw, uint16_t port);
+crow_gw_t* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id);
+
+__END_DECLS
+
 /*#include <crow/gateway.h>
 #include <gxx/gstuff/sender.h>
 #include <gxx/gstuff/automate.h>
@@ -81,19 +97,5 @@ namespace crow {
 	};
 }*/
 
-struct crow_serial_gstuff {
-	struct crow_gw gw;
-	void* privdata;
-} crow_serial_gstuff;
-
-__BEGIN_DECLS
-
-void crow_serial_gstuff_open(struct crow_serial_gstuff* gw, uint16_t port);
-crow_gw_t* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id);
-
-//void crow_serial_gstuff_send(crow_gw_t* gw, crowket_t* pack);
-//void crow_serial_gstuff_nblock_onestep(crow_gw_t* gw);
-
-__END_DECLS
 
 #endif
