@@ -2,20 +2,13 @@
 	@file
 */
 
-#ifndef G1_GATES_SERIAL_GSTUFF_H
-#define G1_GATES_SERIAL_GSTUFF_H
+#ifndef CROW_GATES_SERIAL_GSTUFF_H
+#define CROW_GATES_SERIAL_GSTUFF_H
 
-#include <crow/tower.h>
+#include <sys/cdefs.h>
+#include <stdint.h>
+
 #include <crow/gateway.h>
-
-struct crow_serial_gstuff {
-	struct crow_gw gw;
-	struct crowket * rpack;
-
-	struct gstuff_automate recver;
-	struct gstuff_sender sender;
-
-} crow_serial_gstuff;
 
 __BEGIN_DECLS
 

@@ -1,5 +1,19 @@
 #include <crow/gates/serial_gstuff.h>
 
+#include <crow/tower.h>
+
+#include <gxx/gstuff/cautomate.h>
+#include <gxx/gstuff/csender.h>
+
+struct crow_serial_gstuff {
+	struct crow_gw gw;
+	struct crowket * rpack;
+
+	struct gstuff_automate recver;
+	struct gstuff_sender sender;
+
+} crow_serial_gstuff;
+
 void callback_handler(char * buf, int len);
 
 struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id) 
@@ -58,7 +72,7 @@ init_recv(struct crow_serial_gstuff* g) {
 
 void crow_serial_gstuff_nblock_onestep(struct crow_gw* gw) 
 {
-	if (rpack == nullptr) {
+/*	if (rpack == nullptr) {
 		init_recv();
 	}
 
@@ -68,7 +82,7 @@ void crow_serial_gstuff_nblock_onestep(struct crow_gw* gw)
 	if (len == 1) {
 		//dprhex(c); dpr("\t"); gxx::println(gxx::dstring(&c, 1));
 		recver.newchar(c);
-	}
+	}*/
 }
 
 const struct crow_gw_operations crow_serial_gstuff_ops = {
