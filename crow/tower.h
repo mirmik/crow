@@ -38,7 +38,7 @@ static inline void crow_link_gate(struct crow_gw* gate, uint8_t id) {
 } 
 
 
-struct crow_gw* crow_find_target_gateway(const crowket_t* pack);
+struct crow_gw* crow_find_target_gateway(crowket_t* pack);
 
 void crow_release(crowket_t* pack);
 void crow_tower_release(crowket_t* pack);

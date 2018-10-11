@@ -33,7 +33,7 @@ typedef struct crow_header {
 			uint8_t vaddr : 1; ///< Поле указатель виртуального адреса @todo
 			uint8_t noexec : 1; ///< Флаг предотвращает исполнение пакета. Используется для запросов существования
 			uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
-		};
+		} f;
 	};
 	uint16_t 	flen; ///< Полная длина пакета
 	uint8_t 	alen; ///< Длина поля адреса.
@@ -55,7 +55,7 @@ typedef struct crowket {
 		struct {
 			uint8_t released_by_world : 1;
 			uint8_t released_by_tower : 1;
-		};
+		} f;
 	};
 	struct crow_header header;
 } G1_PACKED crowket_t;
@@ -71,10 +71,9 @@ static inline char* crowket_dataptr(struct crowket* pack) {
 	return (char*)(&pack->header + 1) + pack->header.alen; 
 }
 
-#define crowket_stageptr(pack) ((uint8_t*)(&pack->header + 1) + pack->header.stg)
-//static inline uint8_t* crowket_stageptr(struct crowket* pack) { 
-//	return (uint8_t*)(&pack->header + 1) + pack->header.stg; 
-//}
+static inline uint8_t* crowket_stageptr(struct crowket* pack) { 
+	return (uint8_t*)(&pack->header + 1) + pack->header.stg; 
+}
 
 static inline char* crowket_endptr(struct crowket* pack) { 
 	return (char*)(&pack->header) + pack->header.flen; 

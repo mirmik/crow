@@ -16,9 +16,9 @@ void crow_print_to(gxx::io::ostream& out, crowket_t* pack) {
 		"released:{}"
 		")", 
 		pack->header.qos,
-		(uint8_t)pack->header.ack, 
+		(uint8_t)pack->header.f.ack, 
 		pack->header.alen, 
-		(uint8_t)pack->header.type, 
+		(uint8_t)pack->header.f.type, 
 		gxx::hexascii_encode((const uint8_t*)crowket_addrptr(pack), pack->header.alen), 
 		pack->header.stg, 
 		gxx::dstring(crowket_dataptr(pack), crowket_datasize(pack)), 

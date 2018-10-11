@@ -24,7 +24,7 @@ namespace crow {
 	};
 
 	struct channel : public crow::node {
-		/*dlist_head lnk;
+		dlist_head lnk;
 		uint16_t id;*/
 	/*	uint16_t rid;
 		void * raddr_ptr;

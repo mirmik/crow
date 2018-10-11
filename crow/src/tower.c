@@ -38,7 +38,7 @@ void crow_enable_diagnostic() {
 	crow_traveling_handler = __diagnostic_traveling_handler;
 }
 
-crow_gw_t* crow_find_target_gateway(const crowket_t* pack) {
+crow_gw_t* crow_find_target_gateway(crowket_t* pack) {
 	uint8_t gidx = *crowket_stageptr(pack);
 	crow_gw_t* g;
 	dlist_for_each_entry(g, &crow_gateways, lnk) {
@@ -50,8 +50,8 @@ crow_gw_t* crow_find_target_gateway(const crowket_t* pack) {
 void crow_release(crowket_t* pack) {
 	system_lock();
 
-	if (pack->released_by_tower) crow_utilize(pack);
-	else pack->released_by_world = true;
+	if (pack->f.released_by_tower) crow_utilize(pack);
+	else pack->f.released_by_world = true;
 
 	system_unlock();
 }
@@ -61,8 +61,8 @@ void crow_tower_release(crowket_t* pack) {
 	
 	dlist_del(&pack->lnk);
 	
-	if (pack->released_by_world) crow_utilize(pack);
-	else pack->released_by_tower = true;
+	if (pack->f.released_by_world) crow_utilize(pack);
+	else pack->f.released_by_tower = true;
 	system_unlock();
 }
 
@@ -114,7 +114,7 @@ void crow_travel_error(crowket_t* pack) {
 }
 
 void crow_incoming_handler(crowket_t* pack) {
-	switch(pack->header.type) {
+	switch(pack->header.f.type) {
 		case G1_G0TYPE: crow_incoming_node_packet(pack); break;
 		case G1_G3TYPE: 
 			if (crow_pubsub_handler) crow_pubsub_handler(pack); 
@@ -135,8 +135,8 @@ void crow_do_travel(crowket_t* pack) {
 		//Ветка доставленного пакета.
 		crow_revert_address(pack);
 
-		if (pack->header.ack) {
-			switch(pack->header.type) {
+		if (pack->header.f.ack) {
+			switch(pack->header.f.type) {
 				case G1_ACK_TYPE: utilize_from_outers(pack); break;
 				case G1_ACK21_TYPE: utilize_from_outers(pack); crow_send_ack2(pack); break;
 				case G1_ACK22_TYPE: qos_release_from_incoming(pack); break;
@@ -176,7 +176,7 @@ void crow_do_travel(crowket_t* pack) {
 			crow_tower_release(pack);
 		}
 
-		if (!pack->header.noexec) 
+		if (!pack->header.f.noexec) 
 		{
 			if (crow_user_incoming_handler) crow_user_incoming_handler(pack);
 			else crow_incoming_handler(pack);
@@ -204,7 +204,7 @@ void crow_do_travel(crowket_t* pack) {
 uint16_t __seqcounter = 0;
 void crow_transport(crowket_t* pack) {
 	pack->header.stg = 0;
-	pack->header.ack = 0;
+	pack->header.f.ack = 0;
 	system_lock();
 	pack->header.seqid = __seqcounter++;
 	system_unlock();
@@ -214,7 +214,7 @@ void crow_transport(crowket_t* pack) {
 //void crow_send(crow_address& addr, const char* data, size_t len, uint8_t type, uint8_t qos, uint16_t ackquant) {
 void crow_send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant) {
 	crowket_t* pack = crow_create_packet(NULL, asize, dsize);
-	pack->header.type = type;
+	pack->header.f.type = type;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
 	//if (addr) 
@@ -233,7 +233,7 @@ void crow_send_v(const void* addr, uint8_t asize, const struct iovec* vec, size_
 	}
 
 	crowket_t* pack = crow_create_packet(NULL, asize, dsize);
-	pack->header.type = type;
+	pack->header.f.type = type;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
 	//if (addr) 
@@ -275,19 +275,19 @@ void crow_revert_address(crowket_t* pack) {
 
 void crow_send_ack(crowket_t* pack) {
 	crowket_t* ack = crow_create_packet(NULL, pack->header.alen, 0);
-	ack->header.type = pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
-	ack->header.ack = 1;
+	ack->header.f.type = pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
+	ack->header.f.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
 	ack->header.seqid = pack->header.seqid;
 	memcpy(crowket_addrptr(ack), crowket_addrptr(pack), pack->header.alen);
-	ack->released_by_world = true;
+	ack->f.released_by_world = true;
 	crow_travel(ack);
 }
 
 void crow_send_ack2(crowket_t* pack) {
 	crowket_t* ack = crow_create_packet(NULL, pack->header.alen, 0);
-	ack->header.type = G1_ACK22_TYPE;
-	ack->header.ack = 1;
+	ack->header.f.type = G1_ACK22_TYPE;
+	ack->header.f.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
 	ack->header.seqid = pack->header.seqid;
 	memcpy(crowket_addrptr(ack), crowket_addrptr(pack), pack->header.alen);

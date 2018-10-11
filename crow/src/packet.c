@@ -56,11 +56,11 @@ void crowket_revert(crowket_t* pack, struct iovec* vec, size_t veclen) {
 	struct iovec* eit = vec - 1;
 
 	size_t sz = 0;
-	char* tgt = crowket_stageptr(pack);
+	uint8_t* tgt = crowket_stageptr(pack);
 
 	for (; it != eit; --it) {
 		sz += it->iov_len;
-		char* ptr = it->iov_base + it->iov_len;
+		char* ptr = (char*)it->iov_base + it->iov_len;
 		char* eptr = it->iov_base;
 		while(ptr != eptr) 
 			*tgt++ = *--ptr;
