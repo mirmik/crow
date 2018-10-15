@@ -9,6 +9,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 
+#include <termios.h>
+
 struct crow_serial_gstuff {
 	int fd;
 
@@ -22,6 +24,8 @@ struct crow_serial_gstuff {
 
 struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id) 
 {
+	int ret;
+
 	struct crow_serial_gstuff* g = (struct crow_serial_gstuff*) 
 		malloc(sizeof(struct crow_serial_gstuff));
 	
@@ -29,6 +33,12 @@ struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, u
 	if (g->fd < 0) {
 		perror("serial::open");
 		exit(0);
+	}
+
+	struct termios tattr;
+	ret = tcgetattr(g->fd, &tattr);
+	if (ret) {
+		printf("%s\n", strerror(ret));
 	}
 
 	//crow_serialgate_open(g, port); // TODO: should return NULL on error
