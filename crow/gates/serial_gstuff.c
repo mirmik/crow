@@ -2,42 +2,52 @@
 
 #include <crow/tower.h>
 
-#include <gxx/gstuff/cautomate.h>
-#include <gxx/gstuff/csender.h>
+#include <gxx/gstuff/autorecv.h>
+#include <gxx/gstuff/gstuff.h>
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
 
 struct crow_serial_gstuff {
+	int fd;
+
 	struct crow_gw gw;
 	struct crowket * rpack;
 
-	struct gstuff_automate recver;
-	struct gstuff_sender sender;
+	struct gstuff_autorecv recver;
+	//struct gstuff_sender sender;
 
 } crow_serial_gstuff;
-
-void callback_handler(char * buf, int len);
 
 struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id) 
 {
 	struct crow_serial_gstuff* g = (struct crow_serial_gstuff*) 
 		malloc(sizeof(struct crow_serial_gstuff));
 	
+	g->fd = open(path, O_RDWR);
+	if (g->fd < 0) {
+		perror("serial::open");
+		exit(0);
+	}
+
 	//crow_serialgate_open(g, port); // TODO: should return NULL on error
 	g->rpack = NULL;
-	gstuff_automate_init(buf);
+	//gstuff_autorecv_init(&g->recver, buf);
 
 	crow_link_gate(&g->gw, id);
 	
 	return &g->gw;
 }
 
-void callback_handler(char * buf, int len) {
-	struct crowket * block = rpack;
+void callback_handler(void* priv, int sts, char * buf, int len) {
+	/*struct crowket * block = rpack;
 	init_recv();
 
 	block->revert_stage(id);
 
 	crowket_initialization(block, this);
-	crow_travel(block);
+	crow_travel(block);*/
 }
 
 void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack) 
@@ -55,7 +65,7 @@ void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack)
 	ser->write((uint8_t*)str.data(), str.size());
 	mtx.unlock();
 */
-	crow_return_to_tower(pack);
+	crow_return_to_tower(pack, CROW_SENDED);
 }
 
 /*void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack) 
@@ -65,8 +75,8 @@ void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack)
 
 static inline void 
 init_recv(struct crow_serial_gstuff* g) {
-	g->rpack = (struct crowket*) malloc(128 + sizeof(struct crowket) - sizeof(struct crowket_header));
-	gstuff_automat_init(&g->recver, (char*)&rpack->header, 128);
+	g->rpack = (struct crowket*) malloc(128 + sizeof(struct crowket) - sizeof(struct crow_header));
+//	gstuff_automat_init(&g->recver, (char*)&g->rpack->header, 128);
 	//recver.init(gxx::buffer((char*)&rpack->header, 128));
 }
 
