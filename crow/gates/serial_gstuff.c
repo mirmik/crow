@@ -11,6 +11,8 @@
 
 #include <termios.h>
 
+const struct crow_gw_operations crow_serial_gstuff_ops;
+
 struct crow_serial_gstuff {
 	int fd;
 
@@ -41,16 +43,19 @@ struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, u
 	struct crow_serial_gstuff* g = (struct crow_serial_gstuff*) 
 		malloc(sizeof(struct crow_serial_gstuff));
 	
-	g->fd = open(path, O_RDWR);
+	g->fd = open(path, O_RDWR | O_NOCTTY);
 	if (g->fd < 0) {
 		perror("serial::open");
 		exit(0);
 	}
 
+	//dprf("%d, %s\n", g->fd, path);
+
 	struct termios tattr, orig;
 	ret = tcgetattr(g->fd, &orig);
-	if (ret) {
-		printf("%s\n", strerror(ret));
+	if (ret < 0) {
+		perror("serial::tcgetattr");
+		exit(0);
 	}
 
 	tattr = orig;  /* copy original and then modify below */
@@ -75,19 +80,23 @@ struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, u
     /* put terminal in raw mode after flushing */
     ret = tcsetattr(g->fd,TCSAFLUSH,&tattr); 
 	if (ret < 0) {
-		printf("%s\n", strerror(ret));
+		perror("serial::tcsetattr");
 	}
 
 	g->rpack = NULL;
+	g->gw.ops = &crow_serial_gstuff_ops;
 	crow_link_gate(&g->gw, id);
 
 	gstuff_autorecv_init(&g->recver, callback_handler, g);
 	
+	//dprln("crow_create_serial_gstuff... exit");
 	return &g->gw;
 }
 
 void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack) 
 {
+	dprln("crow_serial_gstuff_send");
+
 	char buffer[pack->header.flen * 2 + 3];
 
 	struct crow_serial_gstuff* g = mcast_out(gw, struct crow_serial_gstuff, gw);
@@ -115,12 +124,6 @@ void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack)
 
 }*/
 
-static inline void 
-init_recv(struct crow_serial_gstuff* g) {
-	g->rpack = (struct crowket*) malloc(128 + sizeof(struct crowket) - sizeof(struct crow_header));
-//	gstuff_automat_init(&g->recver, (char*)&g->rpack->header, 128);
-	//recver.init(gxx::buffer((char*)&rpack->header, 128));
-}
 
 void crow_serial_gstuff_nblock_onestep(struct crow_gw* gw) 
 {

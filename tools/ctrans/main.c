@@ -23,6 +23,7 @@ bool raw;
 bool packmon;
 bool sniffer;
 bool echo;
+bool info;
 
 void incoming_handler(crowket_t* pack) {
 	dpr("incoming: "); 
@@ -94,14 +95,15 @@ int main(int argc, char* argv[]) {
 		{"qos", required_argument, NULL, 'q'}, //qos отправляемых сообщений. 0 по умолчанию
 		{"serial", required_argument, NULL, 'S'}, //serial...
 		{"sniffer", no_argument, NULL, 's'}, //Вывод проходных пакетов.
-		{"pack", no_argument, NULL, 'v'}, //Подробная информация о входящих пакетах.
+		{"pack", no_argument, NULL, 'p'}, //Подробная информация о входящих пакетах.
 		{"echo", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
+		{"info", no_argument, NULL, 'i'}, //Активирует информацию о вратах.
 		{NULL,0,NULL,0}
 	};
 
     int long_index =0;
 	int opt= 0;
-	while ((opt = getopt_long(argc, argv, "uvSsedq", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "uvSsedqip", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'q': qos = atoi(optarg); break;
 			case 'u': udpport = atoi(optarg); break;
@@ -110,8 +112,9 @@ int main(int argc, char* argv[]) {
 				strcpy(serial_port, optarg); 
 				break;
 			case 's': sniffer = true; break;
-			case 'v': packmon = true; break;
+			case 'p': packmon = true; break;
 			case 'e': echo = true; break;
+			case 'i': info = true; break;
 			case 0: break;
 		}
 	}
@@ -152,7 +155,17 @@ int main(int argc, char* argv[]) {
 	} else {
 		addrsize = 0;
 	}	
-		
+
+	if (info) 
+	{
+		printf("gates:\n");
+		printf("\tgate %d: udp port %d\n", G1_UDPGATE, udpport);
+		if (serial_port != 0) 
+			printf("\tgate %d: serial port %s\n", 42, serial_port);
+		//printf("modes:\n");
+
+	}
+
 	if (pthread_create(&console_thread, NULL, console_listener, NULL)) {
 		fprintf(stderr, "Error creating thread\n");
 		return 1;
