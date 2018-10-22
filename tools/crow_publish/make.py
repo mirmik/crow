@@ -16,6 +16,8 @@ application("crow_publish",
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
 		
+		("crow.udpgate"),
+		
 		("gxx", "posix"),
 		("gxx.trent"),
 		("gxx.inet", "posix"),
@@ -23,7 +25,8 @@ application("crow_publish",
 		("gxx.dprint", "cout"),
 		("gxx.syslock", "mutex"),
 	],
-	cxx_flags = ""
+	cxx_flags = "-pedantic",
+	cc_flags = "-pedantic",
 )
 
 @licant.routine

@@ -48,7 +48,7 @@ void traveling_handler(crowket_t* pack) {}
 void transit_handler(crowket_t* pack) {
 	if (sniffer) {
 		dpr("transit: ");
-		crow_print(pack); 
+		crow_println(pack); 
 	}
 }
 
