@@ -61,7 +61,8 @@ void undelivered_handler(struct crowket* pack)
 				+ sizeof(crow_subheader_pubsub_data), shps->thmsz);
 			auto& thm = themes[theme];
 			thm.subs.erase(crow::g3_subscriber(crowket_addrptr(pack), pack->header.alen, pack->header.qos, pack->header.ackquant));
-			gxx::fprintln("G3_REFUSE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(crowket_addrptr(pack), pack->header.alen));
+			if (brocker_info)
+				gxx::fprintln("g3_refuse: t:{}, r:{}", theme, gxx::hexascii_encode(crowket_addrptr(pack), pack->header.alen));
 		}
 	}
 
@@ -103,7 +104,7 @@ int main(int argc, char* argv[])
 
 	int long_index = 0;
 	int opt = 0;
-	while ((opt = getopt_long(argc, argv, "usd", long_options, &long_index)) != -1)
+	while ((opt = getopt_long(argc, argv, "usdi", long_options, &long_index)) != -1)
 	{
 		switch (opt)
 		{

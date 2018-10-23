@@ -71,7 +71,7 @@ void crow_tower_release(crowket_t* pack)
 
 	//Скорее всего это поле должно освобождаться без инициализации.
 	//Инициализируем для последуещего освобождения в utilize
-	dlist_del_init(&pack->lnk); 
+	dlist_del_init(&pack->lnk);
 
 	if (pack->f.released_by_world) crow_utilize(pack);
 	else pack->f.released_by_tower = true;
@@ -98,7 +98,7 @@ void utilize_from_outers(crowket_t* pack)
 void qos_release_from_incoming(crowket_t* pack)
 {
 	crowket_t* it;
-	dlist_for_each_entry(it, &crow_outters, lnk)
+	dlist_for_each_entry(it, &crow_incoming, lnk)
 	{
 		if (it->header.seqid == pack->header.seqid &&
 		        pack->header.alen == it->header.alen &&
@@ -169,10 +169,18 @@ void crow_do_travel(crowket_t* pack)
 		{
 			switch (pack->header.f.type)
 			{
-				case G1_ACK_TYPE: utilize_from_outers(pack); break;
-				case G1_ACK21_TYPE: utilize_from_outers(pack); crow_send_ack2(pack); break;
-				case G1_ACK22_TYPE: qos_release_from_incoming(pack); break;
-				default: break;
+				case G1_ACK_TYPE:
+					utilize_from_outers(pack);
+					break;
+				case G1_ACK21_TYPE:
+					utilize_from_outers(pack);
+					crow_send_ack2(pack);
+					break;
+				case G1_ACK22_TYPE:
+					qos_release_from_incoming(pack);
+					break;
+				default:
+					break;
 			}
 			crow_utilize(pack);
 			return;
@@ -412,6 +420,7 @@ void crow_onestep()
 			else
 			{
 				pack->last_request_time = curtime;
+				dprln("crow_resend_ack");
 				crow_send_ack(pack);
 			}
 		}

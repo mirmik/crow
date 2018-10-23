@@ -9,6 +9,8 @@
 #include <gxx/print.h>
 #include <gxx/print/stdprint.h>
 
+extern bool brocker_info;
+
 void brocker_publish(const std::string& theme, const std::string& data);
 void g3_brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, uint8_t qos, uint16_t ackquant);
 

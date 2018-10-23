@@ -2,14 +2,16 @@
 #include <crow/pubsub.h>
 #include <sys/uio.h>
 #include <gxx/print.h>
+#include <gxx/util/string.h>
 
 std::unordered_map<std::string, crow::theme> themes;
+bool brocker_info = false;
 
 void brocker_publish(const std::string& theme, const std::string& data)
 {
-	//gxx::println("brocker_publish");
-	//gxx::println("theme: ", theme);
-	//gxx::println("data: ", data);
+	if (brocker_info) {
+		gxx::fprintln("publish: t:{} d:{}", theme, gxx::dstring(data));
+	}
 
 	try
 	{
@@ -25,14 +27,14 @@ void brocker_publish(const std::string& theme, const std::string& data)
 
 void g3_brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, uint8_t qos, uint16_t ackquant)
 {
-	//gxx::println("add subscribe");
+	if (brocker_info) {
+		gxx::fprintln("g3_subscribe: t:{} f:{}", theme, gxx::hexascii_encode(raddr, rlen));
+	}
 
 	if (themes.count(theme) == 0)
 	{
 		themes[theme] = crow::theme(theme);
 	}
-
-	GXX_PRINT(theme);
 
 	auto& thm = themes[theme];
 	thm.subs.emplace(raddr, rlen, qos, ackquant);
@@ -60,3 +62,4 @@ void crow::theme::publish(const std::string& data)
 		crow_send_v(sub.host, sub.hlen, vec, 4, G1_G3TYPE, sub.qos, sub.ackquant);
 	}
 }
+
