@@ -40,7 +40,7 @@ void crowket_initialization(crowket_t* pack, crow_gw_t* ingate) {
 
 void crow_utilize(crowket_t* pack) {
 	system_lock();
-	//dlist_del(&pack->lnk); // Очищается в tower_release
+	dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
 	dlist_del(&pack->ulnk);
 	crow_deallocate_packet(pack);
 	system_unlock();

@@ -24,6 +24,7 @@ bool packmon;
 bool sniffer;
 bool echo;
 bool info;
+bool debug;
 
 void incoming_handler(crowket_t* pack) {
 	dpr("incoming: "); 
@@ -98,6 +99,7 @@ int main(int argc, char* argv[]) {
 		{"pack", no_argument, NULL, 'p'}, //Подробная информация о входящих пакетах.
 		{"echo", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
 		{"info", no_argument, NULL, 'i'}, //Активирует информацию о вратах.
+		{"debug", no_argument, NULL, 'd'}, //Активирует информацию о вратах.
 		{NULL,0,NULL,0}
 	};
 
@@ -115,6 +117,7 @@ int main(int argc, char* argv[]) {
 			case 'p': packmon = true; break;
 			case 'e': echo = true; break;
 			case 'i': info = true; break;
+			case 'd': debug = true; break;
 			case 0: break;
 		}
 	}
@@ -124,8 +127,8 @@ int main(int argc, char* argv[]) {
 		exit(-1);
 	}
 		
+	if (debug) crow_enable_diagnostic();
 	crow_user_incoming_handler = incoming_handler;
-	crow_traveling_handler = traveling_handler;
 	crow_transit_handler = transit_handler;
 	
 	/*if (!serial_port.empty()) {

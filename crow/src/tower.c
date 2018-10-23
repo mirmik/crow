@@ -69,7 +69,9 @@ void crow_tower_release(crowket_t* pack)
 {
 	system_lock();
 
-	dlist_del(&pack->lnk);
+	//Скорее всего это поле должно освобождаться без инициализации.
+	//Инициализируем для последуещего освобождения в utilize
+	dlist_del_init(&pack->lnk); 
 
 	if (pack->f.released_by_world) crow_utilize(pack);
 	else pack->f.released_by_tower = true;
@@ -352,7 +354,7 @@ void crow_onestep_travel_only()
 		bool empty = dlist_empty(&crow_travelled);
 		if (empty) break;
 		crowket_t* pack = dlist_first_entry(&crow_travelled, crowket_t, lnk);
-		dlist_del(&pack->lnk);
+		dlist_del_init(&pack->lnk);
 		system_unlock();
 		crow_do_travel(pack);
 	}

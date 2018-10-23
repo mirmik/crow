@@ -1,7 +1,7 @@
 /**
 	@file
 */
-
+/*
 #ifndef CROW_BROCKER_H
 #define CROW_BROCKER_H
 
@@ -19,3 +19,4 @@ int crow_brocker_init();
 __END_DECLS
 
 #endif
+*/

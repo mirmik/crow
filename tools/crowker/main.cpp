@@ -1,52 +1,23 @@
 #include <crow/tower.h>
-#include <crow/brocker.h>
+#include <crow/pubsub.h>
 #include <crow/gates/udpgate.h>
 //#include <thread>
 #include <getopt.h>
 #include <stdbool.h>
 
 #include <stdio.h>
+#include <string>
 
-//#include <unordered_map>
-//#include <gxx/print/stdprint.h>
+#include "brocker.h"
 
 int udpport = -1;
 bool sniffer_option = false;
-//std::unordered_map<std::string, crow::theme> themes;
 
 void sniffer_travel_handler(struct crowket* pack)
 {
 //	gxx::print("travel: ");
 //	crow::println(pack);
 }
-
-//void brocker_publish(const std::string& theme, const std::string& data) {
-/*	int subs = 0;
-
-	try {
-		auto& thm = themes.at(theme);
-		thm.publish(data);
-		subs = thm.subs.size();
-	} catch (std::exception ex) {
-		subs = 0;
-	}
-
-	gxx::fprintln("PUBLISH: (theme: {}, data: {}, subs: {})", theme, data, subs);
-*///}
-
-//void g3_brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, crow::QoS qos, uint16_t ackquant) {
-/*	crow::host host(raddr, rlen);
-
-	if (themes.count(theme) == 0) {
-		themes[theme] = crow::theme(theme);
-	}
-
-	auto& thm = themes[theme];
-	thm.subs.emplace(host, true, qos, ackquant);
-
-	gxx::fprintln("G3_SUBSCRIBE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(raddr, rlen));
-*///}
-
 
 void incoming_pubsub_packet(struct crowket* pack)
 {
@@ -59,16 +30,16 @@ void incoming_pubsub_packet(struct crowket* pack)
 		case PUBLISH:
 		{
 			dprln("PUBLISH");
-			struct crow_subheader_pubsub_data * shps_d = 
-				get_subheader_pubsub_data(pack);
-			//std::string theme(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_data), shps->thmsz);
-			//std::string data(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_data) + shps->thmsz, shps_d->datsz);
+			struct crow_subheader_pubsub_data * shps_d =
+			    get_subheader_pubsub_data(pack);
 			
-			brocker_publish(
-				crowket_pubsub_thmptr(pack), shps->thmsz,
-				crowket_pubsub_datptr(pack), shps_d->datsz
-			);
-		} 
+			dprln("PUBLISH");
+			auto theme = std::string(crowket_pubsub_thmptr(pack), shps->thmsz);
+			auto data = std::string(crowket_pubsub_datptr(pack), shps_d->datsz);
+			
+			dprln("PUBLISH");
+			brocker_publish(theme, data);
+		}
 		break;
 		case SUBSCRIBE:
 		{
@@ -76,7 +47,8 @@ void incoming_pubsub_packet(struct crowket* pack)
 			/*auto shps_c = crow::get_subheader_pubsub_control(pack);
 			std::string theme(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_control), shps->thmsz);
 			g3_brocker_subscribe(pack->addrptr(), pack->addrsize(), theme, shps_c->qos, shps_c->ackquant);
-		*/} 
+			*/
+		}
 		break;
 		default:
 		{

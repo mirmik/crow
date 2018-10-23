@@ -49,8 +49,7 @@ static inline char* crowket_pubsub_thmptr(struct crowket* pack)
 
 static inline char* crowket_pubsub_datptr(struct crowket* pack) 
 {
-
-	return crowket_pubsub_datptr(pack) + get_subheader_pubsub(pack)->thmsz;
+	return crowket_pubsub_thmptr(pack) + get_subheader_pubsub(pack)->thmsz;
 }
 //gxx::buffer pubsub_message_datasect(crowket_t* pack);
 
@@ -69,7 +68,7 @@ static inline gxx::buffer pubsub_data(crowket_t* pack) {
 void crow_publish_buffer(const char* theme, const void* data, size_t datsz, uint8_t qos, uint16_t acktime);
 void crow_publish(const char* theme, const char* data, uint8_t qos, uint16_t acktime);
 //void crow_subscribe(const void* theme, size_t thmsz, uint8_t qos);
-void crow_subscribe(const char* theme, uint8_t qos);
+void crow_subscribe(const char* theme, uint8_t qos, uint16_t acktime);
 
 void crow_set_publish_host(const uint8_t* hhost, size_t hsize);
 //void crow_set_publish_qos(crow::QoS qos);

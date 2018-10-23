@@ -32,25 +32,27 @@ void crow_publish_buffer(const char* theme, const void* data, size_t dlen, uint8
 void crow_publish(const char* theme, const char* data, uint8_t qos, uint16_t acktime) {
 	crow_publish_buffer(theme, data, strlen(data), qos, acktime);
 }
-/*
-void crow::subscribe(const void* theme, size_t thmsz, crow::QoS qos) {
-	crow::subheader_pubsub subps;
-	crow::subheader_pubsub_control subps_c;
 
-	subps.type = crow::frame_type::SUBSCRIBE;
+void crow_subscribe(const char* theme, uint8_t qos, uint16_t acktime) {
+	size_t thmsz = strlen(theme);
+
+	struct crow_subheader_pubsub subps;
+	struct crow_subheader_pubsub_control subps_c;
+
+	subps.type = SUBSCRIBE;
 	subps.thmsz = thmsz;
 	subps_c.qos = qos;
-	subps_c.ackquant = brocker_ackquant;
+	subps_c.ackquant = acktime;
 
-	gxx::iovec iov[4] = {
+	struct iovec iov[4] = {
 		{ &subps, sizeof(subps) },
 		{ &subps_c, sizeof(subps_c) },
-		{ theme, thmsz },
+		{ (void*)theme, thmsz },
 	};
 
-	crow::send(brocker_host.data, brocker_host.size, iov, 3, G1_G3TYPE, crow::QoS(2));
+	crow_send_v(brocker_host, brocker_host_len, iov, 3, G1_G3TYPE, qos, acktime);
 }
-
+/*
 void crow::subscribe(const char* theme, crow::QoS qos) {
 	crow::subscribe(theme, strlen(theme), qos);
 }
