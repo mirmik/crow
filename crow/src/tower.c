@@ -137,10 +137,10 @@ void crow_travel_error(crowket_t* pack)
 
 void crow_incoming_handler(crowket_t* pack)
 {
-	if (__diagnostic_enabled)
-	{
-		debug_print_line("incoming packet");
-	}
+//	if (__diagnostic_enabled)
+//	{
+//		debug_print_line("incoming packet");
+//	}
 
 	switch (pack->header.f.type)
 	{

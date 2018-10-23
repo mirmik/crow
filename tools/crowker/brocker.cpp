@@ -7,9 +7,9 @@ std::unordered_map<std::string, crow::theme> themes;
 
 void brocker_publish(const std::string& theme, const std::string& data)
 {
-	gxx::println("brocker_publish");
-	gxx::println("theme: ", theme);
-	gxx::println("data: ", data);
+	//gxx::println("brocker_publish");
+	//gxx::println("theme: ", theme);
+	//gxx::println("data: ", data);
 
 	try
 	{
@@ -18,27 +18,26 @@ void brocker_publish(const std::string& theme, const std::string& data)
 	}
 	catch (std::exception ex)
 	{
-		gxx::println("unres theme");
+		//gxx::println("unres theme");
 	}
 }
 
-/*
-void brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, crow::QoS qos, uint16_t ackquant) {
-	gxx::println("add subscribe");
 
-	crow::host host(raddr, rlen);
+void g3_brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, uint8_t qos, uint16_t ackquant)
+{
+	//gxx::println("add subscribe");
 
-	if (themes.count(theme) == 0) {
+	if (themes.count(theme) == 0)
+	{
 		themes[theme] = crow::theme(theme);
 	}
 
 	GXX_PRINT(theme);
 
 	auto& thm = themes[theme];
-	thm.subs.emplace(host, true, qos, ackquant);
+	thm.subs.emplace(raddr, rlen, qos, ackquant);
 }
 
-*/
 void crow::theme::publish(const std::string& data)
 {
 	struct crow_subheader_pubsub subps;

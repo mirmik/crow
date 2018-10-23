@@ -10,7 +10,7 @@
 #include <gxx/print/stdprint.h>
 
 void brocker_publish(const std::string& theme, const std::string& data);
-void brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, uint8_t qos, uint16_t ackquant);
+void g3_brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme, uint8_t qos, uint16_t ackquant);
 
 namespace crow
 {
@@ -71,5 +71,7 @@ namespace crow
 		void publish(const std::string& data);
 	};
 }
+
+extern std::unordered_map<std::string, crow::theme> themes;
 
 #endif

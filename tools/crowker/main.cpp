@@ -21,33 +21,26 @@ void sniffer_travel_handler(struct crowket* pack)
 
 void incoming_pubsub_packet(struct crowket* pack)
 {
-	dprln("incoming_pubsub_packet");
-
 	struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
 
 	switch (shps->type)
 	{
 		case PUBLISH:
 		{
-			dprln("PUBLISH");
 			struct crow_subheader_pubsub_data * shps_d =
 			    get_subheader_pubsub_data(pack);
-			
-			dprln("PUBLISH");
+
 			auto theme = std::string(crowket_pubsub_thmptr(pack), shps->thmsz);
 			auto data = std::string(crowket_pubsub_datptr(pack), shps_d->datsz);
-			
-			dprln("PUBLISH");
+
 			brocker_publish(theme, data);
 		}
 		break;
 		case SUBSCRIBE:
 		{
-			dprln("SUBSCRIBE");
-			/*auto shps_c = crow::get_subheader_pubsub_control(pack);
-			std::string theme(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_control), shps->thmsz);
-			g3_brocker_subscribe(pack->addrptr(), pack->addrsize(), theme, shps_c->qos, shps_c->ackquant);
-			*/
+			auto shps_c = get_subheader_pubsub_control(pack);
+			std::string theme(crowket_dataptr(pack) + sizeof(crow_subheader_pubsub) + sizeof(crow_subheader_pubsub_control), shps->thmsz);
+			g3_brocker_subscribe(crowket_addrptr(pack), crowket_addrsize(pack), theme, shps_c->qos, shps_c->ackquant);
 		}
 		break;
 		default:
@@ -60,19 +53,19 @@ void incoming_pubsub_packet(struct crowket* pack)
 
 void undelivered_handler(struct crowket* pack)
 {
-	/*	if (pack->header.type == G1_G3TYPE) {
-			auto shps = get_subheader_pubsub(pack);
+	if (pack->header.f.type == G1_G3TYPE) {
+		auto shps = get_subheader_pubsub(pack);
 
-			if (shps->type == crow::frame_type::PUBLISH) {
-				std::string theme(pack->dataptr() + sizeof(crow::subheader_pubsub) + sizeof(crow::subheader_pubsub_data), shps->thmsz);
-				auto& thm = themes[theme];
-				thm.subs.erase(crow::subscriber(crow::host(pack->addrptr(), pack->header.alen), true, pack->header.qos, pack->header.ackquant));
-				gxx::fprintln("G3_REFUSE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(pack->addrptr(), pack->header.alen));
-			}
+		if (shps->type == PUBLISH) {
+			std::string theme(crowket_dataptr(pack) + sizeof(crow_subheader_pubsub) 
+				+ sizeof(crow_subheader_pubsub_data), shps->thmsz);
+			auto& thm = themes[theme];
+			thm.subs.erase(crow::g3_subscriber(crowket_addrptr(pack), pack->header.alen, pack->header.qos, pack->header.ackquant));
+			gxx::fprintln("G3_REFUSE: (theme: {}, raddr: {})", theme, gxx::hexascii_encode(crowket_addrptr(pack), pack->header.alen));
 		}
+	}
 
-		crow::utilize(pack);
-	*/
+	crow_utilize(pack);
 }
 
 /*void crow::theme::publish(const std::string& data) {
@@ -117,6 +110,7 @@ int main(int argc, char* argv[])
 			case 'u': udpport = atoi(optarg); break;
 			case 'd': crow_enable_diagnostic(); break;
 			case 's': sniffer_option = true; break;
+			case 'i': brocker_info = true; break;
 			case 0: break;
 		}
 	}
