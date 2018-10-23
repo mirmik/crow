@@ -1,26 +1,37 @@
 import licant.modules
 
+licant.modules.module("crow.include",
+	include_paths=["."]
+)
+
 licant.modules.module("crow",
 	srcdir = "crow/src",
 	sources = [
-		"tower.cpp", 
-		"packet.cpp",
-		"node.cpp",
-		"channel.cpp",
-		"pubsub.cpp"
+		"tower.c", 
+		"packet.c",
+		"node.c",
+		"channel.c",
+		"pubsub.c",
+		"print.cpp",
 	],
 	include_paths=["."]
 )
 
 licant.modules.module("crow.allocator", "malloc",
 	sources = [
-		"crow/src/malloc_allocator.cpp"
+		"crow/src/allocation_malloc.c"
 	]
 )
 
 licant.modules.module("crow.udpgate",
 	sources = [
-		"crow/src/udpgate.cpp"
+		"crow/gates/udpgate.c"
+	]
+)
+
+licant.modules.module("crow.serial_gstuff",
+	sources = [
+		"crow/gates/serial_gstuff.c"
 	]
 )
 

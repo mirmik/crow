@@ -9,13 +9,15 @@ import os
 licant.libs.include("gxx")
 licant.libs.include("crow")
 
-application("crow_subscribe", 
+application("crow_subscribe",
 	sources = ["main.cpp"],
 	include_modules = [
 		("crow"),
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
-		
+
+		("crow.udpgate"),
+
 		("gxx", "posix"),
 		("gxx.trent"),
 		("gxx.inet", "posix"),

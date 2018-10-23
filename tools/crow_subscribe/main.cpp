@@ -9,77 +9,98 @@
 
 #include <gxx/trent/trent.h>
 #include <gxx/trent/gbson.h>
+#include <gxx/util/hexer.h>
 
-crow::udpgate ugate;
-int qos = 2;
+uint8_t crowker_addr[256];
+size_t crowker_len;
+
+uint8_t qos = 0;
+uint8_t acktime = 200;
 bool gbson_flag = false;
 
-void subscribe_handler(crow::packet* pack) {
-	auto thm = crow::pubsub_theme(pack);
-	auto dat = crow::pubsub_data(pack);
+void subscribe_handler(crowket* pack)
+{
+	struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
+	struct crow_subheader_pubsub_data * shps_d =
+	    get_subheader_pubsub_data(pack);
 
-	if (!gbson_flag) gxx::println(gxx::dstring(dat)); 
-	else {
+	auto theme = std::string(crowket_pubsub_thmptr(pack), shps->thmsz);
+	auto data = std::string(crowket_pubsub_datptr(pack), shps_d->datsz);
+
+	if (!gbson_flag)
+	{
+		gxx::println(gxx::dstring(data));
+	}
+	else
+	{
 		//std::string str(dat.data(), dat.size());
 		//std::stringstream strm(str);
 		gxx::trent tr;
-		gxx::gbson::load(tr, dat.data(), dat.size());
+		gxx::gbson::load(tr, data.data(), data.size());
 		gxx::println(tr);
 	}
 }
 
-void undelivered_handler(crow::packet* pack) {
-	gxx::println("Crowker access error");
+void undelivered_handler(crowket* pack)
+{
+	dprln("Crowker access error");
 	exit(-1);
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 	const char* crowker = getenv("CROWKER");
 
-	const struct option long_options[] = {
+	const struct option long_options[] =
+	{
 		{"crowker", required_argument, NULL, 'c'},
 		{"debug", no_argument, NULL, 'd'},
 		{"gbson", no_argument, NULL, 'g'},
 		{"qos", required_argument, NULL, 'q'},
-		{NULL,0,NULL,0}
+		{NULL, 0, NULL, 0}
 	};
 
-    int long_index =0;
-	int opt= 0;
-	while ((opt = getopt_long(argc, argv, "cdgq", long_options, &long_index)) != -1) {
-		switch (opt) {
+	int long_index = 0;
+	int opt = 0;
+	while ((opt = getopt_long(argc, argv, "cdgq", long_options, &long_index)) != -1)
+	{
+		switch (opt)
+		{
 			case 'c': crowker = optarg; break;
-			case 'd': crow::enable_diagnostic(); break;
+			case 'd': crow_enable_diagnostic(); break;
 			case 'g': gbson_flag = true;
 			case 'q': qos = atoi(optarg);
 			case 0: break;
 		}
 	}
 
-	crow::undelivered_handler = undelivered_handler;
+	if (crow_create_udpgate(0, G1_UDPGATE) == NULL)
+	{
+		perror("udpgate open");
+		exit(-1);
+	}
 
-	crow::link_gate(&ugate, G1_UDPGATE);
-	ugate.open();
-
-	if (argc - optind != 1) {
+	if (argc - optind != 1)
+	{
 		gxx::println("Usage: crow_publish theme");
 		exit(-1);
 	}
 
-	if (crowker == nullptr) {
+	if (crowker == nullptr)
+	{
 		gxx::println("Enviroment variable CROWKER doesn't setted");
 		exit(-1);
 	}
 
-	//gxx::println("brocker:", crowker);
-	//gxx::println("theme:", argv[optind]);
+	crowker_len = hexer(crowker_addr, 128, crowker, strlen(crowker));
+	crow_set_publish_host(crowker_addr, crowker_len);
+
+	crow_undelivered_handler = undelivered_handler;
+	crow_pubsub_handler = subscribe_handler;
 
 	std::string theme = argv[optind];
 
-	crow::set_publish_host(crow::host(crowker));
-	crow::pubsub_handler = subscribe_handler;
-
-	crow::subscribe(theme.data(), theme.size(), crow::QoS(qos));
-	crow::spin();
+	crow_subscribe(theme.data(), qos, acktime);
+	crow_spin();
 }
 

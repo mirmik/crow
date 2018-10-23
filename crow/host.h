@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-namespace crow {
+/*namespace crow {
 	struct host {
 		uint8_t* data;
 		size_t size;
@@ -32,6 +32,6 @@ namespace crow {
 
 		~host();
 	};
-}
+}*/
 
 #endif

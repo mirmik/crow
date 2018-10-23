@@ -2,16 +2,28 @@
 	@file
 */
 
-#ifndef G1_GATES_SERIAL_GSTUFF_H
-#define G1_GATES_SERIAL_GSTUFF_H
+#ifndef CROW_GATES_SERIAL_GSTUFF_H
+#define CROW_GATES_SERIAL_GSTUFF_H
+
+#include <sys/cdefs.h>
+#include <stdint.h>
 
 #include <crow/gateway.h>
+
+__BEGIN_DECLS
+
+//void crow_serial_gstuff_open(struct crow_serial_gstuff* gw, uint16_t port);
+crow_gw_t* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id);
+
+__END_DECLS
+
+/*#include <crow/gateway.h>
 #include <gxx/gstuff/sender.h>
 #include <gxx/gstuff/automate.h>
 
 #include <gxx/serial/serial.h>
-
-#include <gxx/io/std.h>
+*/
+/*#include <gxx/io/std.h>
 
 #include <mutex>
 
@@ -76,6 +88,7 @@ namespace crow {
 			crow::travel(block);
 		}
 	};
-}
+}*/
+
 
 #endif

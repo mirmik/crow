@@ -10,11 +10,14 @@ licant.libs.include("crow")
 licant.libs.include("gxx")
 
 application("ctrans", 
-	sources = ["main.cpp"],
+	sources = ["main.c"],
 	include_modules = [
 		("crow"),
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
+	
+		("crow.udpgate"),
+		("crow.serial_gstuff"),
 		
 		("gxx", "posix"),
 		("gxx.inet", "posix"),
@@ -24,7 +27,7 @@ application("ctrans",
 		("gxx.serial"),
 	],
 	cxx_flags = "",
-	libs = ["pthread"]
+	libs = ["pthread", "readline"]
 )
 
 @licant.routine
