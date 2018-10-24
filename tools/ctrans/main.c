@@ -19,39 +19,36 @@ uint8_t addr[128];
 int addrsize;
 
 uint8_t qos = 0;
-bool raw;
-bool packmon;
-bool sniffer;
-bool echo;
-bool info;
-bool debug;
+//bool raw;
+bool echo = false;
+bool info = false;
 
 void incoming_handler(crowket_t* pack) {
-	dpr("incoming: "); 
+	//dpr("incoming: "); 
 	
 	if (echo) {
 		crow_send(crowket_addrptr(pack), pack->header.alen, crowket_dataptr(pack), crowket_datasize(pack), 0, 0, 300);
 	}
 	
-	if (packmon) {	
-		crow_println(pack); 
-	} else {
+	//if (packmon) {	
+	//	crow_println(pack); 
+	//} else {
 		char buf[10000];
 		bytes_to_dstring(buf, crowket_dataptr(pack), crowket_datasize(pack));		
 		printf("%s\n", buf);
-	}
+	//}
 	
 	crow_release(pack);
 }
 
-void traveling_handler(crowket_t* pack) {}
+/*void traveling_handler(crowket_t* pack) {}
 
 void transit_handler(crowket_t* pack) {
 	if (sniffer) {
 		dpr("transit: ");
 		crow_println(pack); 
 	}
-}
+}*/
 
 void* console_listener(void* arg) {
 	(void) arg;
@@ -95,17 +92,16 @@ int main(int argc, char* argv[]) {
 		{"udp", required_argument, NULL, 'u'}, //udp порт для 12-ого гейта.
 		{"qos", required_argument, NULL, 'q'}, //qos отправляемых сообщений. 0 по умолчанию
 		{"serial", required_argument, NULL, 'S'}, //serial...
-		{"sniffer", no_argument, NULL, 's'}, //Вывод проходных пакетов.
-		{"pack", no_argument, NULL, 'p'}, //Подробная информация о входящих пакетах.
 		{"echo", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
 		{"info", no_argument, NULL, 'i'}, //Активирует информацию о вратах.
 		{"debug", no_argument, NULL, 'd'}, //Активирует информацию о вратах.
+		{"vdebug", no_argument, NULL, 'v'}, //Активирует информацию о вратах.
 		{NULL,0,NULL,0}
 	};
 
     int long_index =0;
 	int opt= 0;
-	while ((opt = getopt_long(argc, argv, "uvSsedqip", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "uqSeidv", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'q': qos = atoi(optarg); break;
 			case 'u': udpport = atoi(optarg); break;
@@ -113,11 +109,10 @@ int main(int argc, char* argv[]) {
 				serial_port = (char*) malloc(strlen(optarg) + 1); 
 				strcpy(serial_port, optarg); 
 				break;
-			case 's': sniffer = true; break;
-			case 'p': packmon = true; break;
 			case 'e': echo = true; break;
 			case 'i': info = true; break;
-			case 'd': debug = true; break;
+			case 'd': crow_enable_diagnostic(); break;
+			case 'v': crow_enable_live_diagnostic(); break;
 			case 0: break;
 		}
 	}
@@ -127,9 +122,8 @@ int main(int argc, char* argv[]) {
 		exit(-1);
 	}
 		
-	if (debug) crow_enable_diagnostic();
 	crow_user_incoming_handler = incoming_handler;
-	crow_transit_handler = transit_handler;
+	//crow_transit_handler = transit_handler;
 	
 	/*if (!serial_port.empty()) {
 		if (crow_create_serialgate(serial_port.c_str(), 115200, 42) == NULL) {

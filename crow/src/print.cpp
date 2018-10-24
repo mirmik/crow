@@ -34,3 +34,25 @@ void crow_println(crowket_t* pack) {
 	crow_print_to(*gxx::standart_output, pack);
 	gxx::print_to(*gxx::standart_output, "\n");
 }
+
+void crow_diagnostic(const char* notation, crowket_t* pack) 
+{
+	gxx::fprintln("{}: ("
+		"qos:{}, "
+		"ack:{}, "
+		"alen:{}, "
+		"type:{}, "
+		"addr:{}, "
+		"stg:{}, "
+		"data:{}, "
+		")", 
+		notation,
+		pack->header.qos,
+		(uint8_t)pack->header.f.ack, 
+		pack->header.alen, 
+		(uint8_t)pack->header.f.type, 
+		gxx::hexascii_encode((const uint8_t*)crowket_addrptr(pack), pack->header.alen), 
+		pack->header.stg, 
+		gxx::dstring(crowket_dataptr(pack), crowket_datasize(pack))
+	);
+}

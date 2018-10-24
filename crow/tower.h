@@ -49,8 +49,8 @@ void crow_send_ack2(crowket_t* pack);
 
 extern void (*crow_user_type_handler)(crowket_t* pack);
 extern void (*crow_user_incoming_handler)(crowket_t* pack);
-extern void (*crow_traveling_handler)(crowket_t* pack);
-extern void (*crow_transit_handler)(crowket_t* pack);
+//extern void (*crow_traveling_handler)(crowket_t* pack);
+//extern void (*crow_transit_handler)(crowket_t* pack);
 
 /// Обработчик недоставленного пакета. Определяется локальным софтом.
 /// Освобождение должно производиться функцией tower_release.
@@ -69,9 +69,7 @@ void crow_incoming_pubsub_packet(crowket_t* pack);
 //void incoming_channel_packet(crowket_t* pack);
 
 void crow_enable_diagnostic();
-
-void crow_print(crowket_t* pack);
-void crow_println(crowket_t* pack);
+void crow_enable_live_diagnostic();
 
 __END_DECLS
 

@@ -14,6 +14,8 @@
 
 #include <gxx/debug/dprint.h>
 
+#include <assert.h>
+
 /*gxx::dlist<crow_gw_t, &crow_gw_t::lnk> crow_gw_ts;
 gxx::dlist<crowket_t, &crowket_t::lnk> crow_travelled;
 gxx::dlist<crowket_t, &crowket_t::lnk> crow_incoming;
@@ -27,21 +29,20 @@ DLIST_HEAD(crow_outters);
 void(*crow_user_type_handler)(crowket_t* pack) = NULL;
 void(*crow_user_incoming_handler)(crowket_t* pack) = NULL;
 void(*crow_undelivered_handler)(crowket_t* pack) = NULL;
-void(*crow_traveling_handler)(crowket_t* pack) = NULL;
-void(*crow_transit_handler)(crowket_t* pack) = NULL;
+//void(*crow_traveling_handler)(crowket_t* pack) = NULL;
+//void(*crow_transit_handler)(crowket_t* pack) = NULL;
 
 static bool __diagnostic_enabled = false;
-
-static void __diagnostic_traveling_handler(crowket_t* pack)
-{
-	debug_print("travel: ");
-	crow_println(pack);
-}
+bool __crow_live_diagnostic_enabled = false;
 
 void crow_enable_diagnostic()
 {
 	__diagnostic_enabled = true;
-	crow_traveling_handler = __diagnostic_traveling_handler;
+}
+
+void crow_enable_live_diagnostic()
+{
+	__crow_live_diagnostic_enabled = true;
 }
 
 crow_gw_t* crow_find_target_gateway(crowket_t* pack)
@@ -137,11 +138,6 @@ void crow_travel_error(crowket_t* pack)
 
 void crow_incoming_handler(crowket_t* pack)
 {
-//	if (__diagnostic_enabled)
-//	{
-//		debug_print_line("incoming packet");
-//	}
-
 	switch (pack->header.f.type)
 	{
 		case G1_G0TYPE: crow_incoming_node_packet(pack); break;
@@ -157,8 +153,8 @@ void crow_incoming_handler(crowket_t* pack)
 
 void crow_do_travel(crowket_t* pack)
 {
-	if (crow_traveling_handler)
-		crow_traveling_handler(pack);
+	//if (crow_traveling_handler)
+		// crow_traveling_handler(pack);
 
 	if (pack->header.stg == pack->header.alen)
 	{
@@ -167,6 +163,10 @@ void crow_do_travel(crowket_t* pack)
 
 		if (pack->header.f.ack)
 		{
+			//Перехватываем ack пакеты. 
+			if (__diagnostic_enabled) 
+				crow_diagnostic("inack", pack);
+
 			switch (pack->header.f.type)
 			{
 				case G1_ACK_TYPE:
@@ -186,8 +186,12 @@ void crow_do_travel(crowket_t* pack)
 			return;
 		}
 
+		if (__diagnostic_enabled) 
+			crow_diagnostic("incom", pack);
+
 		if (pack->ingate)
 		{
+			//Если пакет пришел извне, используем логику обеспечения качества.
 			if (pack->header.qos == CROW_TARGET_ACK || pack->header.qos == CROW_BINARY_ACK)
 				crow_send_ack(pack);
 
@@ -213,12 +217,13 @@ void crow_do_travel(crowket_t* pack)
 				crow_tower_release(pack);
 			}
 		}
-		//Если пакет отправлен из данного нода, обслуживание не требуется
 		else
 		{
+			//Если пакет отправлен из данного нода, обслуживание не требуется
 			crow_tower_release(pack);
 		}
 
+		//Решаем, что делать с пришедшим пакетом.
 		if (!pack->header.f.noexec)
 		{
 			if (crow_user_incoming_handler) crow_user_incoming_handler(pack);
@@ -230,15 +235,21 @@ void crow_do_travel(crowket_t* pack)
 	}
 	else
 	{
-		if (crow_transit_handler) crow_transit_handler(pack);
+		//if (crow_transit_handler) crow_transit_handler(pack);
 		//Ветка транзитного пакета. Логика поиска врат и пересылки.
 		crow_gw_t* gate = crow_find_target_gateway(pack);
 		if (gate == NULL)
 		{
+			if (__diagnostic_enabled) 
+				crow_diagnostic("wgate", pack);
+
 			crow_travel_error(pack);
 		}
 		else
 		{
+			if (__diagnostic_enabled) 
+				crow_diagnostic("trans", pack);
+
 			//Здесь пакет штампуется временем отправки и пересылается во врата.
 			//Врата должны после пересылки отправить его назад в башню
 			//с помощью return_to_tower для контроля качества.
@@ -394,6 +405,7 @@ void crow_onestep()
 	//gxx::for_each_safe(crow_outters.begin(), crow_outters.end(), [&](crowket_t& pack) {
 	dlist_for_each_entry_safe(pack, n, &crow_outters, lnk)
 	{
+		assert(pack->f.released_by_tower == 0);
 		if (curtime - pack->last_request_time > pack->header.ackquant)
 		{
 			dlist_del_init(&pack->lnk);
@@ -411,6 +423,7 @@ void crow_onestep()
 
 	dlist_for_each_entry_safe(pack, n, &crow_incoming, lnk)
 	{
+		assert(pack->f.released_by_tower == 0);
 		if (curtime - pack->last_request_time > pack->header.ackquant)
 		{
 			if (++pack->ackcount == 5)

@@ -114,6 +114,10 @@ crowket_t* crow_create_packet(struct crow_gw* ingate, size_t addrsize, size_t da
 ///
 void crow_utilize(crowket_t* pack);
 
+void crow_print(crowket_t* pack);
+void crow_println(crowket_t* pack);
+void crow_diagnostic(const char* notation, crowket_t* pack);
+
 __END_DECLS
 
 #endif

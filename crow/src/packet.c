@@ -4,10 +4,13 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include <crow/packet.h>
 #include <crow/gateway.h>
 #include <gxx/syslock.h>
+
+extern bool __crow_live_diagnostic_enabled;
 
 crowket_t* crow_create_packet(crow_gw_t* ingate, size_t addrsize, size_t datasize) { 
 	system_lock();
@@ -39,6 +42,9 @@ void crowket_initialization(crowket_t* pack, crow_gw_t* ingate) {
 }
 
 void crow_utilize(crowket_t* pack) {
+	if (__crow_live_diagnostic_enabled) 
+		crow_diagnostic("utilz", pack);
+
 	system_lock();
 	dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
 	dlist_del(&pack->ulnk);

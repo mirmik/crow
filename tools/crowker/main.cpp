@@ -12,13 +12,6 @@
 
 int udpport = -1;
 bool quite = false;
-bool sniffer_option = false;
-
-void sniffer_travel_handler(struct crowket* pack)
-{
-//	gxx::print("travel: ");
-//	crow::println(pack);
-}
 
 void incoming_pubsub_packet(struct crowket* pack)
 {
@@ -99,20 +92,20 @@ int main(int argc, char* argv[])
 	{
 		{"udp", required_argument, NULL, 'u'},
 		{"debug", no_argument, NULL, 'd'},
+		{"vdebug", no_argument, NULL, 'v'},
 		{"quite", no_argument, NULL, 'q'},
-		{"sniffer", no_argument, NULL, 's'},
 		{NULL, 0, NULL, 0}
 	};
 
 	int long_index = 0;
 	int opt = 0;
-	while ((opt = getopt_long(argc, argv, "usdi", long_options, &long_index)) != -1)
+	while ((opt = getopt_long(argc, argv, "usvdi", long_options, &long_index)) != -1)
 	{
 		switch (opt)
 		{
 			case 'u': udpport = atoi(optarg); break;
 			case 'd': crow_enable_diagnostic(); break;
-			case 's': sniffer_option = true; break;
+			case 'v': crow_enable_live_diagnostic(); break;
 			case 'i': brocker_info = true; break;
 			case 0: break;
 		}
@@ -129,8 +122,6 @@ int main(int argc, char* argv[])
 		perror("udpgate open");
 		exit(-1);
 	}
-
-	if (sniffer_option) crow_traveling_handler = sniffer_travel_handler;
 
 	crow_spin();
 }
