@@ -26,8 +26,9 @@ application("ctrans",
 		("gxx.syslock", "mutex"),
 		("gxx.serial"),
 	],
-	cxx_flags = "",
-	libs = ["pthread", "readline"]
+	#cxx_flags = "-Werror=all -Werror=extra -pedantic-errors -Werror=shadow -Werror=format=2 -Werror=float-equal -Werror=conversion -Werror=logical-op -Werror=shift-overflow=2 -Werror=duplicated-cond -Wno-cast-qual -Werror=cast-align -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_FORTIFY_SOURCE=2 -fsanitize=address -fsanitize=undefined -fno-sanitize-recover -fstack-protector",
+	#cxx_flags = "-Werror=conversion",
+	libs = ["pthread", "readline", "asan", "ubsan"]
 )
 
 @licant.routine
