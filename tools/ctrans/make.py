@@ -31,9 +31,8 @@ application("ctrans",
 	libs = ["pthread", "readline", "asan", "ubsan"]
 )
 
-@licant.routine
+@licant.routine(deps=["ctrans"])
 def install():
-	licant.do("ctrans")
 	os.system("cp ctrans /usr/local/bin")
 
 licant.ex("ctrans")

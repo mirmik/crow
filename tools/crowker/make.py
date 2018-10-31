@@ -27,9 +27,8 @@ application("crowker",
 	cxx_flags = ""
 )
 
-@licant.routine
+@licant.routine(deps=["crowker"])
 def install():
-	licant.do("crowker")
 	os.system("cp crowker /usr/local/bin")
 
 licant.ex("crowker")

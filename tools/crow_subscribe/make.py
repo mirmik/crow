@@ -28,9 +28,8 @@ application("crow_subscribe",
 	cxx_flags = ""
 )
 
-@licant.routine
+@licant.routine(deps=["crow_subscribe"])
 def install():
-	licant.do("crow_subscribe")
 	os.system("cp crow_subscribe /usr/local/bin")
 
 licant.ex("crow_subscribe")

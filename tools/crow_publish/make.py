@@ -29,9 +29,8 @@ application("crow_publish",
 	cc_flags = "-pedantic",
 )
 
-@licant.routine
+@licant.routine(deps=["crow_publish"])
 def install():
-	licant.do("crow_publish")
 	os.system("cp crow_publish /usr/local/bin")
 
 licant.ex("crow_publish")
