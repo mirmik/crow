@@ -25,15 +25,15 @@ struct crow_serial_gstuff {
 } crow_serial_gstuff;
 
 
-void callback_handler(void* priv, int sts, char * buf, int len) {
-	dprln("callback");
-	/*struct crowket * block = rpack;
-	init_recv();
+static inline void newline_handler(struct crow_serial_gstuff* g) 
+{
+	struct crowket * block = g->rpack;
+	g->rpack = NULL;
 
-	block->revert_stage(id);
+	crowket_revert_g(block, g->gw.id);
 
-	crowket_initialization(block, this);
-	crow_travel(block);*/
+	crowket_initialization(block, &g->gw);
+	crow_travel(block);
 }
 
 struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id) 
@@ -76,6 +76,9 @@ struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, u
 
     /* control chars - set return condition: min number of bytes and timer */
     tattr.c_cc[VMIN] = 0; tattr.c_cc[VTIME] = 0; /* immediate - anything       */
+
+    cfsetispeed(&tattr, B115200);
+	cfsetospeed(&tattr, B115200);
     
     /* put terminal in raw mode after flushing */
     ret = tcsetattr(g->fd,TCSAFLUSH,&tattr); 
@@ -87,7 +90,7 @@ struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, u
 	g->gw.ops = &crow_serial_gstuff_ops;
 	crow_link_gate(&g->gw, id);
 
-	gstuff_autorecv_init(&g->recver, callback_handler, g);
+	//gstuff_autorecv_init(&g->recver, callback_handler, g);
 	
 	//dprln("crow_create_serial_gstuff... exit");
 	return &g->gw;
@@ -139,8 +142,15 @@ void crow_serial_gstuff_nblock_onestep(struct crow_gw* gw)
 	int len = read(g->fd, (uint8_t*)&c, 1);
 	//int len = ser->read((uint8_t*)&c, 1);
 	if (len == 1) {
-		//dprhex(c); dpr("\t"); gxx::println(gxx::dstring(&c, 1));
-		gstuff_autorecv_newchar(&g->recver, c);
+		//dprhex(c); dpr("\t");
+		
+		int ret = gstuff_autorecv_newchar(&g->recver, c);
+
+		switch (ret) {
+			case GSTUFF_CRC_ERROR: dprln("warn: gstuff crc error"); break;
+			case GSTUFF_NEWPACKAGE: newline_handler(g); break;
+			default: break;
+		}
 	}
 }
 

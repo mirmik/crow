@@ -58,6 +58,17 @@ typedef struct crowket {
 		} f;
 	};
 	struct crow_header header;
+
+#ifdef __cplusplus
+	uint8_t* addrptr() { return (uint8_t*)(&header + 1); }
+	char* dataptr() { return (char*)(&header + 1) + header.alen; }
+	uint8_t* stageptr() { return (uint8_t*)(&header + 1) + header.stg; }
+	char* endptr() { return (char*)(&header) + header.flen; }
+	size_t addrsize() { return header.alen; }
+	size_t blocksize() { return header.flen; }
+	size_t datasize() { return header.flen - header.alen - sizeof(crow_header_t); }
+#endif
+
 } G1_PACKED crowket_t;
 
 
