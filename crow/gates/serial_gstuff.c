@@ -98,7 +98,7 @@ struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, u
 
 void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack) 
 {
-	dprln("crow_serial_gstuff_send");
+	//dprln("crow_serial_gstuff_send");
 
 	char buffer[pack->header.flen * 2 + 3];
 

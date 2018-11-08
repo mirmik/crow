@@ -388,6 +388,12 @@ void crow_onestep()
 	crowket_t* pack;
 	crowket_t* n;
 
+	crow_gw_t* gate;
+	dlist_for_each_entry(gate, &crow_gateways, lnk)
+	{
+		gate->ops->nblock_onestep(gate);
+	}
+
 	while (1)
 	{
 		system_lock();
@@ -445,11 +451,6 @@ void crow_spin()
 {
 	while (1)
 	{
-		crow_gw_t* gate;
-		dlist_for_each_entry(gate, &crow_gateways, lnk)
-		{
-			gate->ops->nblock_onestep(gate);
-		}
 		crow_onestep();
 	}
 }
