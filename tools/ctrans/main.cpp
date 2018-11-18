@@ -15,20 +15,36 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include <string>
+
 uint8_t addr[128];
 int addrsize;
 
 uint8_t qos = 0;
 //bool raw;
+bool console;
 bool echo = false;
 bool gdebug = false;
 bool info = false;
+
+std::string pulse;
 
 void incoming_handler(crowket_t* pack) {
 	//dpr("incoming: "); 
 	
 	if (echo) {
 		crow_send(crowket_addrptr(pack), pack->header.alen, crowket_dataptr(pack), crowket_datasize(pack), 0, 0, 300);
+	}
+
+	if (console) 
+	{
+		char* dp = crowket_dataptr(pack);
+		size_t ds = crowket_datasize(pack);
+
+		if (strncmp(dp, "exit\n", ds) == 0) 
+		{
+			raise(SIGINT);
+		}
 	}
 	
 	//if (packmon) {	
@@ -95,6 +111,8 @@ int main(int argc, char* argv[]) {
 		{"serial", required_argument, NULL, 'S'}, //serial...
 		{"echo", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
 		{"info", no_argument, NULL, 'i'}, //Активирует информацию о вратах.
+		{"console", no_argument, NULL, 'c'}, //Активирует информацию о вратах.
+		{"pulse", required_argument, NULL, 'p'}, //Активирует информацию о вратах.
 		{"debug", no_argument, NULL, 'd'}, //Активирует информацию о вратах.
 		{"vdebug", no_argument, NULL, 'v'}, //Активирует информацию о вратах.
 		{"gdebug", no_argument, NULL, 'g'}, //Активирует информацию о вратах.
@@ -114,6 +132,8 @@ int main(int argc, char* argv[]) {
 			case 'e': echo = true; break;
 			case 'i': info = true; break;
 			case 'g': gdebug = true; break;
+			case 'p': pulse = optarg; break;
+			case 'c': console = true; break;
 			case 'd': crow_enable_diagnostic(); break;
 			case 'v': crow_enable_live_diagnostic(); break;
 			case 0: break;
@@ -165,6 +185,15 @@ int main(int argc, char* argv[]) {
 		//printf("modes:\n");
 
 	}
+
+	if (pulse != std::string()) 
+	{
+		pulse = pulse + '\n';
+		crow_send(addr, addrsize, pulse.data(), pulse.size(), 0, qos, 200);
+		crow_onestep();
+		exit(0);
+	}
+
 
 	if (pthread_create(&console_thread, NULL, console_listener, NULL)) {
 		fprintf(stderr, "Error creating thread\n");

@@ -10,7 +10,7 @@ licant.libs.include("crow")
 licant.libs.include("gxx")
 
 application("ctrans", 
-	sources = ["main.c"],
+	sources = ["main.cpp"],
 	include_modules = [
 		("crow"),
 		("crow.allocator", "malloc"),
