@@ -140,7 +140,9 @@ void crow_incoming_handler(crowket_t* pack)
 {
 	switch (pack->header.f.type)
 	{
-		case G1_G0TYPE: crow_incoming_node_packet(pack); break;
+		case G1_G0TYPE: 
+			crow_incoming_node_packet(pack); 
+			break;
 		case G1_G3TYPE:
 			if (crow_pubsub_handler) crow_pubsub_handler(pack);
 			else crow_release(pack);

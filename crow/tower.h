@@ -73,4 +73,13 @@ void crow_enable_live_diagnostic();
 
 __END_DECLS
 
+#ifdef __cplusplus
+
+namespace crow 
+{
+	static inline void release(crowket_t* pack) { crow_release(pack); }
+}
+
+#endif
+
 #endif

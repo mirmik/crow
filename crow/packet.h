@@ -131,4 +131,13 @@ void crow_diagnostic(const char* notation, crowket_t* pack);
 
 __END_DECLS
 
+#ifdef __cplusplus
+
+namespace crow 
+{
+	static inline void utilize(crowket_t* pack) { crow_utilize(pack); }
+}
+
+#endif
+
 #endif

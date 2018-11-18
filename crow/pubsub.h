@@ -8,6 +8,8 @@
 #include <crow/tower.h>
 #include <crow/host.h>
 
+#include <assert.h>
+
 struct crow_theme;
 
 #define SUBSCRIBE 	0
@@ -74,5 +76,45 @@ void crow_set_publish_host(const uint8_t* hhost, size_t hsize);
 //void crow_set_publish_qos(crow::QoS qos);
 
 __END_DECLS
+
+#ifdef __cplusplus
+
+#include <gxx/buffer.h>
+
+namespace crow 
+{
+	static inline void publish(const char* theme, const char* data, uint8_t qos=0, uint16_t acktime=DEFAULT_ACKQUANT) {
+		crow_publish(theme, data, qos, acktime);
+	}
+	
+	static inline void subscribe(const char* theme, uint8_t qos=0, uint16_t acktime=DEFAULT_ACKQUANT) {
+		crow_subscribe(theme, qos, acktime);
+	}
+
+	namespace pubsub 
+	{
+		static inline gxx::buffer get_theme(crowket* pack) 
+		{
+			assert(pack->header.f.type == G1_G3TYPE);
+
+			struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
+			//struct crow_subheader_pubsub_data * shps_d = get_subheader_pubsub_data(pack);
+
+			return gxx::buffer(crowket_pubsub_thmptr(pack), shps->thmsz);
+		}
+
+		static inline gxx::buffer get_data(crowket* pack) 
+		{
+			assert(pack->header.f.type == G1_G3TYPE);
+
+			struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
+			struct crow_subheader_pubsub_data * shps_d = get_subheader_pubsub_data(pack);
+
+			return gxx::buffer(crowket_pubsub_datptr(pack), shps_d->datsz);
+		}
+	}
+}
+
+#endif //__cplusplus
 
 #endif

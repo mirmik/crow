@@ -7,13 +7,14 @@
 
 #include <sys/cdefs.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <crow/gateway.h>
 
 __BEGIN_DECLS
 
 //void crow_serial_gstuff_open(struct crow_serial_gstuff* gw, uint16_t port);
-crow_gw_t* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id);
+crow_gw_t* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id, bool debug);
 
 __END_DECLS
 

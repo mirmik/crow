@@ -68,9 +68,9 @@ int main(int argc, char* argv[])
 		switch (opt)
 		{
 			case 'c': crowker = optarg; break;
-			case 'g': gbson_parse = true;
-			case 'b': bindata = true;
-			case 'q': qos = atoi(optarg);
+			case 'g': gbson_parse = true; break;
+			case 'b': bindata = true; break;
+			case 'q': qos = atoi(optarg); break;
 			case 'd': crow_enable_live_diagnostic(); break;
 			case 'v': crow_enable_diagnostic(); break;
 			case 0: break;
@@ -115,10 +115,10 @@ int main(int argc, char* argv[])
 	}
 	else if (bindata)
 	{
-		//gxx::println(argv[optind+1]);
+		dprln("bindata mode");
 
 		auto sv = gxx::split(argv[optind + 1], ',');
-		//gxx::println(sv);
+		gxx::println(sv);
 
 		using ptype = std::pair<std::string, std::string>;
 		std::vector<ptype> vec;

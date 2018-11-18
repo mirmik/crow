@@ -21,6 +21,7 @@ int addrsize;
 uint8_t qos = 0;
 //bool raw;
 bool echo = false;
+bool gdebug = false;
 bool info = false;
 
 void incoming_handler(crowket_t* pack) {
@@ -96,12 +97,13 @@ int main(int argc, char* argv[]) {
 		{"info", no_argument, NULL, 'i'}, //Активирует информацию о вратах.
 		{"debug", no_argument, NULL, 'd'}, //Активирует информацию о вратах.
 		{"vdebug", no_argument, NULL, 'v'}, //Активирует информацию о вратах.
+		{"gdebug", no_argument, NULL, 'g'}, //Активирует информацию о вратах.
 		{NULL,0,NULL,0}
 	};
 
     int long_index =0;
 	int opt= 0;
-	while ((opt = getopt_long(argc, argv, "uqSeidv", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "uqSeidvg", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'q': qos = atoi(optarg); break;
 			case 'u': udpport = atoi(optarg); break;
@@ -111,6 +113,7 @@ int main(int argc, char* argv[]) {
 				break;
 			case 'e': echo = true; break;
 			case 'i': info = true; break;
+			case 'g': gdebug = true; break;
 			case 'd': crow_enable_diagnostic(); break;
 			case 'v': crow_enable_live_diagnostic(); break;
 			case 0: break;
@@ -137,7 +140,7 @@ int main(int argc, char* argv[]) {
 	}*/
 
 	if (serial_port != NULL) {
-		if (crow_create_serial_gstuff(serial_port, 115200, 42) == NULL) {
+		if (crow_create_serial_gstuff(serial_port, 115200, 42, gdebug) == NULL) {
 			perror("serialgate open");
 			exit(-1);
 		}				

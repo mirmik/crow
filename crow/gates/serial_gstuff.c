@@ -18,6 +18,7 @@ struct crow_serial_gstuff {
 
 	struct crow_gw gw;
 	struct crowket * rpack;
+	bool debug;
 
 	struct gstuff_autorecv recver;
 	//struct gstuff_sender sender;
@@ -36,12 +37,14 @@ static inline void newline_handler(struct crow_serial_gstuff* g)
 	crow_travel(block);
 }
 
-struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id) 
+struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id, bool debug) 
 {
 	int ret;
 
 	struct crow_serial_gstuff* g = (struct crow_serial_gstuff*) 
 		malloc(sizeof(struct crow_serial_gstuff));
+
+	g->debug = debug;
 	
 	g->fd = open(path, O_RDWR | O_NOCTTY);
 	if (g->fd < 0) {
@@ -142,7 +145,9 @@ void crow_serial_gstuff_nblock_onestep(struct crow_gw* gw)
 	int len = read(g->fd, (uint8_t*)&c, 1);
 	//int len = ser->read((uint8_t*)&c, 1);
 	if (len == 1) {
-		//dprhex(c); dpr("\t");
+		if (g->debug) {
+			dprhex(c); dprchar('\t'); dprchar(c); dln();
+		}
 		
 		int ret = gstuff_autorecv_newchar(&g->recver, c);
 
