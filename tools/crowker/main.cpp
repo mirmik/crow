@@ -34,6 +34,7 @@ void incoming_pubsub_packet(struct crowket* pack)
 		{
 			auto shps_c = get_subheader_pubsub_control(pack);
 			std::string theme(crowket_dataptr(pack) + sizeof(crow_subheader_pubsub) + sizeof(crow_subheader_pubsub_control), shps->thmsz);
+			
 			g3_brocker_subscribe(crowket_addrptr(pack), crowket_addrsize(pack), theme, shps_c->qos, shps_c->ackquant);
 		}
 		break;
@@ -92,6 +93,7 @@ int main(int argc, char* argv[])
 	{
 		{"udp", required_argument, NULL, 'u'},
 		{"debug", no_argument, NULL, 'd'},
+		{"binfo", no_argument, NULL, 'b'},
 		{"vdebug", no_argument, NULL, 'v'},
 		{"quite", no_argument, NULL, 'q'},
 		{NULL, 0, NULL, 0}
@@ -99,14 +101,14 @@ int main(int argc, char* argv[])
 
 	int long_index = 0;
 	int opt = 0;
-	while ((opt = getopt_long(argc, argv, "usvdi", long_options, &long_index)) != -1)
+	while ((opt = getopt_long(argc, argv, "usvdib", long_options, &long_index)) != -1)
 	{
 		switch (opt)
 		{
 			case 'u': udpport = atoi(optarg); break;
 			case 'd': crow_enable_diagnostic(); break;
 			case 'v': crow_enable_live_diagnostic(); break;
-			case 'i': brocker_info = true; break;
+			case 'b': brocker_info = true; break;
 			case 0: break;
 		}
 	}
