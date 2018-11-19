@@ -4,13 +4,13 @@
 
 #include <stdbool.h>
 #include <crow/tower.h>
-#include <crow/host.h>
 #include <gxx/syslock.h>
 
 #include <gxx/util/hexer.h>
 #include <gxx/debug/dprint.h>
 
 #include <assert.h>
+#include <string.h>
 
 /*gxx::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
 gxx::dlist<crow::packet, &crow::packet::lnk> crow_travelled;
@@ -368,7 +368,7 @@ void crow::return_to_tower(crow::packet* pack, uint8_t sts)
 	system_unlock();
 }
 
-void crow_onestep_travel_only()
+void crow::onestep_travel_only()
 {
 	system_lock();
 	while (1)

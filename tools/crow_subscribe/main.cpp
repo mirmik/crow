@@ -18,14 +18,14 @@ uint8_t qos = 0;
 uint8_t acktime = 200;
 bool gbson_flag = false;
 
-void subscribe_handler(crowket* pack)
+void subscribe_handler(crow::packet* pack)
 {
-	struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
+	struct crow_subheader_pubsub * shps = crow::get_subheader_pubsub(pack);
 	struct crow_subheader_pubsub_data * shps_d =
 	    get_subheader_pubsub_data(pack);
 
-	auto theme = std::string(crowket_pubsub_thmptr(pack), shps->thmsz);
-	auto data = std::string(crowket_pubsub_datptr(pack), shps_d->datsz);
+	auto theme = std::string(crow::packet_pubsub_thmptr(pack), shps->thmsz);
+	auto data = std::string(crow::packet_pubsub_datptr(pack), shps_d->datsz);
 
 	if (!gbson_flag)
 	{
@@ -41,7 +41,7 @@ void subscribe_handler(crowket* pack)
 	}
 }
 
-void undelivered_handler(crowket* pack)
+void undelivered_handler(crow::packet* pack)
 {
 	dprln("Crowker access error");
 	exit(-1);
@@ -68,15 +68,15 @@ int main(int argc, char* argv[])
 		switch (opt)
 		{
 			case 'c': crowker = optarg; break;
-			case 'd': crow_enable_diagnostic(); break;
-			case 'v': crow_enable_live_diagnostic(); break;
+			case 'd': crow::enable_diagnostic(); break;
+			case 'v': crow::enable_live_diagnostic(); break;
 			case 'g': gbson_flag = true;
 			case 'q': qos = atoi(optarg);
 			case 0: break;
 		}
 	}
 
-	if (crow_create_udpgate(0, G1_UDPGATE) == NULL)
+	if (crow::create_udpgate(0, G1_UDPGATE) == NULL)
 	{
 		perror("udpgate open");
 		exit(-1);
@@ -95,14 +95,14 @@ int main(int argc, char* argv[])
 	}
 
 	crowker_len = hexer(crowker_addr, 128, crowker, strlen(crowker));
-	crow_set_publish_host(crowker_addr, crowker_len);
+	crow::set_publish_host(crowker_addr, crowker_len);
 
-	crow_undelivered_handler = undelivered_handler;
-	crow_pubsub_handler = subscribe_handler;
+	crow::undelivered_handler = undelivered_handler;
+	crow::pubsub_handler = subscribe_handler;
 
 	std::string theme = argv[optind];
 
-	crow_subscribe(theme.data(), qos, acktime);
-	crow_spin();
+	crow::subscribe(theme.data(), qos, acktime);
+	crow::spin();
 }
 

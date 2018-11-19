@@ -13,9 +13,9 @@
 int udpport = -1;
 bool quite = false;
 
-void incoming_pubsub_packet(struct crowket* pack)
+void incoming_pubsub_packet(struct crow::packet* pack)
 {
-	struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
+	struct crow_subheader_pubsub * shps = crow::get_subheader_pubsub(pack);
 
 	switch (shps->type)
 	{
@@ -24,8 +24,8 @@ void incoming_pubsub_packet(struct crowket* pack)
 			struct crow_subheader_pubsub_data * shps_d =
 			    get_subheader_pubsub_data(pack);
 
-			auto theme = std::string(crowket_pubsub_thmptr(pack), shps->thmsz);
-			auto data = std::string(crowket_pubsub_datptr(pack), shps_d->datsz);
+			auto theme = std::string(crow::packet_pubsub_thmptr(pack), shps->thmsz);
+			auto data = std::string(crow::packet_pubsub_datptr(pack), shps_d->datsz);
 
 			brocker_publish(theme, data);
 		}
@@ -33,9 +33,9 @@ void incoming_pubsub_packet(struct crowket* pack)
 		case SUBSCRIBE:
 		{
 			auto shps_c = get_subheader_pubsub_control(pack);
-			std::string theme(crowket_dataptr(pack) + sizeof(crow_subheader_pubsub) + sizeof(crow_subheader_pubsub_control), shps->thmsz);
+			std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) + sizeof(crow_subheader_pubsub_control), shps->thmsz);
 			
-			g3_brocker_subscribe(crowket_addrptr(pack), crowket_addrsize(pack), theme, shps_c->qos, shps_c->ackquant);
+			g3_brocker_subscribe(pack->addrptr(), pack->addrsize(), theme, shps_c->qos, shps_c->ackquant);
 		}
 		break;
 		default:
@@ -43,25 +43,25 @@ void incoming_pubsub_packet(struct crowket* pack)
 			printf("unresolved pubsub frame type %d", (uint8_t)shps->type);
 		} break;
 	}
-	crow_release(pack);
+	crow::release(pack);
 }
 
-void undelivered_handler(struct crowket* pack)
+void undelivered_handler(struct crow::packet* pack)
 {
 	if (pack->header.f.type == G1_G3TYPE) {
-		auto shps = get_subheader_pubsub(pack);
+		auto shps = crow::get_subheader_pubsub(pack);
 
 		if (shps->type == PUBLISH) {
-			std::string theme(crowket_dataptr(pack) + sizeof(crow_subheader_pubsub) 
+			std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) 
 				+ sizeof(crow_subheader_pubsub_data), shps->thmsz);
 			auto& thm = themes[theme];
-			thm.subs.erase(crow::g3_subscriber(crowket_addrptr(pack), pack->header.alen, pack->header.qos, pack->header.ackquant));
+			thm.subs.erase(crow::g3_subscriber(pack->addrptr(), pack->header.alen, pack->header.qos, pack->header.ackquant));
 			if (brocker_info)
-				gxx::fprintln("g3_refuse: t:{}, r:{}", theme, gxx::hexascii_encode(crowket_addrptr(pack), pack->header.alen));
+				gxx::fprintln("g3_refuse: t:{}, r:{}", theme, gxx::hexascii_encode(pack->addrptr(), pack->header.alen));
 		}
 	}
 
-	crow_utilize(pack);
+	crow::utilize(pack);
 }
 
 /*void crow::theme::publish(const std::string& data) {
@@ -86,8 +86,8 @@ void undelivered_handler(struct crowket* pack)
 
 int main(int argc, char* argv[])
 {
-	crow_pubsub_handler = incoming_pubsub_packet;
-	crow_undelivered_handler = undelivered_handler;
+	crow::pubsub_handler = incoming_pubsub_packet;
+	crow::undelivered_handler = undelivered_handler;
 
 	const struct option long_options[] =
 	{
@@ -106,8 +106,8 @@ int main(int argc, char* argv[])
 		switch (opt)
 		{
 			case 'u': udpport = atoi(optarg); break;
-			case 'd': crow_enable_diagnostic(); break;
-			case 'v': crow_enable_live_diagnostic(); break;
+			case 'd': crow::enable_diagnostic(); break;
+			case 'v': crow::enable_live_diagnostic(); break;
 			case 'b': brocker_info = true; break;
 			case 0: break;
 		}
@@ -119,12 +119,12 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 
-	if (crow_create_udpgate(udpport, G1_UDPGATE) == NULL)
+	if (crow::create_udpgate(udpport, G1_UDPGATE) == NULL)
 	{
 		perror("udpgate open");
 		exit(-1);
 	}
 
-	crow_spin();
+	crow::spin();
 }
 

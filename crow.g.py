@@ -27,6 +27,14 @@ licant.modules.module("crow.minimal",
 	include_paths=["."]
 )
 
+licant.modules.module("crow.minimal_pubsub",
+	srcdir = "crow/src",
+	sources = [
+		"pubsub.cpp"
+	],
+	include_paths=["."]
+)
+
 licant.modules.module("crow.allocator", "malloc",
 	sources = [
 		"crow/src/allocation_malloc.cpp"

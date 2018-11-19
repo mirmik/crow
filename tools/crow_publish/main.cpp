@@ -71,13 +71,13 @@ int main(int argc, char* argv[])
 			case 'g': gbson_parse = true; break;
 			case 'b': bindata = true; break;
 			case 'q': qos = atoi(optarg); break;
-			case 'd': crow_enable_live_diagnostic(); break;
-			case 'v': crow_enable_diagnostic(); break;
+			case 'd': crow::enable_live_diagnostic(); break;
+			case 'v': crow::enable_diagnostic(); break;
 			case 0: break;
 		}
 	}
 
-	if (crow_create_udpgate(0, G1_UDPGATE) == NULL)
+	if (crow::create_udpgate(0, G1_UDPGATE) == NULL)
 	{
 		perror("udpgate open");
 		exit(-1);
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 	GXX_PRINT(data);
 
 	crowker_len = hexer(crowker_addr, 128, crowker, strlen(crowker));
-	crow_set_publish_host(crowker_addr, crowker_len);
+	crow::set_publish_host(crowker_addr, crowker_len);
 
 	if (gbson_parse)
 	{
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 		gxx::trent tr = gxx::json::parse(istrm).unwrap();
 		int len = gxx::gbson::dump(tr, buf, 256);
 
-		crow_publish_buffer(theme.data(), buf, len, qos, acktime);
+		crow::publish_buffer(theme.data(), buf, len, qos, acktime);
 	}
 	else if (bindata)
 	{
@@ -147,12 +147,12 @@ int main(int argc, char* argv[])
 
 		gxx::print_dump(block, sz);
 
-		crow_publish_buffer(theme.data(), block, sz, qos, acktime);
+		crow::publish_buffer(theme.data(), block, sz, qos, acktime);
 	}
 	else
 	{
-		crow_publish(theme.data(), data.data(), qos, acktime);
+		crow::publish(theme.data(), data.data(), qos, acktime);
 	}
-	crow_onestep_travel_only();
+	crow::onestep_travel_only();
 }
 

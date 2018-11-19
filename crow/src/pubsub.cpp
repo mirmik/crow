@@ -9,7 +9,7 @@ uint16_t brocker_ackquant = DEFAULT_ACKQUANT;
 */
 void(*crow_pubsub_handler)(crow::packet* pack);
 
-void crow_publish_buffer(const char* theme, const void* data, size_t dlen, uint8_t qos, uint16_t acktime)
+void crow::publish_buffer(const char* theme, const void* data, size_t dlen, uint8_t qos, uint16_t acktime)
 {
 	struct crow_subheader_pubsub subps;
 	struct crow_subheader_pubsub_data subps_d;
@@ -26,14 +26,14 @@ void crow_publish_buffer(const char* theme, const void* data, size_t dlen, uint8
 		{ (void*)data, subps_d.datsz },
 	};
 
-	crow_send_v(brocker_host, brocker_host_len, iov, 4, G1_G3TYPE, qos, acktime);
+	crow::send_v(brocker_host, brocker_host_len, iov, 4, G1_G3TYPE, qos, acktime);
 }
 
-void crow_publish(const char* theme, const char* data, uint8_t qos, uint16_t acktime) {
-	crow_publish_buffer(theme, data, strlen(data), qos, acktime);
+void crow::publish(const char* theme, const char* data, uint8_t qos, uint16_t acktime) {
+	crow::publish_buffer(theme, data, strlen(data), qos, acktime);
 }
 
-void crow_subscribe(const char* theme, uint8_t qos, uint16_t acktime) {
+void crow::subscribe(const char* theme, uint8_t qos, uint16_t acktime) {
 	size_t thmsz = strlen(theme);
 
 	struct crow_subheader_pubsub subps;
@@ -50,14 +50,14 @@ void crow_subscribe(const char* theme, uint8_t qos, uint16_t acktime) {
 		{ (void*)theme, thmsz },
 	};
 
-	crow_send_v(brocker_host, brocker_host_len, iov, 3, G1_G3TYPE, qos, acktime);
+	crow::send_v(brocker_host, brocker_host_len, iov, 3, G1_G3TYPE, qos, acktime);
 }
 /*
 void crow::subscribe(const char* theme, crow::QoS qos) {
 	crow::subscribe(theme, strlen(theme), qos);
 }
 */
-void crow_set_publish_host(const uint8_t * hexhost, size_t hsize)
+void crow::set_publish_host(const uint8_t * hexhost, size_t hsize)
 {
 	brocker_host = hexhost;
 	brocker_host_len = hsize;
