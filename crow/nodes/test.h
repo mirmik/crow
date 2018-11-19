@@ -10,15 +10,20 @@ namespace crow {
 	struct test_node : public node {
 		void incoming_packet(crow::packet* pack) override {
 			auto sh = crow::get_subheader(pack);
-			auto data = crow::get_datasect(pack);
-			crow::println(pack);
+			auto data = gxx::buffer(pack->dataptr(), pack->datasize());
+			crow::diagnostic("here", pack);
 			gxx::fprintln("subheader: sid={}, rid={}", (uint16_t)sh->sid, (uint16_t)sh->rid);
 			gxx::fprintln("datasect: {}", gxx::dstring(data));
 			crow::release(pack);
 		}
 	};
 
-	crow::test_node* create_test_node(int i);
+	static inline crow::test_node* create_test_node(int i) 
+	{
+		test_node* n = new test_node;
+		crow::link_node(n, i);
+		return n;
+	}
 }
 
 #endif

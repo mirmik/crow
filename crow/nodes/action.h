@@ -19,7 +19,12 @@ namespace crow {
 		}
 	};
 
-	crow::action_node* create_action_node(int i, gxx::delegate<void, crow::packet*> dlg);
+	static inline crow::action_node* create_action_node(int i, gxx::delegate<void, crow::packet*> dlg) 
+	{
+		action_node* n = new action_node(dlg);
+		crow::link_node(n, i);
+		return n;
+	}
 }
 
 #endif

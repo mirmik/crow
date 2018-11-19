@@ -8,41 +8,38 @@
 #include <crow/packet.h>
 #include <sys/uio.h>
 
-typedef struct crow_node {
-	struct dlist_head lnk;
-	uint16_t id;
-	void (*incoming_packet)(struct crow_node* node, crow::packet* pack);
-} crow_node_t;
+#include <gxx/container/dlist.h>
 
-typedef struct crow_subheader {
-	uint16_t sid;
-	uint16_t rid;		
-} G1_PACKED crow_subheader_t;
+namespace crow
+{
+	struct node
+	{
+		struct dlist_head lnk;
+		uint16_t id;
+		virtual void incoming_packet(crow::packet* pack) = 0;
+	};
+	
+	extern gxx::dlist<node, &node::lnk> nodes;
 
-__BEGIN_DECLS
+	struct subheader
+	{
+		uint16_t sid;
+		uint16_t rid;
+	} G1_PACKED;
 
-static inline void crow_node_init(crow_node_t* node) { 
-	dlist_init(&node->lnk); 
+	static inline subheader* get_subheader(crow::packet* pack)
+	{
+		return (subheader*) pack->dataptr();
+	}
+
+	void link_node(node* srvs, uint16_t id);
+	
+	void node_send(uint16_t sid, uint16_t rid,
+	                    const void* raddr, size_t rlen,
+	                    const void* data, size_t size,
+	                    uint8_t qos, uint16_t ackquant);
+
+	void incoming_node_packet(crow::packet* pack);
 }
-
-static inline crow_subheader_t* crow_get_subheader(crow::packet* pack) {
-	return (crow_subheader_t*) pack->dataptr();
-}
-
-/*static inline gxx::buffer crow_get_datasect(crow::packet* pack) {
-	return gxx::buffer(pack->dataptr() + sizeof(subheader), pack->datasize() - sizeof(subheader));
-}*/	
-
-//extern gxx::dlist<crow::node, &crow::node::lnk> nodes;
-extern struct dlist_head crow_nodes;
-
-/// Добавить сервис к ядру.
-void crow_link_node(crow_node_t* srvs, uint16_t id);
-void crow_node_send(uint16_t sid, uint16_t rid, 
-	const void* raddr, size_t rlen, 
-	const void* data, size_t size, 
-	uint8_t qos, uint16_t ackquant);
-
-__END_DECLS
 
 #endif
