@@ -243,6 +243,8 @@ static void crow_do_travel(crow::packet* pack)
 		if (pack->ingate)
 		{
 			//Если пакет пришел извне, используем логику обеспечения качества.
+
+			//Для пакетов с подтверждение посылаем ack первого или второго типов.
 			if (pack->header.qos == CROW_TARGET_ACK || pack->header.qos == CROW_BINARY_ACK)
 				crow_send_ack(pack);
 
@@ -250,7 +252,6 @@ static void crow_do_travel(crow::packet* pack)
 			{
 				//Перед тем как добавить пакет в обработку, проверяем,
 				//нет ли его в списке принятых.
-				//TODO: Возможно надо посылать ack при повторном приёме.
 				crow::packet* inc;
 				dlist_for_each_entry(inc, &crow_incoming, lnk)
 				{
@@ -459,7 +460,6 @@ void crow::onestep()
 			else
 			{
 				pack->last_request_time = curtime;
-				dprln("crow_resend_ack");
 				crow_send_ack(pack);
 			}
 		}
