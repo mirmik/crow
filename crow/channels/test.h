@@ -8,7 +8,7 @@
 namespace crow {
 	struct test_channel : public channel {
 		void incoming_data_packet(crow::packet* pack) override {
-			auto data = crow::get_datasect(pack);
+			auto data = pack->datasect();
 			gxx::println("test_incoming:", gxx::dstring(data));
 		} 
 	};

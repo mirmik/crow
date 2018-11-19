@@ -6,10 +6,10 @@
 #define G2_CORE_H
 
 #include <crow/node.h>
-#include <crow/host.h>
 #include <gxx/syslock.h>
-//#include <gxx/event/delegate.h>
-/*
+#include <gxx/event/delegate.h>
+#include <gxx/buffer.h>
+
 namespace crow {
 	enum class State {
 		INIT,
@@ -25,11 +25,11 @@ namespace crow {
 
 	struct channel : public crow::node {
 		dlist_head lnk;
-		uint16_t id;*/
-	/*	uint16_t rid;
+		uint16_t id;
+		uint16_t rid;
 		void * raddr_ptr;
 		size_t raddr_len; 
-		crow::QoS qos;
+		uint8_t qos;
 		uint16_t ackquant;
 		uint16_t fid = 0;
 		State state = State::INIT;
@@ -37,7 +37,7 @@ namespace crow {
 		virtual void incoming_data_packet(crow::packet* pack) = 0;
 		channel() { dlist_init(&lnk); }
 
-		void handshake(const crow::host& host, uint16_t rid, crow::QoS qos = crow::QoS(1), uint16_t ackquant = 200);
+		void handshake(uint8_t* raddr, uint16_t rlen, uint16_t rid, uint8_t qos = 0, uint16_t ackquant = 200);
 		int send(const char* data, size_t size);
 	};
 
@@ -49,7 +49,7 @@ namespace crow {
 	} G1_PACKED;
 
 	struct subheader_handshake {
-		crow::QoS qos;
+		uint8_t qos;
 		uint16_t ackquant;
 	} G1_PACKED;
 
@@ -72,12 +72,12 @@ namespace crow {
 	/// Добавить сервис к ядру.
 	void link_channel(crow::channel* srvs, uint16_t id);
 	
-	void handshake(crow::channel* ch, uint16_t rid, const void* raddr_ptr, size_t raddr_len, crow::QoS qos = crow::QoS(0), uint16_t ackquant = 200);	
+	void handshake(crow::channel* ch, uint16_t rid, const void* raddr_ptr, size_t raddr_len, uint8_t qos = 0, uint16_t ackquant = 200);	
 	void __channel_send(crow::channel* ch, const char* data, size_t size);
 
 	struct accept_header {
 		uint16_t rchid;
-		crow::QoS qos;
+		uint8_t qos;
 		uint16_t ackquant;
 	};
 
@@ -95,6 +95,6 @@ namespace crow {
 	}
 
 	uint16_t dynport();
-};*/
+};
 
 #endif

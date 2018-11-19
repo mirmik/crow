@@ -2,6 +2,7 @@
 #define G0_ECHO_H
 
 #include <crow/node.h>
+#include <crow/tower.h>
 
 namespace crow {
 	struct echo_node : public node {
@@ -19,9 +20,9 @@ namespace crow {
 			}
 
 			auto sh = crow::get_subheader(pack);
-			auto ds = crow::get_datasect(pack);
+			auto ds = gxx::buffer(pack->dataaddr(), pack->datasize());
 
-			crow::__node_send(id, sh->sid, pack->addrptr(), pack->header.alen, ds.data(), ds.size(), crow::QoS(0));
+			crow::node_send(id, sh->sid, pack->addrptr(), pack->header.alen, ds.data(), ds.size(), crow::QoS(0));
 			crow::release(pack);
 		}
 	};

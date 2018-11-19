@@ -11,9 +11,7 @@ int main() {
 	auto tch = crow::create_test_channel(10);
 	auto ech = crow::create_echo_channel(11);
 
-	//crow::host remote(".12.127.0.0.1:5025");
-
-	tch->handshake(crow::host(""), 11);
+	tch->handshake((uint8_t*)"", 0, 11);
 	tch->send("HelloWorld", 10);
 
 	crow::spin();

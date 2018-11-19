@@ -11,7 +11,9 @@ licant.libs.include("crow")
 application("target", 
 	sources = ["main.cpp"],
 	include_modules = [
-		("crow"),
+		("crow.minimal"),
+		("crow.minimal_node"),
+		("crow.minimal_channel"),
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
 #		("crow.node"),

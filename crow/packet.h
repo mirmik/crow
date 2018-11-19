@@ -13,6 +13,8 @@
 #include <gxx/datastruct/dlist.h>
 #include <crow/defs.h>
 
+#include <gxx/buffer.h>
+
 /// Качество обслуживания.
 #define CROW_WITHOUT_ACK 0
 #define	CROW_TARGET_ACK 1
@@ -74,6 +76,9 @@ namespace crow
 		size_t addrsize() { return header.alen; }
 		size_t blocksize() { return header.flen; }
 		size_t datasize() { return header.flen - header.alen - sizeof(crow::header); }
+
+		gxx::buffer datasect() { return gxx::buffer(dataptr(), datasize()); }
+		gxx::buffer addrsect() { return gxx::buffer(addrptr(), addrsize()); }
 
 		void revert_gate(uint8_t gateindex);
 		void revert(struct iovec* vec, size_t veclen);

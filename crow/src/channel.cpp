@@ -2,7 +2,9 @@
 #include <crow/tower.h>
 #include <sys/uio.h>
 
-/*
+#include <gxx/print.h>
+#include <gxx/panic.h>
+
 void crow::link_channel(crow::channel* ch, uint16_t id) {
 	ch->id = id;
 	crow::nodes.move_back(*ch);
@@ -55,7 +57,7 @@ void crow::acceptor::incoming_packet(crow::packet* pack) {
 	crow::release(pack);
 }
 
-void crow::handshake(crow::channel* ch, uint16_t rid, const void* raddr_ptr, size_t raddr_len, crow::QoS qos, uint16_t ackquant) {
+void crow::handshake(crow::channel* ch, uint16_t rid, const void* raddr_ptr, size_t raddr_len, uint8_t qos, uint16_t ackquant) {
 	crow::subheader sh0;
 	crow::subheader_channel sh2;
 	crow::subheader_handshake shh;
@@ -80,7 +82,7 @@ void crow::handshake(crow::channel* ch, uint16_t rid, const void* raddr_ptr, siz
 	};
 
 	ch->state = crow::State::CONNECTED;
-	crow::send(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec), G1_G0TYPE, crow::QoS(2), ackquant);
+	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec), G1_G0TYPE, 2, ackquant);
 }
 
 void crow::__channel_send(crow::channel* ch, const char* data, size_t size) {
@@ -96,18 +98,17 @@ void crow::__channel_send(crow::channel* ch, const char* data, size_t size) {
 		{&sh2, sizeof(sh2)},
 		{(void*)data, size},
 	};
-	crow::send(ch->raddr_ptr, ch->raddr_len, vec, sizeof(vec) / sizeof(iovec), G1_G0TYPE, ch->qos, ch->ackquant);
+	crow::send_v(ch->raddr_ptr, ch->raddr_len, vec, sizeof(vec) / sizeof(iovec), G1_G0TYPE, ch->qos, ch->ackquant);
 }
 
 uint16_t crow::dynport() {
 	return 512;
 }
 
-void crow::channel::handshake(const crow::host& host, uint16_t rid, crow::QoS qos, uint16_t ackquant) {
-	crow::handshake(this, rid, host.data, host.size, qos, ackquant);
+void crow::channel::handshake(uint8_t* raddr, uint16_t rlen, uint16_t rid, uint8_t qos, uint16_t ackquant) {
+	crow::handshake(this, rid, raddr, rlen, qos, ackquant);
 }
 
 int crow::channel::send(const char* data, size_t size) {
 	crow::__channel_send(this, data, size);
 }
-*/
