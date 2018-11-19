@@ -12,6 +12,8 @@
 
 namespace crow
 {
+	extern void (*node_handler)(crow::packet* pack);
+
 	struct node
 	{
 		struct dlist_head lnk;
@@ -40,6 +42,10 @@ namespace crow
 	                    uint8_t qos, uint16_t ackquant);
 
 	void incoming_node_handler(crow::packet* pack);
+
+	static inline void enable_node_subsystem() {
+		crow::node_handler = crow::incoming_node_handler;
+	}
 }
 
 #endif
