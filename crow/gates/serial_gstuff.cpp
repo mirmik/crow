@@ -11,13 +11,13 @@
 
 #include <termios.h>
 
-const struct crow_gw_operations crow_serial_gstuff_ops;
+const struct crow::gateway_operations crow_serial_gstuff_ops;
 
 struct crow_serial_gstuff {
 	int fd;
 
-	struct crow_gw gw;
-	struct crowket * rpack;
+	struct crow::gateway gw;
+	struct crow::packet * rpack;
 	bool debug;
 
 	struct gstuff_autorecv recver;
@@ -28,16 +28,16 @@ struct crow_serial_gstuff {
 
 static inline void newline_handler(struct crow_serial_gstuff* g) 
 {
-	struct crowket * block = g->rpack;
+	struct crow::packet * block = g->rpack;
 	g->rpack = NULL;
 
-	crowket_revert_g(block, g->gw.id);
+	crow::packet_revert_g(block, g->gw.id);
 
-	crowket_initialization(block, &g->gw);
+	crow::packet_initialization(block, &g->gw);
 	crow_travel(block);
 }
 
-struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id, bool debug) 
+struct crow::gateway* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id, bool debug) 
 {
 	int ret;
 
@@ -99,7 +99,7 @@ struct crow_gw* crow_create_serial_gstuff(const char* path, uint32_t baudrate, u
 	return &g->gw;
 }
 
-void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack) 
+void crow_serial_gstuff_send(struct crow::gateway* gw, struct crow::packet* pack) 
 {
 	//dprln("crow_serial_gstuff_send");
 
@@ -125,19 +125,19 @@ void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack)
 	crow_return_to_tower(pack, CROW_SENDED);
 }
 
-/*void crow_serial_gstuff_send(struct crow_gw* gw, struct crowket* pack) 
+/*void crow_serial_gstuff_send(struct crow::gateway* gw, struct crow::packet* pack) 
 {
 
 }*/
 
 
-void crow_serial_gstuff_nblock_onestep(struct crow_gw* gw) 
+void crow_serial_gstuff_nblock_onestep(struct crow::gateway* gw) 
 {
 	struct crow_serial_gstuff* g = mcast_out(gw, struct crow_serial_gstuff, gw);
 	
 	if (g->rpack == NULL) {
-		g->rpack = (struct crowket*) 
-			malloc(128 + sizeof(struct crowket) - sizeof(struct crow_header));
+		g->rpack = (struct crow::packet*) 
+			malloc(128 + sizeof(struct crow::packet) - sizeof(struct crow::header));
 		gstuff_autorecv_setbuf(&g->recver, (char*)&g->rpack->header, 128);
 	}
 
@@ -159,7 +159,7 @@ void crow_serial_gstuff_nblock_onestep(struct crow_gw* gw)
 	}
 }
 
-const struct crow_gw_operations crow_serial_gstuff_ops = {
+const struct crow::gateway_operations crow_serial_gstuff_ops = {
 	.send = crow_serial_gstuff_send,
 	.nblock_onestep = crow_serial_gstuff_nblock_onestep
 };

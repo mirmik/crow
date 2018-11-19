@@ -7,11 +7,11 @@
 #include <crow/packet.h>
 #include <stdlib.h>
 
-void crow_deallocate_packet(crowket_t* pack) {  
+void crow::deallocate_packet(crow::packet* pack) {  
 	free(pack); 
 }
 
-crowket_t* crow_allocate_packet(size_t adlen) {
-	return (crowket_t*) malloc(adlen + sizeof(crowket_t));
+crow::packet* crow::allocate_packet(size_t adlen) {
+	return (crow::packet*) malloc(adlen + sizeof(crow::packet));
 }
 

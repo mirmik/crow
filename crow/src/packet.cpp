@@ -10,14 +10,15 @@
 #include <crow/gateway.h>
 #include <gxx/syslock.h>
 
-extern bool __crow_live_diagnostic_enabled;
+bool __crow_live_diagnostic_enabled = false;
 
-crowket_t* crow_create_packet(crow_gw_t* ingate, size_t addrsize, size_t datasize) { 
+crow::packet* crow::create_packet(crow::gateway* ingate, size_t addrsize, size_t datasize)
+{
 	system_lock();
-	crowket_t* pack = crow_allocate_packet(addrsize + datasize);
+	crow::packet* pack = crow::allocate_packet(addrsize + datasize);
 	system_unlock();
-	
-	pack -> header.flen = sizeof(crow_header_t) + addrsize + datasize;
+
+	pack -> header.flen = sizeof(crow::header) + addrsize + datasize;
 	pack -> header.alen = addrsize;
 	pack -> header.ackquant = 200;
 	pack -> header.pflag = 0;
@@ -27,49 +28,54 @@ crowket_t* crow_create_packet(crow_gw_t* ingate, size_t addrsize, size_t datasiz
 	dlist_init(&pack->lnk);
 	dlist_init(&pack->ulnk);
 	pack -> ingate = ingate;
-	pack -> ackcount = 0; 
+	pack -> ackcount = 0;
 	pack -> flags = 0;
-	
+
 	return pack;
 }
 
-void crowket_initialization(crowket_t* pack, crow_gw_t* ingate) { 
+void crow::packet_initialization(crow::packet* pack, crow::gateway* ingate)
+{
 	dlist_init(&pack->lnk);
 	dlist_init(&pack->ulnk);
 	pack -> ingate = ingate;
-	pack -> ackcount = 0; 
+	pack -> ackcount = 0;
 	pack -> flags = 0;
 }
 
-void crow_utilize(crowket_t* pack) {
-	if (__crow_live_diagnostic_enabled) 
-		crow_diagnostic("utilz", pack);
+void crow::utilize(crow::packet* pack)
+{
+	if (__crow_live_diagnostic_enabled)
+		crow::diagnostic("utilz", pack);
 
 	system_lock();
 	dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
 	dlist_del(&pack->ulnk);
-	crow_deallocate_packet(pack);
+	crow::deallocate_packet(pack);
 	system_unlock();
 }
 
-void crowket_revert_g(crowket_t* pack, uint8_t gateindex) {
-	*crowket_stageptr(pack) = gateindex;
-	++pack->header.stg;
+void crow::packet::revert_gate(uint8_t gateindex)
+{
+	*stageptr() = gateindex;
+	++header.stg;
 }
 
-void crowket_revert(crowket_t* pack, struct iovec* vec, size_t veclen) {
+void crow::packet::revert(struct iovec* vec, size_t veclen)
+{
 	struct iovec* it = vec + veclen - 1;
 	struct iovec* eit = vec - 1;
 
 	size_t sz = 0;
-	uint8_t* tgt = crowket_stageptr(pack);
+	uint8_t* tgt = stageptr();
 
-	for (; it != eit; --it) {
+	for (; it != eit; --it)
+	{
 		sz += it->iov_len;
 		char* ptr = (char*)it->iov_base + it->iov_len;
-		char* eptr = it->iov_base;
-		while(ptr != eptr) 
+		char* eptr = (char*)it->iov_base;
+		while (ptr != eptr)
 			*tgt++ = *--ptr;
 	}
-	pack->header.stg += sz;
+	header.stg += sz;
 }

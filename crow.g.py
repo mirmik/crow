@@ -17,21 +17,31 @@ licant.modules.module("crow",
 	include_paths=["."]
 )
 
+licant.modules.module("crow.minimal",
+	srcdir = "crow/src",
+	sources = [
+		"packet.cpp",
+		"print.cpp",
+		"tower.cpp"
+	],
+	include_paths=["."]
+)
+
 licant.modules.module("crow.allocator", "malloc",
 	sources = [
-		"crow/src/allocation_malloc.c"
+		"crow/src/allocation_malloc.cpp"
 	]
 )
 
 licant.modules.module("crow.udpgate",
 	sources = [
-		"crow/gates/udpgate.c"
+		"crow/gates/udpgate.cpp"
 	]
 )
 
 licant.modules.module("crow.serial_gstuff",
 	sources = [
-		"crow/gates/serial_gstuff.c"
+		"crow/gates/serial_gstuff.cpp"
 	]
 )
 

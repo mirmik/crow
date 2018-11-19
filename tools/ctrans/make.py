@@ -12,7 +12,7 @@ licant.libs.include("gxx")
 application("ctrans", 
 	sources = ["main.cpp"],
 	include_modules = [
-		("crow"),
+		("crow.minimal"),
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
 	

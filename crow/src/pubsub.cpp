@@ -7,7 +7,7 @@ size_t brocker_host_len;
 crow::QoS brocker_qos = crow::QoS(0);
 uint16_t brocker_ackquant = DEFAULT_ACKQUANT;
 */
-void(*crow_pubsub_handler)(crowket_t* pack);
+void(*crow_pubsub_handler)(crow::packet* pack);
 
 void crow_publish_buffer(const char* theme, const void* data, size_t dlen, uint8_t qos, uint16_t acktime)
 {

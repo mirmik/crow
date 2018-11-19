@@ -20,7 +20,7 @@ void crow_node_send(uint16_t sid, uint16_t rid, const void* raddr, size_t rsize,
 }
 
 
-void crow_incoming_node_packet(crowket_t* pack) {
+void crow_incoming_node_packet(crow::packet* pack) {
 	crow_subheader_t* sh = crow_get_subheader(pack);
 	crow_node_t* srvs;
 	dlist_for_each_entry(srvs, &crow_nodes, lnk) {

@@ -7,14 +7,21 @@
 
 #include <crow/gateway.h>
 
-__BEGIN_DECLS
+namespace crow 
+{
 
-//void crow_udpgate_send(crow_gw_t* gw, crowket_t* pack);
-//void crow_udpgate_nblock_onestep(crow_gw_t* gw);
+	struct udpgate : public gateway
+	{
+		int sock;
+		crow::packet* block;
 
-//int crow_udpgate_open(crow_udpgate_t* gw, uint16_t port);
-crow_gw_t* crow_create_udpgate(uint16_t port, uint8_t id);
+		void send(crow::packet*) override;
+		void nblock_onestep() override;
 
-__END_DECLS
+		int open(uint16_t  port);
+	};
+
+	gateway* create_udpgate(uint16_t port, uint8_t id);
+}
 
 #endif

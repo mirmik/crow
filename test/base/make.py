@@ -16,10 +16,10 @@ application("target",
 		("gxx", "posix"),
 		("gxx.print", "cout"),
 		("gxx.dprint", "cout"),
-		("gxx.log2", "impl"),
 		("gxx.syslock", "mutex"),
 
-		("crow"),
+		("crow.minimal"),
+		("crow.udpgate"),
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
 		
