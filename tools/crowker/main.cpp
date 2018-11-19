@@ -61,7 +61,7 @@ void undelivered_handler(struct crow::packet* pack)
 		}
 	}
 
-	crow::utilize(pack);
+	crow::release(pack);
 }
 
 /*void crow::theme::publish(const std::string& data) {

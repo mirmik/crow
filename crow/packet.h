@@ -98,8 +98,6 @@ namespace crow
 
 	packet* create_packet(struct crow::gateway* ingate, size_t addrsize, size_t datasize);
 
-	void utilize(crow::packet* pack);
-	
 	void packet_initialization(struct crow::packet* pack, struct crow::gateway* ingate);
 
 	void diagnostic(const char* notation, crow::packet* pack);

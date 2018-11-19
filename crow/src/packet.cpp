@@ -10,8 +10,6 @@
 #include <crow/gateway.h>
 #include <gxx/syslock.h>
 
-bool __crow_live_diagnostic_enabled = false;
-
 crow::packet* crow::create_packet(crow::gateway* ingate, size_t addrsize, size_t datasize)
 {
 	system_lock();
@@ -41,18 +39,6 @@ void crow::packet_initialization(crow::packet* pack, crow::gateway* ingate)
 	pack -> ingate = ingate;
 	pack -> ackcount = 0;
 	pack -> flags = 0;
-}
-
-void crow::utilize(crow::packet* pack)
-{
-	if (__crow_live_diagnostic_enabled)
-		crow::diagnostic("utilz", pack);
-
-	system_lock();
-	dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
-	dlist_del(&pack->ulnk);
-	crow::deallocate_packet(pack);
-	system_unlock();
 }
 
 void crow::packet::revert_gate(uint8_t gateindex)
