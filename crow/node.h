@@ -39,7 +39,7 @@ namespace crow
 	                    const void* data, size_t size,
 	                    uint8_t qos, uint16_t ackquant);
 
-	void incoming_node_packet(crow::packet* pack);
+	void incoming_node_handler(crow::packet* pack);
 }
 
 #endif

@@ -19,7 +19,7 @@ void crow::node_send(uint16_t sid, uint16_t rid, const void* raddr, size_t rsize
 	crow::send_v(raddr, rsize, iov, 2, G1_G0TYPE, qos, ackquant);
 }
 
-void crow::incoming_node_packet(crow::packet* pack)
+void crow::incoming_node_handler(crow::packet* pack)
 {
 	crow::subheader* sh = crow::get_subheader(pack);
 
