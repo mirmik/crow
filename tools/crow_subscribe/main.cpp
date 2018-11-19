@@ -17,6 +17,37 @@ size_t crowker_len;
 uint8_t qos = 0;
 uint8_t acktime = 200;
 bool gbson_flag = false;
+bool bin_mode = false;
+size_t binsize;
+std::vector<size_t> binsizes;
+std::vector<std::string(*)(void*)> binrestores;
+std::vector<std::string> binformat;
+
+std::map<std::string, size_t> visitor_size =
+{
+	{"flt32", 4},
+	{"int32", 4}
+};
+
+std::string flt32_restore(void* tgt)
+{
+	float arg;
+	memcpy(&arg, tgt, 4);
+	return gxx::format("{}", arg);
+}
+
+std::string int32_restore(void* tgt)
+{
+	int32_t arg;
+	memcpy(&arg, tgt, 4);
+	return gxx::format("{}", arg);
+}
+
+std::map<std::string, std::string(*)(void* tgt)> visitor_restore =
+{
+	{"flt32", flt32_restore},
+	{"int32", int32_restore}
+};
 
 void subscribe_handler(crow::packet* pack)
 {
@@ -27,18 +58,51 @@ void subscribe_handler(crow::packet* pack)
 	auto theme = std::string(crow::packet_pubsub_thmptr(pack), shps->thmsz);
 	auto data = std::string(crow::packet_pubsub_datptr(pack), shps_d->datsz);
 
-	if (!gbson_flag)
+	if (bin_mode) 
 	{
-		gxx::println(gxx::dstring(data));
+		bool wrsize = false;
+		if (shps_d->datsz != binsize) 
+		{
+			wrsize = true;
+			gxx::println("wrong size");
+		}
+
+		for (int i = 0; i < binformat.size(); ++i) 
+		{
+			uint8_t* ptr = (uint8_t*)crow::packet_pubsub_datptr(pack);
+
+			auto str = binrestores[i](ptr);
+			auto fstr = binformat[i]; 
+			ptr += binsizes[i];
+
+			gxx::fprint("{}:{} ", fstr, str);
+		}
+		gxx::println();
+
+		if (wrsize) {
+			gxx::println(theme);
+			GXX_PRINT(shps->thmsz);
+			GXX_PRINT(shps_d->datsz);
+			crow::diagnostic("binmode", pack);
+			exit(0);
+		}
+
+		crow::release(pack);
+		return;
 	}
-	else
+
+	if (gbson_flag)
 	{
-		//std::string str(dat.data(), dat.size());
-		//std::stringstream strm(str);
 		gxx::trent tr;
 		gxx::gbson::load(tr, data.data(), data.size());
 		gxx::println(tr);
+		crow::release(pack);
+		return;
 	}
+
+	gxx::println(gxx::dstring(data));
+	crow::release(pack);
+	return;
 }
 
 void undelivered_handler(crow::packet* pack)
@@ -57,6 +121,7 @@ int main(int argc, char* argv[])
 		{"debug", no_argument, NULL, 'd'},
 		{"vdebug", no_argument, NULL, 'v'},
 		{"gbson", no_argument, NULL, 'g'},
+		{"bin", required_argument, NULL, 'b'},
 		{"qos", required_argument, NULL, 'q'},
 		{NULL, 0, NULL, 0}
 	};
@@ -71,6 +136,11 @@ int main(int argc, char* argv[])
 			case 'd': crow::enable_diagnostic(); break;
 			case 'v': crow::enable_live_diagnostic(); break;
 			case 'g': gbson_flag = true;
+			case 'b': 
+				{
+					bin_mode = true;
+					binformat = gxx::split(optarg, ',');
+				}
 			case 'q': qos = atoi(optarg);
 			case 0: break;
 		}
@@ -92,6 +162,16 @@ int main(int argc, char* argv[])
 	{
 		gxx::println("Enviroment variable CROWKER doesn't setted");
 		exit(-1);
+	}
+
+	if (bin_mode) 
+	{
+		for (auto& str : binformat) 
+		{
+			binsize += visitor_size[str];
+			binsizes.push_back(visitor_size[str]);
+			binrestores.push_back(visitor_restore[str]);
+		}
 	}
 
 	crowker_len = hexer(crowker_addr, 128, crowker, strlen(crowker));

@@ -41,15 +41,17 @@ void crow::diagnostic(const char* notation, crow::packet* pack)
 		"qos:{}, "
 		"ack:{}, "
 		"alen:{}, "
+		"flen:{}, "
 		"type:{}, "
 		"addr:{}, "
 		"stg:{}, "
-		"data:{}, "
+		"data:{}"
 		")", 
 		notation,
 		pack->header.qos,
 		(uint8_t)pack->header.f.ack, 
-		pack->header.alen, 
+		(uint8_t)pack->header.alen, 
+		(uint16_t)pack->header.flen, 
 		(uint8_t)pack->header.f.type, 
 		gxx::hexascii_encode((const uint8_t*)pack->addrptr(), pack->header.alen), 
 		pack->header.stg, 

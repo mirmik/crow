@@ -32,7 +32,7 @@ void crow::incoming_node_handler(crow::packet* pack)
 		}
 	}
 
-	crow::utilize(pack);
+	crow::release(pack);
 }
 
 void crow::link_node(crow::node* srv, uint16_t id)
