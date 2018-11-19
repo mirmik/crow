@@ -2,47 +2,28 @@
 
 #include <crow/tower.h>
 
-#include <gxx/gstuff/autorecv.h>
-#include <gxx/gstuff/gstuff.h>
-
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 
 #include <termios.h>
 
-const struct crow::gateway_operations crow_serial_gstuff_ops;
-
-struct crow_serial_gstuff {
-	int fd;
-
-	struct crow::gateway gw;
-	struct crow::packet * rpack;
-	bool debug;
-
-	struct gstuff_autorecv recver;
-	//struct gstuff_sender sender;
-
-} crow_serial_gstuff;
-
-
-static inline void newline_handler(struct crow_serial_gstuff* g) 
+void crow::serial_gstuff::newline_handler() 
 {
-	struct crow::packet * block = g->rpack;
-	g->rpack = NULL;
+	struct crow::packet * block = rpack;
+	rpack = NULL;
 
-	crow::packet_revert_g(block, g->gw.id);
+	block->revert_gate(id);
 
-	crow::packet_initialization(block, &g->gw);
-	crow_travel(block);
+	crow::packet_initialization(block, this);
+	crow::travel(block);
 }
 
-struct crow::gateway* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id, bool debug) 
+struct crow::serial_gstuff* crow::create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id, bool debug) 
 {
 	int ret;
 
-	struct crow_serial_gstuff* g = (struct crow_serial_gstuff*) 
-		malloc(sizeof(struct crow_serial_gstuff));
+	crow::serial_gstuff* g = new crow::serial_gstuff;
 
 	g->debug = debug;
 	
@@ -90,22 +71,20 @@ struct crow::gateway* crow_create_serial_gstuff(const char* path, uint32_t baudr
 	}
 
 	g->rpack = NULL;
-	g->gw.ops = &crow_serial_gstuff_ops;
-	crow_link_gate(&g->gw, id);
+	crow::link_gate(g, id);
 
 	//gstuff_autorecv_init(&g->recver, callback_handler, g);
 	
 	//dprln("crow_create_serial_gstuff... exit");
-	return &g->gw;
+	return g;
 }
 
-void crow_serial_gstuff_send(struct crow::gateway* gw, struct crow::packet* pack) 
+void crow::serial_gstuff::send(struct crow::packet* pack) 
 {
 	//dprln("crow_serial_gstuff_send");
 
 	char buffer[pack->header.flen * 2 + 3];
 
-	struct crow_serial_gstuff* g = mcast_out(gw, struct crow_serial_gstuff, gw);
 	/*std::string str;
 	gxx::io::std_string_writer strm(str);
 	gxx::gstuff::sender sender(strm);
@@ -120,9 +99,9 @@ void crow_serial_gstuff_send(struct crow::gateway* gw, struct crow::packet* pack
 */
 	int len = gstuffing((char*)&pack->header, pack->header.flen, buffer);
 
-	write(g->fd, buffer, len);
+	write(fd, buffer, len);
 
-	crow_return_to_tower(pack, CROW_SENDED);
+	crow::return_to_tower(pack, CROW_SENDED);
 }
 
 /*void crow_serial_gstuff_send(struct crow::gateway* gw, struct crow::packet* pack) 
@@ -131,35 +110,28 @@ void crow_serial_gstuff_send(struct crow::gateway* gw, struct crow::packet* pack
 }*/
 
 
-void crow_serial_gstuff_nblock_onestep(struct crow::gateway* gw) 
+void crow::serial_gstuff::nblock_onestep() 
 {
-	struct crow_serial_gstuff* g = mcast_out(gw, struct crow_serial_gstuff, gw);
-	
-	if (g->rpack == NULL) {
-		g->rpack = (struct crow::packet*) 
+	if (rpack == NULL) {
+		rpack = (struct crow::packet*) 
 			malloc(128 + sizeof(struct crow::packet) - sizeof(struct crow::header));
-		gstuff_autorecv_setbuf(&g->recver, (char*)&g->rpack->header, 128);
+		gstuff_autorecv_setbuf(&recver, (char*)&rpack->header, 128);
 	}
 
 	char c;
-	int len = read(g->fd, (uint8_t*)&c, 1);
+	int len = read(fd, (uint8_t*)&c, 1);
 	//int len = ser->read((uint8_t*)&c, 1);
 	if (len == 1) {
-		if (g->debug) {
+		if (debug) {
 			dprhex(c); dprchar('\t'); dprchar(c); dln();
 		}
 		
-		int ret = gstuff_autorecv_newchar(&g->recver, c);
+		int ret = gstuff_autorecv_newchar(&recver, c);
 
 		switch (ret) {
 			case GSTUFF_CRC_ERROR: dprln("warn: gstuff crc error"); break;
-			case GSTUFF_NEWPACKAGE: newline_handler(g); break;
+			case GSTUFF_NEWPACKAGE: newline_handler(); break;
 			default: break;
 		}
 	}
 }
-
-const struct crow::gateway_operations crow_serial_gstuff_ops = {
-	.send = crow_serial_gstuff_send,
-	.nblock_onestep = crow_serial_gstuff_nblock_onestep
-};

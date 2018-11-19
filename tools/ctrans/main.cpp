@@ -30,17 +30,17 @@ bool info = false;
 
 std::string pulse;
 
-void incoming_handler(crowket_t* pack) {
+void incoming_handler(crow::packet* pack) {
 	//dpr("incoming: "); 
 	
 	if (echo) {
-		crow_send(crowket_addrptr(pack), pack->header.alen, crowket_dataptr(pack), crowket_datasize(pack), 0, 0, 300);
+		crow::send(pack->addrptr(), pack->header.alen, pack->dataptr(), pack->datasize(), 0, 0, 300);
 	}
 
 	if (api) 
 	{
-		char* dp = crowket_dataptr(pack);
-		size_t ds = crowket_datasize(pack);
+		char* dp = pack->dataptr();
+		size_t ds = pack->datasize();
 
 		if (strncmp(dp, "exit\n", ds) == 0) 
 		{
@@ -52,16 +52,16 @@ void incoming_handler(crowket_t* pack) {
 	//	crow_println(pack); 
 	//} else {
 		char buf[10000];
-		bytes_to_dstring(buf, crowket_dataptr(pack), crowket_datasize(pack));		
+		bytes_to_dstring(buf, pack->dataptr(), pack->datasize());		
 		printf("%s\n", buf);
 	//}
 	
-	crow_release(pack);
+	crow::release(pack);
 }
 
-/*void traveling_handler(crowket_t* pack) {}
+/*void traveling_handler(crow::packet* pack) {}
 
-void transit_handler(crowket_t* pack) {
+void transit_handler(crow::packet* pack) {
 	if (sniffer) {
 		dpr("transit: ");
 		crow_println(pack); 
@@ -85,7 +85,7 @@ void* console_listener(void* arg) {
 		len = strlen(input);
 		input[len] = '\n';
 		input[len + 1] = '\0';
-		crow_send(addr, addrsize, input, len+1, 0, qos, 200);
+		crow::send(addr, addrsize, input, len+1, 0, qos, 200);
 	}
 
 	exit(0);
@@ -137,18 +137,18 @@ int main(int argc, char* argv[]) {
 			case 'g': gdebug = true; break;
 			case 'p': pulse = optarg; break;
 			case 'a': api = true; break;
-			case 'd': crow_enable_diagnostic(); break;
-			case 'v': crow_enable_live_diagnostic(); break;
+			case 'd': crow::enable_diagnostic(); break;
+			case 'v': crow::enable_live_diagnostic(); break;
 			case 0: break;
 		}
 	}
 
-	if (crow_create_udpgate(udpport, G1_UDPGATE) == NULL) {
+	if (crow::create_udpgate(udpport, G1_UDPGATE) == NULL) {
 		perror("udpgate open");
 		exit(-1);
 	}
 		
-	crow_user_incoming_handler = incoming_handler;
+	crow::user_incoming_handler = incoming_handler;
 	//crow_transit_handler = transit_handler;
 	
 	/*if (!serial_port.empty()) {
@@ -163,7 +163,7 @@ int main(int argc, char* argv[]) {
 	}*/
 
 	if (serial_port != NULL) {
-		if (crow_create_serial_gstuff(serial_port, 115200, 42, gdebug) == NULL) {
+		if (crow::create_serial_gstuff(serial_port, 115200, 42, gdebug) == NULL) {
 			perror("serialgate open");
 			exit(-1);
 		}				
@@ -192,8 +192,8 @@ int main(int argc, char* argv[]) {
 	if (pulse != std::string()) 
 	{
 		pulse = pulse + '\n';
-		crow_send(addr, addrsize, pulse.data(), pulse.size(), 0, qos, 200);
-		crow_onestep();
+		crow::send(addr, addrsize, pulse.data(), pulse.size(), 0, qos, 200);
+		crow::onestep();
 		exit(0);
 	}
 
@@ -204,6 +204,6 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	crow_spin();
+	crow::spin();
 }
 

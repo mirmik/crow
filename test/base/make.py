@@ -20,6 +20,7 @@ application("target",
 
 		("crow.minimal"),
 		("crow.udpgate"),
+		("crow.serial_gstuff"),
 		("crow.allocator", "malloc"),
 		("crow.time", "chrono"),
 		

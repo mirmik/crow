@@ -21,7 +21,7 @@ namespace crow
 		int open(uint16_t  port);
 	};
 
-	gateway* create_udpgate(uint16_t port, uint8_t id);
+	udpgate* create_udpgate(uint16_t port, uint8_t id);
 }
 
 #endif

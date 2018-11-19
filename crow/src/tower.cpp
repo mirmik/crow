@@ -32,12 +32,12 @@ void(*crow::undelivered_handler)(crow::packet* pack) = nullptr;
 static bool __diagnostic_enabled = false;
 extern bool __crow_live_diagnostic_enabled;
 
-void crow_enable_diagnostic()
+void crow::enable_diagnostic()
 {
 	__diagnostic_enabled = true;
 }
 
-void crow_enable_live_diagnostic()
+void crow::enable_live_diagnostic()
 {
 	__crow_live_diagnostic_enabled = true;
 }
@@ -309,7 +309,7 @@ void crow_transport(crow::packet* pack)
 }
 
 //void crow_send(crow_address& addr, const char* data, size_t len, uint8_t type, uint8_t qos, uint16_t ackquant) {
-void crow_send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant)
+void crow::send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	crow::packet* pack = crow::create_packet(NULL, asize, dsize);
 	pack->header.f.type = type;
@@ -321,7 +321,7 @@ void crow_send(const void* addr, uint8_t asize, const char* data, uint16_t dsize
 	crow_transport(pack);
 }
 
-void crow_send_v(const void* addr, uint8_t asize, const struct iovec* vec, size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
+void crow::send_v(const void* addr, uint8_t asize, const struct iovec* vec, size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	size_t dsize = 0;
 	const struct iovec* it = vec;

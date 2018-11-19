@@ -11,85 +11,26 @@
 
 #include <crow/gateway.h>
 
-__BEGIN_DECLS
+#include <gxx/gstuff/autorecv.h>
+#include <gxx/gstuff/gstuff.h>
 
-//void crow_serial_gstuff_open(struct crow_serial_gstuff* gw, uint16_t port);
-crow::gateway* crow_create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id, bool debug);
+namespace crow 
+{
+	struct serial_gstuff : public crow::gateway {
+		int fd;
 
-__END_DECLS
+		struct crow::packet * rpack;
+		bool debug;
 
-/*#include <crow/gateway.h>
-#include <gxx/gstuff/sender.h>
-#include <gxx/gstuff/automate.h>
+		struct gstuff_autorecv recver;
 
-#include <gxx/serial/serial.h>
-*/
-/*#include <gxx/io/std.h>
+		void newline_handler();
 
-#include <mutex>
-
-namespace crow {
-	std::mutex mtx;
-
-	struct serial_gstuff_gate : public gateway {
-		gxx::gstuff::automate recver;
-		//gxx::gstuff::sender sender;
-
-		crow::packet* rpack = nullptr;
-		//gxx::io::iostream* strm;
-		serial::Serial* ser;
-
-		serial_gstuff_gate(serial::Serial* ser) : ser(ser) {
-			recver.debug_mode(true);
-			recver.set_callback(gxx::make_delegate(&serial_gstuff_gate::handler, this));
-		}
-
-		void send(crow::packet* pack) override {
-			std::string str;
-			gxx::io::std_string_writer strm(str);
-			gxx::gstuff::sender sender(strm);
-
-			sender.start_message();
-			sender.write((char*)&pack->header, pack->header.flen);
-			sender.end_message();
-
-			mtx.lock();
-			ser->write((uint8_t*)str.data(), str.size());
-			mtx.unlock();
-
-			crow::return_to_tower(pack, crow::status::Sended);
-		}
-
-		void nonblock_onestep() override {
-			if (rpack == nullptr) {
-				init_recv();
-			}
-
-			char c;
-			//int len = read(ser->fd(), (uint8_t*)&c, 1);
-			int len = ser->read((uint8_t*)&c, 1);
-			if (len == 1) {
-				//dprhex(c); dpr("\t"); gxx::println(gxx::dstring(&c, 1));
-				recver.newchar(c);
-			}
-		}
-
-		void init_recv() {
-			rpack = (crow::packet*) malloc(128 + sizeof(crow::packet) - sizeof(crow::packet_header));
-			recver.init(gxx::buffer((char*)&rpack->header, 128));
-		}
-
-		void handler(gxx::buffer) {
-			crow::packet* block = rpack;
-			init_recv();
-
-			block->revert_stage(id);
-
-			crow::packet_initialization(block, this);
-			crow::travel(block);
-		}
+		void send(crow::packet*) override;
+		void nblock_onestep() override;
 	};
-}*/
 
+	crow::serial_gstuff* create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id, bool debug);
+}
 
 #endif
