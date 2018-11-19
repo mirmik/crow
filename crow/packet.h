@@ -20,12 +20,15 @@ struct crow_gw;
 #define	CROW_TARGET_ACK 1
 #define CROW_BINARY_ACK 2
 
+namespace crow 
+{
+
 /**
 	@brief Структура заголовок пакета. 
 	@details Заголовок пакета располагается в первых байтах пакета.
 	за заголовком следует поле адреса переменной длины, а за ним данные.
 */
-typedef struct crow_header {
+struct header {
 	union {
 		uint8_t pflag; ///< Флаги пакета
 		struct {
@@ -41,9 +44,9 @@ typedef struct crow_header {
 	uint16_t 	ackquant; ///< Таймаут для пересылки пакета.
 	uint16_t 	seqid; ///< Порядковый номер пакета. Присваивается отправителем.
 	uint8_t 	qos; ///< Поле качества обслуживания.
-} G1_PACKED crow_header_t;
+} G1_PACKED;
 
-typedef struct crowket {
+struct packet {
 	struct dlist_head 	lnk; ///< Для подключения в списки башни crow.
 	struct dlist_head 	ulnk; ///< Для подключения в список пользователя и зависимых протоколов.
 	struct crow_gw* 	ingate; ///< gate, которым пакет прибыл в систему.
@@ -69,8 +72,9 @@ typedef struct crowket {
 	size_t datasize() { return header.flen - header.alen - sizeof(crow_header_t); }
 #endif
 
-} G1_PACKED crowket_t;
+} G1_PACKED;
 
+}
 
 __BEGIN_DECLS
 
