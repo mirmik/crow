@@ -25,7 +25,8 @@ uint8_t type = 0;
 uint8_t ackquant = 200;
 //bool raw;
 bool api = false;
-bool noconsole = false;;
+bool noconsole = false;
+bool noend = false;
 bool echo = false;
 bool gdebug = false;
 bool info = false;
@@ -58,6 +59,7 @@ void incoming_handler(crow::packet* pack) {
 	char buf[10000];
 	bytes_to_dstring(buf, pack->dataptr(), pack->datasize());		
 	printf("%s\n", buf);
+	fflush(stdout);
 	//}
 	
 	crow::release(pack);
@@ -87,8 +89,13 @@ void* console_listener(void* arg) {
 		add_history(input);
 	
 		len = strlen(input);
-		input[len] = '\n';
-		input[len + 1] = '\0';
+		
+		if (!noend) 
+		{
+			input[len] = '\n';
+			input[len + 1] = '\0';
+		}
+
 		crow::send(addr, addrsize, input, len+1, type, qos, ackquant);
 	}
 
@@ -117,7 +124,8 @@ int main(int argc, char* argv[]) {
 		{"qos", required_argument, NULL, 'q'}, //qos отправляемых сообщений. 0 по умолчанию
 		{"type", required_argument, NULL, 't'}, //qos отправляемых сообщений. 0 по умолчанию
 
-		{"echo", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
+		{"echo", no_argument, NULL, 'E'}, //Активирует функцию эха входящих пакетов.
+		{"noend", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
 		{"info", no_argument, NULL, 'i'}, //Активирует информацию о вратах.
 		{"api", no_argument, NULL, 'a'}, //Активирует информацию о вратах.
 		{"noconsole", no_argument, NULL, 'n'}, //Активирует информацию о вратах.
@@ -130,7 +138,7 @@ int main(int argc, char* argv[]) {
 
     int long_index =0;
 	int opt= 0;
-	while ((opt = getopt_long(argc, argv, "uqSeidvgt", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "uqSEeidvgt", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'q': qos = atoi(optarg); break;
 			case 't': type = atoi(optarg); break;
@@ -139,7 +147,8 @@ int main(int argc, char* argv[]) {
 				serial_port = (char*) malloc(strlen(optarg) + 1); 
 				strcpy(serial_port, optarg); 
 				break;
-			case 'e': echo = true; break;
+			case 'E': echo = true; break;
+			case 'e': noend = true; break;
 			case 'i': info = true; break;
 			case 'n': noconsole = true; break;
 			case 'g': gdebug = true; break;
@@ -199,7 +208,7 @@ int main(int argc, char* argv[]) {
 
 	if (pulse != std::string()) 
 	{
-		pulse = pulse + '\n';
+		if (!noend) pulse = pulse + '\n';
 		crow::send(addr, addrsize, pulse.data(), pulse.size(), type, qos, ackquant);
 		crow::onestep();
 		exit(0);
