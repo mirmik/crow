@@ -26,7 +26,7 @@ application("ctrans",
 		("gxx.syslock", "mutex"),
 #		("gxx.serial"),
 	],
-	cxx_flags = "-Werror=all -Werror=extra -pedantic-errors -Werror=shadow -Werror=format=2 -Werror=float-equal -Werror=conversion -Werror=logical-op -Werror=shift-overflow=2 -Werror=duplicated-cond -Wno-cast-qual -Werror=cast-align",
+	#cxx_flags = "-Werror=all -Werror=extra -pedantic-errors -Werror=shadow -Werror=format=2 -Werror=float-equal -Werror=conversion -Werror=logical-op -Werror=shift-overflow=2 -Werror=duplicated-cond -Wno-cast-qual -Werror=cast-align",
 	#cxx_flags = "-Werror=conversion",
 	libs = ["pthread", "readline"]
 )
