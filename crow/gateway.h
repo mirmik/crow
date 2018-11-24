@@ -18,7 +18,7 @@ namespace crow {
 	struct gateway 
 	{
 		struct dlist_head lnk; ///< встроенное поле списка.
-		uint16_t id; ///< номер врат.
+		uint8_t id; ///< номер врат.
 
 		virtual void send(crow::packet*) = 0;
 		virtual void nblock_onestep() = 0;

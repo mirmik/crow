@@ -18,7 +18,7 @@ void crow::udpgate::nblock_onestep()
 	socklen_t sendsize = sizeof(sender);
 	memset(&sender, 0, sizeof(sender));
 
-	int len = recvfrom(sock, &block->header, 128, 0, (struct sockaddr*) &sender, &sendsize);
+	ssize_t len = recvfrom(sock, &block->header, 128, 0, (struct sockaddr*) &sender, &sendsize);
 	if (len <= 0) return;
 
 	crow::packet_initialization(block, this);

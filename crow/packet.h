@@ -73,9 +73,9 @@ namespace crow
 		char* dataptr() { return (char*)(&header + 1) + header.alen; }
 		uint8_t* stageptr() { return (uint8_t*)(&header + 1) + header.stg; }
 		char* endptr() { return (char*)(&header) + header.flen; }
-		size_t addrsize() { return header.alen; }
-		size_t blocksize() { return header.flen; }
-		size_t datasize() { return header.flen - header.alen - sizeof(crow::header); }
+		uint8_t addrsize() { return header.alen; }
+		uint16_t blocksize() { return header.flen; }
+		uint16_t datasize() { return (uint16_t)(header.flen - header.alen - sizeof(crow::header)); }
 
 		gxx::buffer datasect() { return gxx::buffer(dataptr(), datasize()); }
 		gxx::buffer addrsect() { return gxx::buffer(addrptr(), addrsize()); }
@@ -96,7 +96,7 @@ namespace crow
 	///Вернуть память выделенную для пакета pack
 	void deallocate_packet(crow::packet* pack);
 
-	packet* create_packet(struct crow::gateway* ingate, size_t addrsize, size_t datasize);
+	packet* create_packet(struct crow::gateway* ingate, uint8_t addrsize, size_t datasize);
 
 	void packet_initialization(struct crow::packet* pack, struct crow::gateway* ingate);
 

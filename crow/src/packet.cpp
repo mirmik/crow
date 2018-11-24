@@ -10,13 +10,13 @@
 #include <crow/gateway.h>
 #include <gxx/syslock.h>
 
-crow::packet* crow::create_packet(crow::gateway* ingate, size_t addrsize, size_t datasize)
+crow::packet* crow::create_packet(crow::gateway* ingate, uint8_t addrsize, size_t datasize)
 {
 	system_lock();
 	crow::packet* pack = crow::allocate_packet(addrsize + datasize);
 	system_unlock();
 
-	pack -> header.flen = sizeof(crow::header) + addrsize + datasize;
+	pack -> header.flen = (uint16_t)(sizeof(crow::header) + addrsize + datasize);
 	pack -> header.alen = addrsize;
 	pack -> header.ackquant = 200;
 	pack -> header.pflag = 0;
@@ -63,5 +63,5 @@ void crow::packet::revert(struct iovec* vec, size_t veclen)
 		while (ptr != eptr)
 			*tgt++ = *--ptr;
 	}
-	header.stg += sz;
+	header.stg = (uint8_t)(header.stg + sz);
 }
