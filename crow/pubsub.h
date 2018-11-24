@@ -21,7 +21,7 @@ typedef struct crow_subheader_pubsub {
 } G1_PACKED crow_subheader_pubsub_t;
 
 typedef struct crow_subheader_pubsub_data {
-	uint8_t datsz;
+	uint16_t datsz;
 } G1_PACKED crow_subheader_pubsub_data_t;
 
 typedef struct crow_subheader_pubsub_control {
@@ -34,7 +34,7 @@ namespace crow
 	void publish(const char* theme, const char* data, uint8_t qos=0, uint16_t acktime=DEFAULT_ACKQUANT);
 	void subscribe(const char* theme, uint8_t qos=0, uint16_t acktime=DEFAULT_ACKQUANT);
 
-	void publish_buffer(const char* theme, const void* data, size_t datsz, uint8_t qos, uint16_t acktime);
+	void publish_buffer(const char* theme, const void* data, uint16_t datsz, uint8_t qos, uint16_t acktime);
 	void set_publish_host(const uint8_t* hhost, size_t hsize);
 
 
@@ -79,7 +79,7 @@ namespace crow
 		{
 			assert(pack->header.f.type == G1_G3TYPE);
 
-			struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
+			//struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
 			struct crow_subheader_pubsub_data * shps_d = get_subheader_pubsub_data(pack);
 
 			return gxx::buffer(crow::packet_pubsub_datptr(pack), shps_d->datsz);

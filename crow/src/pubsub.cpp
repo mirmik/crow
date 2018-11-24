@@ -1,7 +1,7 @@
 #include <crow/pubsub.h>
 
 const uint8_t * brocker_host;
-size_t brocker_host_len;
+uint8_t brocker_host_len;
 
 /*crow::host brocker_host;
 crow::QoS brocker_qos = crow::QoS(0);
@@ -9,13 +9,13 @@ uint16_t brocker_ackquant = DEFAULT_ACKQUANT;
 */
 void(*crow_pubsub_handler)(crow::packet* pack);
 
-void crow::publish_buffer(const char* theme, const void* data, size_t dlen, uint8_t qos, uint16_t acktime)
+void crow::publish_buffer(const char* theme, const void* data, uint16_t dlen, uint8_t qos, uint16_t acktime)
 {
 	struct crow_subheader_pubsub subps;
 	struct crow_subheader_pubsub_data subps_d;
 
 	subps.type = PUBLISH;
-	subps.thmsz = strlen(theme);
+	subps.thmsz = (uint8_t) strlen(theme);
 	subps_d.datsz = dlen;
 
 	struct iovec iov[4] =
@@ -30,7 +30,7 @@ void crow::publish_buffer(const char* theme, const void* data, size_t dlen, uint
 }
 
 void crow::publish(const char* theme, const char* data, uint8_t qos, uint16_t acktime) {
-	crow::publish_buffer(theme, data, strlen(data), qos, acktime);
+	crow::publish_buffer(theme, data, (uint16_t) strlen(data), qos, acktime);
 }
 
 void crow::subscribe(const char* theme, uint8_t qos, uint16_t acktime) {
@@ -40,7 +40,7 @@ void crow::subscribe(const char* theme, uint8_t qos, uint16_t acktime) {
 	struct crow_subheader_pubsub_control subps_c;
 
 	subps.type = SUBSCRIBE;
-	subps.thmsz = thmsz;
+	subps.thmsz = (uint8_t) thmsz;
 	subps_c.qos = qos;
 	subps_c.ackquant = acktime;
 
@@ -60,7 +60,7 @@ void crow::subscribe(const char* theme, crow::QoS qos) {
 void crow::set_publish_host(const uint8_t * hexhost, size_t hsize)
 {
 	brocker_host = hexhost;
-	brocker_host_len = hsize;
+	brocker_host_len = (uint8_t) hsize;
 }
 /*
 void crow::set_publish_qos(crow::QoS qos) {

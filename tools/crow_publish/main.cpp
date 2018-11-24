@@ -30,7 +30,7 @@ std::map<std::string, size_t> visitor_size =
 
 void flt32_conv(const std::string& str, void* tgt)
 {
-	*(float*)tgt = atof(str.c_str());
+	*(float*)tgt = (float)atof(str.c_str());
 
 }
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 			case 'c': crowker = optarg; break;
 			case 'g': gbson_parse = true; break;
 			case 'b': bindata = true; break;
-			case 'q': qos = atoi(optarg); break;
+			case 'q': qos = (uint8_t) atoi(optarg); break;
 			case 'd': crow::enable_live_diagnostic(); break;
 			case 'v': crow::enable_diagnostic(); break;
 			case 0: break;
@@ -109,9 +109,9 @@ int main(int argc, char* argv[])
 		char buf[256];
 		std::stringstream istrm(data);
 		gxx::trent tr = gxx::json::parse(istrm).unwrap();
-		int len = gxx::gbson::dump(tr, buf, 256);
+		size_t len = gxx::gbson::dump(tr, buf, 256);
 
-		crow::publish_buffer(theme.data(), buf, len, qos, acktime);
+		crow::publish_buffer(theme.data(), buf, (uint16_t) len, qos, acktime);
 	}
 	else if (bindata)
 	{
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 
 		gxx::print_dump(block, sz);
 
-		crow::publish_buffer(theme.data(), block, sz, qos, acktime);
+		crow::publish_buffer(theme.data(), block, (uint16_t)sz, qos, acktime);
 	}
 	else
 	{
