@@ -21,22 +21,25 @@ uint8_t addr[128];
 int addrsize;
 
 uint8_t qos = 0;
-//bool raw;
+uint8_t type = 0;
+uint8_t ackquant = 200;
+
 bool api = false;
 bool noconsole = false;
+bool noend = false;
 bool echo = false;
 bool gdebug = false;
 bool info = false;
 
 std::string pulse;
 
-void incoming_handler(crow::packet* pack)
-{
-	//dpr("incoming: ");
-
-	if (echo)
-	{
-		crow::send(pack->addrptr(), pack->header.alen, pack->dataptr(), pack->datasize(), 0, 0, 300);
+void incoming_handler(crow::packet* pack) {
+	//dpr("incoming: "); 
+	
+	if (echo) {
+		crow::send(pack->addrptr(), pack->header.alen, 
+			pack->dataptr(), pack->datasize(), 
+			pack->header.f.type, pack->header.qos, pack->header.ackquant);
 	}
 
 	if (api)
@@ -50,13 +53,10 @@ void incoming_handler(crow::packet* pack)
 		}
 	}
 
-	//if (packmon) {
-	//	crow_println(pack);
-	//} else {
 	char buf[10000];
-	bytes_to_dstring(buf, pack->dataptr(), pack->datasize());
+	bytes_to_dstring(buf, pack->dataptr(), pack->datasize());		
 	printf("%s\n", buf);
-	//}
+	fflush(stdout);
 
 	crow::release(pack);
 }
@@ -89,9 +89,14 @@ void* console_listener(void* arg)
 		add_history(input);
 
 		len = strlen(input);
-		input[len] = '\n';
-		input[len + 1] = '\0';
-		crow::send(addr, (uint8_t) addrsize, input, (uint16_t) (len + 1), 0, qos, 200);
+
+		if (!noend) 
+		{
+			input[len] = '\n';
+			input[len + 1] = '\0';
+		}
+
+		crow::send(addr, (uint8_t) addrsize, input, (uint16_t) (len + 1), type, qos, ackquant);
 	}
 
 	exit(0);
@@ -116,9 +121,13 @@ int main(int argc, char* argv[])
 	const struct option long_options[] =
 	{
 		{"udp", required_argument, NULL, 'u'}, //udp порт для 12-ого гейта.
-		{"qos", required_argument, NULL, 'q'}, //qos отправляемых сообщений. 0 по умолчанию
 		{"serial", required_argument, NULL, 'S'}, //serial...
-		{"echo", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
+
+		{"qos", required_argument, NULL, 'q'}, //qos отправляемых сообщений. 0 по умолчанию
+		{"type", required_argument, NULL, 't'}, //qos отправляемых сообщений. 0 по умолчанию
+
+		{"echo", no_argument, NULL, 'E'}, //Активирует функцию эха входящих пакетов.
+		{"noend", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
 		{"info", no_argument, NULL, 'i'}, //Активирует информацию о вратах.
 		{"api", no_argument, NULL, 'a'}, //Активирует информацию о вратах.
 		{"noconsole", no_argument, NULL, 'n'}, //Активирует информацию о вратах.
@@ -129,23 +138,21 @@ int main(int argc, char* argv[])
 		{NULL, 0, NULL, 0}
 	};
 
-	int long_index = 0;
-	int opt = 0;
-
-	while ((opt = getopt_long(argc, argv, "uqSeidvg", long_options, &long_index)) != -1)
-	{
-		switch (opt)
-		{
+    int long_index =0;
+	int opt= 0;
+	while ((opt = getopt_long(argc, argv, "uqSEeidvgt", long_options, &long_index)) != -1) {
+		switch (opt) {
 			case 'q': qos = (uint8_t) atoi(optarg); break;
-
+			case 't': type = (uint8_t) atoi(optarg); break;
 			case 'u': udpport = (uint16_t) atoi(optarg); break;
-
 			case 'S':
 				serial_port = (char*) malloc(strlen(optarg) + 1);
 				strcpy(serial_port, optarg);
 				break;
 
-			case 'e': echo = true; break;
+			case 'E': echo = true; break;
+
+			case 'e': noend = true; break;
 
 			case 'i': info = true; break;
 
@@ -223,8 +230,8 @@ int main(int argc, char* argv[])
 
 	if (pulse != std::string())
 	{
-		pulse = pulse + '\n';
-		crow::send(addr, (uint8_t)addrsize, pulse.data(), (uint16_t)pulse.size(), 0, qos, 200);
+		if (!noend) pulse = pulse + '\n';
+		crow::send(addr, (uint8_t)addrsize, pulse.data(), (uint16_t)pulse.size(), type, qos, ackquant);
 		crow::onestep();
 		exit(0);
 	}
