@@ -2,6 +2,8 @@
 @file tower.cpp
 */
 
+#define NOTRACE 1
+
 #include <stdbool.h>
 #include <crow/tower.h>
 #include <gxx/syslock.h>
@@ -11,6 +13,8 @@
 
 #include <assert.h>
 #include <string.h>
+
+#include <gxx/trace.h>
 
 /*gxx::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
 gxx::dlist<crow::packet, &crow::packet::lnk> crow_travelled;
@@ -34,16 +38,19 @@ static bool __live_diagnostic_enabled = false;
 
 void crow::enable_diagnostic()
 {
+	TRACE();
 	__diagnostic_enabled = true;
 }
 
 void crow::enable_live_diagnostic()
 {
+	TRACE();
 	__live_diagnostic_enabled = true;
 }
 
 static void crow_utilize(crow::packet* pack)
 {
+	TRACE();
 	if (__live_diagnostic_enabled)
 		crow::diagnostic("utilz", pack);
 
@@ -56,6 +63,7 @@ static void crow_utilize(crow::packet* pack)
 
 static crow::gateway* crow_find_target_gateway(crow::packet* pack)
 {
+	TRACE();
 	uint8_t gidx = *pack->stageptr();
 
 	for (crow::gateway& gate : crow_gateways)
@@ -69,6 +77,7 @@ static crow::gateway* crow_find_target_gateway(crow::packet* pack)
 
 void crow::release(crow::packet* pack)
 {
+	TRACE();
 	system_lock();
 
 	if (pack->f.released_by_tower) crow_utilize(pack);
@@ -79,6 +88,7 @@ void crow::release(crow::packet* pack)
 
 static void crow_tower_release(crow::packet* pack)
 {
+	TRACE();
 	system_lock();
 
 	//Скорее всего это поле должно освобождаться без инициализации.
@@ -93,6 +103,7 @@ static void crow_tower_release(crow::packet* pack)
 
 static void utilize_from_outers(crow::packet* pack)
 {
+	TRACE();
 	crow::packet* it;
 	dlist_for_each_entry(it, &crow_outters, lnk)
 	{
@@ -110,6 +121,7 @@ static void utilize_from_outers(crow::packet* pack)
 
 static void qos_release_from_incoming(crow::packet* pack)
 {
+	TRACE();
 	crow::packet* it;
 	dlist_for_each_entry(it, &crow_incoming, lnk)
 	{
@@ -125,19 +137,22 @@ static void qos_release_from_incoming(crow::packet* pack)
 }
 
 static void add_to_incoming_list(crow::packet* pack)
-{
+{	
+	TRACE();
 	pack->last_request_time = crow::millis();
 	dlist_move_tail(&pack->lnk, &crow_incoming);
 }
 
 static void add_to_outters_list(crow::packet* pack)
 {
+	TRACE();
 	pack->last_request_time = crow::millis();
 	dlist_move_tail(&pack->lnk, &crow_outters);
 }
 
 void crow::travel(crow::packet* pack)
 {
+	TRACE();
 	system_lock();
 	dlist_add_tail(&pack->lnk, &crow_travelled);
 	system_unlock();
@@ -145,11 +160,13 @@ void crow::travel(crow::packet* pack)
 
 static void crow_travel_error(crow::packet* pack)
 {
+	TRACE();
 	crow_utilize(pack);
 }
 
 static void crow_incoming_handler(crow::packet* pack)
 {
+	TRACE();
 	switch (pack->header.f.type)
 	{
 		case G1_G0TYPE:
@@ -172,6 +189,7 @@ static void crow_incoming_handler(crow::packet* pack)
 
 static void crow_send_ack(crow::packet* pack)
 {
+	TRACE();
 	crow::packet* ack = crow::create_packet(NULL, pack->header.alen, 0);
 	ack->header.f.type = pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
 	ack->header.f.ack = 1;
@@ -184,6 +202,7 @@ static void crow_send_ack(crow::packet* pack)
 
 static void crow_send_ack2(crow::packet* pack)
 {
+	TRACE();
 	crow::packet* ack = crow::create_packet(NULL, pack->header.alen, 0);
 	ack->header.f.type = G1_ACK22_TYPE;
 	ack->header.f.ack = 1;
@@ -195,6 +214,7 @@ static void crow_send_ack2(crow::packet* pack)
 
 static void crow_revert_address(crow::packet* pack)
 {
+	TRACE();
 	uint8_t* first = pack->addrptr();
 	uint8_t* last = pack->addrptr() + pack->header.alen;
 
@@ -208,6 +228,7 @@ static void crow_revert_address(crow::packet* pack)
 
 static void crow_do_travel(crow::packet* pack)
 {
+	TRACE();
 	//if (crow_traveling_handler)
 	// crow_traveling_handler(pack);
 
@@ -325,6 +346,7 @@ static void crow_do_travel(crow::packet* pack)
 uint16_t __seqcounter = 0;
 static void crow_transport(crow::packet* pack)
 {
+	TRACE();
 	pack->header.stg = 0;
 	pack->header.f.ack = 0;
 	system_lock();
@@ -336,6 +358,7 @@ static void crow_transport(crow::packet* pack)
 //void crow_send(crow_address& addr, const char* data, size_t len, uint8_t type, uint8_t qos, uint16_t ackquant) {
 void crow::send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
+	TRACE();
 	crow::packet* pack = crow::create_packet(NULL, asize, dsize);
 	pack->header.f.type = type & 0x1F;
 	pack->header.qos = qos;
@@ -348,6 +371,7 @@ void crow::send(const void* addr, uint8_t asize, const char* data, uint16_t dsiz
 
 void crow::send_v(const void* addr, uint8_t asize, const struct iovec* vec, size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
+	TRACE();
 	size_t dsize = 0;
 	const struct iovec* it = vec;
 	const struct iovec* const eit = vec + veclen;
@@ -378,6 +402,7 @@ void crow::send_v(const void* addr, uint8_t asize, const struct iovec* vec, size
 
 void crow::return_to_tower(crow::packet* pack, uint8_t sts)
 {
+	TRACE();
 	system_lock();
 
 	if (pack->ingate != NULL)
@@ -398,6 +423,7 @@ void crow::return_to_tower(crow::packet* pack, uint8_t sts)
 
 void crow::onestep_travel_only()
 {
+	TRACE();
 	system_lock();
 
 	while (1)
@@ -416,19 +442,11 @@ void crow::onestep_travel_only()
 	system_unlock();
 }
 
-/**
-	@todo Переделать очередь пакетов, выстроив их в порядке работы таймеров.
-*/
-void crow::onestep()
+static inline void crow_onestep_send_stage() 
 {
 	crow::packet* pack;
-	crow::packet* n;
 
-	//crow::gateway* gate;
-	for (crow::gateway& gate : crow_gateways)
-	{
-		gate.nblock_onestep();
-	}
+	TRACE();
 
 	while (1)
 	{
@@ -443,10 +461,31 @@ void crow::onestep()
 		dlist_del_init(&pack->lnk);
 		system_unlock();
 		crow_do_travel(pack);
+		
+		system_unlock();
 	}
+	system_unlock();
+}
+
+static inline void crow_onestep_outers_stage()
+{
+	crow::packet* pack;
+	crow::packet* n;
+
+	TRACE();
 
 	uint16_t curtime = crow::millis();
-	//gxx::for_each_safe(crow_outters.begin(), crow_outters.end(), [&](crow::packet& pack) {
+
+	system_lock();
+	if (dlist_empty(&crow_outters))	
+	{
+		system_unlock();
+		return;
+	}
+	system_unlock();	
+
+
+	system_lock();
 	dlist_for_each_entry_safe(pack, n, &crow_outters, lnk)
 	{
 		assert(pack->f.released_by_tower == 0);
@@ -468,7 +507,27 @@ void crow::onestep()
 			}
 		}
 	}
+	system_unlock();
+} 
 
+static inline void crow_onestep_incoming_stage()
+{
+	crow::packet* pack;
+	crow::packet* n;
+	
+	TRACE();
+
+	uint16_t curtime = crow::millis();
+
+	system_lock();
+	if (dlist_empty(&crow_incoming))	
+	{
+		system_unlock();
+		return;
+	}
+	system_unlock();	
+
+	system_lock();
 	dlist_for_each_entry_safe(pack, n, &crow_incoming, lnk)
 	{
 		assert(pack->f.released_by_tower == 0);
@@ -487,10 +546,29 @@ void crow::onestep()
 		}
 	}
 	system_unlock();
+} 
+
+/**
+	@todo Переделать очередь пакетов, выстроив их в порядке работы таймеров.
+*/
+void crow::onestep()
+{
+	TRACE();
+
+	//crow::gateway* gate;
+	for (crow::gateway& gate : crow_gateways)
+	{
+		gate.nblock_onestep();
+	}
+	
+	crow_onestep_send_stage();
+	crow_onestep_outers_stage();
+	crow_onestep_incoming_stage();
 }
 
 void crow::spin()
 {
+	TRACE();
 	while (1)
 	{
 		crow::onestep();
