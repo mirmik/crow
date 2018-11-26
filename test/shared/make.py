@@ -7,7 +7,7 @@ licant.include("gxx")
 
 licant.cxx_application("target",
 	sources = ["main.cpp"],
-	libs = ["crow"]
+	libs = ["crow", "gxx"],
 )
 
 licant.ex("target")
