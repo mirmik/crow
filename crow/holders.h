@@ -2,14 +2,19 @@
 #define CROW_HOLDERS_H
 
 #include <crow/packet.h>
+#include <crow/pubsub.h>
 #include <crow/tower.h>
+
+#include <gxx/util/setget.h>
 
 namespace crow
 {
 	class packref
 	{
+	protected:
 		crow::packet * pack;
 
+	public:
 		packref(crow::packet* pack_) : pack(pack_)
 		{
 			pack->refs++;
@@ -36,16 +41,37 @@ namespace crow
 			}
 		}
 
-		gxx::buffer rawdata() 
-		{
-			return pack->rawdata();
-		}
+		VALUE_GETTER(addr, pack->addr());
 
-		gxx::buffer addr() 
+		VALUE_GETTER(rawdata, pack->rawdata());
+
+		VALUE_GETTER(qos, pack->header.qos);
+
+		VALUE_GETTER(ackquant, pack->header.ackquant);
+	};
+
+	class node_packref : public packref {};
+
+	class pubsub_packref : public packref
+	{
+	public:
+		gxx::buffer theme()
 		{
-			return pack->addr();
+			return pubsub::get_theme(pack);
 		}
 	};
+
+	class pubsub_data_packref : public pubsub_packref
+	{
+	public:
+		gxx::buffer data()
+		{
+			return pubsub::get_data(pack);
+		}
+	};
+
+	class pubsub_control_packref : public pubsub_packref {};
+
 }
 
 #endif
