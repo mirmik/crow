@@ -4,7 +4,7 @@
 #include <gxx/util/hexascii.h>
 #include <gxx/util/string.h>
 
-void crow_print_to(gxx::io::ostream& out, crow::packet* pack) {
+/*void crow_print_to(gxx::io::ostream& out, crow::packet* pack) {
 	gxx::fprint_to(out, "("
 		"qos:{}, "
 		"ack:{}, "
@@ -21,7 +21,7 @@ void crow_print_to(gxx::io::ostream& out, crow::packet* pack) {
 		(uint8_t)pack->header.f.type, 
 		gxx::hexascii_encode((const uint8_t*)pack->addrptr(), pack->header.alen), 
 		pack->header.stg, 
-		gxx::dstring(pack->dataptr(), pack->datasize()), 
+		gxx::dstring(pack->data()), 
 		pack->flags
 	);
 }
@@ -33,7 +33,7 @@ void crow_print(crow::packet* pack) {
 void crow_println(crow::packet* pack) {
 	crow_print_to(*gxx::standart_output, pack);
 	gxx::print_to(*gxx::standart_output, "\n");
-}
+}*/
 
 void crow::diagnostic(const char* notation, crow::packet* pack) 
 {
@@ -53,8 +53,8 @@ void crow::diagnostic(const char* notation, crow::packet* pack)
 		(uint8_t)pack->header.alen, 
 		(uint16_t)pack->header.flen, 
 		(uint8_t)pack->header.f.type, 
-		gxx::hexascii_encode((const uint8_t*)pack->addrptr(), pack->header.alen), 
+		gxx::hexascii_encode(pack->addr()), 
 		pack->header.stg, 
-		gxx::dstring(pack->dataptr(), pack->datasize())
+		gxx::dstring(pack->rawdata())
 	);
 }

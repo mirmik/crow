@@ -52,12 +52,13 @@ namespace crow
 
 	struct packet
 	{
-		struct dlist_head 	lnk; ///< Для подключения в списки башни crow.
-		struct dlist_head 	ulnk; ///< Для подключения в список пользователя и зависимых протоколов.
+		struct dlist_head 		lnk; ///< Для подключения в списки башни crow.
+		struct dlist_head 		ulnk; ///< Для подключения в список пользователя и зависимых протоколов.
 		struct crow::gateway* 	ingate; ///< gate, которым пакет прибыл в систему.
-		uint16_t 			last_request_time; ///< @todo
-		uint8_t 			ackcount; ///< @todo
-		uint8_t 			status;
+		uint16_t 				last_request_time; ///< @todo
+		uint8_t 				ackcount; ///< @todo
+		uint8_t 				status;
+		uint8_t 				refs;
 		union
 		{
 			uint8_t flags; ///< Местные флаги
@@ -68,21 +69,30 @@ namespace crow
 			} f;
 		};
 		struct crow::header header;
-
-		uint8_t* addrptr() { return (uint8_t*)(&header + 1); }
-		char* dataptr() { return (char*)(&header + 1) + header.alen; }
+		
 		uint8_t* stageptr() { return (uint8_t*)(&header + 1) + header.stg; }
-		char* endptr() { return (char*)(&header) + header.flen; }
-		uint8_t addrsize() { return header.alen; }
-		uint16_t blocksize() { return header.flen; }
-		uint16_t datasize() { return (uint16_t)(header.flen - header.alen - sizeof(crow::header)); }
+		//uint8_t& stage() { return *stageptr(); }
 
+		char* endptr() { return (char*)(&header) + header.flen; }		
+		uint16_t blocksize() { return header.flen; }
+		
+		[[deprecated]]
 		gxx::buffer datasect() { return gxx::buffer(dataptr(), datasize()); }
+		
+		[[deprecated]]
 		gxx::buffer addrsect() { return gxx::buffer(addrptr(), addrsize()); }
+
+		gxx::buffer rawdata() { return gxx::buffer(dataptr(), datasize()); }
+		gxx::buffer addr() { return gxx::buffer(addrptr(), addrsize()); }
 
 		void revert_gate(uint8_t gateindex);
 		void revert(struct iovec* vec, size_t veclen);
 
+		uint8_t* addrptr() { return (uint8_t*)(&header + 1); }
+		uint8_t addrsize() { return header.alen; }
+
+		char* dataptr() { return (char*)(&header + 1) + header.alen; }
+		uint16_t datasize() { return (uint16_t)(header.flen - header.alen - sizeof(crow::header)); }
 	} G1_PACKED;
 
 	/**

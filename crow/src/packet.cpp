@@ -10,6 +10,16 @@
 #include <crow/gateway.h>
 #include <gxx/syslock.h>
 
+void crow::packet_initialization(crow::packet* pack, crow::gateway* ingate)
+{
+	dlist_init(&pack->lnk);
+	dlist_init(&pack->ulnk);
+	pack -> ingate = ingate;
+	pack -> ackcount = 0;
+	pack -> flags = 0;
+	pack -> refs = 0;
+}
+
 crow::packet* crow::create_packet(crow::gateway* ingate, uint8_t addrsize, size_t datasize)
 {
 	system_lock();
@@ -23,22 +33,9 @@ crow::packet* crow::create_packet(crow::gateway* ingate, uint8_t addrsize, size_
 	pack -> header.qos = 0;
 	pack -> header.stg = 0;
 
-	dlist_init(&pack->lnk);
-	dlist_init(&pack->ulnk);
-	pack -> ingate = ingate;
-	pack -> ackcount = 0;
-	pack -> flags = 0;
+	packet_initialization(pack, ingate);
 
 	return pack;
-}
-
-void crow::packet_initialization(crow::packet* pack, crow::gateway* ingate)
-{
-	dlist_init(&pack->lnk);
-	dlist_init(&pack->ulnk);
-	pack -> ingate = ingate;
-	pack -> ackcount = 0;
-	pack -> flags = 0;
 }
 
 void crow::packet::revert_gate(uint8_t gateindex)
