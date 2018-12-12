@@ -35,6 +35,10 @@ tools/ctrans/ctrans
 tools/crowker/crowker
 tools/crow_subscribe/crow_subscribe
 tools/crow_publish/crow_publish
+apps/ctrans/ctrans
+apps/crowker/crowker
+apps/crow_subscribe/crow_subscribe
+apps/crow_publish/crow_publish
 target
 
 dox/html
