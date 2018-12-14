@@ -14,6 +14,7 @@
 uint8_t crowker_addr[256];
 size_t crowker_len;
 
+bool noend = false;
 uint8_t qos = 0;
 uint8_t acktime = 200;
 bool gbson_flag = false;
@@ -87,6 +88,7 @@ void subscribe_handler(crow::packet* pack)
 			exit(0);
 		}
 
+		fflush(stdout);
 		crow::release(pack);
 		return;
 	}
@@ -96,11 +98,15 @@ void subscribe_handler(crow::packet* pack)
 		gxx::trent tr;
 		gxx::gbson::load(tr, data.data(), data.size());
 		gxx::println(tr);
+		fflush(stdout);
 		crow::release(pack);
 		return;
 	}
 
-	gxx::println(gxx::dstring(data));
+	gxx::print(gxx::dstring(data));
+	if (!noend) gxx::println();
+	fflush(stdout);
+	
 	crow::release(pack);
 	return;
 }
@@ -121,6 +127,7 @@ int main(int argc, char* argv[])
 		{"debug", no_argument, NULL, 'd'},
 		{"vdebug", no_argument, NULL, 'v'},
 		{"gbson", no_argument, NULL, 'g'},
+		{"noend", no_argument, NULL, 'e'}, //Активирует функцию эха входящих пакетов.
 		{"bin", required_argument, NULL, 'b'},
 		{"qos", required_argument, NULL, 'q'},
 		{NULL, 0, NULL, 0}
@@ -133,6 +140,7 @@ int main(int argc, char* argv[])
 		switch (opt)
 		{
 			case 'c': crowker = optarg; break;
+			case 'e': noend = true; break;
 			case 'd': crow::enable_diagnostic(); break;
 			case 'v': crow::enable_live_diagnostic(); break;
 			case 'g': gbson_flag = true;
