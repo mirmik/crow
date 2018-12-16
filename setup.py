@@ -10,7 +10,7 @@ import licant
 
 licant.include("gxx")
 licant.cxx_objects("gxx-objects", mdepends = ["gxx"] )
-gxxopts = licant.core.core.get("gxx-objects").lopts
+gxxopts = licant.get_target("gxx-objects").finalopts
 
 class bdist_wheel(bdist_wheel_):
 	def finalize_options(self):
@@ -29,7 +29,7 @@ class bdist_wheel(bdist_wheel_):
 		self.plat_name_supplied = True
 		self.plat_name = platform_name
 
-pycrow_lib = Extension("pycrow.libservoce",
+pycrow_lib = Extension("pycrow.libcrow",
 	sources = gxxopts["sources"],
 	extra_compile_args=['-fPIC', '-std=c++14'],
 	extra_link_args=['-Wl,-rpath,$ORIGIN/libs'],
