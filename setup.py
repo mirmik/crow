@@ -29,22 +29,25 @@ class bdist_wheel(bdist_wheel_):
 		self.plat_name_supplied = True
 		self.plat_name = platform_name
 
+print([os.path.relpath(p) for p in gxxopts["sources"]])
+
 pycrow_lib = Extension("pycrow.libcrow",
-	sources = gxxopts["sources"],
+	sources = ["crow/pywrap.cpp"] + [os.path.relpath(p) for p in gxxopts["sources"]],
 	extra_compile_args=['-fPIC', '-std=c++14'],
 	extra_link_args=['-Wl,-rpath,$ORIGIN/libs'],
-	include_dirs = ["crow"] + gxxopts["include_paths"],
+	include_dirs = ["crow"] + [os.path.relpath(p) for p in gxxopts["include_paths"]],
 	libraries = [],
 )
 
 setup(
 	name = 'pycrow',
+	packages = ['pycrow'],
 	version = '0.0.1',
 	license='MIT',
 	description = 'Messaging system',
 	author = 'Sorokin Nikolay',
 	author_email = 'mirmikns@yandex.ru',
-	url = 'https://mirmik.github.io/zencad/',
+	url = 'https://mirmik.github.io/crow/',
 	keywords = ['testing', 'cad'],
 	classifiers = [],
 
