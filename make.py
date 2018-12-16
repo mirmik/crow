@@ -17,12 +17,9 @@ install_library_path = os.path.join(install_directory_path, target)
 install_library_link = os.path.join(install_directory_path, 'libcrow.so')
 
 licant.cxx_shared_library(target,
-	include_modules = 
+	mdepends = 
 	[
-		licant.submodule("crow"),
-		licant.submodule("crow.time", "chrono"),
-		licant.submodule("crow.allocator", "malloc"),
-		licant.submodule("gxx", 'posix'),
+		"crow"
 	],
 
 	cxx_flags = '-fPIC',
