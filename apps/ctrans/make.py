@@ -14,7 +14,9 @@ application("ctrans",
 	mdepends = [
 		"crow",
 		"crow.udpgate",
-		"crow.serial_gstuff"
+		"crow.serial_gstuff",
+
+		("gxx.print", "__none__")
 	],
 
 	#cxx_flags = "-Werror=all -Werror=extra -pedantic-errors -Werror=shadow -Werror=format=2 -Werror=float-equal -Werror=conversion -Werror=logical-op -Werror=shift-overflow=2 -Werror=duplicated-cond -Wno-cast-qual -Werror=cast-align",
