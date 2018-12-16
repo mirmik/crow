@@ -11,21 +11,10 @@ licant.libs.include("crow")
 
 application("crowker", 
 	sources = ["main.cpp", "brocker.cpp"],
-	include_modules = [
-		("crow.minimal"),
-		("crow.minimal_pubsub"),
-		("crow.allocator", "malloc"),
-		("crow.time", "chrono"),
-		
-		("crow.udpgate"),
-		
-		("gxx", "posix"),
-#		("gxx.inet", "posix"),
-		("gxx.print", "cout"),
-		("gxx.dprint", "cout"),
-		("gxx.syslock", "mutex"),
-	],
-	cxx_flags = ""
+	mdepends = [
+		"crow", 
+		"crow.udpgate"
+	]
 )
 
 @licant.routine(deps=["crowker"])

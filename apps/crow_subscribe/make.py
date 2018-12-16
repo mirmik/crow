@@ -11,22 +11,10 @@ licant.libs.include("crow")
 
 application("crow_subscribe",
 	sources = ["main.cpp"],
-	include_modules = [
-		("crow.minimal"),
-		("crow.minimal_pubsub"),
-		("crow.allocator", "malloc"),
-		("crow.time", "chrono"),
-
-		("crow.udpgate"),
-
-		("gxx", "posix"),
-		("gxx.trent"),
-		("gxx.inet", "posix"),
-		("gxx.print", "cout"),
-		("gxx.dprint", "cout"),
-		("gxx.syslock", "mutex"),
-	],
-	cxx_flags = ""
+	mdepends = [
+		"crow", 
+		"crow.udpgate"
+	]
 )
 
 @licant.routine(deps=["crow_subscribe"])
