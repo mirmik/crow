@@ -83,7 +83,7 @@ void crow::udpgate::send(crow::packet* pack)
 	crow::return_to_tower(pack, CROW_SENDED);
 }
 
-crow::udpgate* crow::create_udpgate(uint16_t port, uint8_t id)
+crow::udpgate* crow::create_udpgate(uint8_t id, uint16_t port)
 {
 	crow::udpgate* g = new crow::udpgate;
 	g->block = NULL;

@@ -6,6 +6,7 @@
 #define G1_GATES_UDPGATE_H
 
 #include <crow/gateway.h>
+#include <crow/defs.h>
 
 namespace crow 
 {
@@ -21,7 +22,7 @@ namespace crow
 		int open(uint16_t  port);
 	};
 
-	udpgate* create_udpgate(uint16_t port, uint8_t id);
+	udpgate* create_udpgate(uint8_t id, uint16_t port);
 }
 
 #endif
