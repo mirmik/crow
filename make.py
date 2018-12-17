@@ -7,7 +7,6 @@ import os
 
 version = "1.0.0"
 
-licant.include('gxx')
 licant.execute("crow.g.py")
 
 target = "libcrow.{}.so".format(version)
