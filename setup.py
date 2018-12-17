@@ -8,7 +8,8 @@ import os
 
 import licant
 
-licant.execute("crow.g.py")
+licant.include("gxx", path="gxx/gxx.g.py")
+licant.include("crow", path="crow.g.py")
 licant.cxx_objects("crow-objects", mdepends = ["crow"] )
 crowopts = licant.core.core.get("crow-objects").finalopts
 

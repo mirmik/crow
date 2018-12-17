@@ -1,5 +1,5 @@
 import licant.modules
-licant.execute("gxx/gxx.g.py")
+licant.include("gxx")
 
 licant.modules.module("crow",
 	srcdir = "crow/src",

@@ -33,6 +33,10 @@ void crow::publish(const char* theme, const char* data, uint8_t qos, uint16_t ac
 	crow::publish_buffer(theme, data, (uint16_t) strlen(data), qos, acktime);
 }
 
+void crow::publish(const char* theme, const std::string& data, uint8_t qos, uint16_t acktime) {
+	crow::publish_buffer(theme, data.data(), (uint16_t) data.size(), qos, acktime);
+}
+
 void crow::subscribe(const char* theme, uint8_t qos, uint16_t acktime) {
 	size_t thmsz = strlen(theme);
 
