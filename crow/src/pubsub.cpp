@@ -1,4 +1,6 @@
 #include <crow/pubsub.h>
+#include <gxx/util/hexer.h>
+#include <gxx/print.h>
 
 const uint8_t * brocker_host;
 uint8_t brocker_host_len;
@@ -66,6 +68,25 @@ void crow::set_publish_host(const uint8_t * hexhost, size_t hsize)
 	brocker_host = hexhost;
 	brocker_host_len = (uint8_t) hsize;
 }
+
+std::string crow::envcrowker() 
+{
+	uint8_t buf[128];
+	const char* envcr = getenv("CROWKER");
+	auto ss = hexer_s(buf, 128, envcr);
+	gxx::print(envcr);
+	return std::string((char*)buf, ss);
+}
+
+void crow::set_crowker(const std::string& crowker)  
+{
+	brocker_host = (uint8_t*) malloc(crowker.size());
+	memcpy((void*)brocker_host, (void*)crowker.data(), crowker.size());
+	brocker_host_len = crowker.size();
+}
+
+
+
 /*
 void crow::set_publish_qos(crow::QoS qos) {
 	brocker_qos = qos;

@@ -38,6 +38,8 @@ namespace crow
 	void publish_buffer(const char* theme, const void* data, uint16_t datsz, uint8_t qos, uint16_t acktime);
 	void set_publish_host(const uint8_t* hhost, size_t hsize);
 
+	void set_crowker(const std::string& str);
+	std::string envcrowker();
 
 
 	static inline crow_subheader_pubsub_t* get_subheader_pubsub(crow::packet* pack) {

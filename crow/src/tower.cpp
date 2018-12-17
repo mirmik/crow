@@ -36,13 +36,13 @@ void(*crow::undelivered_handler)(crow::packet* pack) = nullptr;
 static bool __diagnostic_enabled = false;
 static bool __live_diagnostic_enabled = false;
 
-void crow::enable_diagnostic()
+void crow::diagnostic_enable()
 {
 	TRACE();
 	__diagnostic_enabled = true;
 }
 
-void crow::enable_live_diagnostic()
+void crow::live_diagnostic_enable()
 {
 	TRACE();
 	__live_diagnostic_enabled = true;

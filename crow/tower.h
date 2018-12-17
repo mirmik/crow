@@ -28,8 +28,8 @@ namespace crow
 
 	void travel(crow::packet* pack); 
 
-	void enable_diagnostic();
-	void enable_live_diagnostic();
+	void diagnostic_enable();
+	void live_diagnostic_enable();
 
 	void send(const void* addr, uint8_t asize, const char* data, uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant);
 	void send_v(const void* addr, uint8_t asize, const struct iovec* vec, size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant);
