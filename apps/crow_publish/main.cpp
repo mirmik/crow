@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if (crow::create_udpgate(0, G1_UDPGATE) == NULL)
+	if (crow::create_udpgate(CROW_UDPGATE, 0) == NULL)
 	{
 		perror("udpgate open");
 		exit(-1);
