@@ -31,3 +31,7 @@ def subscribe(theme, handler, **kwargs):
 		pycrow.libcrow.set_subscribe_handler(subscribe_handler_impl)
 
 	return pycrow.libcrow.subscribe(theme, **kwargs)
+
+
+def use_environment_crowker():
+	pycrow.libcrow.set_crowker(pycrow.libcrow.environment_crowker())

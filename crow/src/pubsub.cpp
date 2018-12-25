@@ -78,6 +78,12 @@ std::string crow::envcrowker()
 	return std::string((char*)buf, ss);
 }
 
+std::string crow::environment_crowker() 
+{
+	const char* envcr = getenv("CROWKER");
+	return std::string(envcr);
+}
+
 void crow::set_crowker(const std::string& crowker)  
 {
 	uint8_t buf[128];

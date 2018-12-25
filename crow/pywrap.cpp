@@ -64,6 +64,8 @@ PYBIND11_MODULE(libcrow, m)
 	m.def("live_diagnostic", &live_diagnostic_enable);
 
 	m.def("set_crowker", &set_crowker);
+	m.def("envcrowker", &envcrowker);
+	m.def("environment_crowker", &environment_crowker);
 
 	m.def("subscribe", &subscribe, py::arg("theme"), py::arg("ack")=0, py::arg("ackquant")=200, py::arg("rack")=0, py::arg("rackquant")=200);
 	m.def("publish", (void (*)(const char*, const std::string&, uint8_t, uint16_t))&publish, py::arg("theme"), py::arg("data"), py::arg("ack")=0, py::arg("ackquant")=200);

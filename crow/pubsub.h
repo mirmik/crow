@@ -40,6 +40,7 @@ namespace crow
 
 	void set_crowker(const std::string& str);
 	std::string envcrowker();
+	std::string environment_crowker();
 
 
 	static inline crow_subheader_pubsub_t* get_subheader_pubsub(crow::packet* pack) {
