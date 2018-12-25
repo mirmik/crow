@@ -18,32 +18,31 @@ namespace crow
 {
 	struct g3_subscriber
 	{
-		uint8_t* host;
-		size_t hlen;
+		std::string host;
 		uint8_t qos;
 		uint16_t ackquant;
 
 		g3_subscriber() = default;
 		g3_subscriber(const uint8_t* host, size_t hlen, uint8_t qos, uint16_t ackquant) 
-			: qos(qos), ackquant(ackquant), hlen(hlen)
+			: qos(qos), ackquant(ackquant), host((char*)host, hlen)
 		{
-			this->host = (uint8_t*) malloc(hlen);
-			memcpy(this->host, host, hlen);
+			//this->host = (uint8_t*) malloc(hlen);
+			//memcpy(this->host, host, hlen);
 		}
 		
 		~g3_subscriber() 
 		{
-			free(this->host);
+			//free(this->host);
 		}
 
 		bool operator==(const g3_subscriber& oth) const
 		{
-			return hlen == oth.hlen && (memcmp(host, oth.host, hlen) == 0);
+			return host == oth.host;
 		}
 
 		bool operator!=(const g3_subscriber& oth) const
 		{
-			return hlen != oth.hlen || (memcmp(host, oth.host, hlen) != 0);
+			return host != oth.host;
 		}
 	};
 }
@@ -56,7 +55,7 @@ namespace std
 	{
 		size_t operator()(const crow::g3_subscriber & x) const noexcept
 		{
-			return std::hash<std::string>()(std::string((char*)x.host, x.hlen));
+			return std::hash<std::string>()(x.host);
 		}
 	};
 }
@@ -69,7 +68,7 @@ namespace crow
 		theme(const std::string& name) : name(name) {}
 		theme(const theme& oth) : name(oth.name) {}
 		std::string name;
-		std::unordered_set<crow::g3_subscriber> subs;
+		std::unordered_map<std::string, crow::g3_subscriber> subs;
 		void publish(const std::string& data);
 	};
 }

@@ -61,10 +61,11 @@ PYBIND11_MODULE(libcrow, m)
 	});
 
 	m.def("diagnostic", &diagnostic_enable);
+	m.def("live_diagnostic", &live_diagnostic_enable);
 
 	m.def("set_crowker", &set_crowker);
 
-	m.def("subscribe", &subscribe, py::arg("theme"), py::arg("ack")=0, py::arg("ackquant")=200);
+	m.def("subscribe", &subscribe, py::arg("theme"), py::arg("ack")=0, py::arg("ackquant")=200, py::arg("rack")=0, py::arg("rackquant")=200);
 
 	static int unused; // the capsule needs something to reference
 	py::capsule cleanup(&unused, [](void *)
@@ -74,8 +75,6 @@ PYBIND11_MODULE(libcrow, m)
 		
 		pubsub_handler = nullptr;
 		subscribe_handler_bind.release();
-		
-		std::cout << "Cleanup!" << std::endl;
 	});
 	m.add_object("_cleanup", cleanup);
 }

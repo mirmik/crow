@@ -55,7 +55,7 @@ void undelivered_handler(struct crow::packet* pack)
 			std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) 
 				+ sizeof(crow_subheader_pubsub_data), shps->thmsz);
 			auto& thm = themes[theme];
-			thm.subs.erase(crow::g3_subscriber(pack->addrptr(), pack->header.alen, pack->header.qos, pack->header.ackquant));
+			thm.subs.erase(std::string((char*)pack->addrptr(), pack->header.alen));
 			if (brocker_info)
 				gxx::fprintln("g3_refuse: t:{}, r:{}", theme, gxx::hexascii_encode(pack->addrptr(), pack->header.alen));
 		}
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 
-	if (crow::create_udpgate(udpport, G1_UDPGATE) == NULL)
+	if (crow::create_udpgate(CROW_UDPGATE, udpport) == NULL)
 	{
 		perror("udpgate open");
 		exit(-1);

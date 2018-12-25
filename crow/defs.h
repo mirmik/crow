@@ -7,6 +7,7 @@
 
 #define G1_UDPGATE 12
 #define CROW_UDPGATE_NO 12
+#define CROW_UDPGATE 12
 
 #define G1_ACK_TYPE 0
 #define G1_ACK21_TYPE 1

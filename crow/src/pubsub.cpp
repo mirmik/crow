@@ -39,7 +39,7 @@ void crow::publish(const char* theme, const std::string& data, uint8_t qos, uint
 	crow::publish_buffer(theme, data.data(), (uint16_t) data.size(), qos, acktime);
 }
 
-void crow::subscribe(const char* theme, uint8_t qos, uint16_t acktime) {
+void crow::subscribe(const char* theme, uint8_t qos, uint16_t acktime, uint8_t rqos, uint16_t racktime) {
 	size_t thmsz = strlen(theme);
 
 	struct crow_subheader_pubsub subps;
@@ -47,10 +47,10 @@ void crow::subscribe(const char* theme, uint8_t qos, uint16_t acktime) {
 
 	subps.type = SUBSCRIBE;
 	subps.thmsz = (uint8_t) thmsz;
-	subps_c.qos = qos;
-	subps_c.ackquant = acktime;
+	subps_c.qos = rqos;
+	subps_c.ackquant = racktime;
 
-	struct iovec iov[4] = {
+	struct iovec iov[3] = {
 		{ &subps, sizeof(subps) },
 		{ &subps_c, sizeof(subps_c) },
 		{ (void*)theme, thmsz },

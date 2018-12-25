@@ -7,6 +7,13 @@ def spin():
 	while 1:
 		pycrow.libcrow.onestep()
 
+def diagnostic(pack=False, live=False):
+	if pack:
+		pycrow.libcrow.diagnostic()
+
+	if live:
+		pycrow.libcrow.live_diagnostic()
+
 def incoming_handler(func):
 	pycrow.libcrow.set_incoming_handler(func)
 

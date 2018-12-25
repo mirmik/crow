@@ -37,7 +37,13 @@ void g3_brocker_subscribe(uint8_t* raddr, size_t rlen, const std::string& theme,
 	}
 
 	auto& thm = themes[theme];
-	thm.subs.emplace(raddr, rlen, qos, ackquant);
+	thm.subs[std::string((char*)raddr, rlen)] = crow::g3_subscriber(raddr, rlen, qos, ackquant);
+	//if (ret.second == false) 
+	//{
+		//auto s = crow::g3_subscriber(raddr, rlen, qos, ackquant);
+		//thm.subs[s]->qos = qos; 
+		//thm.subs[s]->ackquant = ackquant;
+	//}
 }
 
 void crow::theme::publish(const std::string& data)
@@ -59,7 +65,7 @@ void crow::theme::publish(const std::string& data)
 
 	for (auto& sub : subs)
 	{
-		crow::send_v(sub.host, sub.hlen, vec, 4, G1_G3TYPE, sub.qos, sub.ackquant);
+		crow::send_v(sub.second.host.data(), sub.second.host.size(), vec, 4, G1_G3TYPE, sub.second.qos, sub.second.ackquant);
 	}
 }
 
