@@ -10,9 +10,13 @@ import licant
 
 licant.include("gxx", path="gxx/gxx.g.py")
 licant.include("crow", path="crow.g.py")
-licant.cxx_objects("crow-objects", mdepends = ["crow"] )
+licant.cxx_objects("crow-objects", 
+	mdepends = [
+		"crow",
+		"crow.udpgate",
+	] 
+)
 crowopts = licant.core.core.get("crow-objects").finalopts
-
 
 class bdist_wheel(bdist_wheel_):
 	def finalize_options(self):
@@ -31,7 +35,7 @@ class bdist_wheel(bdist_wheel_):
 		self.plat_name_supplied = True
 		self.plat_name = platform_name
 
-print([os.path.relpath(p) for p in gxxopts["sources"]])
+print([os.path.relpath(p) for p in crowopts["sources"]])
 
 pycrow_lib = Extension("pycrow.libcrow",
 	sources = ["crow/pywrap.cpp"] + crowopts["sources"],

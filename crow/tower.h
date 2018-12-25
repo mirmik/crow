@@ -18,7 +18,7 @@
 ///Список врат.
 extern gxx::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
 
-namespace crow 
+namespace crow
 {
 	extern void(*user_incoming_handler)(crow::packet* pack);
 	extern void(*pubsub_handler)(crow::packet* pack);
@@ -26,7 +26,7 @@ namespace crow
 	extern void(*user_type_handler)(crow::packet* pack);
 	extern void(*undelivered_handler)(crow::packet* pack);
 
-	void travel(crow::packet* pack); 
+	void travel(crow::packet* pack);
 
 	void diagnostic_enable();
 	void live_diagnostic_enable();
@@ -36,10 +36,11 @@ namespace crow
 
 	void return_to_tower(crow::packet* pack, uint8_t sts);
 
-	static inline void link_gate(struct crow::gateway* gate, uint8_t id) { 
-		gate->id = id; 
-		crow_gateways.add_last(*gate); 
-	} 
+	static inline void link_gate(struct crow::gateway* gate, uint8_t id)
+	{
+		gate->id = id;
+		crow_gateways.add_last(*gate);
+	}
 
 	void release(crow::packet* pack);
 

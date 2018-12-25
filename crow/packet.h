@@ -69,16 +69,16 @@ namespace crow
 			} f;
 		};
 		struct crow::header header;
-		
+
 		uint8_t* stageptr() { return (uint8_t*)(&header + 1) + header.stg; }
 		//uint8_t& stage() { return *stageptr(); }
 
-		char* endptr() { return (char*)(&header) + header.flen; }		
+		char* endptr() { return (char*)(&header) + header.flen; }
 		uint16_t blocksize() { return header.flen; }
-		
+
 		[[deprecated]]
 		gxx::buffer datasect() { return gxx::buffer(dataptr(), datasize()); }
-		
+
 		[[deprecated]]
 		gxx::buffer addrsect() { return gxx::buffer(addrptr(), addrsize()); }
 
