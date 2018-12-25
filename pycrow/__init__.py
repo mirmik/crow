@@ -24,11 +24,10 @@ def subscribe_handler_impl(packet):
 	thm = packet.theme()
 	subs[thm](packet)
 
-def subscribe_handler(theme):
-	def decorator(func):
-		subs[theme] = func
+def subscribe(theme, handler, **kwargs):
+	subs[theme] = handler
 
 	if not subs_init:
 		pycrow.libcrow.set_subscribe_handler(subscribe_handler_impl)
 
-	return decorator
+	return pycrow.libcrow.subscribe(theme, **kwargs)

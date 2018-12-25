@@ -68,10 +68,9 @@ void subscribe_handler(crow::packet* pack)
 			gxx::println("wrong size");
 		}
 
+		uint8_t* ptr = (uint8_t*)crow::packet_pubsub_datptr(pack);
 		for (int i = 0; i < binformat.size(); ++i) 
 		{
-			uint8_t* ptr = (uint8_t*)crow::packet_pubsub_datptr(pack);
-
 			auto str = binrestores[i](ptr);
 			auto fstr = binformat[i]; 
 			ptr += binsizes[i];
@@ -154,7 +153,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if (crow::create_udpgate(0, G1_UDPGATE) == NULL)
+	if (crow::create_udpgate(CROW_UDPGATE, 0) == NULL)
 	{
 		perror("udpgate open");
 		exit(-1);

@@ -66,6 +66,7 @@ PYBIND11_MODULE(libcrow, m)
 	m.def("set_crowker", &set_crowker);
 
 	m.def("subscribe", &subscribe, py::arg("theme"), py::arg("ack")=0, py::arg("ackquant")=200, py::arg("rack")=0, py::arg("rackquant")=200);
+	m.def("publish", (void (*)(const char*, const std::string&, uint8_t, uint16_t))&publish, py::arg("theme"), py::arg("data"), py::arg("ack")=0, py::arg("ackquant")=200);
 
 	static int unused; // the capsule needs something to reference
 	py::capsule cleanup(&unused, [](void *)
