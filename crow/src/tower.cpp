@@ -48,6 +48,18 @@ void crow::live_diagnostic_enable()
 	__live_diagnostic_enabled = true;
 }
 
+void crow::enable_diagnostic()
+{
+	TRACE();
+	__diagnostic_enabled = true;
+}
+
+void crow::enable_live_diagnostic()
+{
+	TRACE();
+	__live_diagnostic_enabled = true;
+}
+
 static void crow_utilize(crow::packet* pack)
 {
 	TRACE();

@@ -7,6 +7,7 @@
 
 #include <crow/gateway.h>
 #include <crow/defs.h>
+#include <iostream>
 
 namespace crow 
 {

@@ -93,10 +93,10 @@ void* console_listener(void* arg)
 		if (!noend) 
 		{
 			input[len] = '\n';
-			input[len + 1] = '\0';
+			len++;
 		}
 
-		crow::send(addr, (uint8_t) addrsize, input, (uint16_t) (len + 1), type, qos, ackquant);
+		crow::send(addr, (uint8_t) addrsize, input, (uint16_t) len, type, qos, ackquant);
 	}
 
 	exit(0);
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if (crow::create_udpgate(udpport, G1_UDPGATE) == NULL)
+	if (crow::create_udpgate(G1_UDPGATE, udpport) == NULL)
 	{
 		perror("udpgate open");
 		exit(-1);

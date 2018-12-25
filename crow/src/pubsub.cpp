@@ -80,9 +80,11 @@ std::string crow::envcrowker()
 
 void crow::set_crowker(const std::string& crowker)  
 {
-	brocker_host = (uint8_t*) malloc(crowker.size());
-	memcpy((void*)brocker_host, (void*)crowker.data(), crowker.size());
-	brocker_host_len = crowker.size();
+	uint8_t buf[128];
+	auto ss = hexer_s(buf, 128, crowker.c_str());
+	brocker_host = (uint8_t*) malloc(ss);
+	memcpy((void*)brocker_host, (void*)buf, ss);
+	brocker_host_len = ss;
 }
 
 

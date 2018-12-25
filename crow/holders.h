@@ -55,6 +55,8 @@ namespace crow
 	class pubsub_packref : public packref
 	{
 	public:
+		pubsub_packref(crow::packet* pack_) : packref(pack_) {}
+
 		gxx::buffer theme()
 		{
 			return pubsub::get_theme(pack);
@@ -64,6 +66,8 @@ namespace crow
 	class pubsub_data_packref : public pubsub_packref
 	{
 	public:
+		pubsub_data_packref(crow::packet* pack_) : pubsub_packref(pack_) {}
+
 		gxx::buffer data()
 		{
 			return pubsub::get_data(pack);
