@@ -1,12 +1,12 @@
 #ifndef G0_DGRAMM_SPAMER_H
 #define G0_DGRAMM_SPAMER_H
 
-#include <gxx/io/ostream.h>
+#include <owl/io/ostream.h>
 #include <crow/node.h>
-#include <gxx/util/hexer.h>
+#include <owl/util/hexer.h>
 
 namespace crow {
-	struct dgramm_spammer : public crow::basic_service, public gxx::io::ostream {
+	struct dgramm_spammer : public crow::basic_service, public owl::io::ostream {
 		int rid;
 		uint8_t* addr;
 		size_t size;

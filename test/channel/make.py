@@ -5,7 +5,7 @@ import licant
 from licant.cxx_modules import application
 from licant.libs import include
 
-licant.libs.include("gxx")
+licant.libs.include("owl")
 licant.libs.include("crow")
 
 application("target", 
@@ -18,11 +18,11 @@ application("target",
 		("crow.time", "chrono"),
 #		("crow.node"),
 		
-		("gxx", "posix"),
-		("gxx.inet", "posix"),
-		("gxx.print", "cout"),
-		("gxx.dprint", "cout"),
-		("gxx.syslock", "mutex"),
+		("owl", "posix"),
+		("owl.inet", "posix"),
+		("owl.print", "cout"),
+		("owl.dprint", "cout"),
+		("owl.syslock", "mutex"),
 	],
 	cxx_flags = ""
 )

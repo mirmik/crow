@@ -2,12 +2,12 @@
 #define G2_CHANNEL_SPAM_H
 
 #include <g2/core.h>
-#include <gxx/panic.h>
+#include <owl/panic.h>
 
 namespace g2 {
 	struct spam_channel : public channel {
 		void incoming_packet(g1::packet* pack) override {
-			gxx::panic("spam incoming!!!");
+			owl::panic("spam incoming!!!");
 		} 
 	};
 

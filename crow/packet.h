@@ -10,10 +10,10 @@
 #include <stdlib.h>
 #include <sys/uio.h>
 
-#include <gxx/datastruct/dlist.h>
+#include <owl/datastruct/dlist.h>
 #include <crow/defs.h>
 
-#include <gxx/buffer.h>
+#include <owl/buffer.h>
 
 /// Качество обслуживания.
 #define CROW_WITHOUT_ACK 0
@@ -77,13 +77,13 @@ namespace crow
 		uint16_t blocksize() { return header.flen; }
 
 		[[deprecated]]
-		gxx::buffer datasect() { return gxx::buffer(dataptr(), datasize()); }
+		owl::buffer datasect() { return owl::buffer(dataptr(), datasize()); }
 
 		[[deprecated]]
-		gxx::buffer addrsect() { return gxx::buffer(addrptr(), addrsize()); }
+		owl::buffer addrsect() { return owl::buffer(addrptr(), addrsize()); }
 
-		gxx::buffer rawdata() { return gxx::buffer(dataptr(), datasize()); }
-		gxx::buffer addr() { return gxx::buffer(addrptr(), addrsize()); }
+		owl::buffer rawdata() { return owl::buffer(dataptr(), datasize()); }
+		owl::buffer addr() { return owl::buffer(addrptr(), addrsize()); }
 
 		void revert_gate(uint8_t gateindex);
 		void revert(struct iovec* vec, size_t veclen);

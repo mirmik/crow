@@ -2,26 +2,25 @@
 @file tower.cpp
 */
 
-#define NOTRACE 1
-
 #include <stdbool.h>
 #include <crow/tower.h>
-#include <gxx/syslock.h>
+#include <owl/syslock.h>
 
-#include <gxx/util/hexer.h>
-#include <gxx/debug/dprint.h>
+#include <crow/hexer.h>
+//#include <owl/debug/dprint.h>
 
 #include <assert.h>
 #include <string.h>
 
-#include <gxx/trace.h>
+#define NOTRACE 1
+#include <nos/trace.h>
 
-/*gxx::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
-gxx::dlist<crow::packet, &crow::packet::lnk> crow_travelled;
-gxx::dlist<crow::packet, &crow::packet::lnk> crow_incoming;
-gxx::dlist<crow::packet, &crow::packet::lnk> crow_outters;*/
+/*owl::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
+owl::dlist<crow::packet, &crow::packet::lnk> crow_travelled;
+owl::dlist<crow::packet, &crow::packet::lnk> crow_incoming;
+owl::dlist<crow::packet, &crow::packet::lnk> crow_outters;*/
 
-gxx::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
+owl::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
 
 DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);

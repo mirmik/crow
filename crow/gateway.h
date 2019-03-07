@@ -6,7 +6,7 @@
 #define G1_GATEWAY_H
 
 #include <crow/packet.h>
-#include <gxx/datastruct/dlist.h>
+#include <owl/datastruct/dlist.h>
 
 //struct crow::gateway_operations;
 

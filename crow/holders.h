@@ -5,7 +5,7 @@
 #include <crow/pubsub.h>
 #include <crow/tower.h>
 
-#include <gxx/util/setget.h>
+#include <owl/util/setget.h>
 
 namespace crow
 {
@@ -57,7 +57,7 @@ namespace crow
 	public:
 		pubsub_packref(crow::packet* pack_) : packref(pack_) {}
 
-		gxx::buffer theme()
+		owl::buffer theme()
 		{
 			return pubsub::get_theme(pack);
 		}
@@ -68,7 +68,7 @@ namespace crow
 	public:
 		pubsub_data_packref(crow::packet* pack_) : pubsub_packref(pack_) {}
 
-		gxx::buffer data()
+		owl::buffer data()
 		{
 			return pubsub::get_data(pack);
 		}

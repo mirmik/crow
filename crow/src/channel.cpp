@@ -2,8 +2,8 @@
 #include <crow/tower.h>
 #include <sys/uio.h>
 
-#include <gxx/print.h>
-#include <gxx/panic.h>
+#include <nos/print.h>
+#include <nos/bugon.h>
 
 void crow::link_channel(crow::channel* ch, uint16_t id) {
 	ch->id = id;
@@ -16,7 +16,7 @@ void crow::channel::incoming_packet(crow::packet* pack) {
 
 	switch(sh2->ftype) {
 		case crow::Frame::HANDSHAKE:
-			gxx::println("HANDSHAKE");
+			nos::println("HANDSHAKE");
 			if (state == crow::State::INIT) {
 				crow::subheader_handshake* shh = crow::get_subheader_handshake(pack);
 				rid = sh0->sid;
@@ -29,16 +29,16 @@ void crow::channel::incoming_packet(crow::packet* pack) {
 
 			}
 			else {
-				gxx::panic("no INIT state");
+				BUG_ON("no INIT state");
 				//unknown_port(pack);
 			}
 			break;
 		case crow::Frame::DATA:
-			gxx::println("DATA");
+			nos::println("DATA");
 			incoming_data_packet(pack);
 			return;
 		case crow::Frame::REFUSE:
-			gxx::println("REFUSE");
+			nos::println("REFUSE");
 			state = crow::State::DISCONNECTED;
 			break;
 		default: break;

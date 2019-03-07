@@ -6,17 +6,17 @@ import licant.libs
 from licant.cxx_modules import application
 from licant.modules import submodule
 
-licant.libs.include("gxx")
+licant.libs.include("owl")
 licant.libs.include("crow")
 
 application("target",
 	sources = ["main.cpp"],
 	include_paths = ["../.."],
 	include_modules = [
-		("gxx", "posix"),
-		("gxx.print", "cout"),
-		("gxx.dprint", "cout"),
-		("gxx.syslock", "mutex"),
+		("owl", "posix"),
+		("owl.print", "cout"),
+		("owl.dprint", "cout"),
+		("owl.syslock", "mutex"),
 
 		("crow.minimal"),
 		("crow.minimal_pubsub"),

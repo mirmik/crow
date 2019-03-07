@@ -1,5 +1,6 @@
 import licant.modules
-licant.include("gxx")
+licant.include("owl")
+licant.include("nos")
 
 licant.modules.module("crow",
 	srcdir = "crow/src",
@@ -17,7 +18,8 @@ licant.modules.module("crow",
 	mdepends = [
 		"crow.allocator",
 		"crow.time",
-		"gxx"
+		"owl.include",
+		"nos"
 	]
 )
 

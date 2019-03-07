@@ -6,7 +6,7 @@
 #include <crow/gates/udpgate.h>
 
 void hello(crow::packet* pack) {
-	gxx::println("HelloWorld!!!!!");
+	owl::println("HelloWorld!!!!!");
 }
 
 int main() {

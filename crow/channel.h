@@ -6,9 +6,9 @@
 #define G2_CORE_H
 
 #include <crow/node.h>
-#include <gxx/syslock.h>
-#include <gxx/event/delegate.h>
-#include <gxx/buffer.h>
+#include <owl/syslock.h>
+#include <owl/event/delegate.h>
+#include <owl/buffer.h>
 
 namespace crow {
 	enum class State {
@@ -61,13 +61,13 @@ namespace crow {
 		return (subheader_handshake*) (pack->dataptr() + sizeof(crow::subheader) + sizeof(crow::subheader_channel));
 	}
 
-	static inline gxx::buffer get_datasect_channel(crow::packet* pack) {
-		return gxx::buffer(pack->dataptr() + sizeof(crow::subheader) + sizeof(crow::subheader_channel), pack->datasize() - sizeof(crow::subheader) - sizeof(crow::subheader_channel));
+	static inline owl::buffer get_datasect_channel(crow::packet* pack) {
+		return owl::buffer(pack->dataptr() + sizeof(crow::subheader) + sizeof(crow::subheader_channel), pack->datasize() - sizeof(crow::subheader) - sizeof(crow::subheader_channel));
 	}	
 
 	//crow::channel* get_channel(uint16_t id);
 
-	//extern gxx::dlist<crow::channel, &crow::channel::lnk> channels;
+	//extern owl::dlist<crow::channel, &crow::channel::lnk> channels;
 
 	/// Добавить сервис к ядру.
 	void link_channel(crow::channel* srvs, uint16_t id);
@@ -82,13 +82,13 @@ namespace crow {
 	};
 
 	struct acceptor : public crow::node {
-		gxx::delegate<crow::channel*> init_channel;
-		acceptor(gxx::delegate<crow::channel*> init_channel) : init_channel(init_channel) {}
+		owl::delegate<crow::channel*> init_channel;
+		acceptor(owl::delegate<crow::channel*> init_channel) : init_channel(init_channel) {}
 
 		void incoming_packet(crow::packet* pack) override;
 	};
 
-	static inline acceptor* create_acceptor(uint16_t port, gxx::delegate<crow::channel*> dlg) {
+	static inline acceptor* create_acceptor(uint16_t port, owl::delegate<crow::channel*> dlg) {
 		auto asrv = new crow::acceptor(dlg);
 		crow::link_node(asrv, port);
 		return asrv;

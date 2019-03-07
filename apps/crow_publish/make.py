@@ -6,7 +6,7 @@ from licant.cxx_modules import application
 from licant.libs import include
 import os
 
-licant.libs.include("gxx")
+licant.libs.include("owl")
 licant.libs.include("crow")
 
 application("crow_publish", 

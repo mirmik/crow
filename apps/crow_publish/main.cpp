@@ -4,12 +4,12 @@
 #include <thread>
 #include <getopt.h>
 
-#include <gxx/trent/trent.h>
-#include <gxx/trent/json.h>
-#include <gxx/trent/gbson.h>
+#include <owl/trent/trent.h>
+#include <owl/trent/json.h>
+#include <owl/trent/gbson.h>
 
-#include <gxx/util/numconvert.h>
-#include <gxx/util/hexer.h>
+#include <owl/util/numconvert.h>
+#include <owl/util/hexer.h>
 
 #include <sstream>
 
@@ -85,21 +85,21 @@ int main(int argc, char* argv[])
 
 	if (argc - optind != 2)
 	{
-		gxx::println("Usage: crow_publish theme data");
+		owl::println("Usage: crow_publish theme data");
 		exit(-1);
 	}
 
 	if (crowker == nullptr)
 	{
-		gxx::println("Enviroment variable CROWKER doesn't setted");
+		owl::println("Enviroment variable CROWKER doesn't setted");
 		exit(-1);
 	}
 
 	std::string theme = argv[optind];
 	std::string data = argv[optind + 1];
 
-	GXX_PRINT(theme);
-	GXX_PRINT(data);
+	owl_PRINT(theme);
+	owl_PRINT(data);
 
 	crowker_len = hexer(crowker_addr, 128, crowker, strlen(crowker));
 	crow::set_publish_host(crowker_addr, crowker_len);
@@ -108,8 +108,8 @@ int main(int argc, char* argv[])
 	{
 		char buf[256];
 		std::stringstream istrm(data);
-		gxx::trent tr = gxx::json::parse(istrm).unwrap();
-		size_t len = gxx::gbson::dump(tr, buf, 256);
+		owl::trent tr = owl::json::parse(istrm).unwrap();
+		size_t len = owl::gbson::dump(tr, buf, 256);
 
 		crow::publish_buffer(theme.data(), buf, (uint16_t) len, qos, acktime);
 	}
@@ -117,19 +117,19 @@ int main(int argc, char* argv[])
 	{
 		dprln("bindata mode");
 
-		auto sv = gxx::split(argv[optind + 1], ',');
-		gxx::println(sv);
+		auto sv = owl::split(argv[optind + 1], ',');
+		owl::println(sv);
 
 		using ptype = std::pair<std::string, std::string>;
 		std::vector<ptype> vec;
 
 		for (auto s : sv)
 		{
-			auto p = gxx::split(s, ':');
+			auto p = owl::split(s, ':');
 			vec.emplace_back(p[0], p[1]);
 		}
 
-		//gxx::println(vec);
+		//owl::println(vec);
 
 		size_t sz = 0;
 
@@ -140,12 +140,12 @@ int main(int argc, char* argv[])
 
 		for (auto s : vec)
 		{
-			gxx::println(s.first);
+			owl::println(s.first);
 			visitor_conv[s.first](s.second, ptr);
 			ptr += visitor_size[s.first];
 		}
 
-		gxx::print_dump(block, sz);
+		owl::print_dump(block, sz);
 
 		crow::publish_buffer(theme.data(), block, (uint16_t)sz, qos, acktime);
 	}

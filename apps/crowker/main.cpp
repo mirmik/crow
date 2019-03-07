@@ -57,7 +57,7 @@ void undelivered_handler(struct crow::packet* pack)
 			auto& thm = themes[theme];
 			thm.subs.erase(std::string((char*)pack->addrptr(), pack->header.alen));
 			if (brocker_info)
-				gxx::fprintln("g3_refuse: t:{}, r:{}", theme, gxx::hexascii_encode(pack->addrptr(), pack->header.alen));
+				owl::fprintln("g3_refuse: t:{}, r:{}", theme, owl::hexascii_encode(pack->addrptr(), pack->header.alen));
 		}
 	}
 

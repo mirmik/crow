@@ -1,8 +1,8 @@
 #include <crow/node.h>
 #include <crow/tower.h>
-#include <gxx/syslock.h>
+#include <owl/syslock.h>
 
-gxx::dlist<crow::node, &crow::node::lnk> crow::nodes;
+owl::dlist<crow::node, &crow::node::lnk> crow::nodes;
 
 void crow::node_send(uint16_t sid, uint16_t rid, const void* raddr, size_t rsize, const void* data, size_t size, uint8_t qos, uint16_t ackquant)
 {

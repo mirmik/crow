@@ -8,7 +8,7 @@
 #include <crow/packet.h>
 #include <sys/uio.h>
 
-#include <gxx/container/dlist.h>
+#include <owl/container/dlist.h>
 
 namespace crow
 {
@@ -21,7 +21,7 @@ namespace crow
 		virtual void incoming_packet(crow::packet* pack) = 0;
 	};
 	
-	extern gxx::dlist<node, &node::lnk> nodes;
+	extern owl::dlist<node, &node::lnk> nodes;
 
 	struct subheader
 	{

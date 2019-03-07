@@ -1,9 +1,9 @@
 #include <crow/packet.h>
-#include <gxx/container/pool.h>
+#include <owl/container/pool.h>
 
-#include <gxx/syslock.h>
+#include <owl/syslock.h>
 
-gxx::pool _crow_packet_pool;
+owl::pool _crow_packet_pool;
 
 void crow::engage_packet_pool(void* zone, size_t zonesize, size_t elsize) 
 {

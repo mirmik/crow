@@ -8,7 +8,7 @@
 
 #include <termios.h>
 
-#include <gxx/panic.h>
+#include <owl/panic.h>
 
 void crow::serial_gstuff::newline_handler()
 {
@@ -101,8 +101,8 @@ void crow::serial_gstuff::send(struct crow::packet* pack)
 	char buffer[512];
 
 	/*std::string str;
-	gxx::io::std_string_writer strm(str);
-	gxx::gstuff::sender sender(strm);
+	owl::io::std_string_writer strm(str);
+	owl::gstuff::sender sender(strm);
 
 	sender.start_message();
 	sender.write((char*)&pack->header, pack->header.flen);

@@ -1,15 +1,15 @@
 #include <crow/tower.h>
 #include <crow/pubsub.h>
-#include <gxx/print/stdprint.h>
+#include <owl/print/stdprint.h>
 #include <crow/gates/udpgate.h>
 #include <thread>
 #include <getopt.h>
 
 #include <sstream>
 
-#include <gxx/trent/trent.h>
-#include <gxx/trent/gbson.h>
-#include <gxx/util/hexer.h>
+#include <owl/trent/trent.h>
+#include <owl/trent/gbson.h>
+#include <owl/util/hexer.h>
 
 uint8_t crowker_addr[256];
 size_t crowker_len;
@@ -34,14 +34,14 @@ std::string flt32_restore(void* tgt)
 {
 	float arg;
 	memcpy(&arg, tgt, 4);
-	return gxx::format("{}", arg);
+	return owl::format("{}", arg);
 }
 
 std::string int32_restore(void* tgt)
 {
 	int32_t arg;
 	memcpy(&arg, tgt, 4);
-	return gxx::format("{}", arg);
+	return owl::format("{}", arg);
 }
 
 std::map<std::string, std::string(*)(void* tgt)> visitor_restore =
@@ -65,7 +65,7 @@ void subscribe_handler(crow::packet* pack)
 		if (shps_d->datsz != binsize) 
 		{
 			wrsize = true;
-			gxx::println("wrong size");
+			owl::println("wrong size");
 		}
 
 		uint8_t* ptr = (uint8_t*)crow::packet_pubsub_datptr(pack);
@@ -75,14 +75,14 @@ void subscribe_handler(crow::packet* pack)
 			auto fstr = binformat[i]; 
 			ptr += binsizes[i];
 
-			gxx::fprint("{}:{} ", fstr, str);
+			owl::fprint("{}:{} ", fstr, str);
 		}
-		gxx::println();
+		owl::println();
 
 		if (wrsize) {
-			gxx::println(theme);
-			GXX_PRINT(shps->thmsz);
-			GXX_PRINT(shps_d->datsz);
+			owl::println(theme);
+			owl_PRINT(shps->thmsz);
+			owl_PRINT(shps_d->datsz);
 			crow::diagnostic("binmode", pack);
 			exit(0);
 		}
@@ -94,16 +94,16 @@ void subscribe_handler(crow::packet* pack)
 
 	if (gbson_flag)
 	{
-		gxx::trent tr;
-		gxx::gbson::load(tr, data.data(), data.size());
-		gxx::println(tr);
+		owl::trent tr;
+		owl::gbson::load(tr, data.data(), data.size());
+		owl::println(tr);
 		fflush(stdout);
 		crow::release(pack);
 		return;
 	}
 
-	gxx::print(gxx::dstring(data));
-	if (!noend) gxx::println();
+	owl::print(owl::dstring(data));
+	if (!noend) owl::println();
 	fflush(stdout);
 	
 	crow::release(pack);
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 			case 'b': 
 				{
 					bin_mode = true;
-					binformat = gxx::split(optarg, ',');
+					binformat = owl::split(optarg, ',');
 				}
 			case 'q': qos = atoi(optarg);
 			case 0: break;
@@ -161,13 +161,13 @@ int main(int argc, char* argv[])
 
 	if (argc - optind != 1)
 	{
-		gxx::println("Usage: crow_publish theme");
+		owl::println("Usage: crow_publish theme");
 		exit(-1);
 	}
 
 	if (crowker == nullptr)
 	{
-		gxx::println("Enviroment variable CROWKER doesn't setted");
+		owl::println("Enviroment variable CROWKER doesn't setted");
 		exit(-1);
 	}
 
