@@ -12,15 +12,15 @@ namespace crow {
 
 		void incoming_packet(crow::packet* pack) override {
 			if (!quite) {
-				/*owl::fprintln("echo service incoming_message {0}", owl::buffer(msg->data, msg->size));
-				owl_PRINT(msg->sid);
-				owl_PRINT(msg->rid);
-				owl_PRINT(msg->pack->header.alen);
-				owl::writeln(msg->data, msg->size);*/				
+				/*igris::fprintln("echo service incoming_message {0}", igris::buffer(msg->data, msg->size));
+				igris_PRINT(msg->sid);
+				igris_PRINT(msg->rid);
+				igris_PRINT(msg->pack->header.alen);
+				igris::writeln(msg->data, msg->size);*/				
 			}
 
 			auto sh = crow::get_subheader(pack);
-			auto ds = owl::buffer(pack->dataaddr(), pack->datasize());
+			auto ds = igris::buffer(pack->dataaddr(), pack->datasize());
 
 			crow::node_send(id, sh->sid, pack->addrptr(), pack->header.alen, ds.data(), ds.size(), crow::QoS(0));
 			crow::release(pack);

@@ -1,5 +1,5 @@
 import licant.modules
-licant.include("owl")
+licant.include("igris")
 licant.include("nos")
 
 licant.modules.module("crow",
@@ -18,7 +18,7 @@ licant.modules.module("crow",
 	mdepends = [
 		"crow.allocator",
 		"crow.time",
-		"owl.include",
+		"igris.include",
 		"nos"
 	]
 )

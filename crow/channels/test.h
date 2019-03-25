@@ -2,14 +2,14 @@
 #define G2_CHANNEL_TEST_H
 
 #include <crow/channel.h>
-#include <owl/print/stdprint.h>
-#include <owl/util/string.h>
+#include <igris/print/stdprint.h>
+#include <igris/util/string.h>
 
 namespace crow {
 	struct test_channel : public channel {
 		void incoming_data_packet(crow::packet* pack) override {
 			auto data = pack->datasect();
-			owl::println("test_incoming:", owl::dstring(data));
+			igris::println("test_incoming:", igris::dstring(data));
 		} 
 	};
 

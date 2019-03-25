@@ -7,7 +7,7 @@
 
 #include <crow/tower.h>
 #include <assert.h>
-#include <owl/buffer.h>
+#include <igris/buffer.h>
 
 struct crow_theme;
 
@@ -69,24 +69,24 @@ namespace crow
 
 	namespace pubsub 
 	{
-		static inline owl::buffer get_theme(crow::packet* pack) 
+		static inline igris::buffer get_theme(crow::packet* pack) 
 		{
 			assert(pack->header.f.type == G1_G3TYPE);
 
 			struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
 			//struct crow_subheader_pubsub_data * shps_d = get_subheader_pubsub_data(pack);
 
-			return owl::buffer(crow::packet_pubsub_thmptr(pack), shps->thmsz);
+			return igris::buffer(crow::packet_pubsub_thmptr(pack), shps->thmsz);
 		}
 
-		static inline owl::buffer get_data(crow::packet* pack) 
+		static inline igris::buffer get_data(crow::packet* pack) 
 		{
 			assert(pack->header.f.type == G1_G3TYPE);
 
 			//struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
 			struct crow_subheader_pubsub_data * shps_d = get_subheader_pubsub_data(pack);
 
-			return owl::buffer(crow::packet_pubsub_datptr(pack), shps_d->datsz);
+			return igris::buffer(crow::packet_pubsub_datptr(pack), shps_d->datsz);
 		}
 	}
 }

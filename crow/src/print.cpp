@@ -4,8 +4,8 @@
 #include <nos/util/string.h>
 #include <nos/util/dstring.h>
 
-/*void crow_print_to(owl::io::ostream& out, crow::packet* pack) {
-	owl::fprint_to(out, "("
+/*void crow_print_to(igris::io::ostream& out, crow::packet* pack) {
+	igris::fprint_to(out, "("
 		"qos:{}, "
 		"ack:{}, "
 		"alen:{}, "
@@ -19,20 +19,20 @@
 		(uint8_t)pack->header.f.ack, 
 		pack->header.alen, 
 		(uint8_t)pack->header.f.type, 
-		owl::hexascii_encode((const uint8_t*)pack->addrptr(), pack->header.alen), 
+		igris::hexascii_encode((const uint8_t*)pack->addrptr(), pack->header.alen), 
 		pack->header.stg, 
-		owl::dstring(pack->data()), 
+		igris::dstring(pack->data()), 
 		pack->flags
 	);
 }
 
 void crow_print(crow::packet* pack) {
-	crow_print_to(*owl::standart_output, pack);
+	crow_print_to(*igris::standart_output, pack);
 }
 
 void crow_println(crow::packet* pack) {
-	crow_print_to(*owl::standart_output, pack);
-	owl::print_to(*owl::standart_output, "\n");
+	crow_print_to(*igris::standart_output, pack);
+	igris::print_to(*igris::standart_output, "\n");
 }*/
 
 void crow::diagnostic(const char* notation, crow::packet* pack) 

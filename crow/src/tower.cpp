@@ -4,10 +4,10 @@
 
 #include <stdbool.h>
 #include <crow/tower.h>
-#include <owl/syslock.h>
+#include <igris/syslock.h>
 
 #include <crow/hexer.h>
-//#include <owl/debug/dprint.h>
+//#include <igris/debug/dprint.h>
 
 #include <assert.h>
 #include <string.h>
@@ -15,12 +15,12 @@
 #define NOTRACE 1
 #include <nos/trace.h>
 
-/*owl::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
-owl::dlist<crow::packet, &crow::packet::lnk> crow_travelled;
-owl::dlist<crow::packet, &crow::packet::lnk> crow_incoming;
-owl::dlist<crow::packet, &crow::packet::lnk> crow_outters;*/
+/*igris::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
+igris::dlist<crow::packet, &crow::packet::lnk> crow_travelled;
+igris::dlist<crow::packet, &crow::packet::lnk> crow_incoming;
+igris::dlist<crow::packet, &crow::packet::lnk> crow_outters;*/
 
-owl::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
+igris::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
 
 DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);

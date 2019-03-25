@@ -8,7 +8,7 @@
 
 #include <crow/packet.h>
 #include <crow/gateway.h>
-#include <owl/syslock.h>
+#include <igris/syslock.h>
 
 void crow::packet_initialization(crow::packet* pack, crow::gateway* ingate)
 {

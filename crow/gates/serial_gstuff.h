@@ -11,8 +11,8 @@
 
 #include <crow/gateway.h>
 
-#include <owl/gstuff/autorecv.h>
-#include <owl/gstuff/gstuff.h>
+#include <igris/gstuff/autorecv.h>
+#include <igris/gstuff/gstuff.h>
 
 namespace crow 
 {

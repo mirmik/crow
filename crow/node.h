@@ -8,7 +8,7 @@
 #include <crow/packet.h>
 #include <sys/uio.h>
 
-#include <owl/container/dlist.h>
+#include <igris/container/dlist.h>
 
 namespace crow
 {
@@ -21,7 +21,7 @@ namespace crow
 		virtual void incoming_packet(crow::packet* pack) = 0;
 	};
 	
-	extern owl::dlist<node, &node::lnk> nodes;
+	extern igris::dlist<node, &node::lnk> nodes;
 
 	struct subheader
 	{

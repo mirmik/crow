@@ -5,7 +5,7 @@
 #include <crow/pubsub.h>
 #include <crow/tower.h>
 
-#include <owl/util/setget.h>
+#include <igris/util/setget.h>
 
 namespace crow
 {
@@ -57,7 +57,7 @@ namespace crow
 	public:
 		pubsub_packref(crow::packet* pack_) : packref(pack_) {}
 
-		owl::buffer theme()
+		igris::buffer theme()
 		{
 			return pubsub::get_theme(pack);
 		}
@@ -68,7 +68,7 @@ namespace crow
 	public:
 		pubsub_data_packref(crow::packet* pack_) : pubsub_packref(pack_) {}
 
-		owl::buffer data()
+		igris::buffer data()
 		{
 			return pubsub::get_data(pack);
 		}

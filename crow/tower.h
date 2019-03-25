@@ -9,14 +9,14 @@
 #include <crow/gateway.h>
 #include <sys/uio.h>
 
-//#include <owl/debug/dprint.h>
-#include <owl/container/dlist.h>
+//#include <igris/debug/dprint.h>
+#include <igris/container/dlist.h>
 
 #define CROW_SENDED 0
 #define CROW_WRONG_ADDRESS -1
 
 ///Список врат.
-extern owl::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
+extern igris::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
 
 namespace crow
 {

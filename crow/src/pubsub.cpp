@@ -74,7 +74,7 @@ std::string crow::envcrowker()
 	uint8_t buf[128];
 	const char* envcr = getenv("CROWKER");
 	auto ss = hexer_s(buf, 128, envcr);
-	//owl::print(envcr);
+	//igris::print(envcr);
 	return std::string((char*)buf, ss);
 }
 
@@ -100,8 +100,8 @@ void crow::set_publish_qos(crow::QoS qos) {
 	brocker_qos = qos;
 }
 
-owl::buffer crow::pubsub_message_datasect(crow::packet* pack) {
+igris::buffer crow::pubsub_message_datasect(crow::packet* pack) {
 	auto shps = crow::get_subheader_pubsub(pack);
 	auto shps_d = crow::get_subheader_pubsub_data(pack);
-	return owl::buffer(pack->dataptr() + sizeof(subheader_pubsub) + sizeof(subheader_pubsub_data) + shps->thmsz, shps_d->datsz);
+	return igris::buffer(pack->dataptr() + sizeof(subheader_pubsub) + sizeof(subheader_pubsub_data) + shps->thmsz, shps_d->datsz);
 }*/
