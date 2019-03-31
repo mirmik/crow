@@ -1,8 +1,9 @@
 #include <crow/tower.h>
 #include <crow/gates/udpgate.h>
 #include <crow/gates/serial_gstuff.h>
-#include <owl/util/hexer.h>
-#include <owl/util/dstring.h>
+
+#include <crow/hexer.h>
+#include <igris/util/dstring.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -207,7 +208,7 @@ int main(int argc, char* argv[])
 
 		if (addrsize < 0)
 		{
-			dprln("Wrong address format");
+			printf("Wrong address format\n");
 			exit(-1);
 		}
 	}

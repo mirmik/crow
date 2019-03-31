@@ -3,7 +3,7 @@
 #include <sys/uio.h>
 
 #include <nos/print.h>
-#include <nos/bugon.h>
+#include <igris/bug.h>
 
 void crow::link_channel(crow::channel* ch, uint16_t id) {
 	ch->id = id;

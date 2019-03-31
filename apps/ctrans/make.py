@@ -3,10 +3,11 @@
 
 import licant
 from licant.cxx_modules import application
-from licant.libs import include
 import os
 
-licant.libs.include("crow")
+licant.include("crow")
+licant.include("igris")
+licant.include("nos")
 
 application("ctrans", 
 	sources = ["main.cpp"],

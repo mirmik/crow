@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 #include <crow/tower.h>
-#include <igris/syslock.h>
+#include <igris/sync/syslock.h>
 
 #include <crow/hexer.h>
 //#include <igris/debug/dprint.h>

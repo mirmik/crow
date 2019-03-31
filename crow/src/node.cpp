@@ -1,6 +1,6 @@
 #include <crow/node.h>
 #include <crow/tower.h>
-#include <igris/syslock.h>
+#include <igris/sync/syslock.h>
 
 igris::dlist<crow::node, &crow::node::lnk> crow::nodes;
 

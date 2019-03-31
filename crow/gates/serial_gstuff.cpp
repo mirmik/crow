@@ -1,14 +1,13 @@
 #include <crow/gates/serial_gstuff.h>
-
 #include <crow/tower.h>
+
+#include <igris/bug.h>
 
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 
 #include <termios.h>
-
-#include <igris/panic.h>
 
 void crow::serial_gstuff::newline_handler()
 {
@@ -36,8 +35,6 @@ struct crow::serial_gstuff* crow::create_serial_gstuff(const char* path, uint32_
 		perror("serial::open");
 		exit(0);
 	}
-
-	//dprf("%d, %s\n", g->fd, path);
 
 	struct termios tattr, orig;
 	ret = tcgetattr(g->fd, &orig);
@@ -74,7 +71,7 @@ struct crow::serial_gstuff* crow::create_serial_gstuff(const char* path, uint32_
 	}
 	else
 	{
-		PANIC_TRACED();
+		BUG();
 	}
 
 	/* put terminal in raw mode after flushing */
@@ -88,41 +85,17 @@ struct crow::serial_gstuff* crow::create_serial_gstuff(const char* path, uint32_
 	g->rpack = NULL;
 	crow::link_gate(g, id);
 
-	//gstuff_autorecv_init(&g->recver, callback_handler, g);
-
-	//dprln("crow_create_serial_gstuff... exit");
 	return g;
 }
 
 void crow::serial_gstuff::send(struct crow::packet* pack)
 {
-	//dprln("crow_serial_gstuff_send");
-
 	char buffer[512];
 
-	/*std::string str;
-	igris::io::std_string_writer strm(str);
-	igris::gstuff::sender sender(strm);
-
-	sender.start_message();
-	sender.write((char*)&pack->header, pack->header.flen);
-	sender.end_message();
-
-	mtx.lock();
-	ser->write((uint8_t*)str.data(), str.size());
-	mtx.unlock();
-	*/
 	int len = gstuffing((char*)&pack->header, pack->header.flen, buffer);
-
 	write(fd, buffer, len);
-
 	crow::return_to_tower(pack, CROW_SENDED);
 }
-
-/*void crow_serial_gstuff_send(struct crow::gateway* gw, struct crow::packet* pack)
-{
-
-}*/
 
 
 void crow::serial_gstuff::nblock_onestep()
@@ -137,7 +110,6 @@ void crow::serial_gstuff::nblock_onestep()
 	char c;
 	ssize_t len = read(fd, (uint8_t*)&c, 1);
 
-	//int len = ser->read((uint8_t*)&c, 1);
 	if (len == 1)
 	{
 		if (debug)

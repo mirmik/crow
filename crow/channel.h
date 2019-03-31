@@ -6,7 +6,7 @@
 #define G2_CORE_H
 
 #include <crow/node.h>
-#include <igris/syslock.h>
+#include <igris/sync/syslock.h>
 #include <igris/event/delegate.h>
 #include <igris/buffer.h>
 

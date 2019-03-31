@@ -1,7 +1,7 @@
 #include <crow/packet.h>
 #include <igris/container/pool.h>
 
-#include <igris/syslock.h>
+#include <igris/sync/syslock.h>
 
 igris::pool _crow_packet_pool;
 

@@ -32,15 +32,15 @@ typedef struct crow_subheader_pubsub_control {
 namespace crow 
 {
 	void publish(const char* theme, const char* data, uint8_t qos=0, uint16_t acktime=DEFAULT_ACKQUANT);
-	void publish(const char* theme, const std::string& data, uint8_t qos=0, uint16_t acktime=DEFAULT_ACKQUANT);
+	//void publish(const char* theme, const std::string& data, uint8_t qos=0, uint16_t acktime=DEFAULT_ACKQUANT);
 	void subscribe(const char* theme, uint8_t qos=0, uint16_t acktime=DEFAULT_ACKQUANT, uint8_t rqos=0, uint16_t racktime=DEFAULT_ACKQUANT);
 
 	void publish_buffer(const char* theme, const void* data, uint16_t datsz, uint8_t qos, uint16_t acktime);
 	void set_publish_host(const uint8_t* hhost, size_t hsize);
 
-	void set_crowker(const std::string& str);
-	std::string envcrowker();
-	std::string environment_crowker();
+	//void set_crowker(const std::string& str);
+	//std::string envcrowker();
+	//std::string environment_crowker();
 
 
 	static inline crow_subheader_pubsub_t* get_subheader_pubsub(crow::packet* pack) {
