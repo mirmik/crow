@@ -7,8 +7,10 @@
 
 #include <thread>
 
-namespace crow {
-	static inline void run_background() {
+namespace crow
+{
+	static inline void run_background()
+	{
 		std::thread thr(crow::spin);
 		thr.detach();
 		// return std::move(thr);

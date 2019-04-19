@@ -13,11 +13,14 @@
 int udpport = -1;
 bool quite = false;
 
-void incoming_pubsub_packet(struct crow::packet *pack) {
+void incoming_pubsub_packet(struct crow::packet *pack)
+{
 	struct crow_subheader_pubsub *shps = crow::get_subheader_pubsub(pack);
 
-	switch (shps->type) {
-	case PUBLISH: {
+	switch (shps->type)
+	{
+	case PUBLISH:
+	{
 		struct crow_subheader_pubsub_data *shps_d =
 			get_subheader_pubsub_data(pack);
 
@@ -26,8 +29,10 @@ void incoming_pubsub_packet(struct crow::packet *pack) {
 			std::string(crow::packet_pubsub_datptr(pack), shps_d->datsz);
 
 		brocker_publish(theme, data);
-	} break;
-	case SUBSCRIBE: {
+	}
+	break;
+	case SUBSCRIBE:
+	{
 		auto shps_c = get_subheader_pubsub_control(pack);
 		std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
 							  sizeof(crow_subheader_pubsub_control),
@@ -35,19 +40,25 @@ void incoming_pubsub_packet(struct crow::packet *pack) {
 
 		g3_brocker_subscribe(pack->addrptr(), pack->addrsize(), theme,
 							 shps_c->qos, shps_c->ackquant);
-	} break;
-	default: {
+	}
+	break;
+	default:
+	{
 		printf("unresolved pubsub frame type %d", (uint8_t)shps->type);
-	} break;
+	}
+	break;
 	}
 	crow::release(pack);
 }
 
-void undelivered_handler(struct crow::packet *pack) {
-	if (pack->header.f.type == G1_G3TYPE) {
+void undelivered_handler(struct crow::packet *pack)
+{
+	if (pack->header.f.type == G1_G3TYPE)
+	{
 		auto shps = crow::get_subheader_pubsub(pack);
 
-		if (shps->type == PUBLISH) {
+		if (shps->type == PUBLISH)
+		{
 			std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
 								  sizeof(crow_subheader_pubsub_data),
 							  shps->thmsz);
@@ -85,7 +96,8 @@ sub.ackquant);
 	}
 }*/
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	crow::pubsub_handler = incoming_pubsub_packet;
 	crow::undelivered_handler = undelivered_handler;
 
@@ -99,8 +111,10 @@ int main(int argc, char *argv[]) {
 	int long_index = 0;
 	int opt = 0;
 	while ((opt = getopt_long(argc, argv, "usvdib", long_options,
-							  &long_index)) != -1) {
-		switch (opt) {
+							  &long_index)) != -1)
+	{
+		switch (opt)
+		{
 		case 'u':
 			udpport = atoi(optarg);
 			break;
@@ -118,12 +132,14 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (udpport == -1) {
+	if (udpport == -1)
+	{
 		printf("You should specify udp port.\n");
 		exit(-1);
 	}
 
-	if (crow::create_udpgate(CROW_UDPGATE, udpport) == NULL) {
+	if (crow::create_udpgate(CROW_UDPGATE, udpport) == NULL)
+	{
 		perror("udpgate open");
 		exit(-1);
 	}

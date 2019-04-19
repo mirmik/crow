@@ -17,21 +17,25 @@ struct crow_theme;
 #define PUBLISH 1
 #define MESSAGE 2
 
-typedef struct crow_subheader_pubsub {
+typedef struct crow_subheader_pubsub
+{
 	uint8_t type;
 	uint8_t thmsz;
 } G1_PACKED crow_subheader_pubsub_t;
 
-typedef struct crow_subheader_pubsub_data {
+typedef struct crow_subheader_pubsub_data
+{
 	uint16_t datsz;
 } G1_PACKED crow_subheader_pubsub_data_t;
 
-typedef struct crow_subheader_pubsub_control {
+typedef struct crow_subheader_pubsub_control
+{
 	uint8_t qos;
 	uint16_t ackquant;
 } G1_PACKED crow_subheader_pubsub_control_t;
 
-namespace crow {
+namespace crow
+{
 	void publish(const char *theme, const char *data, uint8_t qos = 0,
 				 uint16_t acktime = DEFAULT_ACKQUANT);
 	// void publish(const char* theme, const std::string& data, uint8_t qos=0,
@@ -49,36 +53,43 @@ namespace crow {
 	std::string environment_crowker();
 
 	static inline crow_subheader_pubsub_t *
-	get_subheader_pubsub(crow::packet *pack) {
+	get_subheader_pubsub(crow::packet *pack)
+	{
 		return (crow_subheader_pubsub_t *)pack->dataptr();
 	}
 
 	static inline crow_subheader_pubsub_data_t *
-	get_subheader_pubsub_data(crow::packet *pack) {
+	get_subheader_pubsub_data(crow::packet *pack)
+	{
 		return (
 			crow_subheader_pubsub_data_t *)(pack->dataptr() +
 											sizeof(crow_subheader_pubsub_t));
 	}
 
 	static inline crow_subheader_pubsub_control_t *
-	get_subheader_pubsub_control(crow::packet *pack) {
+	get_subheader_pubsub_control(crow::packet *pack)
+	{
 		return (
 			crow_subheader_pubsub_control_t *)(pack->dataptr() +
 											   sizeof(crow_subheader_pubsub_t));
 	}
 
-	static inline char *packet_pubsub_thmptr(struct crow::packet *pack) {
+	static inline char *packet_pubsub_thmptr(struct crow::packet *pack)
+	{
 		return pack->dataptr() + sizeof(crow_subheader_pubsub_t) +
 			   sizeof(crow_subheader_pubsub_data_t);
 	}
 
-	static inline char *packet_pubsub_datptr(struct crow::packet *pack) {
+	static inline char *packet_pubsub_datptr(struct crow::packet *pack)
+	{
 		return crow::packet_pubsub_thmptr(pack) +
 			   get_subheader_pubsub(pack)->thmsz;
 	}
 
-	namespace pubsub {
-		static inline igris::buffer get_theme(crow::packet *pack) {
+	namespace pubsub
+	{
+		static inline igris::buffer get_theme(crow::packet *pack)
+		{
 			assert(pack->header.f.type == G1_G3TYPE);
 
 			struct crow_subheader_pubsub *shps = get_subheader_pubsub(pack);
@@ -88,7 +99,8 @@ namespace crow {
 			return igris::buffer(crow::packet_pubsub_thmptr(pack), shps->thmsz);
 		}
 
-		static inline igris::buffer get_data(crow::packet *pack) {
+		static inline igris::buffer get_data(crow::packet *pack)
+		{
 			assert(pack->header.f.type == G1_G3TYPE);
 
 			// struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);

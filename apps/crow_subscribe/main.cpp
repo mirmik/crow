@@ -26,13 +26,15 @@ std::vector<std::string> binformat;
 
 std::map<std::string, size_t> visitor_size = {{"flt32", 4}, {"int32", 4}};
 
-std::string flt32_restore(void *tgt) {
+std::string flt32_restore(void *tgt)
+{
 	float arg;
 	memcpy(&arg, tgt, 4);
 	return owl::format("{}", arg);
 }
 
-std::string int32_restore(void *tgt) {
+std::string int32_restore(void *tgt)
+{
 	int32_t arg;
 	memcpy(&arg, tgt, 4);
 	return owl::format("{}", arg);
@@ -41,22 +43,26 @@ std::string int32_restore(void *tgt) {
 std::map<std::string, std::string (*)(void *tgt)> visitor_restore = {
 	{"flt32", flt32_restore}, {"int32", int32_restore}};
 
-void subscribe_handler(crow::packet *pack) {
+void subscribe_handler(crow::packet *pack)
+{
 	struct crow_subheader_pubsub *shps = crow::get_subheader_pubsub(pack);
 	struct crow_subheader_pubsub_data *shps_d = get_subheader_pubsub_data(pack);
 
 	auto theme = std::string(crow::packet_pubsub_thmptr(pack), shps->thmsz);
 	auto data = std::string(crow::packet_pubsub_datptr(pack), shps_d->datsz);
 
-	if (bin_mode) {
+	if (bin_mode)
+	{
 		bool wrsize = false;
-		if (shps_d->datsz != binsize) {
+		if (shps_d->datsz != binsize)
+		{
 			wrsize = true;
 			owl::println("wrong size");
 		}
 
 		uint8_t *ptr = (uint8_t *)crow::packet_pubsub_datptr(pack);
-		for (int i = 0; i < binformat.size(); ++i) {
+		for (int i = 0; i < binformat.size(); ++i)
+		{
 			auto str = binrestores[i](ptr);
 			auto fstr = binformat[i];
 			ptr += binsizes[i];
@@ -65,7 +71,8 @@ void subscribe_handler(crow::packet *pack) {
 		}
 		owl::println();
 
-		if (wrsize) {
+		if (wrsize)
+		{
 			owl::println(theme);
 			owl_PRINT(shps->thmsz);
 			owl_PRINT(shps_d->datsz);
@@ -78,7 +85,8 @@ void subscribe_handler(crow::packet *pack) {
 		return;
 	}
 
-	if (gbson_flag) {
+	if (gbson_flag)
+	{
 		owl::trent tr;
 		owl::gbson::load(tr, data.data(), data.size());
 		owl::println(tr);
@@ -96,12 +104,14 @@ void subscribe_handler(crow::packet *pack) {
 	return;
 }
 
-void undelivered_handler(crow::packet *pack) {
+void undelivered_handler(crow::packet *pack)
+{
 	dprln("Crowker access error");
 	exit(-1);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	const char *crowker = getenv("CROWKER");
 
 	const struct option long_options[] = {
@@ -118,8 +128,10 @@ int main(int argc, char *argv[]) {
 	int long_index = 0;
 	int opt = 0;
 	while ((opt = getopt_long(argc, argv, "cdvgq", long_options,
-							  &long_index)) != -1) {
-		switch (opt) {
+							  &long_index)) != -1)
+	{
+		switch (opt)
+		{
 		case 'c':
 			crowker = optarg;
 			break;
@@ -134,7 +146,8 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'g':
 			gbson_flag = true;
-		case 'b': {
+		case 'b':
+		{
 			bin_mode = true;
 			binformat = owl::split(optarg, ',');
 		}
@@ -145,23 +158,28 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (crow::create_udpgate(CROW_UDPGATE, 0) == NULL) {
+	if (crow::create_udpgate(CROW_UDPGATE, 0) == NULL)
+	{
 		perror("udpgate open");
 		exit(-1);
 	}
 
-	if (argc - optind != 1) {
+	if (argc - optind != 1)
+	{
 		owl::println("Usage: crow_publish theme");
 		exit(-1);
 	}
 
-	if (crowker == nullptr) {
+	if (crowker == nullptr)
+	{
 		owl::println("Enviroment variable CROWKER doesn't setted");
 		exit(-1);
 	}
 
-	if (bin_mode) {
-		for (auto &str : binformat) {
+	if (bin_mode)
+	{
+		for (auto &str : binformat)
+		{
 			binsize += visitor_size[str];
 			binsizes.push_back(visitor_size[str]);
 			binrestores.push_back(visitor_restore[str]);

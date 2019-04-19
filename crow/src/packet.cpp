@@ -10,7 +10,8 @@
 #include <crow/packet.h>
 #include <igris/sync/syslock.h>
 
-void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate) {
+void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
+{
 	dlist_init(&pack->lnk);
 	dlist_init(&pack->ulnk);
 	pack->ingate = ingate;
@@ -20,7 +21,8 @@ void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate) {
 }
 
 crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
-								  size_t datasize) {
+								  size_t datasize)
+{
 	system_lock();
 	crow::packet *pack = crow::allocate_packet(addrsize + datasize);
 	system_unlock();
@@ -37,19 +39,22 @@ crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
 	return pack;
 }
 
-void crow::packet::revert_gate(uint8_t gateindex) {
+void crow::packet::revert_gate(uint8_t gateindex)
+{
 	*stageptr() = gateindex;
 	++header.stg;
 }
 
-void crow::packet::revert(struct iovec *vec, size_t veclen) {
+void crow::packet::revert(struct iovec *vec, size_t veclen)
+{
 	struct iovec *it = vec + veclen - 1;
 	struct iovec *eit = vec - 1;
 
 	size_t sz = 0;
 	uint8_t *tgt = stageptr();
 
-	for (; it != eit; --it) {
+	for (; it != eit; --it)
+	{
 		sz += it->iov_len;
 		char *ptr = (char *)it->iov_base + it->iov_len;
 		char *eptr = (char *)it->iov_base;

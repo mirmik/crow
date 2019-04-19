@@ -10,20 +10,24 @@
 #include <igris/event/delegate.h>
 #include <igris/sync/syslock.h>
 
-namespace crow {
-	enum class State {
+namespace crow
+{
+	enum class State
+	{
 		INIT,
 		CONNECTED,
 		DISCONNECTED,
 	};
 
-	enum class Frame {
+	enum class Frame
+	{
 		HANDSHAKE = 0,
 		DATA = 1,
 		REFUSE = 2,
 	};
 
-	struct channel : public crow::node {
+	struct channel : public crow::node
+	{
 		dlist_head lnk;
 		uint16_t id;
 		uint16_t rid;
@@ -42,30 +46,35 @@ namespace crow {
 		int send(const char *data, size_t size);
 	};
 
-	struct subheader_channel {
+	struct subheader_channel
+	{
 		// uint16_t sid;
 		// uint16_t rid;
 		uint16_t frame_id;
 		Frame ftype;
 	} G1_PACKED;
 
-	struct subheader_handshake {
+	struct subheader_handshake
+	{
 		uint8_t qos;
 		uint16_t ackquant;
 	} G1_PACKED;
 
-	static inline subheader_channel *get_subheader_channel(crow::packet *pack) {
+	static inline subheader_channel *get_subheader_channel(crow::packet *pack)
+	{
 		return (subheader_channel *)(pack->dataptr() + sizeof(crow::subheader));
 	}
 
 	static inline subheader_handshake *
-	get_subheader_handshake(crow::packet *pack) {
+	get_subheader_handshake(crow::packet *pack)
+	{
 		return (subheader_handshake *)(pack->dataptr() +
 									   sizeof(crow::subheader) +
 									   sizeof(crow::subheader_channel));
 	}
 
-	static inline igris::buffer get_datasect_channel(crow::packet *pack) {
+	static inline igris::buffer get_datasect_channel(crow::packet *pack)
+	{
 		return igris::buffer(pack->dataptr() + sizeof(crow::subheader) +
 								 sizeof(crow::subheader_channel),
 							 pack->datasize() - sizeof(crow::subheader) -
@@ -83,22 +92,27 @@ namespace crow {
 				   size_t raddr_len, uint8_t qos = 0, uint16_t ackquant = 200);
 	void __channel_send(crow::channel *ch, const char *data, size_t size);
 
-	struct accept_header {
+	struct accept_header
+	{
 		uint16_t rchid;
 		uint8_t qos;
 		uint16_t ackquant;
 	};
 
-	struct acceptor : public crow::node {
+	struct acceptor : public crow::node
+	{
 		igris::delegate<crow::channel *> init_channel;
 		acceptor(igris::delegate<crow::channel *> init_channel)
-			: init_channel(init_channel) {}
+			: init_channel(init_channel)
+		{
+		}
 
 		void incoming_packet(crow::packet *pack) override;
 	};
 
 	static inline acceptor *
-	create_acceptor(uint16_t port, igris::delegate<crow::channel *> dlg) {
+	create_acceptor(uint16_t port, igris::delegate<crow::channel *> dlg)
+	{
 		auto asrv = new crow::acceptor(dlg);
 		crow::link_node(asrv, port);
 		return asrv;

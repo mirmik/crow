@@ -5,7 +5,8 @@
 #include <crow/gates/udpgate.h>
 #include <crow/tower.h>
 
-int main() {
+int main()
+{
 	crow::enable_diagnostic();
 
 	auto tch = crow::create_test_channel(10);

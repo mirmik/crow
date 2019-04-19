@@ -8,8 +8,10 @@
 #include <crow/tower.h>
 #include <igris/event/delegate.h>
 
-namespace crow {
-	struct action_node : public node {
+namespace crow
+{
+	struct action_node : public node
+	{
 		igris::delegate<void, crow::packet *> dlg;
 
 		action_node(igris::delegate<void, crow::packet *> dlg) : dlg(dlg) {}
@@ -18,7 +20,8 @@ namespace crow {
 	};
 
 	static inline crow::action_node *
-	create_action_node(int i, igris::delegate<void, crow::packet *> dlg) {
+	create_action_node(int i, igris::delegate<void, crow::packet *> dlg)
+	{
 		action_node *n = new action_node(dlg);
 		crow::link_node(n, i);
 		return n;

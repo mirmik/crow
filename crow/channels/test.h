@@ -5,15 +5,19 @@
 #include <igris/print/stdprint.h>
 #include <igris/util/string.h>
 
-namespace crow {
-	struct test_channel : public channel {
-		void incoming_data_packet(crow::packet *pack) override {
+namespace crow
+{
+	struct test_channel : public channel
+	{
+		void incoming_data_packet(crow::packet *pack) override
+		{
 			auto data = pack->datasect();
 			igris::println("test_incoming:", igris::dstring(data));
 		}
 	};
 
-	test_channel *create_test_channel(uint16_t id) {
+	test_channel *create_test_channel(uint16_t id)
+	{
 		auto ptr = new crow::test_channel;
 		crow::link_channel(ptr, id);
 		return ptr;

@@ -9,7 +9,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-void crow::udpgate::nblock_onestep() {
+void crow::udpgate::nblock_onestep()
+{
 	if (!block)
 		block = (crow::packet *)malloc(128 + sizeof(crow::packet) -
 									   sizeof(crow::header));
@@ -36,7 +37,8 @@ void crow::udpgate::nblock_onestep() {
 	crow::travel(pack);
 }
 
-int crow::udpgate::open(uint16_t port) {
+int crow::udpgate::open(uint16_t port)
+{
 	int ret;
 
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -46,9 +48,11 @@ int crow::udpgate::open(uint16_t port) {
 	memset(&ipaddr, 0, iplen);
 	ipaddr.sin_port = htons(port);
 
-	if (port != 0) {
+	if (port != 0)
+	{
 		ret = bind(sock, (struct sockaddr *)&ipaddr, iplen);
-		if (ret != 0) {
+		if (ret != 0)
+		{
 			perror("bind");
 			exit(-1);
 		}
@@ -61,7 +65,8 @@ int crow::udpgate::open(uint16_t port) {
 	return ret;
 }
 
-void crow::udpgate::send(crow::packet *pack) {
+void crow::udpgate::send(crow::packet *pack)
+{
 	uint32_t *addr = (uint32_t *)(pack->stageptr() + 1);
 	uint16_t *port = (uint16_t *)(pack->stageptr() + 5);
 
@@ -79,7 +84,8 @@ void crow::udpgate::send(crow::packet *pack) {
 	crow::return_to_tower(pack, CROW_SENDED);
 }
 
-crow::udpgate *crow::create_udpgate(uint8_t id, uint16_t port) {
+crow::udpgate *crow::create_udpgate(uint8_t id, uint16_t port)
+{
 	crow::udpgate *g = new crow::udpgate;
 	g->block = NULL;
 	g->open(port); // TODO: should return NULL on error

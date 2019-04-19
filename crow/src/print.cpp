@@ -34,7 +34,8 @@ void crow_println(crow::packet* pack) {
 	igris::print_to(*igris::standart_output, "\n");
 }*/
 
-void crow::diagnostic(const char *notation, crow::packet *pack) {
+void crow::diagnostic(const char *notation, crow::packet *pack)
+{
 	nos::fprintln(
 		"{}: ("
 		"qos:{}, "

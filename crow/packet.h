@@ -20,7 +20,8 @@
 #define CROW_TARGET_ACK 1
 #define CROW_BINARY_ACK 2
 
-namespace crow {
+namespace crow
+{
 	struct gateway;
 
 	/**
@@ -28,10 +29,12 @@ namespace crow {
 		@details Заголовок пакета располагается в первых байтах пакета.
 		за заголовком следует поле адреса переменной длины, а за ним данные.
 	*/
-	struct header {
+	struct header
+	{
 		union {
 			uint8_t pflag; ///< Флаги пакета
-			struct {
+			struct
+			{
 				uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
 								 ///< передается в типе.
 				uint8_t vaddr : 1; ///< Поле указатель виртуального адреса @todo
@@ -50,7 +53,8 @@ namespace crow {
 		uint8_t qos; ///< Поле качества обслуживания.
 	} G1_PACKED;
 
-	struct packet {
+	struct packet
+	{
 		struct dlist_head lnk; ///< Для подключения в списки башни crow.
 		struct dlist_head ulnk; ///< Для подключения в список пользователя и
 								///< зависимых протоколов.
@@ -61,7 +65,8 @@ namespace crow {
 		uint8_t refs;
 		union {
 			uint8_t flags; ///< Местные флаги
-			struct {
+			struct
+			{
 				uint8_t released_by_world : 1;
 				uint8_t released_by_tower : 1;
 			} f;
@@ -78,7 +83,8 @@ namespace crow {
 			return igris::buffer(dataptr(), datasize());
 		}
 
-			[[deprecated]] igris::buffer addrsect() {
+			[[deprecated]] igris::buffer addrsect()
+		{
 			return igris::buffer(addrptr(), addrsize());
 		}
 
@@ -92,7 +98,8 @@ namespace crow {
 		uint8_t addrsize() { return header.alen; }
 
 		char *dataptr() { return (char *)(&header + 1) + header.alen; }
-		uint16_t datasize() {
+		uint16_t datasize()
+		{
 			return (uint16_t)(header.flen - header.alen - sizeof(crow::header));
 		}
 	} G1_PACKED;

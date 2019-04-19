@@ -16,8 +16,10 @@
 	@details Может содержать поле списка и некоторое время хранить отправляемые
    пакеты.
 */
-namespace crow {
-	struct gateway {
+namespace crow
+{
+	struct gateway
+	{
 		struct dlist_head lnk; ///< встроенное поле списка.
 		uint8_t id;			   ///< номер врат.
 

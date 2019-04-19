@@ -7,7 +7,8 @@
 
 void hello(crow::packet *pack) { owl::println("HelloWorld!!!!!"); }
 
-int main() {
+int main()
+{
 	crow::create_test_node(10);
 	crow::create_action_node(11, hello);
 

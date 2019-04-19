@@ -9,9 +9,11 @@
 #include <crow/gateway.h>
 #include <iostream>
 
-namespace crow {
+namespace crow
+{
 
-	struct udpgate : public gateway {
+	struct udpgate : public gateway
+	{
 		int sock;
 		crow::packet *block;
 

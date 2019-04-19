@@ -14,8 +14,10 @@
 #include <igris/protocols/gstuff/autorecv.h>
 #include <igris/protocols/gstuff/gstuff.h>
 
-namespace crow {
-	struct serial_gstuff : public crow::gateway {
+namespace crow
+{
+	struct serial_gstuff : public crow::gateway
+	{
 		int fd;
 
 		struct crow::packet *rpack;

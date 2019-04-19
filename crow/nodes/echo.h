@@ -4,14 +4,18 @@
 #include <crow/node.h>
 #include <crow/tower.h>
 
-namespace crow {
-	struct echo_node : public node {
+namespace crow
+{
+	struct echo_node : public node
+	{
 		bool quite;
 
 		echo_node(bool quite = false) : quite(quite) {}
 
-		void incoming_packet(crow::packet *pack) override {
-			if (!quite) {
+		void incoming_packet(crow::packet *pack) override
+		{
+			if (!quite)
+			{
 				/*igris::fprintln("echo service incoming_message {0}",
 				igris::buffer(msg->data, msg->size)); igris_PRINT(msg->sid);
 				igris_PRINT(msg->rid);

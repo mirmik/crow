@@ -7,27 +7,35 @@
 std::unordered_map<std::string, crow::theme> themes;
 bool brocker_info = false;
 
-void brocker_publish(const std::string &theme, const std::string &data) {
-	if (brocker_info) {
+void brocker_publish(const std::string &theme, const std::string &data)
+{
+	if (brocker_info)
+	{
 		owl::fprintln("publish: t:{} d:{}", theme, owl::dstring(data));
 	}
 
-	try {
+	try
+	{
 		auto &thm = themes.at(theme);
 		thm.publish(data);
-	} catch (std::exception ex) {
+	}
+	catch (std::exception ex)
+	{
 		// owl::println("unres theme");
 	}
 }
 
 void g3_brocker_subscribe(uint8_t *raddr, size_t rlen, const std::string &theme,
-						  uint8_t qos, uint16_t ackquant) {
-	if (brocker_info) {
+						  uint8_t qos, uint16_t ackquant)
+{
+	if (brocker_info)
+	{
 		owl::fprintln("g3_subscribe: t:{} f:{}", theme,
 					  owl::hexascii_encode(raddr, rlen));
 	}
 
-	if (themes.count(theme) == 0) {
+	if (themes.count(theme) == 0)
+	{
 		themes[theme] = crow::theme(theme);
 	}
 
@@ -42,7 +50,8 @@ void g3_brocker_subscribe(uint8_t *raddr, size_t rlen, const std::string &theme,
 	//}
 }
 
-void crow::theme::publish(const std::string &data) {
+void crow::theme::publish(const std::string &data)
+{
 	struct crow_subheader_pubsub subps;
 	struct crow_subheader_pubsub_data subps_d;
 
@@ -55,7 +64,8 @@ void crow::theme::publish(const std::string &data) {
 					{(void *)name.data(), name.size()},
 					{(void *)data.data(), data.size()}};
 
-	for (auto &sub : subs) {
+	for (auto &sub : subs)
+	{
 		crow::send_v(sub.second.host.data(), sub.second.host.size(), vec, 4,
 					 G1_G3TYPE, sub.second.qos, sub.second.ackquant);
 	}

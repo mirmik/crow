@@ -34,20 +34,24 @@ bool info = false;
 
 std::string pulse;
 
-void incoming_handler(crow::packet *pack) {
+void incoming_handler(crow::packet *pack)
+{
 	// dpr("incoming: ");
 
-	if (echo) {
+	if (echo)
+	{
 		crow::send(pack->addrptr(), pack->header.alen, pack->dataptr(),
 				   pack->datasize(), pack->header.f.type, pack->header.qos,
 				   pack->header.ackquant);
 	}
 
-	if (api) {
+	if (api)
+	{
 		char *dp = pack->dataptr();
 		size_t ds = pack->datasize();
 
-		if (strncmp(dp, "exit\n", ds) == 0) {
+		if (strncmp(dp, "exit\n", ds) == 0)
+		{
 			raise(SIGINT);
 		}
 	}
@@ -69,7 +73,8 @@ void transit_handler(crow::packet* pack) {
 	}
 }*/
 
-void *console_listener(void *arg) {
+void *console_listener(void *arg)
+{
 	(void)arg;
 
 	char *input;
@@ -77,7 +82,8 @@ void *console_listener(void *arg) {
 
 	rl_catch_signals = 0;
 
-	while (1) {
+	while (1)
+	{
 		input = readline("");
 
 		if (!input)
@@ -87,7 +93,8 @@ void *console_listener(void *arg) {
 
 		len = strlen(input);
 
-		if (!noend) {
+		if (!noend)
+		{
 			input[len] = '\n';
 			len++;
 		}
@@ -109,7 +116,8 @@ char *serial_port = NULL;
 //	exit(sig);
 //}
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	pthread_t console_thread;
 
 	//	signal(SIGINT, signal_handler);
@@ -140,8 +148,10 @@ int main(int argc, char *argv[]) {
 	int long_index = 0;
 	int opt = 0;
 	while ((opt = getopt_long(argc, argv, "uqSEeidvgt", long_options,
-							  &long_index)) != -1) {
-		switch (opt) {
+							  &long_index)) != -1)
+	{
+		switch (opt)
+		{
 		case 'q':
 			qos = (uint8_t)atoi(optarg);
 			break;
@@ -197,7 +207,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (crow::create_udpgate(G1_UDPGATE, udpport) == NULL) {
+	if (crow::create_udpgate(G1_UDPGATE, udpport) == NULL)
+	{
 		perror("udpgate open");
 		exit(-1);
 	}
@@ -216,26 +227,32 @@ int main(int argc, char *argv[]) {
 		//crow_link_gate(serialgate, 42);
 	}*/
 
-	if (serial_port != NULL) {
-		if (crow::create_serial_gstuff(serial_port, 115200, 42, gdebug) ==
-			NULL) {
+	if (serial_port != NULL)
+	{
+		if (crow::create_serial_gstuff(serial_port, 115200, 42, gdebug) == NULL)
+		{
 			perror("serialgate open");
 			exit(-1);
 		}
 	}
 
-	if (optind < argc) {
+	if (optind < argc)
+	{
 		addrsize = hexer(addr, 128, argv[optind], strlen(argv[optind]));
 
-		if (addrsize < 0) {
+		if (addrsize < 0)
+		{
 			printf("Wrong address format\n");
 			exit(-1);
 		}
-	} else {
+	}
+	else
+	{
 		addrsize = 0;
 	}
 
-	if (info) {
+	if (info)
+	{
 		printf("gates:\n");
 		printf("\tgate %d: udp port %d\n", G1_UDPGATE, udpport);
 
@@ -245,7 +262,8 @@ int main(int argc, char *argv[]) {
 		// printf("modes:\n");
 	}
 
-	if (pulse != std::string()) {
+	if (pulse != std::string())
+	{
 		if (!noend)
 			pulse = pulse + '\n';
 		crow::send(addr, (uint8_t)addrsize, pulse.data(),
@@ -255,7 +273,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (!noconsole)
-		if (pthread_create(&console_thread, NULL, console_listener, NULL)) {
+		if (pthread_create(&console_thread, NULL, console_listener, NULL))
+		{
 			fprintf(stderr, "Error creating thread\n");
 			return 1;
 		}

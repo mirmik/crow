@@ -13,18 +13,21 @@ using namespace crow;
 namespace py = pybind11;
 
 py::function incoming_handler_bind;
-void incoming_handler_bind_invoke(crow::packet *pack) {
+void incoming_handler_bind_invoke(crow::packet *pack)
+{
 	crow::packref control(pack);
 	incoming_handler_bind(control);
 }
 
 py::function subscribe_handler_bind;
-void subscribe_handler_bind_invoke(crow::packet *pack) {
+void subscribe_handler_bind_invoke(crow::packet *pack)
+{
 	crow::pubsub_data_packref control(pack);
 	subscribe_handler_bind(control);
 }
 
-PYBIND11_MODULE(libcrow, m) {
+PYBIND11_MODULE(libcrow, m)
+{
 	py::class_<packref>(m, "packref")
 		.def("rawdata",
 			 [](packref &self) -> py::bytes {

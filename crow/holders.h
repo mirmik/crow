@@ -7,8 +7,10 @@
 
 #include <igris/util/setget.h>
 
-namespace crow {
-	class packref {
+namespace crow
+{
+	class packref
+	{
 	  protected:
 		crow::packet *pack;
 
@@ -19,8 +21,10 @@ namespace crow {
 
 		packref(crow::packref &&oth) : pack(oth.pack) { oth.pack = nullptr; }
 
-		~packref() {
-			if (pack) {
+		~packref()
+		{
+			if (pack)
+			{
 				pack->refs--;
 
 				if (pack->refs == 0)
@@ -37,23 +41,29 @@ namespace crow {
 		VALUE_GETTER(ackquant, pack->header.ackquant);
 	};
 
-	class node_packref : public packref {};
+	class node_packref : public packref
+	{
+	};
 
-	class pubsub_packref : public packref {
+	class pubsub_packref : public packref
+	{
 	  public:
 		pubsub_packref(crow::packet *pack_) : packref(pack_) {}
 
 		igris::buffer theme() { return pubsub::get_theme(pack); }
 	};
 
-	class pubsub_data_packref : public pubsub_packref {
+	class pubsub_data_packref : public pubsub_packref
+	{
 	  public:
 		pubsub_data_packref(crow::packet *pack_) : pubsub_packref(pack_) {}
 
 		igris::buffer data() { return pubsub::get_data(pack); }
 	};
 
-	class pubsub_control_packref : public pubsub_packref {};
+	class pubsub_control_packref : public pubsub_packref
+	{
+	};
 
 } // namespace crow
 
