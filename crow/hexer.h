@@ -13,7 +13,7 @@ __BEGIN_DECLS
 /// Пример: .12#7F000001:10004 -> 0C7F0000012714
 /// Пример: #0C#7F000001#2714 -> 0C7F0000012714
 /// Пример: #0C7F0000012714 -> 0C7F0000012714
-int hexer(uint8_t* dst, size_t maxsz, const char* src, size_t srcsz);
-int hexer_s(uint8_t* dst, size_t maxsz, const char* src);
+int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz);
+int hexer_s(uint8_t *dst, size_t maxsz, const char *src);
 
 __END_DECLS

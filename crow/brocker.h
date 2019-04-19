@@ -10,7 +10,7 @@
 __BEGIN_DECLS
 
 int brocker_publish(
-	const void * thm, size_t thmsz, 
+	const void * thm, size_t thmsz,
 	const void * dat, size_t datsz
 );
 

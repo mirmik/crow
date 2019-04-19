@@ -7,18 +7,18 @@
 
 namespace crow {
 	struct echo_channel : public channel {
-		void incoming_data_packet(crow::packet* pack) override {
+		void incoming_data_packet(crow::packet *pack) override {
 			auto data = pack->datasect();
 			crow::__channel_send(this, "TEST", 4);
 			crow::release(pack);
-		} 
+		}
 	};
 
-	echo_channel* create_echo_channel(uint16_t id) {
+	echo_channel *create_echo_channel(uint16_t id) {
 		auto ptr = new crow::echo_channel;
 		crow::link_channel(ptr, id);
 		return ptr;
 	}
-}
+} // namespace crow
 
 #endif

@@ -8,7 +8,8 @@ import os
 
 import licant
 
-licant.include("owl", path="owl/owl.g.py")
+licant.include("nos", local_tunel="build/nos")
+licant.include("igris", local_tunel="build/igris")
 licant.include("crow", path="crow.g.py")
 licant.cxx_objects("crow-objects", 
 	mdepends = [

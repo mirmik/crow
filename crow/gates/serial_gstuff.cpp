@@ -1,17 +1,16 @@
 #include <crow/gates/serial_gstuff.h>
 #include <crow/tower.h>
 
-#include <igris/bug.h>
+#include <igris/util/bug.h>
 
-#include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <termios.h>
 
-void crow::serial_gstuff::newline_handler()
-{
-	struct crow::packet * block = rpack;
+void crow::serial_gstuff::newline_handler() {
+	struct crow::packet *block = rpack;
 	rpack = NULL;
 
 	block->revert_gate(id);
@@ -20,18 +19,18 @@ void crow::serial_gstuff::newline_handler()
 	crow::travel(block);
 }
 
-struct crow::serial_gstuff* crow::create_serial_gstuff(const char* path, uint32_t baudrate, uint8_t id, bool debug)
-{
+struct crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
+													   uint32_t baudrate,
+													   uint8_t id, bool debug) {
 	int ret;
 
-	crow::serial_gstuff* g = new crow::serial_gstuff;
+	crow::serial_gstuff *g = new crow::serial_gstuff;
 
 	g->debug = debug;
 
 	g->fd = open(path, O_RDWR | O_NOCTTY);
 
-	if (g->fd < 0)
-	{
+	if (g->fd < 0) {
 		perror("serial::open");
 		exit(0);
 	}
@@ -39,13 +38,12 @@ struct crow::serial_gstuff* crow::create_serial_gstuff(const char* path, uint32_
 	struct termios tattr, orig;
 	ret = tcgetattr(g->fd, &orig);
 
-	if (ret < 0)
-	{
+	if (ret < 0) {
 		perror("serial::tcgetattr");
 		exit(0);
 	}
 
-	tattr = orig;  /* copy original and then modify below */
+	tattr = orig; /* copy original and then modify below */
 
 	/* input modes - clear indicated ones giving: no break, no CR to NL,
 	   no parity check, no strip char, no start/stop output (sic) control */
@@ -62,23 +60,20 @@ struct crow::serial_gstuff* crow::create_serial_gstuff(const char* path, uint32_
 	tattr.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
 
 	/* control chars - set return condition: min number of bytes and timer */
-	tattr.c_cc[VMIN] = 0; tattr.c_cc[VTIME] = 0; /* immediate - anything       */
+	tattr.c_cc[VMIN] = 0;
+	tattr.c_cc[VTIME] = 0; /* immediate - anything       */
 
-	if (baudrate == 115200)
-	{
+	if (baudrate == 115200) {
 		cfsetispeed(&tattr, B115200);
 		cfsetospeed(&tattr, B115200);
-	}
-	else
-	{
+	} else {
 		BUG();
 	}
 
 	/* put terminal in raw mode after flushing */
 	ret = tcsetattr(g->fd, TCSAFLUSH, &tattr);
 
-	if (ret < 0)
-	{
+	if (ret < 0) {
 		perror("serial::tcsetattr");
 	}
 
@@ -88,44 +83,45 @@ struct crow::serial_gstuff* crow::create_serial_gstuff(const char* path, uint32_
 	return g;
 }
 
-void crow::serial_gstuff::send(struct crow::packet* pack)
-{
+void crow::serial_gstuff::send(struct crow::packet *pack) {
 	char buffer[512];
 
-	int len = gstuffing((char*)&pack->header, pack->header.flen, buffer);
+	int len = gstuffing((char *)&pack->header, pack->header.flen, buffer);
 	write(fd, buffer, len);
 	crow::return_to_tower(pack, CROW_SENDED);
 }
 
-
-void crow::serial_gstuff::nblock_onestep()
-{
-	if (rpack == NULL)
-	{
-		rpack = (struct crow::packet*)
-		        malloc(128 + sizeof(struct crow::packet) - sizeof(struct crow::header));
-		gstuff_autorecv_setbuf(&recver, (char*)&rpack->header, 128);
+void crow::serial_gstuff::nblock_onestep() {
+	if (rpack == NULL) {
+		rpack = (struct crow::packet *)malloc(
+			128 + sizeof(struct crow::packet) - sizeof(struct crow::header));
+		gstuff_autorecv_setbuf(&recver, (char *)&rpack->header, 128);
 	}
 
 	char c;
-	ssize_t len = read(fd, (uint8_t*)&c, 1);
+	ssize_t len = read(fd, (uint8_t *)&c, 1);
 
-	if (len == 1)
-	{
-		if (debug)
-		{
-			dprhex(c); dprchar('\t'); dprchar(c); dln();
+	if (len == 1) {
+		if (debug) {
+			dprhex(c);
+			dprchar('\t');
+			dprchar(c);
+			dln();
 		}
 
 		int ret = gstuff_autorecv_newchar(&recver, c);
 
-		switch (ret)
-		{
-			case GSTUFF_CRC_ERROR: dprln("warn: gstuff crc error"); break;
+		switch (ret) {
+		case GSTUFF_CRC_ERROR:
+			dprln("warn: gstuff crc error");
+			break;
 
-			case GSTUFF_NEWPACKAGE: newline_handler(); break;
+		case GSTUFF_NEWPACKAGE:
+			newline_handler();
+			break;
 
-			default: break;
+		default:
+			break;
 		}
 	}
 }

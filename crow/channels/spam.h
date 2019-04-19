@@ -6,16 +6,16 @@
 
 namespace g2 {
 	struct spam_channel : public channel {
-		void incoming_packet(g1::packet* pack) override {
+		void incoming_packet(g1::packet *pack) override {
 			igris::panic("spam incoming!!!");
-		} 
+		}
 	};
 
-	spam_channel* create_spam_channel(uint16_t id) {
+	spam_channel *create_spam_channel(uint16_t id) {
 		auto ptr = new g2::spam_channel;
 		g2::link_channel(ptr, id);
 		return ptr;
 	}
-}
+} // namespace g2
 
 #endif
