@@ -6,18 +6,30 @@ from licant.cxx_modules import application
 from licant.libs import include
 import os
 
-licant.libs.include("owl")
 licant.libs.include("crow")
 
+licant.libs.include("nos")
+licant.libs.include("igris")
+
+gates = [
+	"crow.udpgate",
+	"crow.serial_gstuff",
+]
+
+mdepends = ["crow"]
+mdepends.extend(gates)
+
 application("crowker", 
-	sources = ["main.cpp", "brocker.cpp"],
-	mdepends = [
-		"crow", 
-		"crow.udpgate"
-	]
+	sources = [
+		"main.cpp",
+		"brocker.cpp"
+	],
+	mdepends = mdepends,
+	cxx_flags = "-Wextra -Wall",
+	libs = ["pthread", "readline"]
 )
 
-@licant.routine(deps=["crowker"])
+@licant.routine(deps = ["crowker"])
 def install():
 	os.system("cp crowker /usr/local/bin")
 

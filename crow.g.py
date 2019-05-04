@@ -19,7 +19,6 @@ licant.modules.module("crow",
 		"igris.include",
 		"igris.syslock",
 		"igris.dprint",
-		"igris.protocols.dstring",
 		"nos"
 	]
 )

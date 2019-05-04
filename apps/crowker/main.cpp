@@ -10,6 +10,9 @@
 
 #include "brocker.h"
 
+#include <nos/print.h>
+#include <nos/fprint.h>
+
 int udpport = -1;
 bool quite = false;
 
@@ -66,9 +69,9 @@ void undelivered_handler(struct crow::packet *pack)
 			thm.subs.erase(
 				std::string((char *)pack->addrptr(), pack->header.alen));
 			if (brocker_info)
-				owl::fprintln(
+				nos::fprintln(
 					"g3_refuse: t:{}, r:{}", theme,
-					owl::hexascii_encode(pack->addrptr(), pack->header.alen));
+					igris::hexascii_encode(pack->addrptr(), pack->header.alen));
 		}
 	}
 

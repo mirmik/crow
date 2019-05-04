@@ -43,7 +43,7 @@ namespace crow
 
 		void handshake(uint8_t *raddr, uint16_t rlen, uint16_t rid,
 					   uint8_t qos = 0, uint16_t ackquant = 200);
-		int send(const char *data, size_t size);
+		void send(const char *data, size_t size);
 	};
 
 	struct subheader_channel

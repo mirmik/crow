@@ -6,8 +6,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <owl/print.h>
-#include <owl/print/stdprint.h>
+#include <nos/print.h>
 
 extern bool brocker_info;
 
@@ -19,9 +18,9 @@ namespace crow
 {
 	struct g3_subscriber
 	{
-		std::string host;
 		uint8_t qos;
 		uint16_t ackquant;
+		std::string host;
 
 		g3_subscriber() = default;
 		g3_subscriber(const uint8_t *host, size_t hlen, uint8_t qos,

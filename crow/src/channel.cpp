@@ -121,7 +121,7 @@ void crow::channel::handshake(uint8_t *raddr, uint16_t rlen, uint16_t rid,
 	crow::handshake(this, rid, raddr, rlen, qos, ackquant);
 }
 
-int crow::channel::send(const char *data, size_t size)
+void crow::channel::send(const char *data, size_t size)
 {
 	crow::__channel_send(this, data, size);
 }
