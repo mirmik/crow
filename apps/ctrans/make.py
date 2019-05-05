@@ -20,7 +20,12 @@ mdepends = ["crow"]
 mdepends.extend(gates)
 
 application("ctrans", 
-	sources = ["main.cpp"],
+	sources = [
+		"main.cpp",
+		"binin.cpp",
+		"binout.cpp",
+		"bincommon.cpp",
+	],
 	mdepends = mdepends,
 	cxx_flags = "-Wextra -Wall",
 	libs = ["pthread", "readline"]

@@ -3,8 +3,11 @@
 #include <crow/tower.h>
 
 #include <crow/hexer.h>
+#include <igris/util/string.h>
 #include <igris/util/dstring.h>
 #include <igris/util/bug.h>
+
+#include <nos/fprint.h>
 
 #include <getopt.h>
 #include <pthread.h>
@@ -18,6 +21,10 @@
 #include <readline/readline.h>
 
 #include <string>
+#include <map>
+
+#include "binin.h"
+#include "binout.h"
 
 uint8_t addr[128];
 int addrsize;
@@ -33,15 +40,102 @@ bool echo = false;
 bool gdebug = false;
 bool info = false;
 
+bool bin_output_mode = false;
+bool bin_input_mode = false;
+
+std::string binout_fmt;
+std::string binin_fmt;
+
 std::string pulse;
+
+enum class input_format 
+{
+	INPUT_RAW,
+	INPUT_RAW_ENDLINE,
+	INPUT_BINARY
+};
 
 enum class output_format
 {
 	OUTPUT_RAW,
 	OUTPUT_DSTRING,
+	OUTPUT_BINARY
 };
 
+input_format informat = input_format::INPUT_RAW_ENDLINE;
 output_format outformat = output_format::OUTPUT_RAW;
+
+std::string informat_tostr() 
+{
+	switch(informat) 
+	{
+		case input_format::INPUT_RAW: return "INPUT_RAW";
+		case input_format::INPUT_RAW_ENDLINE: return "INPUT_RAW_ENDLINE";
+		case input_format::INPUT_BINARY: return "INPUT_BINARY";
+	}
+	return std::string();
+}
+
+std::string outformat_tostr() 
+{
+	switch(outformat) 
+	{
+		case output_format::OUTPUT_RAW: return "OUTPUT_RAW";
+		case output_format::OUTPUT_DSTRING: return "OUTPUT_DSTRING";
+		case output_format::OUTPUT_BINARY: return "OUTPUT_BINARY";
+	}
+	return std::string();
+}
+
+void output_do(igris::buffer data, crow::packet* pack)
+{
+	switch (outformat)
+	{
+		case output_format::OUTPUT_RAW:
+			printf("%.*s", (int)data.size(), data.data());
+			fflush(stdout);
+			break;
+
+		case output_format::OUTPUT_DSTRING:
+			// Вывод в stdout информацию пакета.
+			char buf[10000];
+			bytes_to_dstring(buf, data.data(), data.size());
+			printf("%s\n", buf);
+			fflush(stdout);
+			break;
+
+		case output_format::OUTPUT_BINARY:
+			output_binary(data, pack);
+			break;
+
+		default:
+			BUG();
+	}
+}
+
+std::string input_do(igris::buffer data) 
+{
+	std::string message;
+
+	switch (informat) 
+	{
+		case input_format::INPUT_RAW_ENDLINE:
+			message = std::string(data.data(), data.size());
+			message += '\n';
+			return message;
+
+		case input_format::INPUT_RAW:
+			message = std::string(data.data(), data.size());
+			return message;
+
+		case input_format::INPUT_BINARY:
+			message = input_binary(std::string(data.data(), data.size()));
+			return message;			
+
+		default:
+			BUG();
+	}
+}
 
 void incoming_handler(crow::packet *pack)
 {
@@ -65,25 +159,7 @@ void incoming_handler(crow::packet *pack)
 		}
 	}
 
-
-	switch (outformat)
-	{
-		case output_format::OUTPUT_RAW:
-			printf("%*s", pack->datasize(), pack->dataptr());
-			fflush(stdout);
-			break;
-
-		case output_format::OUTPUT_DSTRING: 
-			// Вывод в stdout информацию пакета.
-			char buf[10000];
-			bytes_to_dstring(buf, pack->dataptr(), pack->datasize());
-			printf("%s\n", buf);
-			fflush(stdout);
-			break;
-
-		default:
-			BUG();
-	}
+	output_do(pack->rawdata(), pack);
 
 	crow::release(pack);
 }
@@ -93,7 +169,6 @@ void *console_listener(void *arg)
 	(void)arg;
 
 	char *input;
-	size_t len;
 
 	rl_catch_signals = 0;
 
@@ -105,16 +180,9 @@ void *console_listener(void *arg)
 			break;
 
 		add_history(input);
+		std::string message = input_do(input);
 
-		len = strlen(input);
-
-		if (!noend)
-		{
-			input[len] = '\n';
-			len++;
-		}
-
-		crow::send(addr, (uint8_t)addrsize, input, (uint16_t)len, type, qos,
+		crow::send(addr, (uint8_t)addrsize, message.data(), message.size(), type, qos,
 		           ackquant);
 	}
 
@@ -143,17 +211,20 @@ int main(int argc, char *argv[])
 		{"noconsole", no_argument, NULL, 'n'}, // Отключает создание консоли.
 		{"pulse", required_argument, NULL, 'p'}, // Отключает программу по первой транзакции.
 
-		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах.
-		{"debug", no_argument, NULL, 'd'}, //Активирует информацию о вратах.
-		{"vdebug", no_argument, NULL, 'v'}, //Активирует информацию о вратах.
-		{"gdebug", no_argument, NULL, 'g'}, //Активирует информацию о вратах.
+		{"binin", required_argument, NULL, 'b'}, // Форматирует вход согласно бинарного шаблона.
+		{"binout", required_argument, NULL, 'B'}, // Форматирует вывод согласно бинарного шаблона.
+
+		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
+		{"debug", no_argument, NULL, 'd'}, // Включает информацию о событиях башни.
+		{"vdebug", no_argument, NULL, 'v'}, // Активирует информацию о времени жизни пакетов.
+		{"gdebug", no_argument, NULL, 'g'}, // Активирует информацию о вратах.
 		{NULL, 0, NULL, 0}
 	};
 
 	int long_index = 0;
 	int opt = 0;
 
-	while ((opt = getopt_long(argc, argv, "uqSEeidvgt", long_options,
+	while ((opt = getopt_long(argc, argv, "uqSEeidvgtB", long_options,
 	                          &long_index)) != -1)
 	{
 		switch (opt)
@@ -211,7 +282,23 @@ int main(int argc, char *argv[])
 				crow::enable_live_diagnostic();
 				break;
 
+			case 'b':
+				binin_fmt = optarg;
+				bin_input_mode = true;
+				break;
+
+			case 'B':
+				//binary_mode_prepare(optarg);
+				binout_fmt = optarg;
+				bin_output_mode = true;
+				break;
+
+			case '?':
+				exit(-1);
+				break;
+
 			case 0:
+				BUG();
 				break;
 		}
 	}
@@ -234,6 +321,22 @@ int main(int argc, char *argv[])
 // Переопределение стандартного обработчика (Для возможности перехвата и api)
 	crow::user_incoming_handler = incoming_handler;
 
+	if (bin_output_mode == true) 
+	{
+		binout_mode_prepare(binout_fmt);
+		outformat = output_format::OUTPUT_BINARY;
+	}
+
+	if (bin_input_mode == true) 
+	{
+		binin_mode_prepare(binin_fmt);
+		informat = input_format::INPUT_BINARY;
+	}
+
+	if (noend) 
+	{
+		informat = input_format::INPUT_RAW;
+	}
 
 // Определение целевого адресса
 	if (optind < argc)
@@ -259,6 +362,9 @@ int main(int argc, char *argv[])
 
 		if (serial_port != 0)
 			printf("\tgate %d: serial port %s\n", 42, serial_port);
+
+		nos::println("informat:", informat_tostr());
+		nos::println("outformat:", outformat_tostr());
 	}
 
 // Ветка обработки pulse мода.
@@ -267,8 +373,10 @@ int main(int argc, char *argv[])
 		if (!noend)
 			pulse = pulse + '\n';
 
-		crow::send(addr, (uint8_t)addrsize, pulse.data(),
-		           (uint16_t)pulse.size(), type, qos, ackquant);
+		std::string message = input_do(igris::buffer(pulse.data(), pulse.size()));
+
+		crow::send(addr, (uint8_t)addrsize, message.data(),
+		           message.size(), type, qos, ackquant);
 		crow::onestep();
 		exit(0);
 	}
