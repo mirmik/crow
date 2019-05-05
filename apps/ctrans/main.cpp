@@ -91,7 +91,7 @@ void output_do(igris::buffer data, crow::packet* pack)
 {
 	if (api) 
 	{
-		if (data == "exit")
+		if (data == "exit\n")
 			exit(0);
 	}
 
