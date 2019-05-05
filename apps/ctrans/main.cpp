@@ -376,9 +376,6 @@ int main(int argc, char *argv[])
 // Ветка обработки pulse мода.
 	if (pulse != std::string())
 	{
-		if (!noend)
-			pulse = pulse + '\n';
-
 		std::string message = input_do(igris::buffer(pulse.data(), pulse.size()));
 
 		crow::send(addr, (uint8_t)addrsize, message.data(),
