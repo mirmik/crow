@@ -89,6 +89,12 @@ std::string outformat_tostr()
 
 void output_do(igris::buffer data, crow::packet* pack)
 {
+	if (api) 
+	{
+		if (data == "exit")
+			exit(0);
+	}
+
 	switch (outformat)
 	{
 		case output_format::OUTPUT_RAW:
