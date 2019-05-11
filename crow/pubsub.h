@@ -90,7 +90,7 @@ namespace crow
 	{
 		static inline igris::buffer get_theme(crow::packet *pack)
 		{
-			assert(pack->header.f.type == G1_G3TYPE);
+			assert(pack->header.f.type == CROW_PUBSUB_PROTOCOL);
 
 			struct crow_subheader_pubsub *shps = get_subheader_pubsub(pack);
 			// struct crow_subheader_pubsub_data * shps_d =
@@ -101,7 +101,7 @@ namespace crow
 
 		static inline igris::buffer get_data(crow::packet *pack)
 		{
-			assert(pack->header.f.type == G1_G3TYPE);
+			assert(pack->header.f.type == CROW_PUBSUB_PROTOCOL);
 
 			// struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
 			struct crow_subheader_pubsub_data *shps_d =

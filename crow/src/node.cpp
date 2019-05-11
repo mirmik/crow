@@ -14,7 +14,7 @@ void crow::node_send(uint16_t sid, uint16_t rid, const void *raddr,
 
 	struct iovec iov[2] = {{(void *)&sh, sizeof(sh)}, {(void *)data, size}};
 
-	crow::send_v(raddr, rsize, iov, 2, G1_G0TYPE, qos, ackquant);
+	crow::send_v(raddr, rsize, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
 void crow::incoming_node_handler(crow::packet *pack)

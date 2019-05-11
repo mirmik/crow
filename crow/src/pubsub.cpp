@@ -28,7 +28,7 @@ void crow::publish_buffer(const char *theme, const void *data, uint16_t dlen,
 		{(void *)data, subps_d.datsz},
 	};
 
-	crow::send_v(brocker_host, brocker_host_len, iov, 4, G1_G3TYPE, qos,
+	crow::send_v(brocker_host, brocker_host_len, iov, 4, CROW_PUBSUB_PROTOCOL, qos,
 				 acktime);
 }
 
@@ -62,7 +62,7 @@ void crow::subscribe(const char *theme, uint8_t qos, uint16_t acktime,
 		{(void *)theme, thmsz},
 	};
 
-	crow::send_v(brocker_host, brocker_host_len, iov, 3, G1_G3TYPE, qos,
+	crow::send_v(brocker_host, brocker_host_len, iov, 3, CROW_PUBSUB_PROTOCOL, qos,
 				 acktime);
 }
 /*

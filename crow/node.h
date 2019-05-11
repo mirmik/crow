@@ -2,8 +2,8 @@
 	@file
 */
 
-#ifndef G0_CORE_H
-#define G0_CORE_H
+#ifndef CROW_NODE_H
+#define CROW_NODE_H
 
 #include <crow/packet.h>
 #include <sys/uio.h>

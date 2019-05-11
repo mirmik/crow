@@ -15,6 +15,8 @@
 #define NOTRACE 1
 #include <nos/trace.h>
 
+#include <crow/query.h>
+
 /*igris::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
 igris::dlist<crow::packet, &crow::packet::lnk> crow_travelled;
 igris::dlist<crow::packet, &crow::packet::lnk> crow_incoming;
@@ -181,7 +183,7 @@ static void crow_incoming_handler(crow::packet *pack)
 	TRACE();
 	switch (pack->header.f.type)
 	{
-	case G1_G0TYPE:
+	case CROW_NODE_PROTOCOL:
 		if (crow::node_handler)
 			crow::node_handler(pack);
 		else
@@ -189,12 +191,17 @@ static void crow_incoming_handler(crow::packet *pack)
 
 		break;
 
-	case G1_G3TYPE:
+	case CROW_PUBSUB_PROTOCOL:
 		if (crow::pubsub_handler)
 			crow::pubsub_handler(pack);
 		else
 			crow::release(pack);
 
+		break;
+
+	case CROW_QUERY_PROTOCOL:
+		crow::query_protocol_handler(pack);
+		crow::release(pack);
 		break;
 
 	default:

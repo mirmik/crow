@@ -92,7 +92,7 @@ void crow::handshake(crow::channel *ch, uint16_t rid, const void *raddr_ptr,
 
 	ch->state = crow::State::CONNECTED;
 	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec),
-				 G1_G0TYPE, 2, ackquant);
+				 CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
 void crow::__channel_send(crow::channel *ch, const char *data, size_t size)
@@ -110,7 +110,7 @@ void crow::__channel_send(crow::channel *ch, const char *data, size_t size)
 		{(void *)data, size},
 	};
 	crow::send_v(ch->raddr_ptr, ch->raddr_len, vec, sizeof(vec) / sizeof(iovec),
-				 G1_G0TYPE, ch->qos, ch->ackquant);
+				 CROW_NODE_PROTOCOL, ch->qos, ch->ackquant);
 }
 
 uint16_t crow::dynport() { return 512; }

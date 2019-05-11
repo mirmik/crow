@@ -23,19 +23,22 @@ namespace crow
 	// Передать пакет в обработку.
 	void travel(crow::packet *pack);
 
-	// Включить трассировку пакетов. 
-	void diagnostic_enable();	
+	// Включить трассировку пакетов.
+	void diagnostic_enable();
 	void enable_diagnostic();
-	
+
 	// Включить трассировку аллокации.
 	void live_diagnostic_enable();
 	void enable_live_diagnostic();
 
 	// Отправить пакет.
-	void send(const void *addr, uint8_t asize, const char *data, uint16_t dsize,
-			  uint8_t type, uint8_t qos, uint16_t ackquant);
-	void send_v(const void *addr, uint8_t asize, const struct iovec *vec,
-				size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant);
+	void send(const void *addr, uint8_t asize,
+	          const char *data, uint16_t dsize,
+	          uint8_t type, uint8_t qos, uint16_t ackquant);
+
+	void send_v(const void *addr, uint8_t asize,
+	            const struct iovec *vec, size_t veclen,
+	            uint8_t type, uint8_t qos, uint16_t ackquant);
 
 	// Эта функция вызывается вратами после обработки отсылаемого пакета.
 	void return_to_tower(crow::packet *pack, uint8_t sts);
