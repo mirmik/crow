@@ -30,7 +30,7 @@ void crow::query_protocol_handler(crow::packet * pack)
 	}
 
 	// Not Found
-	crow::query_answer_error(pack, NULL, 0, CROW_QUERY_ENOENT);
+	crow::query_answer(pack, NULL, 0, CROW_QUERY_ENOENT);
 
 end_label:
 	crow::release(pack);
