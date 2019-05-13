@@ -38,6 +38,12 @@ void crow::publish(const char *theme, const char *data, uint8_t qos,
 	crow::publish_buffer(theme, data, (uint16_t)strlen(data), qos, acktime);
 }
 
+void crow::publish(const char *theme, const std::string& data, uint8_t qos,
+				   uint16_t acktime)
+{
+	crow::publish_buffer(theme, data.data(), data.size(), qos, acktime);
+}
+
 // void crow::publish(const char* theme, const std::string& data, uint8_t qos,
 // uint16_t acktime) { 	crow::publish_buffer(theme, data.data(), (uint16_t)
 // data.size(), qos, acktime);
@@ -91,14 +97,14 @@ std::string crow::environment_crowker()
 	return std::string(envcr);
 }
 
-/*void crow::set_crowker(const std::string& crowker)
+void crow::set_crowker(const std::string& crowker)
 {
 	uint8_t buf[128];
 	auto ss = hexer_s(buf, 128, crowker.c_str());
 	brocker_host = (uint8_t*) malloc(ss);
 	memcpy((void*)brocker_host, (void*)buf, ss);
 	brocker_host_len = ss;
-}*/
+}
 
 /*
 void crow::set_publish_qos(crow::QoS qos) {

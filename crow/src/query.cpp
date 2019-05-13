@@ -51,7 +51,7 @@ void crow::query_answer(crow::packet * pack,
 	out_header.thmsz = in_header->thmsz;
 	out_header.datsz = datsz;
 	out_header.qid = in_header->qid;
-	out_header.errcode = errcode;
+	out_header.code = errcode;
 
 	struct iovec iov[] =
 	{

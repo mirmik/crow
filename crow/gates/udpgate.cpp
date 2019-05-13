@@ -11,18 +11,25 @@
 
 void crow::udpgate::nblock_onestep()
 {
-	if (!block)
-		block = (crow::packet *)malloc(128 + sizeof(crow::packet) -
-									   sizeof(crow::header));
+	crow::header header;
 
 	struct sockaddr_in sender;
 	socklen_t sendsize = sizeof(sender);
 	memset(&sender, 0, sizeof(sender));
 
-	ssize_t len = recvfrom(sock, &block->header, 128, 0,
-						   (struct sockaddr *)&sender, &sendsize);
+	ssize_t len = recvfrom(sock, &header, sizeof(crow::header), 
+		MSG_PEEK, (struct sockaddr *)&sender, &sendsize);
+
 	if (len <= 0)
 		return;
+
+	size_t flen = header.flen;
+
+	if (!block)
+		block = (crow::packet *) malloc(flen + sizeof(crow::packet) - sizeof(crow::header));
+
+	len = recvfrom(sock, &block->header, flen, 
+		0, (struct sockaddr *)&sender, &sendsize);
 
 	crow::packet_initialization(block, this);
 

@@ -45,6 +45,7 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
 		"type:{}, "
 		"addr:{}, "
 		"stg:{}, "
+		"dlen:{}, "
 		"data:{}"
 		")",
 		notation, pack->header.qos, (uint8_t)pack->header.f.ack,
@@ -52,5 +53,6 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
 		(uint8_t)pack->header.f.type,
 		igris::hexascii_encode(pack->addrptr(), pack->addrsize()),
 		pack->header.stg,
-		igris::dstring(pack->rawdata().data(), pack->rawdata().size()));
+		pack->rawdata().size(),
+		igris::dstring(pack->rawdata().data(), pack->rawdata().size() > 16 ? 16 : pack->rawdata().size()));
 }

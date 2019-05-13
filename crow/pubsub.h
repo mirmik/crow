@@ -37,15 +37,15 @@ typedef struct crow_subheader_pubsub_control
 namespace crow
 {
 	void publish(const char *theme, const char *data, uint8_t qos = 0,
-				 uint16_t acktime = DEFAULT_ACKQUANT);
-	// void publish(const char* theme, const std::string& data, uint8_t qos=0,
-	// uint16_t acktime=DEFAULT_ACKQUANT);
-	void subscribe(const char *theme, uint8_t qos = 0,
-				   uint16_t acktime = DEFAULT_ACKQUANT, uint8_t rqos = 0,
-				   uint16_t racktime = DEFAULT_ACKQUANT);
+	             uint16_t acktime = DEFAULT_ACKQUANT);
+	void publish(const char* theme, const std::string& data, uint8_t qos = 0,
+	             uint16_t acktime = DEFAULT_ACKQUANT);
+	void subscribe(const char *theme,
+	               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
+	               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);
 
 	void publish_buffer(const char *theme, const void *data, uint16_t datsz,
-						uint8_t qos, uint16_t acktime);
+	                    uint8_t qos, uint16_t acktime);
 	void set_publish_host(const uint8_t *hhost, size_t hsize);
 
 	void set_crowker(const std::string &str);
@@ -62,28 +62,28 @@ namespace crow
 	get_subheader_pubsub_data(crow::packet *pack)
 	{
 		return (
-			crow_subheader_pubsub_data_t *)(pack->dataptr() +
-											sizeof(crow_subheader_pubsub_t));
+		           crow_subheader_pubsub_data_t *)(pack->dataptr() +
+		                   sizeof(crow_subheader_pubsub_t));
 	}
 
 	static inline crow_subheader_pubsub_control_t *
 	get_subheader_pubsub_control(crow::packet *pack)
 	{
 		return (
-			crow_subheader_pubsub_control_t *)(pack->dataptr() +
-											   sizeof(crow_subheader_pubsub_t));
+		           crow_subheader_pubsub_control_t *)(pack->dataptr() +
+		                   sizeof(crow_subheader_pubsub_t));
 	}
 
 	static inline char *packet_pubsub_thmptr(struct crow::packet *pack)
 	{
 		return pack->dataptr() + sizeof(crow_subheader_pubsub_t) +
-			   sizeof(crow_subheader_pubsub_data_t);
+		       sizeof(crow_subheader_pubsub_data_t);
 	}
 
 	static inline char *packet_pubsub_datptr(struct crow::packet *pack)
 	{
 		return crow::packet_pubsub_thmptr(pack) +
-			   get_subheader_pubsub(pack)->thmsz;
+		       get_subheader_pubsub(pack)->thmsz;
 	}
 
 	namespace pubsub
@@ -105,10 +105,10 @@ namespace crow
 
 			// struct crow_subheader_pubsub * shps = get_subheader_pubsub(pack);
 			struct crow_subheader_pubsub_data *shps_d =
-				get_subheader_pubsub_data(pack);
+			    get_subheader_pubsub_data(pack);
 
 			return igris::buffer(crow::packet_pubsub_datptr(pack),
-								 shps_d->datsz);
+			                     shps_d->datsz);
 		}
 	} // namespace pubsub
 } // namespace crow

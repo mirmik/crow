@@ -94,4 +94,6 @@ PYBIND11_MODULE(libcrow, m)
 		subscribe_handler_bind.release();
 	});
 	m.add_object("_cleanup", cleanup);
+
+	m.def("diagnostic_enable", diagnostic_enable);
 }
