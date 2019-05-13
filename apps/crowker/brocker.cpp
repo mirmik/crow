@@ -68,6 +68,6 @@ void crow::theme::publish(const std::string &data)
 	for (auto &sub : subs)
 	{
 		crow::send_v(sub.second.host.data(), sub.second.host.size(), vec, 4,
-					 G1_G3TYPE, sub.second.qos, sub.second.ackquant);
+					 CROW_PUBSUB_PROTOCOL, sub.second.qos, sub.second.ackquant);
 	}
 }

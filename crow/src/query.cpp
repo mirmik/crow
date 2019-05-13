@@ -1,31 +1,60 @@
 #include <crow/query.h>
+#include <crow/tower.h>
 
-void crow::query_protocol_handler(crow::packet * pack) 
+crow::query_function * crow::query_table;
+
+void crow::query_protocol_handler(crow::packet * pack)
 {
 	igris::buffer raw, theme, data;
-	uint8_t thmsz;
-	uint16_t datsz;
-	uint16_t qcount;
-	
-	if (crow::query_table == nullptr) 
-	{
-		crow::release(pack);
-		return;
-	}
+//	uint16_t qcount;
+
+	crow::query_header* header;
+
+	if (crow::query_table == nullptr)
+		goto end_label;
 
 	raw = pack->rawdata();
-	
-	memcpy(&thmsz,  raw.data() + 0, 								sizeof(thmsz));
-	memcpy(&datsz,  raw.data() + sizeof(thmsz), 					sizeof(datsz));
-	memcpy(&qcount, raw.data() + sizeof(thmsz) + sizeof(datsz), 	sizeof(qcount));
+	header = (crow::query_header *) raw.data();
 
-	theme = { raw.data() + sizeof(thmsz) + sizeof(datsz) + sizeof(qcount), 			thmsz };
-	data = { raw.data() + sizeof(thmsz) + sizeof(datsz) + sizeof(qcount) + thmsz, 	datsz };
+	theme = { raw.data() + sizeof(crow::query_header), header->thmsz };
+	data = { raw.data() + sizeof(crow::query_header) + header->thmsz, header->datsz };
 
-	for (const auto& q : crow::query_table) 
+	for (const crow::query_function * q = crow::query_table; q->func != NULL; ++q)
 	{
-		//if 
+		//if
 	}
 
-	crow::query_answer_error
+	//crow::query_answer_error(pack);
+
+end_label:
+	crow::release(pack);
+	return;
+}
+
+void crow::query_answer(crow::packet * pack,
+                        const char* dat, size_t datsz, uint8_t errcode)
+{
+	crow::query_header out_header;
+	crow::query_header * in_header;
+
+	char * in_header_thm;
+
+	in_header = (crow::query_header*) pack->rawdata().data();
+	in_header_thm = (char*)(in_header + 1);
+
+	out_header.thmsz = in_header->thmsz;
+	out_header.datsz = datsz;
+	out_header.qid = in_header->qid;
+	out_header.errcode = errcode;
+
+	struct iovec iov[] =
+	{
+		{&out_header, sizeof(query_header)},
+		{(void *)in_header_thm, in_header->thmsz},
+		{(void *)dat, datsz}
+	};
+
+	crow::send_v(pack->addrptr(), pack->addrsize(), iov, 3,
+	             CROW_QUERY_PROTOCOL, pack->header.qos, pack->header.ackquant);
+
 }

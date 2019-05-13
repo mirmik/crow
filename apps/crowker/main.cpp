@@ -56,7 +56,7 @@ void incoming_pubsub_packet(struct crow::packet *pack)
 
 void undelivered_handler(struct crow::packet *pack)
 {
-	if (pack->header.f.type == G1_G3TYPE)
+	if (pack->header.f.type == CROW_PUBSUB_PROTOCOL)
 	{
 		auto shps = crow::get_subheader_pubsub(pack);
 
