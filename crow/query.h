@@ -19,10 +19,10 @@ namespace crow
 
 	struct query_header
 	{
+		uint8_t code;
 		uint8_t thmsz;
 		uint16_t datsz;
 		uint8_t qid;
-		uint8_t errcode;
 	} __attribute__((packed));
 
 
@@ -33,6 +33,7 @@ namespace crow
 	                          const void * data, size_t dsize,
 	                          uint8_t qos, uint16_t ackquant);
 
+	void query_announce(const char * theme);
 
 	void query_answer(crow::packet* pack,
 	                  const char* dat, size_t datsz, uint8_t errcode);
