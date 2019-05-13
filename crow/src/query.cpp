@@ -21,10 +21,16 @@ void crow::query_protocol_handler(crow::packet * pack)
 
 	for (const crow::query_function * q = crow::query_table; q->func != NULL; ++q)
 	{
-		//if
+		if (theme == igris::buffer(q->name, strlen(q->name))) 
+		{
+			dprln("OUR CLIENT TODO");
+
+			goto end_label;
+		}
 	}
 
-	//crow::query_answer_error(pack);
+	// Not Found
+	crow::query_answer_error(pack, NULL, 0, CROW_QUERY_ENOENT);
 
 end_label:
 	crow::release(pack);

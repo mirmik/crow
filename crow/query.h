@@ -3,6 +3,8 @@
 
 #include <crow/packet.h>
 
+#define CROW_QUERY_ENOENT 10
+
 namespace crow
 {
 	///////////////////////////////////////////////////
