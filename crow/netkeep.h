@@ -26,6 +26,7 @@ namespace crow
 		uint8_t code;
 		uint8_t declared_name_len;
 		uint8_t declared_type;
+		uint8_t datlen;
 	};
 
 	extern std::map<std::string, chrono::timestamp> brocker_list;
@@ -39,11 +40,14 @@ namespace crow
 
 		switch (header -> code)
 		{
+			case CROW_BROCKER_ALIVE_HANDSHAKE:
+				netproto_alive_send(CROW_TOWER_TYPE_CROWKER, pack->addr());
+				//fallthrow
 			case CROW_BROCKER_ALIVE:
 				netproto_mutex.lock();
 				browker_list.insert(header->addrsect());
 				netproto_mutex.unlock();
-				break;
+				break; 
 
 			default:
 				break;
