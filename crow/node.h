@@ -27,7 +27,7 @@ namespace crow
 	{
 		uint16_t sid;
 		uint16_t rid;
-	} G1_PACKED;
+	} __attribute__((packed));
 
 	static inline subheader *get_subheader(crow::packet *pack)
 	{
