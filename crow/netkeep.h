@@ -14,11 +14,13 @@
 
 namespace crow
 {
-	struct 
+	struct alived_tower
 	{
 		std::string addr;
 		std::string name;
 		uint8_t type;
+
+		chrono::timestamp lastalive;		
 	};
 
 	struct netproto_subheader
@@ -29,7 +31,7 @@ namespace crow
 		uint8_t datlen;
 	};
 
-	extern std::map<std::string, chrono::timestamp> brocker_list;
+	extern std::list<alived_tower> alived_list;
 	extern std::mutex netproto_mutex;
 
 	static inline
