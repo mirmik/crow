@@ -1,4 +1,9 @@
 import licant.modules
+import licant
+
+licant.module("crow.netkeep_crowker", 
+	sources=["crow/src/netkeep_crowker.cpp"]
+)
 
 licant.modules.module("crow",
 	srcdir = "crow/src",
@@ -9,6 +14,8 @@ licant.modules.module("crow",
 		"channel.cpp",
 		"pubsub.cpp",
 		"query.cpp",
+		"alive.cpp",
+		"netkeep.cpp",
 		"print.cpp",
 		"hexer.c",
 	],
@@ -17,9 +24,11 @@ licant.modules.module("crow",
 		"crow.allocator",
 		"crow.time",
 		"crow.include",
+
 		"igris.include",
 		"igris.syslock",
 		"igris.dprint",
+
 		"nos"
 	]
 )

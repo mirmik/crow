@@ -16,7 +16,10 @@ gates = [
 	"crow.serial_gstuff",
 ]
 
-mdepends = ["crow"]
+mdepends = [
+	"crow",
+	"crow.netkeep_crowker"
+]
 mdepends.extend(gates)
 
 application("crowker", 

@@ -1,6 +1,9 @@
 #include <crow/gates/udpgate.h>
 #include <crow/pubsub.h>
 #include <crow/tower.h>
+
+#include <crow/netkeep.h>
+
 //#include <thread>
 #include <getopt.h>
 #include <stdbool.h>
@@ -78,31 +81,13 @@ void undelivered_handler(struct crow::packet *pack)
 	crow::release(pack);
 }
 
-/*void crow::theme::publish(const std::string& data) {
-	crow::subheader_pubsub subps;
-	crow::subheader_pubsub_data subps_d;
-
-	subps.type = crow::frame_type::PUBLISH;
-	subps.thmsz = name.size();
-	subps_d.datsz = data.size();
-
-	iovec vec[4] = {
-		{ &subps, sizeof(subps) },
-		{ &subps_d, sizeof(subps_d) },
-		{(void*)name.data(), name.size()},
-		{(void*)data.data(), data.size()}
-	};
-
-	for (auto& sub : subs) {
-		crow::send(sub.host.data, sub.host.size, vec, 4, G1_G3TYPE, sub.qos,
-sub.ackquant);
-	}
-}*/
-
 int main(int argc, char *argv[])
 {
 	crow::pubsub_handler = incoming_pubsub_packet;
 	crow::undelivered_handler = undelivered_handler;
+
+	crow::netkeep_protocol_handler = 
+		crow::netkeep_protocol_handler_crowker; 
 
 	const struct option long_options[] = {{"udp", required_argument, NULL, 'u'},
 										  {"debug", no_argument, NULL, 'd'},

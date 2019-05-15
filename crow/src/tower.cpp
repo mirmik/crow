@@ -16,6 +16,7 @@
 #include <nos/trace.h>
 
 #include <crow/query.h>
+#include <crow/netkeep.h>
 
 /*igris::dlist<crow::gateway, &crow::gateway::lnk> crow::gateways;
 igris::dlist<crow::packet, &crow::packet::lnk> crow_travelled;
@@ -196,12 +197,18 @@ static void crow_incoming_handler(crow::packet *pack)
 			crow::pubsub_handler(pack);
 		else
 			crow::release(pack);
-
 		break;
 
 	case CROW_QUERY_PROTOCOL:
 		crow::query_protocol_handler(pack);
 		crow::release(pack);
+		break;
+
+	case CROW_NETKEEP_PROTOCOL:
+		if (crow::netkeep_protocol_handler)
+			crow::netkeep_protocol_handler(pack);
+		else
+			crow::release(pack);
 		break;
 
 	default:
