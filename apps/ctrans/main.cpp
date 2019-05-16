@@ -219,6 +219,8 @@ int main(int argc, char *argv[])
 
 		{"binin", required_argument, NULL, 'b'}, // Форматирует вход согласно бинарного шаблона.
 		{"binout", required_argument, NULL, 'B'}, // Форматирует вывод согласно бинарного шаблона.
+		{"rawout", no_argument, NULL, 'r'},
+		{"dbgout", no_argument, NULL, 'j'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
 		{"debug", no_argument, NULL, 'd'}, // Включает информацию о событиях башни.
@@ -262,6 +264,14 @@ int main(int argc, char *argv[])
 
 			case 'i':
 				info = true;
+				break;
+
+			case 'r':
+				outformat = output_format::OUTPUT_RAW;
+				break;
+			
+			case 'j':
+				outformat = output_format::OUTPUT_DSTRING;
 				break;
 
 			case 'n':
