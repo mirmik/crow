@@ -2,12 +2,15 @@
 #include <crow/alive.h>
 
 #include <igris/container/dualmap.h>
+#include <igris/util/dstring.h>
 
 #include <mutex>
 #include <chrono>
 
 #include <string>
 #include <list>
+
+#include <nos/print.h>
 
 struct alived_tower
 {
@@ -29,12 +32,16 @@ void crow::netkeep_protocol_handler_crowker(crow::packet * pack)
 	switch (header -> code)
 	{
 		case CROW_ALIVE_HANDSHAKE:
-			send_alive_message(pack->addrptr(), pack->addrsize(),
-			                   CROW_ALIVE, CROW_TOWER_TYPE_CROWKER,
-			                   pack->header.qos, pack->header.ackquant);
-		//fallthrow
+			send_alive(pack->addrptr(), pack->addrsize(),
+			           CROW_ALIVE, CROW_TOWER_TYPE_CROWKER,
+			           pack->header.qos, pack->header.ackquant);
+
+			goto fallthrow;
+
 		case CROW_ALIVE:
 		{
+		fallthrow:
+
 			std::string addr = (std::string) pack->addr();
 			std::string name { (char*)(header + 1), header->nlen };
 
@@ -42,13 +49,13 @@ void crow::netkeep_protocol_handler_crowker(crow::packet * pack)
 
 			if (alivemap.contains(std::make_pair(addr, name)))
 			{
-				dprln("NETPROTO:CONTAINS");
+				//dprln("NETPROTO:CONTAINS");
 				alivemap.at(std::make_pair(addr, name)).lastalive =
 				    std::chrono::system_clock::now();
 			}
 			else
 			{
-				dprln("NETPROTO:CREATENEW");
+				//dprln("NETPROTO:CREATENEW");
 				alived_tower record
 				{
 					header->type, std::chrono::system_clock::now() };
@@ -71,31 +78,37 @@ void crow::netkeep_serve()
 	alivemap_t::iter0 it, eit, next;
 	std::lock_guard<std::mutex> lock(netproto_mutex);
 
-	while (true)
+	if (alivemap.size() == 0)
 	{
-		it = alivemap.begin0();
+		return;
+	}
+
+	it = alivemap.begin0();
+	eit = alivemap.end0();
+
+	now = std::chrono::system_clock::now();
+
+	do
+	{
 		next = std::next(it);
-		eit = alivemap.end0();
+		auto diff = 
+			std::chrono::duration_cast<std::chrono::milliseconds>(
+		    	now - it->second.val.lastalive);
 
-		now = std::chrono::system_clock::now();
+		//dprln(diff.count());
 
-		/*for (; it != eit; ++it)
+		if (diff > std::chrono::seconds(4))
 		{
-			if (s.second - now > 8s)
-			{
-				break;
-			}
+			//dprln("NETKEP:ERASE");
+			nos::println("Disconnect host", 
+				igris::dstring(it->second.it1->first), 
+				it->second.it2->first);
+			alivemap.erase(it);
 		}
 
-		if (it == eit)
-			break;
-
-		else
-		{
-			alivemap.erase(it);
-			//browker_list::remove(it);
-		}*/
+		it = next;
 	}
+	while (it != eit);
 }
 
 /*static inline

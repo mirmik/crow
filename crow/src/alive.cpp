@@ -2,7 +2,7 @@
 
 static const char * __netname = "";
 
-void crow::send_alive_message(const uint8_t* raddr, size_t rlen,
+void crow::send_alive(const uint8_t* raddr, size_t rlen,
 							uint8_t code, uint8_t type,
 							uint8_t qos, uint16_t ackquant) 
 {
@@ -15,7 +15,7 @@ void crow::send_alive_message(const uint8_t* raddr, size_t rlen,
 	struct iovec iov[] =
 	{
 		{&header, sizeof(alive_header)},
-		{(void *)crow::netname, header.nlen},
+		{(void *)__netname, header.nlen},
 	};
 
 	crow::send_v(raddr, rlen, iov, 2,
@@ -28,7 +28,7 @@ void crow::set_netname(const char * name)
 	__netname = name;
 }
 
-const char * netname() 
+const char * crow::netname() 
 {
 	return __netname;
 }

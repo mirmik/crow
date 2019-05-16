@@ -18,7 +18,7 @@ namespace crow
 		uint8_t type;
 	} __attribute__((packed));
 
-	void send_alive_message(const uint8_t* raddr, size_t rlen,
+	void send_alive(const uint8_t* raddr, size_t rlen,
 							uint8_t code, uint8_t type,
 							uint8_t qos, uint16_t ackquant);
 
