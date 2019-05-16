@@ -51,10 +51,6 @@ void crow::netkeep_protocol_handler_crowker(crow::packet * pack)
 				alivemap.insert(addr, name, record);
 			}
 		};
-
-			//netproto_mutex.lock();
-			//browker_list.insert(header->addrsect());
-			//netproto_mutex.unlock();
 		break;
 
 		default:
