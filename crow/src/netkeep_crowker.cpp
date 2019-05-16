@@ -15,7 +15,10 @@ struct alived_tower
 	std::chrono::time_point<std::chrono::system_clock> lastalive;
 };
 
-igris::dualmap <std::string, std::string, struct alived_tower> alivemap;
+using alivemap_t =
+    igris::dualmap <std::string, std::string, struct alived_tower>;
+alivemap_t alivemap;
+
 std::mutex netproto_mutex;
 
 void crow::netkeep_protocol_handler_crowker(crow::packet * pack)
@@ -37,16 +40,17 @@ void crow::netkeep_protocol_handler_crowker(crow::packet * pack)
 
 			std::lock_guard<std::mutex> lock(netproto_mutex);
 
-			if (alivemap.contains(std::make_pair(addr, name))) 
+			if (alivemap.contains(std::make_pair(addr, name)))
 			{
 				dprln("NETPROTO:CONTAINS");
-				alivemap.at(std::make_pair(addr, name)).lastalive = 
-					std::chrono::system_clock::now();
+				alivemap.at(std::make_pair(addr, name)).lastalive =
+				    std::chrono::system_clock::now();
 			}
-			else 
+			else
 			{
 				dprln("NETPROTO:CREATENEW");
-				alived_tower record { 
+				alived_tower record
+				{
 					header->type, std::chrono::system_clock::now() };
 				alivemap.insert(addr, name, record);
 			}
@@ -61,44 +65,45 @@ void crow::netkeep_protocol_handler_crowker(crow::packet * pack)
 	return;
 }
 
-/*	static inline
-	void crow::netproto_serve()
+void crow::netkeep_serve()
+{
+	std::chrono::time_point<std::chrono::system_clock> now;
+	alivemap_t::iter0 it, eit, next;
+	std::lock_guard<std::mutex> lock(netproto_mutex);
+
+	while (true)
 	{
-		auto now;
-		std::map<std::string, chrono::timestamp>::iterator it, eit;
+		it = alivemap.begin0();
+		next = std::next(it);
+		eit = alivemap.end0();
 
-		std::lock_guard<std::mutex> lock(netproto_mutex);
+		now = std::chrono::system_clock::now();
 
-		while (true)
+		/*for (; it != eit; ++it)
 		{
-			it = browker_list.begin();
-			eit = browker_list.end();
-			now = chrono::sysclock::now();
-
-			for (; it != eit; ++it)
+			if (s.second - now > 8s)
 			{
-				if (s.second - now > 8s)
-				{
-					break;
-				}
-			}
-
-			if (it == eit)
 				break;
-
-			else
-			{
-				browker_list::remove(it);
 			}
 		}
-	}
 
-	static inline
-	void debug_print_brocker_list()
-	{
-		for (const auto& s : browker_list)
+		if (it == eit)
+			break;
+
+		else
 		{
-			dprln(s.first);
-		}
+			alivemap.erase(it);
+			//browker_list::remove(it);
+		}*/
 	}
+}
+
+/*static inline
+void debug_print_brocker_list()
+{
+	for (const auto& s : browker_list)
+	{
+		dprln(s.first);
+	}
+}
 */

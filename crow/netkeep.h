@@ -8,6 +8,8 @@ namespace crow
 	void netkeep_protocol_handler_stub(crow::packet * pack);
 	void netkeep_protocol_handler_crowker(crow::packet * pack);
 
+	void netkeep_serve();
+
 	extern void (*netkeep_protocol_handler)(crow::packet * pack);
 }
 
