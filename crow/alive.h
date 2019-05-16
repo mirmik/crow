@@ -18,12 +18,12 @@ namespace crow
 		uint8_t type;
 	} __attribute__((packed));
 
-	extern const char * netname;
-
 	void send_alive_message(const uint8_t* raddr, size_t rlen,
-							//const char* name, size_t nlen,
 							uint8_t code, uint8_t type,
 							uint8_t qos, uint16_t ackquant);
+
+	void set_netname(const char * name);
+	const char * netname();
 }
 
 #endif

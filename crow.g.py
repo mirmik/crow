@@ -33,6 +33,10 @@ licant.modules.module("crow",
 	]
 )
 
+licant.module("crow.crowker",
+	mdepends = ["crow.netkeep_crowker"]
+)
+
 licant.modules.module("crow.minimal",
 	srcdir = "crow/src",
 	sources = [

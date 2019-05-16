@@ -1,6 +1,8 @@
 #include <crow/netkeep.h>
 #include <crow/alive.h>
 
+#include <igris/container/dualmap.h>
+
 #include <mutex>
 #include <chrono>
 
@@ -9,14 +11,11 @@
 
 struct alived_tower
 {
-	std::string addr;
-	std::string name;
 	uint8_t type;
-
 	std::chrono::time_point<std::chrono::system_clock> lastalive;
 };
 
-std::list<alived_tower> alived_list;
+igris::dualmap <std::string, std::string, struct alived_tower> alivemap;
 std::mutex netproto_mutex;
 
 void crow::netkeep_protocol_handler_crowker(crow::packet * pack)
@@ -32,10 +31,31 @@ void crow::netkeep_protocol_handler_crowker(crow::packet * pack)
 			                   pack->header.qos, pack->header.ackquant);
 		//fallthrow
 		case CROW_ALIVE:
+		{
+			std::string addr = (std::string) pack->addr();
+			std::string name { (char*)(header + 1), header->nlen };
+
+			std::lock_guard<std::mutex> lock(netproto_mutex);
+
+			if (alivemap.contains(std::make_pair(addr, name))) 
+			{
+				dprln("NETPROTO:CONTAINS");
+				alivemap.at(std::make_pair(addr, name)).lastalive = 
+					std::chrono::system_clock::now();
+			}
+			else 
+			{
+				dprln("NETPROTO:CREATENEW");
+				alived_tower record { 
+					header->type, std::chrono::system_clock::now() };
+				alivemap.insert(addr, name, record);
+			}
+		};
+
 			//netproto_mutex.lock();
 			//browker_list.insert(header->addrsect());
 			//netproto_mutex.unlock();
-			break;
+		break;
 
 		default:
 			break;
