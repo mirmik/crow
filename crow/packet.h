@@ -60,7 +60,6 @@ namespace crow
 		struct crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
 		uint16_t last_request_time; ///< @todo
 		uint8_t ackcount;			///< @todo
-		uint8_t status;
 		uint8_t refs;
 		union {
 			uint8_t flags; ///< Местные флаги
