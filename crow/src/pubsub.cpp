@@ -98,6 +98,33 @@ void crow::subscribe(const char *theme, uint8_t qos, uint16_t acktime,
 	crow::send_v(brocker_host, brocker_host_len, iov, 3, CROW_PUBSUB_PROTOCOL, qos,
 	             acktime);
 }
+
+void crow::subscribe(
+    uint8_t * raddr, uint8_t rlen,
+    const char *theme, uint8_t qos, uint16_t acktime,
+    uint8_t rqos, uint16_t racktime)
+{
+	size_t thmsz = strlen(theme);
+
+	struct crow_subheader_pubsub subps;
+	struct crow_subheader_pubsub_control subps_c;
+
+	subps.type = SUBSCRIBE;
+	subps.thmsz = (uint8_t)thmsz;
+	subps_c.qos = rqos;
+	subps_c.ackquant = racktime;
+
+	struct iovec iov[3] =
+	{
+		{&subps, sizeof(subps)},
+		{&subps_c, sizeof(subps_c)},
+		{(void *)theme, thmsz},
+	};
+
+	crow::send_v(raddr, rlen, iov, 3, CROW_PUBSUB_PROTOCOL, qos,
+	             acktime);
+}
+
 /*
 void crow::subscribe(const char* theme, crow::QoS qos) {
 	crow::subscribe(theme, strlen(theme), qos);

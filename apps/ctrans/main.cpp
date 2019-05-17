@@ -19,11 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <readline/history.h>
-#include <readline/readline.h>
-
 #include <string>
 #include <map>
+#include <thread>
 
 #include "binin.h"
 #include "binout.h"
@@ -43,6 +41,7 @@ bool noend = false;
 bool echo = false;
 bool gdebug = false;
 bool info = false;
+bool subscribe_mode = false;
 
 bool bin_output_mode = false;
 bool bin_input_mode = false;
@@ -138,12 +137,12 @@ std::string input_do(const std::string& data)
 	switch (informat)
 	{
 		case input_format::INPUT_RAW_ENDLINE:
-			message = std::string(data.data(), data.size());
+			message = data;
 			message += '\n';
 			return message;
 
 		case input_format::INPUT_RAW:
-			message = std::string(data.data(), data.size());
+			message = data;
 			return message;
 
 		case input_format::INPUT_BINARY:
@@ -194,7 +193,15 @@ void incoming_handler(crow::packet *pack)
 		}
 	}
 
-	output_do(pack->rawdata(), pack);
+	switch (pack->header.f.type)
+	{
+		case CROW_PUBSUB_PROTOCOL:
+			output_do(crow::packet_pubsub_datptr(pack), pack);
+			break;
+
+		default:
+			output_do(pack->rawdata(), pack);
+	}
 
 	crow::release(pack);
 }
@@ -207,13 +214,12 @@ void *console_listener(void *arg)
 
 	while (1)
 	{
-		if (std::cin.peek() == std::char_traits<char>::eof()) 
+		if (std::cin.peek() == std::char_traits<char>::eof())
 		{
 			exit(0);
 		}
 
 		std::getline(std::cin, input);
-
 		std::string message = input_do(input);
 		send_do(message);
 	}
@@ -248,6 +254,7 @@ int main(int argc, char *argv[])
 		{"rawout", no_argument, NULL, 'r'},
 		{"dbgout", no_argument, NULL, 'j'},
 
+		{"subscribe", required_argument, NULL, 'l'},
 		{"publish", required_argument, NULL, 'P'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
@@ -342,6 +349,12 @@ int main(int argc, char *argv[])
 				protoopt = protoopt_e::PROTOOPT_PUBLISH;
 				break;
 
+			case 'l':
+				theme = optarg;
+				subscribe_mode = 1;
+				break;
+
+
 			case '?':
 				exit(-1);
 				break;
@@ -435,6 +448,16 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "Error creating thread\n");
 			return 1;
 		}
+	}
+
+	if (subscribe_mode) 
+	{
+		std::thread([](){
+			while(1) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+				crow::subscribe(addr, addrsize, theme.c_str(), qos, ackquant, qos, ackquant);
+			}
+		}).detach();
 	}
 
 	crow::spin();
