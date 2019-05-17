@@ -12,7 +12,7 @@ uint16_t brocker_ackquant = DEFAULT_ACKQUANT;
 void (*crow_pubsub_handler)(crow::packet *pack);
 
 void crow::publish_buffer(const char *theme, const void *data, uint16_t dlen,
-						  uint8_t qos, uint16_t acktime)
+                          uint8_t qos, uint16_t acktime)
 {
 	struct crow_subheader_pubsub subps;
 	struct crow_subheader_pubsub_data subps_d;
@@ -21,7 +21,8 @@ void crow::publish_buffer(const char *theme, const void *data, uint16_t dlen,
 	subps.thmsz = (uint8_t)strlen(theme);
 	subps_d.datsz = dlen;
 
-	struct iovec iov[4] = {
+	struct iovec iov[4] =
+	{
 		{&subps, sizeof(subps)},
 		{&subps_d, sizeof(subps_d)},
 		{(void *)theme, subps.thmsz},
@@ -29,17 +30,42 @@ void crow::publish_buffer(const char *theme, const void *data, uint16_t dlen,
 	};
 
 	crow::send_v(brocker_host, brocker_host_len, iov, 4, CROW_PUBSUB_PROTOCOL, qos,
-				 acktime);
+	             acktime);
 }
 
+void crow::publish(
+    uint8_t * raddr, uint8_t rlen,
+    const char *theme, const char *data, uint8_t dlen,
+    uint8_t qos, uint16_t acktime)
+{
+	struct crow_subheader_pubsub subps;
+	struct crow_subheader_pubsub_data subps_d;
+
+	subps.type = PUBLISH;
+	subps.thmsz = (uint8_t)strlen(theme);
+	subps_d.datsz = dlen;
+
+	struct iovec iov[4] =
+	{
+		{&subps, sizeof(subps)},
+		{&subps_d, sizeof(subps_d)},
+		{(void *)theme, subps.thmsz},
+		{(void *)data, subps_d.datsz},
+	};
+
+	crow::send_v(raddr, rlen, iov, 4, CROW_PUBSUB_PROTOCOL,
+	             qos, acktime);
+}
+
+
 void crow::publish(const char *theme, const char *data, uint8_t qos,
-				   uint16_t acktime)
+                   uint16_t acktime)
 {
 	crow::publish_buffer(theme, data, (uint16_t)strlen(data), qos, acktime);
 }
 
 void crow::publish(const char *theme, const std::string& data, uint8_t qos,
-				   uint16_t acktime)
+                   uint16_t acktime)
 {
 	crow::publish_buffer(theme, data.data(), data.size(), qos, acktime);
 }
@@ -50,7 +76,7 @@ void crow::publish(const char *theme, const std::string& data, uint8_t qos,
 //}
 
 void crow::subscribe(const char *theme, uint8_t qos, uint16_t acktime,
-					 uint8_t rqos, uint16_t racktime)
+                     uint8_t rqos, uint16_t racktime)
 {
 	size_t thmsz = strlen(theme);
 
@@ -62,14 +88,15 @@ void crow::subscribe(const char *theme, uint8_t qos, uint16_t acktime,
 	subps_c.qos = rqos;
 	subps_c.ackquant = racktime;
 
-	struct iovec iov[3] = {
+	struct iovec iov[3] =
+	{
 		{&subps, sizeof(subps)},
 		{&subps_c, sizeof(subps_c)},
 		{(void *)theme, thmsz},
 	};
 
 	crow::send_v(brocker_host, brocker_host_len, iov, 3, CROW_PUBSUB_PROTOCOL, qos,
-				 acktime);
+	             acktime);
 }
 /*
 void crow::subscribe(const char* theme, crow::QoS qos) {

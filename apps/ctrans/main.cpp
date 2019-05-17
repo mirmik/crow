@@ -1,8 +1,10 @@
 #include <crow/gates/serial_gstuff.h>
 #include <crow/gates/udpgate.h>
-#include <crow/tower.h>
 
+#include <crow/tower.h>
+#include <crow/pubsub.h>
 #include <crow/hexer.h>
+
 #include <igris/util/string.h>
 #include <igris/util/dstring.h>
 #include <igris/util/bug.h>
@@ -47,8 +49,15 @@ std::string binout_fmt;
 std::string binin_fmt;
 
 std::string pulse;
+std::string theme;
 
-enum class input_format 
+enum class protoopt_e
+{
+	PROTOOPT_BASIC,
+	PROTOOPT_PUBLISH
+};
+
+enum class input_format
 {
 	INPUT_RAW,
 	INPUT_RAW_ENDLINE,
@@ -62,12 +71,13 @@ enum class output_format
 	OUTPUT_BINARY
 };
 
+protoopt_e protoopt = protoopt_e::PROTOOPT_BASIC;
 input_format informat = input_format::INPUT_RAW_ENDLINE;
 output_format outformat = output_format::OUTPUT_RAW;
 
-std::string informat_tostr() 
+std::string informat_tostr()
 {
-	switch(informat) 
+	switch (informat)
 	{
 		case input_format::INPUT_RAW: return "INPUT_RAW";
 		case input_format::INPUT_RAW_ENDLINE: return "INPUT_RAW_ENDLINE";
@@ -76,9 +86,9 @@ std::string informat_tostr()
 	return std::string();
 }
 
-std::string outformat_tostr() 
+std::string outformat_tostr()
 {
-	switch(outformat) 
+	switch (outformat)
 	{
 		case output_format::OUTPUT_RAW: return "OUTPUT_RAW";
 		case output_format::OUTPUT_DSTRING: return "OUTPUT_DSTRING";
@@ -89,7 +99,7 @@ std::string outformat_tostr()
 
 void output_do(igris::buffer data, crow::packet* pack)
 {
-	if (api) 
+	if (api)
 	{
 		if (data == "exit\n")
 			exit(0);
@@ -119,11 +129,11 @@ void output_do(igris::buffer data, crow::packet* pack)
 	}
 }
 
-std::string input_do(igris::buffer data) 
+std::string input_do(igris::buffer data)
 {
 	std::string message;
 
-	switch (informat) 
+	switch (informat)
 	{
 		case input_format::INPUT_RAW_ENDLINE:
 			message = std::string(data.data(), data.size());
@@ -136,10 +146,27 @@ std::string input_do(igris::buffer data)
 
 		case input_format::INPUT_BINARY:
 			message = input_binary(std::string(data.data(), data.size()));
-			return message;			
+			return message;
 
 		default:
 			BUG();
+	}
+}
+
+void send_do(const std::string message)
+{
+	switch (protoopt)
+	{
+		case protoopt_e::PROTOOPT_BASIC:
+			crow::send(addr, (uint8_t)addrsize,
+			           message.data(), message.size(), type,
+			           qos, ackquant);
+			break;
+		case protoopt_e::PROTOOPT_PUBLISH:
+			crow::publish(addr, (uint8_t)addrsize, theme.c_str(),
+			              message.data(), message.size(),
+			              qos, ackquant);
+			break;
 	}
 }
 
@@ -188,8 +215,7 @@ void *console_listener(void *arg)
 		add_history(input);
 		std::string message = input_do(input);
 
-		crow::send(addr, (uint8_t)addrsize, message.data(), message.size(), type, qos,
-		           ackquant);
+		send_do(message);
 	}
 
 	exit(0);
@@ -221,6 +247,8 @@ int main(int argc, char *argv[])
 		{"binout", required_argument, NULL, 'B'}, // Форматирует вывод согласно бинарного шаблона.
 		{"rawout", no_argument, NULL, 'r'},
 		{"dbgout", no_argument, NULL, 'j'},
+
+		{"publish", required_argument, NULL, 'P'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
 		{"debug", no_argument, NULL, 'd'}, // Включает информацию о событиях башни.
@@ -269,7 +297,7 @@ int main(int argc, char *argv[])
 			case 'r':
 				outformat = output_format::OUTPUT_RAW;
 				break;
-			
+
 			case 'j':
 				outformat = output_format::OUTPUT_DSTRING;
 				break;
@@ -309,6 +337,11 @@ int main(int argc, char *argv[])
 				bin_output_mode = true;
 				break;
 
+			case 'P':
+				theme = optarg;
+				protoopt = protoopt_e::PROTOOPT_PUBLISH;
+				break;
+
 			case '?':
 				exit(-1);
 				break;
@@ -337,19 +370,19 @@ int main(int argc, char *argv[])
 // Переопределение стандартного обработчика (Для возможности перехвата и api)
 	crow::user_incoming_handler = incoming_handler;
 
-	if (bin_output_mode == true) 
+	if (bin_output_mode == true)
 	{
 		binout_mode_prepare(binout_fmt);
 		outformat = output_format::OUTPUT_BINARY;
 	}
 
-	if (bin_input_mode == true) 
+	if (bin_input_mode == true)
 	{
 		binin_mode_prepare(binin_fmt);
 		informat = input_format::INPUT_BINARY;
 	}
 
-	if (noend) 
+	if (noend)
 	{
 		informat = input_format::INPUT_RAW;
 	}
@@ -388,8 +421,8 @@ int main(int argc, char *argv[])
 	{
 		std::string message = input_do(igris::buffer(pulse.data(), pulse.size()));
 
-		crow::send(addr, (uint8_t)addrsize, message.data(),
-		           message.size(), type, qos, ackquant);
+		send_do(message);
+
 		crow::onestep();
 		exit(0);
 	}

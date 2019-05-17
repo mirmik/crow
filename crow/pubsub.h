@@ -36,10 +36,17 @@ typedef struct crow_subheader_pubsub_control
 
 namespace crow
 {
+	void publish(
+		uint8_t * raddr, uint8_t rlen,
+		const char *theme, const char *data, uint8_t dsize, 
+		uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT);
+
 	void publish(const char *theme, const char *data, uint8_t qos = 0,
 	             uint16_t acktime = DEFAULT_ACKQUANT);
+	
 	void publish(const char* theme, const std::string& data, uint8_t qos = 0,
 	             uint16_t acktime = DEFAULT_ACKQUANT);
+
 	void subscribe(const char *theme,
 	               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
 	               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);
