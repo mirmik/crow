@@ -196,7 +196,7 @@ void incoming_handler(crow::packet *pack)
 	switch (pack->header.f.type)
 	{
 		case CROW_PUBSUB_PROTOCOL:
-			output_do(crow::packet_pubsub_datptr(pack), pack);
+			output_do(crow::pubsub::get_data(pack), pack);
 			break;
 
 		default:
