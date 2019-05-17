@@ -50,7 +50,7 @@ namespace crow
 		uint16_t ackquant; ///< Таймаут для пересылки пакета.
 		uint16_t seqid; ///< Порядковый номер пакета. Присваивается отправителем.
 		uint8_t qos; ///< Поле качества обслуживания.
-	} G1_PACKED;
+	} __attribute__((packed));
 
 	struct packet
 	{
