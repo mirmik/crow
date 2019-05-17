@@ -28,6 +28,8 @@
 #include "binin.h"
 #include "binout.h"
 
+#include <iostream>
+
 uint8_t addr[128];
 int addrsize;
 
@@ -129,7 +131,7 @@ void output_do(igris::buffer data, crow::packet* pack)
 	}
 }
 
-std::string input_do(igris::buffer data)
+std::string input_do(const std::string& data)
 {
 	std::string message;
 
@@ -201,20 +203,18 @@ void *console_listener(void *arg)
 {
 	(void)arg;
 
-	char *input;
-
-	rl_catch_signals = 0;
+	std::string input;
 
 	while (1)
 	{
-		input = readline("");
+		if (std::cin.peek() == std::char_traits<char>::eof()) 
+		{
+			exit(0);
+		}
 
-		if (!input)
-			break;
+		std::getline(std::cin, input);
 
-		add_history(input);
 		std::string message = input_do(input);
-
 		send_do(message);
 	}
 
@@ -417,9 +417,9 @@ int main(int argc, char *argv[])
 	}
 
 // Ветка обработки pulse мода.
-	if (pulse != std::string())
+	if (pulse != "")
 	{
-		std::string message = input_do(igris::buffer(pulse.data(), pulse.size()));
+		std::string message = input_do(pulse);
 
 		send_do(message);
 
