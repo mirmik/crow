@@ -101,7 +101,7 @@ namespace crow
 		{
 			return (uint16_t)(header.flen - header.alen - sizeof(crow::header));
 		}
-	} G1_PACKED;
+	} __attribute__((packed));
 
 	/**
 	 * Выделить память для пакета.

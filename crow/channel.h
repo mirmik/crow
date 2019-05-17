@@ -52,13 +52,13 @@ namespace crow
 		// uint16_t rid;
 		uint16_t frame_id;
 		Frame ftype;
-	} G1_PACKED;
+	} __attribute__((packed));
 
 	struct subheader_handshake
 	{
 		uint8_t qos;
 		uint16_t ackquant;
-	} G1_PACKED;
+	} __attribute__((packed));
 
 	static inline subheader_channel *get_subheader_channel(crow::packet *pack)
 	{

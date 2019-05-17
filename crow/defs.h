@@ -20,6 +20,4 @@
 
 #define DEFAULT_ACKQUANT 200
 
-#define G1_PACKED __attribute__((packed))
-
 #endif

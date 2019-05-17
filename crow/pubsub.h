@@ -21,18 +21,18 @@ typedef struct crow_subheader_pubsub
 {
 	uint8_t type;
 	uint8_t thmsz;
-} G1_PACKED crow_subheader_pubsub_t;
+} __attribute__((packed)) crow_subheader_pubsub_t;
 
 typedef struct crow_subheader_pubsub_data
 {
 	uint16_t datsz;
-} G1_PACKED crow_subheader_pubsub_data_t;
+} __attribute__((packed)) crow_subheader_pubsub_data_t;
 
 typedef struct crow_subheader_pubsub_control
 {
 	uint8_t qos;
 	uint16_t ackquant;
-} G1_PACKED crow_subheader_pubsub_control_t;
+} __attribute__((packed)) crow_subheader_pubsub_control_t;
 
 namespace crow
 {
