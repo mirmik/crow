@@ -8,8 +8,8 @@ void crow::acceptor::incoming_packet(crow::packet *pack)
 
 	auto ch = init_channel();
 
-	crow::handshake(ch, sh0->sid, pack->addrptr(), pack->addrsize(), shh->qos,
-					shh->ackquant);
+	ch->handshake(pack->addrptr(), pack->addrsize(), sh0->sid, 
+		shh->qos, shh->ackquant);
 	crow::release(pack);
 }
 

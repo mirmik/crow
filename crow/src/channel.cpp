@@ -67,25 +67,25 @@ void crow::channel::undelivered_packet(crow::packet * pack)
 	crow::release(pack);
 }
 
-void crow::handshake(crow::channel *ch, uint16_t rid, const void *raddr_ptr,
-                     size_t raddr_len, uint8_t qos, uint16_t ackquant)
+void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint16_t rid, 
+	uint8_t qos, uint16_t ackquant)
 {
 	crow::node_subheader sh0;
 	crow::subheader_channel sh2;
 	crow::subheader_handshake shh;
 
-	sh0.sid = ch->id;
-	sh0.rid = ch->rid = rid;
+	sh0.sid = id;
+	sh0.rid = this->rid = rid;
 
 	sh2.frame_id = 0;
 	sh2.ftype = crow::Frame::HANDSHAKE;
 
-	ch->raddr_ptr = malloc(raddr_len);
-	memcpy(ch->raddr_ptr, raddr_ptr, raddr_len);
-	ch->raddr_len = raddr_len;
+	this->raddr_ptr = malloc(raddr_len);
+	memcpy(this->raddr_ptr, raddr_ptr, raddr_len);
+	this->raddr_len = raddr_len;
 
-	ch->qos = shh.qos = qos;
-	ch->ackquant = shh.ackquant = ackquant;
+	this->qos = shh.qos = qos;
+	this->ackquant = shh.ackquant = ackquant;
 
 	iovec vec[] =
 	{
@@ -94,7 +94,7 @@ void crow::handshake(crow::channel *ch, uint16_t rid, const void *raddr_ptr,
 		{&shh, sizeof(shh)},
 	};
 
-	ch->state = crow::State::CONNECTED;
+	state = crow::State::CONNECTED;
 	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec),
 	             CROW_NODE_PROTOCOL, 2, ackquant);
 }
@@ -119,12 +119,6 @@ void crow::__channel_send(crow::channel *ch, const char *data, size_t size)
 }
 
 uint16_t crow::dynport() { return 512; }
-
-void crow::channel::handshake(uint8_t *raddr, uint16_t rlen, uint16_t rid,
-                              uint8_t qos, uint16_t ackquant)
-{
-	crow::handshake(this, rid, raddr, rlen, qos, ackquant);
-}
 
 void crow::channel::send(const char *data, size_t size)
 {

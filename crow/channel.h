@@ -50,7 +50,7 @@ namespace crow
 
 		void undelivered_packet(crow::packet *pack) override;
 
-		void handshake(uint8_t *raddr, uint16_t rlen, uint16_t rid,
+		void handshake(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
 					   uint8_t qos = 0, uint16_t ackquant = 200);
 		
 		void send(const char *data, size_t size);
@@ -112,8 +112,6 @@ namespace crow
 	/// Добавить сервис к ядру.
 	void link_channel(crow::channel *srvs, uint16_t id);
 
-	void handshake(crow::channel *ch, uint16_t rid, const void *raddr_ptr,
-				   size_t raddr_len, uint8_t qos = 0, uint16_t ackquant = 200);
 	void __channel_send(crow::channel *ch, const char *data, size_t size);
 
 	struct accept_header
