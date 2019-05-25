@@ -8,7 +8,7 @@ void crow::node_send(uint16_t sid, uint16_t rid, const void *raddr,
 					 size_t rsize, const void *data, size_t size, uint8_t qos,
 					 uint16_t ackquant)
 {
-	crow::subheader sh;
+	crow::node_subheader sh;
 	sh.sid = sid;
 	sh.rid = rid;
 
@@ -19,7 +19,7 @@ void crow::node_send(uint16_t sid, uint16_t rid, const void *raddr,
 
 void crow::incoming_node_handler(crow::packet *pack)
 {
-	crow::subheader *sh = crow::get_subheader(pack);
+	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 
 	for (crow::node &srvs : crow::nodes)
 	{

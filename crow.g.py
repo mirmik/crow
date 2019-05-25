@@ -8,6 +8,7 @@ licant.module("crow.netkeep_crowker",
 licant.modules.module("crow",
 	srcdir = "crow/src",
 	sources = [
+		"acceptor.cpp",
 		"tower.cpp", 
 		"packet.cpp",
 		"node.cpp",

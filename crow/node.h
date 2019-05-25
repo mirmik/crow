@@ -14,25 +14,22 @@ namespace crow
 {
 	extern void (*node_handler)(crow::packet *pack);
 
-	struct node
-	{
-		struct dlist_head lnk;
-		uint16_t id;
-		virtual void incoming_packet(crow::packet *pack) = 0;
-	};
-
-	extern igris::dlist<node, &node::lnk> nodes;
-
-	struct subheader
+	struct node_subheader
 	{
 		uint16_t sid;
 		uint16_t rid;
 	} __attribute__((packed));
 
-	static inline subheader *get_subheader(crow::packet *pack)
+	
+	struct node
 	{
-		return (subheader *)pack->dataptr();
-	}
+		struct dlist_head lnk;
+		uint16_t id;
+		virtual void incoming_packet(crow::packet *pack) = 0;
+		virtual void undelivered_packet(crow::packet *pack) = 0;
+	};
+
+	extern igris::dlist<node, &node::lnk> nodes;
 
 	void link_node(node *srvs, uint16_t id);
 
