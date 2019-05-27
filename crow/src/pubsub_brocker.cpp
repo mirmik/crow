@@ -24,10 +24,6 @@ namespace crow
 		{
 		}
 
-		/*bool operator<(const subscriber& oth) const {
-			return g3 < oth.g3 && host < oth.host;
-		}*/
-
 		bool operator==(const subscriber &oth) const
 		{
 			return g3 == oth.g3 && host == oth.host;
@@ -67,7 +63,7 @@ namespace crow
 
 std::unordered_map<std::string, crow::theme> themes;
 
-void brocker_publish(const std::string &theme, const std::string &data)
+/*void brocker_publish(const std::string &theme, const std::string &data)
 {
 	igris::println("brocker_publish");
 	igris::println("theme: ", theme);
@@ -100,7 +96,7 @@ void brocker_subscribe(uint8_t *raddr, size_t rlen, const std::string &theme,
 
 	auto &thm = themes[theme];
 	thm.subs.emplace(host, true, qos, ackquant);
-}
+}*/
 
 void crow::incoming_pubsub_packet(crow::packet *pack)
 {

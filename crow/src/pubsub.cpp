@@ -5,10 +5,6 @@
 const uint8_t *brocker_host;
 uint8_t brocker_host_len;
 
-/*crow::host brocker_host;
-crow::QoS brocker_qos = crow::QoS(0);
-uint16_t brocker_ackquant = DEFAULT_ACKQUANT;
-*/
 void (*crow_pubsub_handler)(crow::packet *pack);
 
 void crow::publish_buffer(const char *theme, const void *data, uint16_t dlen,
@@ -70,11 +66,6 @@ void crow::publish(const char *theme, const std::string& data, uint8_t qos,
 	crow::publish_buffer(theme, data.data(), data.size(), qos, acktime);
 }
 
-// void crow::publish(const char* theme, const std::string& data, uint8_t qos,
-// uint16_t acktime) { 	crow::publish_buffer(theme, data.data(), (uint16_t)
-// data.size(), qos, acktime);
-//}
-
 void crow::subscribe(const char *theme, uint8_t qos, uint16_t acktime,
                      uint8_t rqos, uint16_t racktime)
 {
@@ -125,11 +116,6 @@ void crow::subscribe(
 	             acktime);
 }
 
-/*
-void crow::subscribe(const char* theme, crow::QoS qos) {
-	crow::subscribe(theme, strlen(theme), qos);
-}
-*/
 void crow::set_publish_host(const uint8_t *hexhost, size_t hsize)
 {
 	brocker_host = hexhost;
@@ -141,7 +127,6 @@ std::string crow::envcrowker()
 	uint8_t buf[128];
 	const char *envcr = getenv("CROWKER");
 	auto ss = hexer_s(buf, 128, envcr);
-	// igris::print(envcr);
 	return std::string((char *)buf, ss);
 }
 
@@ -159,15 +144,3 @@ void crow::set_crowker(const std::string& crowker)
 	memcpy((void*)brocker_host, (void*)buf, ss);
 	brocker_host_len = ss;
 }
-
-/*
-void crow::set_publish_qos(crow::QoS qos) {
-	brocker_qos = qos;
-}
-
-igris::buffer crow::pubsub_message_datasect(crow::packet* pack) {
-	auto shps = crow::get_subheader_pubsub(pack);
-	auto shps_d = crow::get_subheader_pubsub_data(pack);
-	return igris::buffer(pack->dataptr() + sizeof(subheader_pubsub) +
-sizeof(subheader_pubsub_data) + shps->thmsz, shps_d->datsz);
-}*/
