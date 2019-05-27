@@ -8,6 +8,7 @@
 #include <igris/util/string.h>
 #include <igris/util/dstring.h>
 #include <igris/util/bug.h>
+#include <igris/protocols/msgtype.h>
 
 #include <nos/fprint.h>
 
@@ -48,9 +49,12 @@ bool bin_input_mode = false;
 
 std::string binout_fmt;
 std::string binin_fmt;
+std::string msgtype;
+igris::msgtype_reader msgreader;
 
 std::string pulse;
 std::string theme;
+
 
 enum class protoopt_e
 {
@@ -62,14 +66,16 @@ enum class input_format
 {
 	INPUT_RAW,
 	INPUT_RAW_ENDLINE,
-	INPUT_BINARY
+	INPUT_BINARY,
+	INPUT_MSGTYPE
 };
 
 enum class output_format
 {
 	OUTPUT_RAW,
 	OUTPUT_DSTRING,
-	OUTPUT_BINARY
+	OUTPUT_BINARY,
+	OUTPUT_MSGTYPE
 };
 
 protoopt_e protoopt = protoopt_e::PROTOOPT_BASIC;
@@ -83,6 +89,7 @@ std::string informat_tostr()
 		case input_format::INPUT_RAW: return "INPUT_RAW";
 		case input_format::INPUT_RAW_ENDLINE: return "INPUT_RAW_ENDLINE";
 		case input_format::INPUT_BINARY: return "INPUT_BINARY";
+		case input_format::INPUT_MSGTYPE: return "INPUT_MSGTYPE";
 	}
 	return std::string();
 }
@@ -94,6 +101,7 @@ std::string outformat_tostr()
 		case output_format::OUTPUT_RAW: return "OUTPUT_RAW";
 		case output_format::OUTPUT_DSTRING: return "OUTPUT_DSTRING";
 		case output_format::OUTPUT_BINARY: return "OUTPUT_BINARY";
+		case output_format::OUTPUT_MSGTYPE: return "OUTPUT_MSGTYPE";
 	}
 	return std::string();
 }
@@ -124,6 +132,16 @@ void output_do(igris::buffer data, crow::packet* pack)
 		case output_format::OUTPUT_BINARY:
 			output_binary(data, pack);
 			break;
+
+		case output_format::OUTPUT_MSGTYPE:
+		{
+			auto ret = msgreader.tostring(data);
+			for (int i = 0; i < ret.size(); ++i)
+			{
+				nos::fprintln("{}: {}", ret[i].first, ret[i].second);
+			}
+		}
+		break;
 
 		default:
 			BUG();
@@ -256,6 +274,7 @@ int main(int argc, char *argv[])
 
 		{"subscribe", required_argument, NULL, 'l'},
 		{"publish", required_argument, NULL, 'P'},
+		{"msgtype", required_argument, NULL, 'm'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
 		{"debug", no_argument, NULL, 'd'}, // Включает информацию о событиях башни.
@@ -349,6 +368,11 @@ int main(int argc, char *argv[])
 				protoopt = protoopt_e::PROTOOPT_PUBLISH;
 				break;
 
+			case 'm':
+				msgtype = optarg;
+				outformat = output_format::OUTPUT_MSGTYPE;
+				break;
+
 			case 'l':
 				theme = optarg;
 				subscribe_mode = 1;
@@ -429,6 +453,12 @@ int main(int argc, char *argv[])
 		nos::println("outformat:", outformat_tostr());
 	}
 
+	if (outformat == output_format::OUTPUT_MSGTYPE)
+	{
+		msgreader = igris::msgtype_read_type(msgtype,
+		                                     "/home/mirmik/project/crow/apps/ctrans/test.msg");
+	}
+
 // Ветка обработки pulse мода.
 	if (pulse != "")
 	{
@@ -450,10 +480,12 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (subscribe_mode) 
+	if (subscribe_mode)
 	{
-		std::thread([](){
-			while(1) {
+		std::thread([]()
+		{
+			while (1)
+			{
 				crow::subscribe(addr, addrsize, theme.c_str(), qos, ackquant, qos, ackquant);
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			}

@@ -14,6 +14,7 @@ licant.libs.include("igris")
 gates = [
 	"crow.udpgate",
 	"crow.serial_gstuff",
+	"igris.protocols.msgtype"
 ]
 
 mdepends = ["crow"]
