@@ -15,8 +15,6 @@ void crow::channel::incoming_packet(crow::packet *pack)
 	crow::node_subheader *sh0 = (node_subheader *) pack->dataptr();
 	crow::subheader_channel *sh2 = crow::get_subheader_channel(pack);
 
-	dprln("channel::incoming");
-
 	switch (sh2->ftype)
 	{
 		case crow::Frame::HANDSHAKE:
@@ -61,7 +59,9 @@ void crow::channel::incoming_packet(crow::packet *pack)
 
 void crow::channel::incoming_data_packet(crow::packet * pack)
 {
-	crow::release(pack);
+	dprln("TODO: SEQUENCE LOGIC");
+
+	this->incoming_handler(this, pack);
 }
 
 void crow::channel::undelivered_packet(crow::packet * pack)

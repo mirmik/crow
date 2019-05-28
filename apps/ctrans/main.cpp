@@ -231,9 +231,8 @@ void incoming_handler(crow::packet *pack)
 			break;
 
 		case CROW_NODE_PROTOCOL:
-			nos::println("CROW_NODE_PROTOCOL");
 			crow::incoming_node_handler(pack);
-			break;
+			return;
 
 		default:
 			output_do(pack->rawdata(), pack);
@@ -246,7 +245,7 @@ void print_channel_message(crow::channel* ch, crow::packet* pack)
 {
 	(void) ch;
 	(void) pack;
-	dprln("channel incoming package");
+	output_do(crow::channel::getdata(pack), pack);
 }
 
 crow::channel* acceptor_create_channel() 
