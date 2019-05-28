@@ -22,7 +22,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
 		case crow::Frame::HANDSHAKE:
 			nos::println("HANDSHAKE");
 
-			if (state == crow::State::INIT)
+			if (_state == crow::State::INIT)
 			{
 				crow::subheader_handshake *shh =
 				    crow::get_subheader_handshake(pack);
@@ -32,7 +32,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
 				raddr_ptr = malloc(pack->header.alen);
 				memcpy(raddr_ptr, pack->addrptr(), pack->header.alen);
 				raddr_len = pack->header.alen;
-				state = crow::State::CONNECTED;
+				_state = crow::State::CONNECTED;
 			}
 			else
 			{
@@ -49,7 +49,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
 
 		case crow::Frame::REFUSE:
 			nos::println("REFUSE");
-			state = crow::State::DISCONNECTED;
+			_state = crow::State::DISCONNECTED;
 			break;
 
 		default:
@@ -100,7 +100,7 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint
 		{&shh, sizeof(shh)},
 	};
 
-	state = crow::State::CONNECTED;
+	//_state = crow::State::CONNECTED;
 	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec),
 	             CROW_NODE_PROTOCOL, 2, ackquant);
 }

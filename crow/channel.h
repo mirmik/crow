@@ -11,16 +11,20 @@
 #include <igris/event/delegate.h>
 #include <igris/sync/syslock.h>
 
+#define CROW_CHANNEL_INIT 0
+#define CROW_CHANNEL_CONNECTED 1
+#define CROW_CHANNEL_DISCONNECTED 2
+
 namespace crow
 {
-	enum class State
+	enum class State : uint8_t
 	{
-		INIT,
-		CONNECTED,
-		DISCONNECTED,
+		INIT = 0,
+		CONNECTED = 1,
+		DISCONNECTED = 2,
 	};
 
-	enum class Frame
+	enum class Frame : uint8_t
 	{
 		HANDSHAKE = 0,
 		DATA = 1,
@@ -36,14 +40,13 @@ namespace crow
 		using incoming_handler_t = void(*)(crow::channel*, crow::packet*);
 
 		dlist_head lnk;
-		uint16_t id;
 		uint16_t rid;
 		void *raddr_ptr;
 		size_t raddr_len;
 		uint8_t qos;
 		uint16_t ackquant;
 		uint16_t fid = 0;
-		State state = State::INIT;
+		State _state = State::INIT;
 		incoming_handler_t incoming_handler;
 
 		channel() : lnk(DLIST_HEAD_INIT(lnk)) {};
@@ -57,6 +60,8 @@ namespace crow
 			this->incoming_handler = incoming_handler;
 			crow::link_channel(this, id);
 		}
+
+		uint8_t state() { return (uint8_t)_state; }
 
 		void incoming_packet(crow::packet *pack) override;
 		void incoming_data_packet(crow::packet *pack);
@@ -92,8 +97,6 @@ namespace crow
 
 	struct subheader_channel
 	{
-		// uint16_t sid;
-		// uint16_t rid;
 		uint16_t frame_id;
 		Frame ftype;
 	} __attribute__((packed));
@@ -103,6 +106,14 @@ namespace crow
 		uint8_t qos;
 		uint16_t ackquant;
 	} __attribute__((packed));
+
+	/*struct accept_header
+	{
+		uint16_t rchid;
+		uint8_t qos;
+		uint16_t ackquant;
+	} __attribute__((packed));*/
+
 
 	static inline subheader_channel *get_subheader_channel(crow::packet *pack)
 	{
@@ -133,12 +144,6 @@ namespace crow
 
 	void __channel_send(crow::channel *ch, const char *data, size_t size);
 
-	struct accept_header
-	{
-		uint16_t rchid;
-		uint8_t qos;
-		uint16_t ackquant;
-	};
 
 
 	static inline acceptor *

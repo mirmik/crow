@@ -23,8 +23,8 @@ namespace crow
 	
 	struct node
 	{
-		struct dlist_head lnk;
-		uint16_t id;
+		struct dlist_head lnk = DLIST_HEAD_INIT(lnk);
+		uint16_t id = 0;
 		virtual void incoming_packet(crow::packet *pack) = 0;
 		virtual void undelivered_packet(crow::packet *pack) = 0;
 	};
