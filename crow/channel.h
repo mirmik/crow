@@ -15,6 +15,8 @@
 #define CROW_CHANNEL_CONNECTED 1
 #define CROW_CHANNEL_DISCONNECTED 2
 
+#define CROW_CHANNEL_ERR_NOCONNECT -1
+
 namespace crow
 {
 	enum class State : uint8_t
@@ -39,7 +41,7 @@ namespace crow
 	public:
 		using incoming_handler_t = void(*)(crow::channel*, crow::packet*);
 
-		dlist_head lnk;
+		dlist_head lnk;	
 		uint16_t rid;
 		void *raddr_ptr;
 		size_t raddr_len;
@@ -55,8 +57,6 @@ namespace crow
 
 		void init(int id, incoming_handler_t incoming_handler)
 		{
-			dprln("init");
-			DPRINT(id);
 			this->incoming_handler = incoming_handler;
 			crow::link_channel(this, id);
 		}
@@ -69,30 +69,17 @@ namespace crow
 		void undelivered_packet(crow::packet *pack) override;
 
 		void handshake(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
-		               uint8_t qos = 0, uint16_t ackquant = 200);
+		               uint8_t qos = 2, uint16_t ackquant = 200);
 
-		void send(const char *data, size_t size);
+		int send(const char *data, size_t size);
 
 		static igris::buffer getdata(crow::packet *pack);
-	};
 
-	struct acceptor : public crow::node
-	{
-		igris::delegate<crow::channel *> init_channel;
+		//////////////////SYNC API/////////////////////////
+		int connect(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
+		               uint8_t qos = 2, uint16_t ackquant = 200);
 
-		acceptor() = default;
-		acceptor(igris::delegate<crow::channel *> init_channel)
-			: init_channel(init_channel)
-		{}
-
-		void init(int id, igris::delegate<crow::channel *> init_channel)
-		{
-			this->init_channel = init_channel;
-			link_node(this, id);
-		}
-
-		void incoming_packet(crow::packet *pack) override;
-		void undelivered_packet(crow::packet *pack) override;
+		int syncrecv(crow::packet** ppack);
 	};
 
 	struct subheader_channel
@@ -143,18 +130,6 @@ namespace crow
 	/// Добавить сервис к ядру.
 
 	void __channel_send(crow::channel *ch, const char *data, size_t size);
-
-
-
-	static inline acceptor *
-	create_acceptor(uint16_t port, igris::delegate<crow::channel *> dlg)
-	{
-		auto asrv = new crow::acceptor(dlg);
-		crow::link_node(asrv, port);
-		return asrv;
-	}
-
-	uint16_t dynport();
 }; // namespace crow
 
 #endif

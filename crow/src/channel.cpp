@@ -1,4 +1,5 @@
 #include <crow/channel.h>
+#include <crow/acceptor.h>
 #include <crow/tower.h>
 #include <sys/uio.h>
 
@@ -66,6 +67,9 @@ void crow::channel::incoming_data_packet(crow::packet * pack)
 
 void crow::channel::undelivered_packet(crow::packet * pack)
 {
+	dprln("ubdelivered packet");
+	notify_one(-1);
+	dprln("here");
 	crow::release(pack);
 }
 
@@ -75,10 +79,6 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint
 	crow::node_subheader sh0;
 	crow::subheader_channel sh2;
 	crow::subheader_handshake shh;
-
-	dprln("handshake");
-	DPRINT(id);
-	DPRINT(rid);
 
 	sh0.sid = id;
 	sh0.rid = this->rid = rid;
@@ -105,13 +105,19 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint
 	             CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
-void crow::__channel_send(crow::channel *ch, const char *data, size_t size)
+
+int crow::channel::send(const char *data, size_t size)
 {
+	if (_state != crow::State::CONNECTED) 
+	{
+		return CROW_CHANNEL_ERR_NOCONNECT;
+	}
+
 	crow::node_subheader sh0;
 	crow::subheader_channel sh2;
-	sh0.sid = ch->id;
-	sh0.rid = ch->rid;
-	sh2.frame_id = ch->fid++;
+	sh0.sid = this->id;
+	sh0.rid = this->rid;
+	sh2.frame_id = this->fid++;
 	sh2.ftype = crow::Frame::DATA;
 
 	iovec vec[] =
@@ -120,15 +126,10 @@ void crow::__channel_send(crow::channel *ch, const char *data, size_t size)
 		{&sh2, sizeof(sh2)},
 		{(void *)data, size},
 	};
-	crow::send_v(ch->raddr_ptr, ch->raddr_len, vec, sizeof(vec) / sizeof(iovec),
-	             CROW_NODE_PROTOCOL, ch->qos, ch->ackquant);
-}
+	crow::send_v(this->raddr_ptr, this->raddr_len, vec, sizeof(vec) / sizeof(iovec),
+	             CROW_NODE_PROTOCOL, this->qos, this->ackquant);
 
-uint16_t crow::dynport() { return 512; }
-
-void crow::channel::send(const char *data, size_t size)
-{
-	crow::__channel_send(this, data, size);
+	return 0;
 }
 
 

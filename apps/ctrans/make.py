@@ -17,7 +17,7 @@ gates = [
 	"igris.protocols.msgtype"
 ]
 
-mdepends = ["crow"]
+mdepends = ["crow", ("igris.ctrobj", "linux")]
 mdepends.extend(gates)
 
 application("ctrans", 

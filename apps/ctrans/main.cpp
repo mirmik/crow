@@ -4,6 +4,8 @@
 #include <crow/tower.h>
 #include <crow/pubsub.h>
 #include <crow/channel.h>
+#include <crow/acceptor.h>
+
 #include <crow/hexer.h>
 
 #include <igris/util/string.h>
@@ -189,15 +191,19 @@ void send_do(const std::string message)
 			           message.data(), message.size(), type,
 			           qos, ackquant);
 			break;
-		
+
 		case protoopt_e::PROTOOPT_PUBLISH:
 			crow::publish(addr, (uint8_t)addrsize, theme.c_str(),
 			              message.data(), message.size(),
 			              qos, ackquant);
 			break;
-		
+
 		case protoopt_e::PROTOOPT_CHANNEL:
-			channel.send(message.data(), message.size());
+			int ret = channel.send(message.data(), message.size());
+			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+			{
+				nos::println("Channel is not connected");
+			}
 			break;
 	}
 }
@@ -241,14 +247,14 @@ void incoming_handler(crow::packet *pack)
 	crow::release(pack);
 }
 
-void print_channel_message(crow::channel* ch, crow::packet* pack) 
+void print_channel_message(crow::channel* ch, crow::packet* pack)
 {
 	(void) ch;
 	(void) pack;
 	output_do(crow::channel::getdata(pack), pack);
 }
 
-crow::channel* acceptor_create_channel() 
+crow::channel* acceptor_create_channel()
 {
 	dprln("acceptor_create_channel");
 	crow::channel * ch = new crow::channel(print_channel_message);
@@ -501,13 +507,23 @@ int main(int argc, char *argv[])
 		                                     "/home/mirmik/project/crow/apps/ctrans/test.msg");
 	}
 
-	if (channelno >= 0) 
+	//START CROW
+	std::thread crowthr([]() { crow::spin(); });
+
+	if (channelno >= 0)
 	{
 		channel.init(33, print_channel_message);
-		channel.handshake(addr, addrsize, channelno, qos, ackquant); 
+
+		int ret = channel.connect(addr, addrsize, channelno, qos, ackquant);
+
+		if (ret)
+		{
+			nos::println("Handshake failure");
+			exit(0);
+		}
 	}
 
-	if (acceptorno >= 0) 
+	if (acceptorno >= 0)
 	{
 		acceptor.init(acceptorno, acceptor_create_channel);
 	}
@@ -545,5 +561,5 @@ int main(int argc, char *argv[])
 		}).detach();
 	}
 
-	crow::spin();
+	crowthr.join();
 }

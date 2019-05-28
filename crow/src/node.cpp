@@ -33,8 +33,27 @@ void crow::incoming_node_handler(crow::packet *pack)
 	crow::release(pack);
 }
 
+void crow::undelivered_node_handler(crow::packet *pack) 
+{
+	dprln("undelivered_node_handler");
+	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
+
+	for (crow::node &srvs : crow::nodes)
+	{
+		if (srvs.id == sh->sid)
+		{
+			srvs.undelivered_packet(pack);
+			return;
+		}
+	}
+
+	crow::release(pack);	
+}
+
 void crow::link_node(crow::node *srv, uint16_t id)
 {
 	srv->id = id;
+	system_lock();
 	nodes.add_last(*srv);
+	system_unlock();
 }

@@ -7,6 +7,8 @@
 #include <stdbool.h>
 
 #include <crow/hexer.h>
+#include <crow/node.h>
+
 //#include <igris/debug/dprint.h>
 
 #include <assert.h>
@@ -487,6 +489,20 @@ void crow::onestep_travel_only()
 	system_unlock();
 }
 
+void crow_undelivered(crow::packet* pack) 
+{
+	if (pack->header.f.type == CROW_NODE_PROTOCOL) 
+	{
+		crow::undelivered_node_handler(pack);
+		return;
+	}
+
+	if (crow::undelivered_handler)
+		crow::undelivered_handler(pack);
+	else
+		crow::release(pack);
+}
+
 static inline void crow_onestep_send_stage()
 {
 	crow::packet *pack;
@@ -541,11 +557,13 @@ static inline void crow_onestep_outers_stage()
 			if (++pack->ackcount == 5)
 			{
 				crow_tower_release(pack);
+				crow_undelivered(pack);
 
-				if (crow::undelivered_handler)
-					crow::undelivered_handler(pack);
-				else
-					crow::release(pack);
+				dprln("after crow_undelivered");
+				//if (crow::undelivered_handler)
+				//	crow::undelivered_handler(pack);
+				//else
+				//	crow::release(pack);
 			}
 			else
 			{

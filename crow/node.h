@@ -24,9 +24,13 @@ namespace crow
 	struct node
 	{
 		struct dlist_head lnk = DLIST_HEAD_INIT(lnk);
+		struct dlist_head waitlnk = DLIST_HEAD_INIT(waitlnk);	
 		uint16_t id = 0;
+
 		virtual void incoming_packet(crow::packet *pack) = 0;
 		virtual void undelivered_packet(crow::packet *pack) = 0;
+		int waitevent();
+		void notify_one(int future);
 	};
 
 	extern igris::dlist<node, &node::lnk> nodes;
@@ -38,6 +42,7 @@ namespace crow
 				   uint16_t ackquant);
 
 	void incoming_node_handler(crow::packet *pack);
+	void undelivered_node_handler(crow::packet *pack);
 
 	static inline void enable_node_subsystem()
 	{

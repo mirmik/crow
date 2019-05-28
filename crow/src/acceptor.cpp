@@ -1,3 +1,4 @@
+#include <crow/acceptor.h>
 #include <crow/channel.h>
 #include <crow/tower.h>
 
@@ -23,4 +24,9 @@ void crow::acceptor::undelivered_packet(crow::packet *pack)
 {
 	TRACE();
 	crow::release(pack);
+}
+
+uint16_t crow::dynport() 
+{ 
+	return 512; 
 }
