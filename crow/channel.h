@@ -27,9 +27,13 @@ namespace crow
 		REFUSE = 2,
 	};
 
-	struct channel : public crow::node
+	class channel;
+	void link_channel(crow::channel *srvs, uint16_t id);
+
+	class channel : public crow::node
 	{
-		using incoming_handler_t = void(*)(crow::channel*,crow::packet*);
+	public:
+		using incoming_handler_t = void(*)(crow::channel*, crow::packet*);
 
 		dlist_head lnk;
 		uint16_t id;
@@ -42,8 +46,17 @@ namespace crow
 		State state = State::INIT;
 		incoming_handler_t incoming_handler;
 
+		channel() : lnk(DLIST_HEAD_INIT(lnk)) {};
 		channel(incoming_handler_t incoming_handler) : lnk(DLIST_HEAD_INIT(lnk)),
 			incoming_handler(incoming_handler) {}
+
+		void init(int id, incoming_handler_t incoming_handler)
+		{
+			dprln("init");
+			DPRINT(id);
+			this->incoming_handler = incoming_handler;
+			crow::link_channel(this, id);
+		}
 
 		void incoming_packet(crow::packet *pack) override;
 		void incoming_data_packet(crow::packet *pack);
@@ -51,8 +64,8 @@ namespace crow
 		void undelivered_packet(crow::packet *pack) override;
 
 		void handshake(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
-					   uint8_t qos = 0, uint16_t ackquant = 200);
-		
+		               uint8_t qos = 0, uint16_t ackquant = 200);
+
 		void send(const char *data, size_t size);
 
 		static igris::buffer getdata(crow::packet *pack);
@@ -61,10 +74,17 @@ namespace crow
 	struct acceptor : public crow::node
 	{
 		igris::delegate<crow::channel *> init_channel;
-		
+
+		acceptor() = default;
 		acceptor(igris::delegate<crow::channel *> init_channel)
 			: init_channel(init_channel)
 		{}
+
+		void init(int id, igris::delegate<crow::channel *> init_channel)
+		{
+			this->init_channel = init_channel;
+			link_node(this, id);
+		}
 
 		void incoming_packet(crow::packet *pack) override;
 		void undelivered_packet(crow::packet *pack) override;
@@ -93,24 +113,23 @@ namespace crow
 	get_subheader_handshake(crow::packet *pack)
 	{
 		return (subheader_handshake *)(pack->dataptr() +
-									   sizeof(crow::node_subheader) +
-									   sizeof(crow::subheader_channel));
+		                               sizeof(crow::node_subheader) +
+		                               sizeof(crow::subheader_channel));
 	}
 
-/*	static inline igris::buffer get_datasect_channel(crow::packet *pack)
-	{
-		return igris::buffer(pack->dataptr() + sizeof(crow::node_subheader) +
-								 sizeof(crow::subheader_channel),
-							 pack->datasize() - sizeof(crow::node_subheader) -
-								 sizeof(crow::subheader_channel));
-	}
-*/
+	/*	static inline igris::buffer get_datasect_channel(crow::packet *pack)
+		{
+			return igris::buffer(pack->dataptr() + sizeof(crow::node_subheader) +
+									 sizeof(crow::subheader_channel),
+								 pack->datasize() - sizeof(crow::node_subheader) -
+									 sizeof(crow::subheader_channel));
+		}
+	*/
 	// crow::channel* get_channel(uint16_t id);
 
 	// extern igris::dlist<crow::channel, &crow::channel::lnk> channels;
 
 	/// Добавить сервис к ядру.
-	void link_channel(crow::channel *srvs, uint16_t id);
 
 	void __channel_send(crow::channel *ch, const char *data, size_t size);
 

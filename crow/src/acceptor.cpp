@@ -7,6 +7,9 @@ void crow::acceptor::incoming_packet(crow::packet *pack)
 	crow::subheader_handshake *shh = crow::get_subheader_handshake(pack);
 
 	auto ch = init_channel();
+	link_channel(ch, crow::dynport());
+
+	DPRINT(sh0->sid);
 
 	ch->handshake(pack->addrptr(), pack->addrsize(), sh0->sid, 
 		shh->qos, shh->ackquant);

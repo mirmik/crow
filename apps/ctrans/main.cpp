@@ -3,6 +3,7 @@
 
 #include <crow/tower.h>
 #include <crow/pubsub.h>
+#include <crow/channel.h>
 #include <crow/hexer.h>
 
 #include <igris/util/string.h>
@@ -47,6 +48,12 @@ bool subscribe_mode = false;
 bool bin_output_mode = false;
 bool bin_input_mode = false;
 
+int acceptorno = -1;
+int channelno = -1;
+
+crow::channel channel;
+crow::acceptor acceptor;
+
 std::string binout_fmt;
 std::string binin_fmt;
 std::string msgtype;
@@ -59,6 +66,7 @@ std::string theme;
 enum class protoopt_e
 {
 	PROTOOPT_BASIC,
+	PROTOOPT_CHANNEL,
 	PROTOOPT_PUBLISH
 };
 
@@ -136,7 +144,7 @@ void output_do(igris::buffer data, crow::packet* pack)
 		case output_format::OUTPUT_MSGTYPE:
 		{
 			auto ret = msgreader.tostring(data);
-			for (int i = 0; i < ret.size(); ++i)
+			for (unsigned int i = 0; i < ret.size(); ++i)
 			{
 				nos::fprintln("{}: {}", ret[i].first, ret[i].second);
 			}
@@ -181,10 +189,15 @@ void send_do(const std::string message)
 			           message.data(), message.size(), type,
 			           qos, ackquant);
 			break;
+		
 		case protoopt_e::PROTOOPT_PUBLISH:
 			crow::publish(addr, (uint8_t)addrsize, theme.c_str(),
 			              message.data(), message.size(),
 			              qos, ackquant);
+			break;
+		
+		case protoopt_e::PROTOOPT_CHANNEL:
+			channel.send(message.data(), message.size());
 			break;
 	}
 }
@@ -217,11 +230,30 @@ void incoming_handler(crow::packet *pack)
 			output_do(crow::pubsub::get_data(pack), pack);
 			break;
 
+		case CROW_NODE_PROTOCOL:
+			nos::println("CROW_NODE_PROTOCOL");
+			crow::incoming_node_handler(pack);
+			break;
+
 		default:
 			output_do(pack->rawdata(), pack);
 	}
 
 	crow::release(pack);
+}
+
+void print_channel_message(crow::channel* ch, crow::packet* pack) 
+{
+	(void) ch;
+	(void) pack;
+	dprln("channel incoming package");
+}
+
+crow::channel* acceptor_create_channel() 
+{
+	dprln("acceptor_create_channel");
+	crow::channel * ch = new crow::channel(print_channel_message);
+	return ch;
 }
 
 void *console_listener(void *arg)
@@ -271,6 +303,9 @@ int main(int argc, char *argv[])
 		{"binout", required_argument, NULL, 'B'}, // Форматирует вывод согласно бинарного шаблона.
 		{"rawout", no_argument, NULL, 'r'},
 		{"dbgout", no_argument, NULL, 'j'},
+
+		{"chlisten", required_argument, NULL, 'w'},
+		{"channel", required_argument, NULL, 'c'},
 
 		{"subscribe", required_argument, NULL, 'l'},
 		{"publish", required_argument, NULL, 'P'},
@@ -378,6 +413,14 @@ int main(int argc, char *argv[])
 				subscribe_mode = 1;
 				break;
 
+			case 'w':
+				acceptorno = atoi(optarg);
+				break;
+
+			case 'c':
+				channelno = atoi(optarg);
+				protoopt = protoopt_e::PROTOOPT_CHANNEL;
+				break;
 
 			case '?':
 				exit(-1);
@@ -457,6 +500,17 @@ int main(int argc, char *argv[])
 	{
 		msgreader = igris::msgtype_read_type(msgtype,
 		                                     "/home/mirmik/project/crow/apps/ctrans/test.msg");
+	}
+
+	if (channelno >= 0) 
+	{
+		channel.init(33, print_channel_message);
+		channel.handshake(addr, addrsize, channelno, qos, ackquant); 
+	}
+
+	if (acceptorno >= 0) 
+	{
+		acceptor.init(acceptorno, acceptor_create_channel);
 	}
 
 // Ветка обработки pulse мода.
