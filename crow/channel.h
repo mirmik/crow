@@ -1,9 +1,5 @@
-/**
-	@file
-*/
-
-#ifndef G2_CORE_H
-#define G2_CORE_H
+#ifndef CROW_CHANNEL_H
+#define CROW_CHANNEL_H
 
 #include <crow/node.h>
 
