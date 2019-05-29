@@ -32,6 +32,8 @@
 
 #include <iostream>
 
+#include <unistd.h>
+
 uint8_t addr[128];
 int addrsize;
 
@@ -64,6 +66,8 @@ igris::msgtype_reader msgreader;
 std::string pulse;
 std::string theme;
 
+int DATAOUTPUT_FILENO = STDOUT_FILENO;
+int DATAINPUT_FILENO = STDIN_FILENO;
 
 enum class protoopt_e
 {
@@ -127,16 +131,14 @@ void output_do(igris::buffer data, crow::packet* pack)
 	switch (outformat)
 	{
 		case output_format::OUTPUT_RAW:
-			printf("%.*s", (int)data.size(), data.data());
-			fflush(stdout);
+			write(DATAOUTPUT_FILENO, data.data(), data.size());
 			break;
 
 		case output_format::OUTPUT_DSTRING:
 			// Вывод в stdout информацию пакета.
 			char buf[10000];
 			bytes_to_dstring(buf, data.data(), data.size());
-			printf("%s\n", buf);
-			fflush(stdout);
+			write(DATAOUTPUT_FILENO, buf, strlen(buf));
 			break;
 
 		case output_format::OUTPUT_BINARY:
@@ -179,6 +181,27 @@ std::string input_do(const std::string& data)
 
 		default:
 			BUG();
+	}
+}
+
+void pipeline(const std::string& cmd) 
+{
+	nos::println("pipeline", cmd);
+
+	int child_pid;
+	int pipe_to_child[2];
+	int pipe_from_child[2];
+
+	pipe(pipe_to_child);
+	pipe(pipe_from_child);
+
+	if ((child_pid = fork()) == 0) 
+	{
+		// child branch
+	}
+	else 
+	{
+		// parent branch
 	}
 }
 
@@ -256,7 +279,6 @@ void print_channel_message(crow::channel* ch, crow::packet* pack)
 
 crow::channel* acceptor_create_channel()
 {
-	dprln("acceptor_create_channel");
 	crow::channel * ch = new crow::channel(print_channel_message);
 	return ch;
 }
