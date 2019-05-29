@@ -56,6 +56,7 @@ int acceptorno = -1;
 int channelno = -1;
 
 crow::channel channel;
+crow::channel * reverse_channel;
 crow::acceptor acceptor;
 
 std::string binout_fmt;
@@ -65,6 +66,7 @@ igris::msgtype_reader msgreader;
 
 std::string pulse;
 std::string theme;
+std::string pipelinecmd;
 
 int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
@@ -73,6 +75,7 @@ enum class protoopt_e
 {
 	PROTOOPT_BASIC,
 	PROTOOPT_CHANNEL,
+	PROTOOPT_REVERSE_CHANNEL,
 	PROTOOPT_PUBLISH
 };
 
@@ -93,7 +96,7 @@ enum class output_format
 };
 
 protoopt_e protoopt = protoopt_e::PROTOOPT_BASIC;
-input_format informat = input_format::INPUT_RAW_ENDLINE;
+input_format informat = input_format::INPUT_RAW;
 output_format outformat = output_format::OUTPUT_RAW;
 
 std::string informat_tostr()
@@ -184,25 +187,57 @@ std::string input_do(const std::string& data)
 	}
 }
 
-void pipeline(const std::string& cmd) 
+void pipeline(const std::string& cmd, char* parent_env[]) 
 {
 	nos::println("pipeline", cmd);
+
+	int ans;
 
 	int child_pid;
 	int pipe_to_child[2];
 	int pipe_from_child[2];
 
-	pipe(pipe_to_child);
-	pipe(pipe_from_child);
+    char *child_args [] = { (char*)cmd.c_str(), (char*)0 };
+
+	ans = pipe(pipe_to_child);
+	if (ans) 
+	{
+		perror("pipe");
+		exit(-1);
+	}
+
+	ans = pipe(pipe_from_child);
+	if (ans) 
+	{
+		perror("pipe");
+		exit(-1);
+	}
 
 	if ((child_pid = fork()) == 0) 
 	{
 		// child branch
+		dprln("child:", getpid());
+
+		dup2(pipe_from_child[1], STDOUT_FILENO);
+		dup2(pipe_to_child[0], STDIN_FILENO);
+		close(pipe_from_child[0]);
+		close(pipe_to_child[1]);		
+
+		ans = execvp(cmd.c_str(), child_args);
+		if (ans) 
+		{
+			perror("execve");
+			exit(-1);
+		}
 	}
-	else 
-	{
-		// parent branch
-	}
+	
+	// parent branch
+	dprln("parent:", getpid());
+		
+	DATAINPUT_FILENO = pipe_from_child[0];
+	DATAOUTPUT_FILENO = pipe_to_child[1];		 
+	close(pipe_from_child[1]);
+	close(pipe_to_child[0]);	
 }
 
 void send_do(const std::string message)
@@ -221,12 +256,24 @@ void send_do(const std::string message)
 			              qos, ackquant);
 			break;
 
-		case protoopt_e::PROTOOPT_CHANNEL:
+		case protoopt_e::PROTOOPT_CHANNEL: 
+		{
 			int ret = channel.send(message.data(), message.size());
 			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
 			{
 				nos::println("Channel is not connected");
 			}
+		}
+			break;
+
+		case protoopt_e::PROTOOPT_REVERSE_CHANNEL:
+		{
+			int ret = reverse_channel->send(message.data(), message.size());
+			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+			{
+				nos::println("Channel is not connected");
+			}
+		}
 			break;
 	}
 }
@@ -280,6 +327,7 @@ void print_channel_message(crow::channel* ch, crow::packet* pack)
 crow::channel* acceptor_create_channel()
 {
 	crow::channel * ch = new crow::channel(print_channel_message);
+	reverse_channel = ch;
 	return ch;
 }
 
@@ -288,15 +336,18 @@ void *console_listener(void *arg)
 	(void)arg;
 
 	std::string input;
+	char readbuf[1024];
 
 	while (1)
 	{
-		if (std::cin.peek() == std::char_traits<char>::eof())
-		{
-			exit(0);
-		}
+		//if (std::cin.peek() == std::char_traits<char>::eof())
+		//{
+		//	exit(0);
+		//}
+		//std::getline(std::cin, input);
+		int len = read(DATAINPUT_FILENO, readbuf, 1024);
 
-		std::getline(std::cin, input);
+		input = std::string(readbuf, len);
 		std::string message = input_do(input);
 		send_do(message);
 	}
@@ -307,7 +358,7 @@ void *console_listener(void *arg)
 uint16_t udpport = 0;
 char *serial_port = NULL;
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[], char *env[])
 {
 	pthread_t console_thread;
 
@@ -320,7 +371,7 @@ int main(int argc, char *argv[])
 		{"type", required_argument, NULL, 't'}, // метка типа отправляемых сообщений
 		{"ackquant", required_argument, NULL, 'a'}, // установка кванта ack
 
-		{"noend", no_argument, NULL, 'e'}, // Блокирует добавление символа конца строки.
+		{"noend", no_argument, NULL, 'x'}, // Блокирует добавление символа конца строки.
 		{"echo", no_argument, NULL, 'E'}, // Активирует функцию эха входящих пакетов.
 		{"api", no_argument, NULL, 'a'}, // Активирует удалённое управление.
 		{"noconsole", no_argument, NULL, 'n'}, // Отключает создание консоли.
@@ -333,6 +384,7 @@ int main(int argc, char *argv[])
 
 		{"chlisten", required_argument, NULL, 'w'},
 		{"channel", required_argument, NULL, 'c'},
+		{"pipeline", required_argument, NULL, 'e'},
 
 		{"subscribe", required_argument, NULL, 'l'},
 		{"publish", required_argument, NULL, 'P'},
@@ -374,7 +426,7 @@ int main(int argc, char *argv[])
 				echo = true;
 				break;
 
-			case 'e':
+			case 'x':
 				noend = true;
 				break;
 
@@ -442,11 +494,16 @@ int main(int argc, char *argv[])
 
 			case 'w':
 				acceptorno = atoi(optarg);
+				protoopt = protoopt_e::PROTOOPT_REVERSE_CHANNEL;				
 				break;
 
 			case 'c':
 				channelno = atoi(optarg);
 				protoopt = protoopt_e::PROTOOPT_CHANNEL;
+				break;
+
+			case 'e':
+				pipelinecmd = optarg;
 				break;
 
 			case '?':
@@ -494,7 +551,7 @@ int main(int argc, char *argv[])
 		informat = input_format::INPUT_RAW;
 	}
 
-// Определение целевого адресса
+// Определение целевого адреса
 	if (optind < argc)
 	{
 		addrsize = hexer(addr, 128, argv[optind], strlen(argv[optind]));
@@ -527,6 +584,11 @@ int main(int argc, char *argv[])
 	{
 		msgreader = igris::msgtype_read_type(msgtype,
 		                                     "/home/mirmik/project/crow/apps/ctrans/test.msg");
+	}
+
+	if (pipelinecmd != "") 
+	{
+		pipeline(pipelinecmd, env);
 	}
 
 	//START CROW
