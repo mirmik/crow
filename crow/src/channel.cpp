@@ -24,7 +24,6 @@ void crow::channel::incoming_packet(crow::packet *pack)
 
 			if (_state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
 			{
-				// Если мы еще ни с кем и никогда.
 				crow::subheader_handshake *sh_handshake =
 				    crow::get_subheader_handshake(pack);
 				
