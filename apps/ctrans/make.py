@@ -27,6 +27,7 @@ application("ctrans",
 		"binout.cpp",
 		"bincommon.cpp",
 	],
+	defines = ["NOTRACE=1"],
 	mdepends = mdepends,
 	cxx_flags = "-Wextra -Wall",
 	libs = ["pthread", "readline"]
