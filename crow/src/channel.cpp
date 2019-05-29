@@ -170,17 +170,17 @@ int crow::channel::send(const char *data, size_t size)
 		return CROW_CHANNEL_ERR_NOCONNECT;
 	}
 
-	crow::node_subheader sh0;
-	crow::subheader_channel sh2;
-	sh0.sid = this->id;
-	sh0.rid = this->rid;
-	sh2.frame_id = this->fid++;
-	sh2.ftype = crow::Frame::DATA;
+	crow::node_subheader sh_node;
+	crow::subheader_channel sh_channel;
+	sh_node.sid = this->id;
+	sh_node.rid = this->rid;
+	sh_channel.frame_id = this->fid++;
+	sh_channel.ftype = crow::Frame::DATA;
 
 	iovec vec[] =
 	{
-		{&sh0, sizeof(sh0)},
-		{&sh2, sizeof(sh2)},
+		{&sh_node, sizeof(sh_node)},
+		{&sh_channel, sizeof(sh_channel)},
 		{(void *)data, size},
 	};
 	crow::send_v(this->raddr_ptr, this->raddr_len, vec, sizeof(vec) / sizeof(iovec),
