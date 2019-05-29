@@ -94,14 +94,6 @@ namespace crow
 		uint16_t ackquant;
 	} __attribute__((packed));
 
-	/*struct accept_header
-	{
-		uint16_t rchid;
-		uint8_t qos;
-		uint16_t ackquant;
-	} __attribute__((packed));*/
-
-
 	static inline subheader_channel *get_subheader_channel(crow::packet *pack)
 	{
 		return (subheader_channel *)(pack->dataptr() + sizeof(crow::node_subheader));
@@ -114,22 +106,6 @@ namespace crow
 		                               sizeof(crow::node_subheader) +
 		                               sizeof(crow::subheader_channel));
 	}
-
-	/*	static inline igris::buffer get_datasect_channel(crow::packet *pack)
-		{
-			return igris::buffer(pack->dataptr() + sizeof(crow::node_subheader) +
-									 sizeof(crow::subheader_channel),
-								 pack->datasize() - sizeof(crow::node_subheader) -
-									 sizeof(crow::subheader_channel));
-		}
-	*/
-	// crow::channel* get_channel(uint16_t id);
-
-	// extern igris::dlist<crow::channel, &crow::channel::lnk> channels;
-
-	/// Добавить сервис к ядру.
-
-	void __channel_send(crow::channel *ch, const char *data, size_t size);
 }; // namespace crow
 
 #endif
