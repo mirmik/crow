@@ -17,14 +17,14 @@
 
 namespace crow
 {
-	enum class State : uint8_t
-	{
-		INIT = CROW_CHANNEL_INIT,
-		WAIT_HANDSHAKE_REQUEST = CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST,
-		WAIT_HANDSHAKE_ANSWER = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER,
-		CONNECTED = CROW_CHANNEL_CONNECTED,
-		DISCONNECTED = CROW_CHANNEL_DISCONNECTED,
-	};
+//	enum class State : uint8_t
+//	{
+//		INIT = CROW_CHANNEL_INIT,
+//		WAIT_HANDSHAKE_REQUEST = CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST,
+//		WAIT_HANDSHAKE_ANSWER = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER,
+//		CONNECTED = CROW_CHANNEL_CONNECTED,
+//		DISCONNECTED = CROW_CHANNEL_DISCONNECTED,
+//	};
 
 	enum class Frame : uint8_t
 	{
@@ -49,7 +49,13 @@ namespace crow
 		uint8_t qos;
 		uint16_t ackquant;
 		uint16_t fid = 0;
-		State _state = State::INIT;
+		union {
+			uint8_t flags = 0;
+			struct {
+				uint8_t _state : 4;
+				uint8_t dynamic_addr : 1;
+			};
+		};
 		incoming_handler_t incoming_handler;
 
 		channel() : lnk(DLIST_HEAD_INIT(lnk)) {};
@@ -74,7 +80,7 @@ namespace crow
 		void send_handshake_answer();
 
 		void wait_handshake_request() 
-			{ _state = State::WAIT_HANDSHAKE_REQUEST; }
+			{ _state = CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST; }
 
 		int send(const char *data, size_t size);
 

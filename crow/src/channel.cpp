@@ -22,7 +22,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
 			// Кто-то пытается установить с нами связь.
 			nos::println("HANDSHAKE_REQUEST");
 
-			if (_state == crow::State::WAIT_HANDSHAKE_REQUEST)
+			if (_state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
 			{
 				// Если мы еще ни с кем и никогда.
 				crow::subheader_handshake *sh_handshake =
@@ -39,7 +39,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
 				
 				send_handshake_answer();
 				
-				_state = crow::State::CONNECTED;
+				_state = CROW_CHANNEL_CONNECTED;
 			}
 			else 
 			{
@@ -52,7 +52,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
 			// Кто-то ответил на зов.
 			nos::println("HANDSHAKE_ANSWER");
 
-			if (_state == crow::State::WAIT_HANDSHAKE_ANSWER) 
+			if (_state == CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER) 
 			{
 				// Если мы еще ни с кем и никогда.
 				crow::subheader_handshake *sh_handshake =
@@ -66,7 +66,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
 				qos = sh_handshake->qos;
 				ackquant = sh_handshake->ackquant;
 				
-				_state = crow::State::CONNECTED;
+				_state = CROW_CHANNEL_CONNECTED;
 				notify_one(0);
 			}
 			else 
@@ -83,7 +83,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
 
 		case crow::Frame::REFUSE:
 			nos::println("REFUSE");
-			_state = crow::State::DISCONNECTED;
+			_state = CROW_CHANNEL_DISCONNECTED;
 			break;
 
 		default:
@@ -132,7 +132,7 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint
 		{&sh_handshake, sizeof(sh_handshake)}
 	};
 
-	_state = State::WAIT_HANDSHAKE_ANSWER;
+	_state = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER;
 
 	//_state = crow::State::CONNECTED;
 	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec),
@@ -165,7 +165,7 @@ void crow::channel::send_handshake_answer()
 
 int crow::channel::send(const char *data, size_t size)
 {
-	if (_state != crow::State::CONNECTED) 
+	if (_state != CROW_CHANNEL_CONNECTED) 
 	{
 		return CROW_CHANNEL_ERR_NOCONNECT;
 	}
