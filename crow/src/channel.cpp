@@ -20,8 +20,6 @@ void crow::channel::incoming_packet(crow::packet *pack)
 	{
 		case crow::Frame::HANDSHAKE_REQUEST:
 			// Кто-то пытается установить с нами связь.
-			nos::println("HANDSHAKE_REQUEST");
-
 			if (_state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
 			{
 				crow::subheader_handshake *sh_handshake =
@@ -49,8 +47,6 @@ void crow::channel::incoming_packet(crow::packet *pack)
 
 		case crow::Frame::HANDSHAKE_ANSWER:
 			// Кто-то ответил на зов.
-			nos::println("HANDSHAKE_ANSWER");
-
 			if (_state == CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER) 
 			{
 				// Если мы еще ни с кем и никогда.
@@ -76,12 +72,10 @@ void crow::channel::incoming_packet(crow::packet *pack)
 			break;
 
 		case crow::Frame::DATA:
-			nos::println("DATA");
 			incoming_data_packet(pack);
 			return;
 
 		case crow::Frame::REFUSE:
-			nos::println("REFUSE");
 			_state = CROW_CHANNEL_DISCONNECTED;
 			break;
 
@@ -95,16 +89,13 @@ void crow::channel::incoming_packet(crow::packet *pack)
 
 void crow::channel::incoming_data_packet(crow::packet * pack)
 {
-	dprln("TODO: SEQUENCE LOGIC");
-
 	this->incoming_handler(this, pack);
 }
 
 void crow::channel::undelivered_packet(crow::packet * pack)
 {
-	dprln("ubdelivered packet");
 	notify_one(-1);
-	dprln("here");
+	_state = CROW_CHANNEL_DISCONNECTED;
 	crow::release(pack);
 }
 
