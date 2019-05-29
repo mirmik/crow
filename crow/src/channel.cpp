@@ -13,30 +13,65 @@ void crow::link_channel(crow::channel *ch, uint16_t id)
 
 void crow::channel::incoming_packet(crow::packet *pack)
 {
-	crow::node_subheader *sh0 = (node_subheader *) pack->dataptr();
-	crow::subheader_channel *sh2 = crow::get_subheader_channel(pack);
+	crow::node_subheader *sh_node = (node_subheader *) pack->dataptr();
+	crow::subheader_channel *sh_channel = crow::get_subheader_channel(pack);
 
-	switch (sh2->ftype)
+	switch (sh_channel->ftype)
 	{
-		case crow::Frame::HANDSHAKE:
-			nos::println("HANDSHAKE");
+		case crow::Frame::HANDSHAKE_REQUEST:
+			// Кто-то пытается установить с нами связь.
+			nos::println("HANDSHAKE_REQUEST");
 
-			if (_state == crow::State::INIT)
+			if (_state == crow::State::WAIT_HANDSHAKE_REQUEST)
 			{
-				crow::subheader_handshake *shh =
+				// Если мы еще ни с кем и никогда.
+				crow::subheader_handshake *sh_handshake =
 				    crow::get_subheader_handshake(pack);
-				rid = sh0->sid;
-				qos = shh->qos;
-				ackquant = shh->ackquant;
+				
+				// TODO: перенести аллокацию под адрес в другое место
 				raddr_ptr = malloc(pack->header.alen);
 				memcpy(raddr_ptr, pack->addrptr(), pack->header.alen);
 				raddr_len = pack->header.alen;
+				rid = sh_node->sid;
+
+				qos = sh_handshake->qos;
+				ackquant = sh_handshake->ackquant;
+				
+				send_handshake_answer();
+				
 				_state = crow::State::CONNECTED;
 			}
-			else
+			else 
 			{
-				BUG_ON("no INIT state");
-				// unknown_port(pack);
+				dprln("WARN: HANDSHAKE_REQUEST on another state");
+			}
+
+			break;
+
+		case crow::Frame::HANDSHAKE_ANSWER:
+			// Кто-то ответил на зов.
+			nos::println("HANDSHAKE_ANSWER");
+
+			if (_state == crow::State::WAIT_HANDSHAKE_ANSWER) 
+			{
+				// Если мы еще ни с кем и никогда.
+				crow::subheader_handshake *sh_handshake =
+				    crow::get_subheader_handshake(pack);
+				
+				// TODO: перенести аллокацию под адрес в другое место
+				raddr_ptr = malloc(pack->header.alen);
+				memcpy(raddr_ptr, pack->addrptr(), pack->header.alen);
+				raddr_len = pack->header.alen;
+				rid = sh_node->sid;
+				qos = sh_handshake->qos;
+				ackquant = sh_handshake->ackquant;
+				
+				_state = crow::State::CONNECTED;
+				notify_one(0);
+			}
+			else 
+			{
+				dprln("WARN: HANDSHAKE_ANSWER on another state");				
 			}
 
 			break;
@@ -52,6 +87,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
 			break;
 
 		default:
+			BUG();
 			break;
 	}
 
@@ -76,35 +112,56 @@ void crow::channel::undelivered_packet(crow::packet * pack)
 void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint16_t rid, 
 	uint8_t qos, uint16_t ackquant)
 {
-	crow::node_subheader sh0;
-	crow::subheader_channel sh2;
-	crow::subheader_handshake shh;
+	crow::node_subheader sh_node;
+	crow::subheader_channel sh_channel;
+	crow::subheader_handshake sh_handshake;
 
-	sh0.sid = id;
-	sh0.rid = this->rid = rid;
+	sh_node.sid = id;
+	sh_node.rid = this->rid = rid;
 
-	sh2.frame_id = 0;
-	sh2.ftype = crow::Frame::HANDSHAKE;
+	sh_channel.frame_id = 0;
+	sh_channel.ftype = crow::Frame::HANDSHAKE_REQUEST;
 
-	this->raddr_ptr = malloc(raddr_len);
-	memcpy(this->raddr_ptr, raddr_ptr, raddr_len);
-	this->raddr_len = raddr_len;
-
-	this->qos = shh.qos = qos;
-	this->ackquant = shh.ackquant = ackquant;
+	sh_handshake.qos = qos;
+	sh_handshake.ackquant = ackquant;
 
 	iovec vec[] =
 	{
-		{&sh0, sizeof(sh0)},
-		{&sh2, sizeof(sh2)},
-		{&shh, sizeof(shh)},
+		{&sh_node, sizeof(sh_node)},
+		{&sh_channel, sizeof(sh_channel)},
+		{&sh_handshake, sizeof(sh_handshake)}
 	};
+
+	_state = State::WAIT_HANDSHAKE_ANSWER;
 
 	//_state = crow::State::CONNECTED;
 	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec),
 	             CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
+void crow::channel::send_handshake_answer() 
+{
+	crow::node_subheader sh_node;
+	crow::subheader_channel sh_channel;
+	crow::subheader_handshake sh_handshake;
+
+	sh_node.sid = id;
+	sh_node.rid = rid;
+
+	sh_channel.frame_id = 0;
+	sh_channel.ftype = crow::Frame::HANDSHAKE_ANSWER;
+
+	iovec vec[] =
+	{
+		{&sh_node, sizeof(sh_node)},
+		{&sh_channel, sizeof(sh_channel)},
+		{&sh_handshake, sizeof(sh_handshake)}
+	};
+
+	//_state = crow::State::CONNECTED;
+	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec),
+	             CROW_NODE_PROTOCOL, 2, ackquant);	
+}
 
 int crow::channel::send(const char *data, size_t size)
 {

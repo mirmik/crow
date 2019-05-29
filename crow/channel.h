@@ -8,8 +8,10 @@
 #include <igris/sync/syslock.h>
 
 #define CROW_CHANNEL_INIT 0
-#define CROW_CHANNEL_CONNECTED 1
-#define CROW_CHANNEL_DISCONNECTED 2
+#define CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST 1
+#define CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER 2
+#define CROW_CHANNEL_CONNECTED 3
+#define CROW_CHANNEL_DISCONNECTED 4
 
 #define CROW_CHANNEL_ERR_NOCONNECT -1
 
@@ -17,16 +19,19 @@ namespace crow
 {
 	enum class State : uint8_t
 	{
-		INIT = 0,
-		CONNECTED = 1,
-		DISCONNECTED = 2,
+		INIT = CROW_CHANNEL_INIT,
+		WAIT_HANDSHAKE_REQUEST = CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST,
+		WAIT_HANDSHAKE_ANSWER = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER,
+		CONNECTED = CROW_CHANNEL_CONNECTED,
+		DISCONNECTED = CROW_CHANNEL_DISCONNECTED,
 	};
 
 	enum class Frame : uint8_t
 	{
-		HANDSHAKE = 0,
-		DATA = 1,
-		REFUSE = 2,
+		HANDSHAKE_REQUEST = 0,
+		HANDSHAKE_ANSWER = 1,
+		DATA = 2,
+		REFUSE = 3,
 	};
 
 	class channel;
@@ -65,7 +70,11 @@ namespace crow
 		void undelivered_packet(crow::packet *pack) override;
 
 		void handshake(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
-		               uint8_t qos = 2, uint16_t ackquant = 200);
+		               uint8_t qos = 2, uint16_t ackquant = 200);		
+		void send_handshake_answer();
+
+		void wait_handshake_request() 
+			{ _state = State::WAIT_HANDSHAKE_REQUEST; }
 
 		int send(const char *data, size_t size);
 
