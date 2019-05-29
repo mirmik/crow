@@ -7,8 +7,6 @@ int crow::channel::connect(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
 	handshake(raddr, rlen, rid, qos, ackquant);
 	int ret = waitevent();
 
-	dprln("AFTER waintevent");
-
 	if (ret)
 		return CROW_ERR_UNDELIVERED;
 

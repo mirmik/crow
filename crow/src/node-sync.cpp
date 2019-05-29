@@ -5,9 +5,6 @@ int crow::node::waitevent()
 {
 	void * ret;
 	wait_current_schedee(&waitlnk, 0, &ret);	
-	dprln("AFTER wait_current_schedee");
-
-	dprln((int)(uintptr_t)ret);
 	return (int)(uintptr_t)ret;
 }
 

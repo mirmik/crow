@@ -513,7 +513,6 @@ int main(int argc, char *argv[])
 	if (channelno >= 0)
 	{
 		channel.init(33, print_channel_message);
-
 		int ret = channel.connect(addr, addrsize, channelno, qos, ackquant);
 
 		if (ret)
