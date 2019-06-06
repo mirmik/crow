@@ -559,7 +559,6 @@ static inline void crow_onestep_outers_stage()
 				crow_tower_release(pack);
 				crow_undelivered(pack);
 
-				dprln("after crow_undelivered");
 				//if (crow::undelivered_handler)
 				//	crow::undelivered_handler(pack);
 				//else

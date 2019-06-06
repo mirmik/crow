@@ -34,9 +34,12 @@
 
 #include <unistd.h>
 
+bool cancel_token = false;
+
 uint8_t addr[128];
 int addrsize;
 
+bool userqos = false;
 uint8_t qos = 0;
 uint8_t type = 0;
 uint8_t ackquant = 200;
@@ -187,7 +190,7 @@ std::string input_do(const std::string& data)
 	}
 }
 
-void pipeline(const std::string& cmd, char* parent_env[]) 
+void pipeline(const std::string& cmd) 
 {
 	nos::println("pipeline", cmd);
 
@@ -358,7 +361,7 @@ void *console_listener(void *arg)
 uint16_t udpport = 0;
 char *serial_port = NULL;
 
-int main(int argc, char *argv[], char *env[])
+int main(int argc, char *argv[])
 {
 	pthread_t console_thread;
 
@@ -407,6 +410,7 @@ int main(int argc, char *argv[], char *env[])
 		{
 			case 'q':
 				qos = (uint8_t)atoi(optarg);
+				userqos = true;
 				break;
 
 			case 't':
@@ -588,20 +592,34 @@ int main(int argc, char *argv[], char *env[])
 
 	if (pipelinecmd != "") 
 	{
-		pipeline(pipelinecmd, env);
+		pipeline(pipelinecmd);
 	}
 
 	//START CROW
-	std::thread crowthr([]() { crow::spin(); });
+	std::thread crowthr([]() {
+	while(1) { 
+		crow::onestep(); 
+		if (cancel_token) 
+		{
+			return;
+		}
+	}
+	});
 
 	if (channelno >= 0)
 	{
+		if (userqos == false)
+			qos = 2;
+
 		channel.init(33, print_channel_message);
 		int ret = channel.connect(addr, addrsize, channelno, qos, ackquant);
 
 		if (ret)
 		{
 			nos::println("Handshake failure");
+			
+			cancel_token = true;
+			crowthr.join();
 			exit(0);
 		}
 	}

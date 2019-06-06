@@ -18,7 +18,8 @@ gates = [
 
 mdepends = [
 	"crow",
-	"crow.netkeep_crowker"
+	"crow.netkeep_crowker",
+	("igris.ctrobj", "linux")
 ]
 mdepends.extend(gates)
 

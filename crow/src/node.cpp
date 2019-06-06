@@ -35,7 +35,6 @@ void crow::incoming_node_handler(crow::packet *pack)
 
 void crow::undelivered_node_handler(crow::packet *pack) 
 {
-	dprln("undelivered_node_handler");
 	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 
 	for (crow::node &srvs : crow::nodes)

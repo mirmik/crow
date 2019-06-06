@@ -31,8 +31,8 @@ void crow::channel::incoming_packet(crow::packet *pack)
 				raddr_len = pack->header.alen;
 				rid = sh_node->sid;
 
-				qos = sh_handshake->qos;
-				ackquant = sh_handshake->ackquant;
+				this->qos = sh_handshake->qos;
+				this->ackquant = sh_handshake->ackquant;
 				
 				send_handshake_answer();
 				
@@ -112,8 +112,8 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint
 	sh_channel.frame_id = 0;
 	sh_channel.ftype = crow::Frame::HANDSHAKE_REQUEST;
 
-	sh_handshake.qos = qos;
-	sh_handshake.ackquant = ackquant;
+	sh_handshake.qos = this->qos = qos;
+	sh_handshake.ackquant = this->ackquant = ackquant;
 
 	iovec vec[] =
 	{
@@ -140,6 +140,9 @@ void crow::channel::send_handshake_answer()
 
 	sh_channel.frame_id = 0;
 	sh_channel.ftype = crow::Frame::HANDSHAKE_ANSWER;
+
+	sh_handshake.qos = this->qos = qos;
+	sh_handshake.ackquant = this->ackquant = ackquant;
 
 	iovec vec[] =
 	{
@@ -173,6 +176,7 @@ int crow::channel::send(const char *data, size_t size)
 		{&sh_channel, sizeof(sh_channel)},
 		{(void *)data, size},
 	};
+
 	crow::send_v(this->raddr_ptr, this->raddr_len, vec, sizeof(vec) / sizeof(iovec),
 	             CROW_NODE_PROTOCOL, this->qos, this->ackquant);
 
