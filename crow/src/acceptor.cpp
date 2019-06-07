@@ -6,8 +6,6 @@
 
 void crow::acceptor::incoming_packet(crow::packet *pack)
 {
-	TRACE();
-	//crow::node_subheader *sh0 = (node_subheader *) pack->dataptr();
 	crow::subheader_channel *shc = crow::get_subheader_channel(pack);
 
 	if (shc->ftype == Frame::HANDSHAKE_REQUEST)
@@ -25,11 +23,11 @@ void crow::acceptor::incoming_packet(crow::packet *pack)
 
 void crow::acceptor::undelivered_packet(crow::packet *pack)
 {
-	TRACE();
 	crow::release(pack);
 }
 
 uint16_t crow::dynport()
 {
+	dprln("TODO: crow::dynport");
 	return 512;
 }
