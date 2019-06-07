@@ -6,6 +6,7 @@
 #include <crow/gates/udpgate.h>
 #include <crow/holders.h>
 #include <crow/tower.h>
+#include <crow/pubsub.h>
 
 //#include <igris/print.h>
 
@@ -76,14 +77,27 @@ PYBIND11_MODULE(libcrow, m)
 	m.def("envcrowker", &envcrowker);
 	m.def("environment_crowker", &environment_crowker);
 
-	m.def("subscribe", &subscribe, py::arg("theme"), py::arg("ack") = 0,
-		  py::arg("ackquant") = 200, py::arg("rack") = 0,
-		  py::arg("rackquant") = 200);
+	m.def("subscribe", 
+		  (void (*)(
+		  	const std::string & addr,
+		  	const std::string & theme,
+		  	uint8_t ack, uint16_t ackquant,
+		    uint8_t rack, uint16_t rackquant)) &subscribe, 
+		  py::arg("addr"), 
+		  py::arg("theme"), 
+		  py::arg("ack"), py::arg("ackquant"), 
+		  py::arg("rack"), py::arg("rackquant"));
+
 	m.def("publish",
-		  (void (*)(const char *, const std::string &, uint8_t, uint16_t)) &
-			  publish,
-		  py::arg("theme"), py::arg("data"), py::arg("ack") = 0,
-		  py::arg("ackquant") = 200);
+		  (void (*)(
+		  	const std::string & addr,
+		  	const std::string & theme, 
+		  	const std::string & data, 
+		  	uint8_t ack, uint16_t ackquant)) & publish,
+		  py::arg("addr"),
+		  py::arg("theme"), 
+		  py::arg("data"), 
+		  py::arg("ack"), py::arg("ackquant"));
 
 	static int unused; // the capsule needs something to reference
 	py::capsule cleanup(&unused, [](void *) {

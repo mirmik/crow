@@ -2,12 +2,12 @@
 #include <crow/pubsub.h>
 #include <nos/print.h>
 
-const uint8_t *brocker_host;
-uint8_t brocker_host_len;
+//const uint8_t *brocker_host;
+//uint8_t brocker_host_len;
 
 void (*crow_pubsub_handler)(crow::packet *pack);
 
-void crow::publish_buffer(const char *theme, const void *data, uint16_t dlen,
+/*void crow::publish_buffer(const char *theme, const void *data, uint16_t dlen,
                           uint8_t qos, uint16_t acktime)
 {
 	struct crow_subheader_pubsub subps;
@@ -27,10 +27,10 @@ void crow::publish_buffer(const char *theme, const void *data, uint16_t dlen,
 
 	crow::send_v(brocker_host, brocker_host_len, iov, 4, CROW_PUBSUB_PROTOCOL, qos,
 	             acktime);
-}
+}*/
 
 void crow::publish(
-    uint8_t * raddr, uint8_t rlen,
+    const uint8_t * raddr, uint8_t rlen,
     const char *theme, const char *data, uint8_t dlen,
     uint8_t qos, uint16_t acktime)
 {
@@ -54,19 +54,21 @@ void crow::publish(
 }
 
 
-void crow::publish(const char *theme, const char *data, uint8_t qos,
+void crow::publish(const uint8_t * raddr, uint8_t rlen,
+                   const char *theme, const char *data, uint8_t qos,
                    uint16_t acktime)
 {
-	crow::publish_buffer(theme, data, (uint16_t)strlen(data), qos, acktime);
+	crow::publish(raddr, rlen, theme, data, (uint16_t)strlen(data), qos, acktime);
 }
 
-void crow::publish(const char *theme, const std::string& data, uint8_t qos,
+void crow::publish(const uint8_t * raddr, uint8_t rlen,
+                   const char *theme, const std::string& data, uint8_t qos,
                    uint16_t acktime)
 {
-	crow::publish_buffer(theme, data.data(), data.size(), qos, acktime);
+	crow::publish(raddr, rlen, theme, data.data(), data.size(), qos, acktime);
 }
 
-void crow::subscribe(const char *theme, uint8_t qos, uint16_t acktime,
+/*void crow::subscribe(const char *theme, uint8_t qos, uint16_t acktime,
                      uint8_t rqos, uint16_t racktime)
 {
 	size_t thmsz = strlen(theme);
@@ -88,10 +90,10 @@ void crow::subscribe(const char *theme, uint8_t qos, uint16_t acktime,
 
 	crow::send_v(brocker_host, brocker_host_len, iov, 3, CROW_PUBSUB_PROTOCOL, qos,
 	             acktime);
-}
+}*/
 
 void crow::subscribe(
-    uint8_t * raddr, uint8_t rlen,
+    const uint8_t * raddr, uint8_t rlen,
     const char *theme, uint8_t qos, uint16_t acktime,
     uint8_t rqos, uint16_t racktime)
 {
@@ -116,11 +118,11 @@ void crow::subscribe(
 	             acktime);
 }
 
-void crow::set_publish_host(const uint8_t *hexhost, size_t hsize)
+/*void crow::set_publish_host(const uint8_t *hexhost, size_t hsize)
 {
 	brocker_host = hexhost;
 	brocker_host_len = (uint8_t)hsize;
-}
+}*/
 
 std::string crow::envcrowker()
 {
@@ -136,11 +138,39 @@ std::string crow::environment_crowker()
 	return std::string(envcr);
 }
 
-void crow::set_crowker(const std::string& crowker)
+/*void crow::set_crowker(const std::string& crowker)
 {
 	uint8_t buf[128];
 	auto ss = hexer_s(buf, 128, crowker.c_str());
 	brocker_host = (uint8_t*) malloc(ss);
 	memcpy((void*)brocker_host, (void*)buf, ss);
 	brocker_host_len = ss;
+}*/
+
+
+void crow::publish(
+    const std::string & addr,
+    const std::string & theme, 
+    const std::string & data,
+    uint8_t qos, 
+    uint16_t acktime) 
+{
+	publish(
+		(const uint8_t*)addr.data(), addr.size(), 
+		theme.c_str(), 
+		data.data(), data.size(),
+		qos, acktime);
+}
+
+void crow::subscribe(
+	const std::string & addr,
+ 	const std::string & theme, 
+	uint8_t qos, uint16_t acktime,
+	uint8_t rqos, uint16_t racktime) 
+{
+	subscribe(
+		(const uint8_t*)addr.data(), addr.size(), 
+		theme.c_str(), 
+		qos, acktime,
+		rqos, racktime);
 }
