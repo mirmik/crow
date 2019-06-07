@@ -166,7 +166,7 @@ void output_do(igris::buffer data, crow::packet* pack)
 	}
 }
 
-std::string input_do(const std::string& data)
+std::pair<std::string, bool> input_do(const std::string& data)
 {
 	std::string message;
 
@@ -175,22 +175,26 @@ std::string input_do(const std::string& data)
 		case input_format::INPUT_RAW_ENDLINE:
 			message = data;
 			message += '\n';
-			return message;
+			return std::make_pair(message, true);
 
 		case input_format::INPUT_RAW:
 			message = data;
-			return message;
+			return std::make_pair(message, true);
 
 		case input_format::INPUT_BINARY:
 			message = input_binary(std::string(data.data(), data.size()));
-			return message;
+			return std::make_pair(message, true);
+
+		case input_format::INPUT_MSGTYPE:
+			message = msgreader.input(data);
+			return std::make_pair(message, message == "" ? false : true);
 
 		default:
 			BUG();
 	}
 }
 
-void pipeline(const std::string& cmd) 
+void pipeline(const std::string& cmd)
 {
 	nos::println("pipeline", cmd);
 
@@ -200,23 +204,23 @@ void pipeline(const std::string& cmd)
 	int pipe_to_child[2];
 	int pipe_from_child[2];
 
-    char *child_args [] = { (char*)cmd.c_str(), (char*)0 };
+	char *child_args [] = { (char*)cmd.c_str(), (char*)0 };
 
 	ans = pipe(pipe_to_child);
-	if (ans) 
+	if (ans)
 	{
 		perror("pipe");
 		exit(-1);
 	}
 
 	ans = pipe(pipe_from_child);
-	if (ans) 
+	if (ans)
 	{
 		perror("pipe");
 		exit(-1);
 	}
 
-	if ((child_pid = fork()) == 0) 
+	if ((child_pid = fork()) == 0)
 	{
 		// child branch
 		dprln("child:", getpid());
@@ -224,23 +228,23 @@ void pipeline(const std::string& cmd)
 		dup2(pipe_from_child[1], STDOUT_FILENO);
 		dup2(pipe_to_child[0], STDIN_FILENO);
 		close(pipe_from_child[0]);
-		close(pipe_to_child[1]);		
+		close(pipe_to_child[1]);
 
 		ans = execvp(cmd.c_str(), child_args);
-		if (ans) 
+		if (ans)
 		{
 			perror("execve");
 			exit(-1);
 		}
 	}
-	
+
 	// parent branch
 	dprln("parent:", getpid());
-		
+
 	DATAINPUT_FILENO = pipe_from_child[0];
-	DATAOUTPUT_FILENO = pipe_to_child[1];		 
+	DATAOUTPUT_FILENO = pipe_to_child[1];
 	close(pipe_from_child[1]);
-	close(pipe_to_child[0]);	
+	close(pipe_to_child[0]);
 }
 
 void send_do(const std::string message)
@@ -259,7 +263,7 @@ void send_do(const std::string message)
 			              qos, ackquant);
 			break;
 
-		case protoopt_e::PROTOOPT_CHANNEL: 
+		case protoopt_e::PROTOOPT_CHANNEL:
 		{
 			int ret = channel.send(message.data(), message.size());
 			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
@@ -267,7 +271,7 @@ void send_do(const std::string message)
 				nos::println("Channel is not connected");
 			}
 		}
-			break;
+		break;
 
 		case protoopt_e::PROTOOPT_REVERSE_CHANNEL:
 		{
@@ -277,7 +281,7 @@ void send_do(const std::string message)
 				nos::println("Channel is not connected");
 			}
 		}
-			break;
+		break;
 	}
 }
 
@@ -351,8 +355,9 @@ void *console_listener(void *arg)
 		int len = read(DATAINPUT_FILENO, readbuf, 1024);
 
 		input = std::string(readbuf, len);
-		std::string message = input_do(input);
-		send_do(message);
+		auto msgpair = input_do(input);
+		if (msgpair.second)
+			send_do(msgpair.first);
 	}
 
 	exit(0);
@@ -489,6 +494,7 @@ int main(int argc, char *argv[])
 			case 'm':
 				msgtype = optarg;
 				outformat = output_format::OUTPUT_MSGTYPE;
+				informat = input_format::INPUT_MSGTYPE;
 				break;
 
 			case 'l':
@@ -498,7 +504,7 @@ int main(int argc, char *argv[])
 
 			case 'w':
 				acceptorno = atoi(optarg);
-				protoopt = protoopt_e::PROTOOPT_REVERSE_CHANNEL;				
+				protoopt = protoopt_e::PROTOOPT_REVERSE_CHANNEL;
 				break;
 
 			case 'c':
@@ -590,20 +596,22 @@ int main(int argc, char *argv[])
 		                                     "/home/mirmik/project/crow/apps/ctrans/test.msg");
 	}
 
-	if (pipelinecmd != "") 
+	if (pipelinecmd != "")
 	{
 		pipeline(pipelinecmd);
 	}
 
 	//START CROW
-	std::thread crowthr([]() {
-	while(1) { 
-		crow::onestep(); 
-		if (cancel_token) 
+	std::thread crowthr([]()
+	{
+		while (1)
 		{
-			return;
+			crow::onestep();
+			if (cancel_token)
+			{
+				return;
+			}
 		}
-	}
 	});
 
 	if (channelno >= 0)
@@ -617,7 +625,7 @@ int main(int argc, char *argv[])
 		if (ret)
 		{
 			nos::println("Handshake failure");
-			
+
 			cancel_token = true;
 			crowthr.join();
 			exit(0);
@@ -632,9 +640,9 @@ int main(int argc, char *argv[])
 // Ветка обработки pulse мода.
 	if (pulse != "")
 	{
-		std::string message = input_do(pulse);
-
-		send_do(message);
+		auto msgpair = input_do(pulse);
+		if (msgpair.second)
+			send_do(msgpair.first);
 
 		crow::onestep();
 		exit(0);
