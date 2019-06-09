@@ -24,8 +24,8 @@ licant.cxx_shared_library(target,
 		"crow.crowker"
 	],
 
-	cxx_flags = '-fPIC',
-	cc_flags = '-fPIC',
+	cxx_flags = '-fPIC -Wall',
+	cc_flags = '-fPIC -Wall',
 )
 
 @licant.routine(deps=[target])
