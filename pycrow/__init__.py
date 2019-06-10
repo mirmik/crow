@@ -3,6 +3,8 @@ import pycrow.libcrow
 
 from pycrow.libcrow import *
 
+crowker = None
+
 def spin():
 	while 1:
 		pycrow.libcrow.onestep()
@@ -30,8 +32,12 @@ def subscribe(theme, handler, **kwargs):
 	if not subs_init:
 		pycrow.libcrow.set_subscribe_handler(subscribe_handler_impl)
 
-	return pycrow.libcrow.subscribe(theme, **kwargs)
+	return pycrow.libcrow.subscribe(crowker, theme, **kwargs)
 
 
 def use_environment_crowker():
-	pycrow.libcrow.set_crowker(pycrow.libcrow.environment_crowker())
+	crowker = pycrow.libcrow.environment_crowker()
+
+def set_crowker(cker):
+	global crowker
+	crowker = pycrow.libcrow.compile_address(cker)

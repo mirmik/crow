@@ -78,7 +78,7 @@ namespace crow
 	                    uint8_t qos, uint16_t acktime);
 	void set_publish_host(const uint8_t *hhost, size_t hsize);
 
-	void set_crowker(const std::string &str);
+	//void set_crowker(const std::string &str);
 	std::string envcrowker();
 	std::string environment_crowker();
 

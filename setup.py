@@ -15,6 +15,7 @@ licant.cxx_objects("crow-objects",
 	mdepends = [
 		"crow",
 		"crow.udpgate",
+		("igris.ctrobj", "linux")
 	] 
 )
 crowopts = licant.core.core.get("crow-objects").finalopts

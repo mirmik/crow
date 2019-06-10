@@ -7,6 +7,7 @@
 #include <crow/holders.h>
 #include <crow/tower.h>
 #include <crow/pubsub.h>
+#include <crow/hexer.h>
 
 //#include <igris/print.h>
 
@@ -70,10 +71,12 @@ PYBIND11_MODULE(libcrow, m)
 		crow::pubsub_handler = subscribe_handler_bind_invoke;
 	});
 
+	m.def("compile_address", &compile_address);
+
 	m.def("diagnostic", &diagnostic_enable);
 	m.def("live_diagnostic", &live_diagnostic_enable);
 
-	m.def("set_crowker", &set_crowker);
+	//m.def("set_crowker", &set_crowker);
 	m.def("envcrowker", &envcrowker);
 	m.def("environment_crowker", &environment_crowker);
 
