@@ -187,6 +187,3 @@ pycrow/libs
 build 
 dist
 *.egg-info
-
-crowker
-ctrans
