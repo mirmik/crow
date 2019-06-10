@@ -6,6 +6,7 @@
 
 #ifdef __cplusplus
 #include <string>
+#include <vector>
 #endif
 
 __BEGIN_DECLS
@@ -25,10 +26,10 @@ __END_DECLS
 
 #ifdef __cplusplus
 static inline
-std::string compile_address(const std::string& in) 
+std::vector<uint8_t> compile_address(const std::string& in) 
 {
-	std::string out;
-	out.reserve(in.size());
+	std::vector<uint8_t> out;
+	out.resize(in.size());
 
 	int len = hexer_s((uint8_t*)out.data(), in.size(), in.data());
 	out.resize(len);

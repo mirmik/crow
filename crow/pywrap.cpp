@@ -82,7 +82,7 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("subscribe", 
 		  (void (*)(
-		  	const std::string & addr,
+		  	const std::vector<uint8_t> & addr,
 		  	const std::string & theme,
 		  	uint8_t ack, uint16_t ackquant,
 		    uint8_t rack, uint16_t rackquant)) &subscribe, 
@@ -93,7 +93,7 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("publish",
 		  (void (*)(
-		  	const std::string & addr,
+		  	const std::vector<uint8_t> & addr,
 		  	const std::string & theme, 
 		  	const std::string & data, 
 		  	uint8_t ack, uint16_t ackquant)) & publish,

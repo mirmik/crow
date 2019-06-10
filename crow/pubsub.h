@@ -53,7 +53,7 @@ namespace crow
 				 uint8_t qos, uint16_t acktime);
 
 	void publish(
-	    const std::string & addr,
+	    const std::vector<uint8_t> & addr,
 	    const std::string & theme, 
 	    const std::string & data,
 	    uint8_t qos = 0, 
@@ -69,7 +69,7 @@ namespace crow
 	               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
 	               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);
 
-	void subscribe(const std::string & addr,
+	void subscribe(const std::vector<uint8_t> & addr,
 	    		   const std::string & theme, 
 	               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
 	               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);

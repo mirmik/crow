@@ -149,7 +149,7 @@ std::string crow::environment_crowker()
 
 
 void crow::publish(
-    const std::string & addr,
+    const std::vector<uint8_t> & addr,
     const std::string & theme, 
     const std::string & data,
     uint8_t qos, 
@@ -163,7 +163,7 @@ void crow::publish(
 }
 
 void crow::subscribe(
-	const std::string & addr,
+	const std::vector<uint8_t> & addr,
  	const std::string & theme, 
 	uint8_t qos, uint16_t acktime,
 	uint8_t rqos, uint16_t racktime) 
