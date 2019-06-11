@@ -65,7 +65,7 @@ crow::acceptor acceptor;
 std::string binout_fmt;
 std::string binin_fmt;
 std::string msgtype;
-igris::msgtype_reader msgreader;
+igris::msgtype_struct msgreader;
 
 std::string pulse;
 std::string theme;
@@ -154,10 +154,11 @@ void output_do(igris::buffer data, crow::packet* pack)
 		case output_format::OUTPUT_MSGTYPE:
 		{
 			auto ret = msgreader.tostring(data);
-			for (unsigned int i = 0; i < ret.size(); ++i)
-			{
-				nos::fprintln("{}: {}", ret[i].first, ret[i].second);
-			}
+			//for (unsigned int i = 0; i < ret.size(); ++i)
+			//{
+			//	nos::fprintln("{}: {}", ret[i].first, ret[i].second);
+			//}
+			nos::println(ret);
 		}
 		break;
 
@@ -186,7 +187,7 @@ std::pair<std::string, bool> input_do(const std::string& data)
 			return std::make_pair(message, true);
 
 		case input_format::INPUT_MSGTYPE:
-			message = msgreader.input(data);
+			message = msgreader.fromstring_as_string(data);
 			return std::make_pair(message, message == "" ? false : true);
 
 		default:

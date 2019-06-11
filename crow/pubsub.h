@@ -10,6 +10,7 @@
 #include <igris/buffer.h>
 
 #include <string>
+#include <vector>
 
 struct crow_theme;
 

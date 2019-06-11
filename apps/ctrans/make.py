@@ -30,7 +30,8 @@ application("ctrans",
 	defines = ["NOTRACE=1"],
 	mdepends = mdepends,
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline"]
+	libs = ["pthread", "readline"],
+	cxxstd = "c++17"
 )
 
 @licant.routine(deps = ["ctrans"])
