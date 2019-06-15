@@ -17,8 +17,8 @@ void crow::udpgate::nblock_onestep()
 	socklen_t sendsize = sizeof(sender);
 	memset(&sender, 0, sizeof(sender));
 
-	ssize_t len = recvfrom(sock, &header, sizeof(crow::header), 
-		MSG_PEEK, (struct sockaddr *)&sender, &sendsize);
+	ssize_t len = recvfrom(sock, &header, sizeof(crow::header),
+	                       MSG_PEEK, (struct sockaddr *)&sender, &sendsize);
 
 	if (len <= 0)
 		return;
@@ -28,13 +28,15 @@ void crow::udpgate::nblock_onestep()
 	if (!block)
 		block = (crow::packet *) malloc(flen + sizeof(crow::packet) - sizeof(crow::header));
 
-	len = recvfrom(sock, &block->header, flen, 
-		0, (struct sockaddr *)&sender, &sendsize);
+	len = recvfrom(sock, &block->header, flen,
+	               0, (struct sockaddr *)&sender, &sendsize);
 
 	crow::packet_initialization(block, this);
 
-	struct iovec vec[3] = {
-		{&id, 1}, {&sender.sin_addr.s_addr, 4}, {&sender.sin_port, 2}};
+	struct iovec vec[3] =
+	{
+		{&id, 1}, {&sender.sin_addr.s_addr, 4}, {&sender.sin_port, 2}
+	};
 
 	block->revert(vec, 3);
 
@@ -46,7 +48,7 @@ void crow::udpgate::nblock_onestep()
 
 int crow::udpgate::open(uint16_t port)
 {
-	int ret;
+	int ret ;
 
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -58,11 +60,18 @@ int crow::udpgate::open(uint16_t port)
 	if (port != 0)
 	{
 		ret = bind(sock, (struct sockaddr *)&ipaddr, iplen);
+
 		if (ret != 0)
 		{
 			perror("bind");
 			exit(-1);
 		}
+	} 
+
+	else 
+	{
+		//dynamic port assign
+		ret = 0;
 	}
 
 	int flags = fcntl(sock, F_GETFL);
@@ -87,7 +96,7 @@ void crow::udpgate::send(crow::packet *pack)
 	ipaddr.sin_addr.s_addr = *addr;
 
 	sendto(sock, (const char *)&pack->header, pack->header.flen, 0,
-		   (struct sockaddr *)&ipaddr, iplen);
+	       (struct sockaddr *)&ipaddr, iplen);
 	crow::return_to_tower(pack, CROW_SENDED);
 }
 
