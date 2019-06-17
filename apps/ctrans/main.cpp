@@ -49,6 +49,7 @@ uint8_t ackquant = 200;
 
 bool api = false;
 bool noconsole = false;
+bool nlout = false;
 bool noend = false;
 bool echo = false;
 bool gdebug = false;
@@ -191,6 +192,11 @@ void output_do(igris::buffer data, crow::packet* pack)
 
 		default:
 			BUG();
+	}
+
+	if (nlout) 
+	{
+		write(DATAOUTPUT_FILENO, "\n", 1);
 	}
 }
 
@@ -417,6 +423,7 @@ int main(int argc, char *argv[])
 		{"ackquant", required_argument, NULL, 'a'}, // установка кванта ack
 
 		{"noend", no_argument, NULL, 'x'}, // Блокирует добавление символа конца строки.
+		{"nlout", no_argument, NULL, 'N'}, // Блокирует добавление символа конца строки.
 		{"echo", no_argument, NULL, 'E'}, // Активирует функцию эха входящих пакетов.
 		{"api", no_argument, NULL, 'a'}, // Активирует удалённое управление.
 		{"noconsole", no_argument, NULL, 'n'}, // Отключает создание консоли.
@@ -474,6 +481,10 @@ int main(int argc, char *argv[])
 
 			case 'x':
 				noend = true;
+				break;
+
+			case 'N':
+				nlout = true;
 				break;
 
 			case 'i':
