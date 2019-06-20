@@ -44,7 +44,7 @@ licant.modules.module("crow.minimal",
 	srcdir = "crow/src",
 	sources = [
 		"packet.cpp",
-		"print.cpp",
+#		"print.cpp",
 		"tower.cpp"
 	],
 	mdepends = ["crow.include"]
