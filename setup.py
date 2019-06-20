@@ -5,11 +5,12 @@ from wheel.bdist_wheel import bdist_wheel as bdist_wheel_
 from setuptools import setup, Extension, Command
 from distutils.util import get_platform
 import os
+import glob
 
 import licant
 
-licant.include("nos", local_tunel="build/nos")
-licant.include("igris", local_tunel="build/igris")
+licant.include("nos", local_tunel=("pycrow/__tunels__/nos", "nos.g.py"))
+licant.include("igris", local_tunel=("pycrow/__tunels__/igris", "igris.g.py"))
 licant.include("crow", path="crow.g.py")
 licant.cxx_objects("crow-objects", 
 	mdepends = [
@@ -37,8 +38,6 @@ class bdist_wheel(bdist_wheel_):
 		self.plat_name_supplied = True
 		self.plat_name = platform_name
 
-print([os.path.relpath(p) for p in crowopts["sources"]])
-
 pycrow_lib = Extension("pycrow.libcrow",
 	sources = ["crow/pywrap.cpp"] + crowopts["sources"],
 	extra_compile_args=['-fPIC', '-std=c++14'],
@@ -50,7 +49,7 @@ pycrow_lib = Extension("pycrow.libcrow",
 setup(
 	name = 'pycrow',
 	packages = ['pycrow'],
-	version = '0.0.1',
+	version = '0.1.4',
 	license='MIT',
 	description = 'Messaging system',
 	author = 'Sorokin Nikolay',
@@ -59,7 +58,15 @@ setup(
 	keywords = ['testing', 'cad'],
 	classifiers = [],
 
-	include_package_data=True,
 	ext_modules = [pycrow_lib],
-	cmdclass = {"bdist_wheel" : bdist_wheel}
+	cmdclass = {"bdist_wheel" : bdist_wheel},
+
+    package_data={"pycrow": [ 
+    	"__tunels__/nos/nos.g.py", 
+    	"__tunels__/igris/igris.g.py"
+		"__tunels__/igris/compat/libc/libc.g.py",
+		"__tunels__/igris/compat/std/std.g.py",
+		"__tunels__/igris/compat/posix/posix.g.py",
+    ] },   
+	include_package_data=True,
 )
