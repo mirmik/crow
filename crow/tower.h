@@ -18,6 +18,8 @@ namespace crow
 	extern void (*pubsub_handler)(crow::packet *pack);
 	extern void (*node_handler)(crow::packet *pack);
 	extern void (*user_type_handler)(crow::packet *pack);
+//	extern void (*query_tower_handler)(crow::packet *pack);
+//	extern void (*netkeep_tower_handler)(crow::packet *pack);
 	extern void (*undelivered_handler)(crow::packet *pack);
 
 	// Передать пакет в обработку.

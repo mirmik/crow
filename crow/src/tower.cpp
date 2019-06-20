@@ -186,7 +186,7 @@ static void crow_incoming_handler(crow::packet *pack)
 			crow::release(pack);
 		break;
 
-	case CROW_QUERY_PROTOCOL:
+/*	case CROW_QUERY_PROTOCOL:
 		crow::query_protocol_handler(pack);
 		crow::release(pack);
 		break;
@@ -197,7 +197,7 @@ static void crow_incoming_handler(crow::packet *pack)
 		else
 			crow::release(pack);
 		break;
-
+*/
 	default:
 		if (crow::user_type_handler)
 			crow::user_type_handler(pack);
