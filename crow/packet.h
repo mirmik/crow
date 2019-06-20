@@ -100,7 +100,8 @@ namespace crow
 		{
 			return (uint16_t)(header.flen - header.alen - sizeof(crow::header));
 		}
-	} __attribute__((packed));
+	}; //На самом деле, он не должен быть packed.
+	//__attribute__((packed));
 
 	/**
 	 * Выделить память для пакета.

@@ -141,8 +141,8 @@ void crow::channel::send_handshake_answer()
 	sh_channel.frame_id = 0;
 	sh_channel.ftype = crow::Frame::HANDSHAKE_ANSWER;
 
-	sh_handshake.qos = this->qos = qos;
-	sh_handshake.ackquant = this->ackquant = ackquant;
+	sh_handshake.qos = this->qos;
+	sh_handshake.ackquant = this->ackquant;
 
 	iovec vec[] =
 	{

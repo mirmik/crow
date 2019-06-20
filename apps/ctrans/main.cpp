@@ -11,7 +11,10 @@
 #include <igris/util/string.h>
 #include <igris/util/dstring.h>
 #include <igris/util/bug.h>
+
+#ifdef WITH_MSGTYPE
 #include <igris/protocols/msgtype.h>
+#endif
 
 #include <nos/fprint.h>
 
@@ -46,6 +49,7 @@ uint8_t ackquant = 200;
 
 bool api = false;
 bool noconsole = false;
+bool nlout = false;
 bool noend = false;
 bool echo = false;
 bool gdebug = false;
@@ -64,8 +68,11 @@ crow::acceptor acceptor;
 
 std::string binout_fmt;
 std::string binin_fmt;
+
+#ifdef WITH_MSGTYPE
 std::string msgtype;
 igris::msgtype_struct msgreader;
+#endif
 
 std::string pulse;
 std::string theme;
@@ -87,7 +94,9 @@ enum class input_format
 	INPUT_RAW,
 	INPUT_RAW_ENDLINE,
 	INPUT_BINARY,
+#ifdef WITH_MSGTYPE
 	INPUT_MSGTYPE
+#endif
 };
 
 enum class output_format
@@ -95,7 +104,9 @@ enum class output_format
 	OUTPUT_RAW,
 	OUTPUT_DSTRING,
 	OUTPUT_BINARY,
+#ifdef WITH_MSGTYPE
 	OUTPUT_MSGTYPE
+#endif
 };
 
 protoopt_e protoopt = protoopt_e::PROTOOPT_BASIC;
@@ -107,10 +118,17 @@ std::string informat_tostr()
 	switch (informat)
 	{
 		case input_format::INPUT_RAW: return "INPUT_RAW";
+
 		case input_format::INPUT_RAW_ENDLINE: return "INPUT_RAW_ENDLINE";
+
 		case input_format::INPUT_BINARY: return "INPUT_BINARY";
+
+#ifdef WITH_MSGTYPE
+
 		case input_format::INPUT_MSGTYPE: return "INPUT_MSGTYPE";
+#endif
 	}
+
 	return std::string();
 }
 
@@ -119,10 +137,17 @@ std::string outformat_tostr()
 	switch (outformat)
 	{
 		case output_format::OUTPUT_RAW: return "OUTPUT_RAW";
+
 		case output_format::OUTPUT_DSTRING: return "OUTPUT_DSTRING";
+
 		case output_format::OUTPUT_BINARY: return "OUTPUT_BINARY";
+
+#ifdef WITH_MSGTYPE
+
 		case output_format::OUTPUT_MSGTYPE: return "OUTPUT_MSGTYPE";
+#endif
 	}
+
 	return std::string();
 }
 
@@ -151,19 +176,27 @@ void output_do(igris::buffer data, crow::packet* pack)
 			output_binary(data, pack);
 			break;
 
+#ifdef WITH_MSGTYPE
+
 		case output_format::OUTPUT_MSGTYPE:
-		{
-			auto ret = msgreader.tostring(data);
-			//for (unsigned int i = 0; i < ret.size(); ++i)
-			//{
-			//	nos::fprintln("{}: {}", ret[i].first, ret[i].second);
-			//}
-			nos::println(ret);
-		}
-		break;
+			{
+				auto ret = msgreader.tostring(data);
+				//for (unsigned int i = 0; i < ret.size(); ++i)
+				//{
+				//	nos::fprintln("{}: {}", ret[i].first, ret[i].second);
+				//}
+				nos::println(ret);
+			}
+			break;
+#endif
 
 		default:
 			BUG();
+	}
+
+	if (nlout) 
+	{
+		write(DATAOUTPUT_FILENO, "\n", 1);
 	}
 }
 
@@ -186,9 +219,12 @@ std::pair<std::string, bool> input_do(const std::string& data)
 			message = input_binary(std::string(data.data(), data.size()));
 			return std::make_pair(message, true);
 
+#ifdef WITH_MSGTYPE
+
 		case input_format::INPUT_MSGTYPE:
 			message = msgreader.fromstring_as_string(data);
 			return std::make_pair(message, message == "" ? false : true);
+#endif
 
 		default:
 			BUG();
@@ -208,6 +244,7 @@ void pipeline(const std::string& cmd)
 	char *child_args [] = { (char*)cmd.c_str(), (char*)0 };
 
 	ans = pipe(pipe_to_child);
+
 	if (ans)
 	{
 		perror("pipe");
@@ -215,6 +252,7 @@ void pipeline(const std::string& cmd)
 	}
 
 	ans = pipe(pipe_from_child);
+
 	if (ans)
 	{
 		perror("pipe");
@@ -232,6 +270,7 @@ void pipeline(const std::string& cmd)
 		close(pipe_to_child[1]);
 
 		ans = execvp(cmd.c_str(), child_args);
+
 		if (ans)
 		{
 			perror("execve");
@@ -265,24 +304,26 @@ void send_do(const std::string message)
 			break;
 
 		case protoopt_e::PROTOOPT_CHANNEL:
-		{
-			int ret = channel.send(message.data(), message.size());
-			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
 			{
-				nos::println("Channel is not connected");
+				int ret = channel.send(message.data(), message.size());
+
+				if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+				{
+					nos::println("Channel is not connected");
+				}
 			}
-		}
-		break;
+			break;
 
 		case protoopt_e::PROTOOPT_REVERSE_CHANNEL:
-		{
-			int ret = reverse_channel->send(message.data(), message.size());
-			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
 			{
-				nos::println("Channel is not connected");
+				int ret = reverse_channel->send(message.data(), message.size());
+
+				if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+				{
+					nos::println("Channel is not connected");
+				}
 			}
-		}
-		break;
+			break;
 	}
 }
 
@@ -357,6 +398,7 @@ void *console_listener(void *arg)
 
 		input = std::string(readbuf, len);
 		auto msgpair = input_do(input);
+
 		if (msgpair.second)
 			send_do(msgpair.first);
 	}
@@ -381,6 +423,7 @@ int main(int argc, char *argv[])
 		{"ackquant", required_argument, NULL, 'a'}, // установка кванта ack
 
 		{"noend", no_argument, NULL, 'x'}, // Блокирует добавление символа конца строки.
+		{"nlout", no_argument, NULL, 'N'}, // Блокирует добавление символа конца строки.
 		{"echo", no_argument, NULL, 'E'}, // Активирует функцию эха входящих пакетов.
 		{"api", no_argument, NULL, 'a'}, // Активирует удалённое управление.
 		{"noconsole", no_argument, NULL, 'n'}, // Отключает создание консоли.
@@ -440,6 +483,10 @@ int main(int argc, char *argv[])
 				noend = true;
 				break;
 
+			case 'N':
+				nlout = true;
+				break;
+
 			case 'i':
 				info = true;
 				break;
@@ -491,12 +538,14 @@ int main(int argc, char *argv[])
 				theme = optarg;
 				protoopt = protoopt_e::PROTOOPT_PUBLISH;
 				break;
+#ifdef WITH_MSGTYPE
 
 			case 'm':
 				msgtype = optarg;
 				outformat = output_format::OUTPUT_MSGTYPE;
 				informat = input_format::INPUT_MSGTYPE;
 				break;
+#endif
 
 			case 'l':
 				theme = optarg;
@@ -591,11 +640,15 @@ int main(int argc, char *argv[])
 		nos::println("outformat:", outformat_tostr());
 	}
 
+#ifdef WITH_MSGTYPE
+
 	if (outformat == output_format::OUTPUT_MSGTYPE)
 	{
 		msgreader = igris::msgtype_read_type(msgtype,
 		                                     "/home/mirmik/project/crow/apps/ctrans/test.msg");
 	}
+
+#endif
 
 	if (pipelinecmd != "")
 	{
@@ -608,6 +661,7 @@ int main(int argc, char *argv[])
 		while (1)
 		{
 			crow::onestep();
+
 			if (cancel_token)
 			{
 				return;
@@ -642,6 +696,7 @@ int main(int argc, char *argv[])
 	if (pulse != "")
 	{
 		auto msgpair = input_do(pulse);
+
 		if (msgpair.second)
 			send_do(msgpair.first);
 
