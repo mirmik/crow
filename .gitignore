@@ -187,3 +187,5 @@ pycrow/libs
 build 
 dist
 *.egg-info
+
+pycrow/__tunels__/*
