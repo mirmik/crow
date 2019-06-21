@@ -42,7 +42,8 @@ namespace crow
 				   uint16_t ackquant);
 
 	void incoming_node_handler(crow::packet *pack);
-	void undelivered_node_handler(crow::packet *pack);
+	void undelivered_node_handler_common(crow::packet *pack);
+	extern void (*undelivered_node_handler)(crow::packet *pack);
 
 	static inline void enable_node_subsystem()
 	{

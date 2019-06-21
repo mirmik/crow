@@ -14,8 +14,8 @@
 #include <assert.h>
 #include <string.h>
 
-//#define NOTRACE 1
-//#include <nos/trace.h>
+#define NODTRACE 0
+#include <igris/dtrace.h>
 
 #include <crow/query.h>
 #include <crow/netkeep.h>
@@ -36,6 +36,7 @@ void (*crow::node_handler)(crow::packet *pack) = nullptr;
 void (*crow::user_type_handler)(crow::packet *pack) = nullptr;
 void (*crow::user_incoming_handler)(crow::packet *pack) = nullptr;
 void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
+void (*crow::undelivered_node_handler)(crow::packet *pack) = nullptr;
 
 static bool __diagnostic_enabled = false;
 static bool __live_diagnostic_enabled = false;
@@ -245,6 +246,7 @@ static void crow_revert_address(crow::packet *pack)
 
 static void crow_do_travel(crow::packet *pack)
 {
+	DTRACE();
 	// if (crow_traveling_handler)
 	// crow_traveling_handler(pack);
 
@@ -344,6 +346,8 @@ static void crow_do_travel(crow::packet *pack)
 		// if (crow_transit_handler) crow_transit_handler(pack);
 		//Ветка транзитного пакета. Логика поиска врат и пересылки.
 		crow::gateway *gate = crow_find_target_gateway(pack);
+		dprln("found gate");
+		dprptrln(gate);
 
 		if (gate == NULL)
 		{
@@ -360,6 +364,7 @@ static void crow_do_travel(crow::packet *pack)
 			//Здесь пакет штампуется временем отправки и пересылается во врата.
 			//Врата должны после пересылки отправить его назад в башню
 			//с помощью return_to_tower для контроля качества.
+			dprln("SEND");
 			gate->send(pack);
 		}
 	}
@@ -467,7 +472,9 @@ void crow::onestep_travel_only()
 
 void crow_undelivered(crow::packet* pack) 
 {
-	if (pack->header.f.type == CROW_NODE_PROTOCOL) 
+	if (pack->header.f.type == CROW_NODE_PROTOCOL
+		&& crow::undelivered_node_handler
+	) 
 	{
 		crow::undelivered_node_handler(pack);
 		return;
@@ -481,6 +488,7 @@ void crow_undelivered(crow::packet* pack)
 
 static inline void crow_onestep_send_stage()
 {
+	//DTRACE();
 	crow::packet *pack;
 
 	while (1)
