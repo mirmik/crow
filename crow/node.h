@@ -1,25 +1,28 @@
-/**
-	@file
-*/
-
 #ifndef CROW_NODE_H
 #define CROW_NODE_H
 
 #include <crow/packet.h>
+#include <crow/protocol.h>
 #include <sys/uio.h>
 
 #include <igris/container/dlist.h>
 
 namespace crow
 {
-	extern void (*node_handler)(crow::packet *pack);
+	class node_protocol_cls : public crow::protocol 
+	{
+	public:
+		void incoming(crow::packet *pack) override;
+		void undelivered(crow::packet *pack) override;
+		node_protocol_cls() : protocol(CROW_NODE_PROTOCOL) {}
+	};
+	extern node_protocol_cls node_protocol;	
 
 	struct node_subheader
 	{
 		uint16_t sid;
 		uint16_t rid;
 	} __attribute__((packed));
-
 	
 	struct node
 	{
@@ -40,15 +43,6 @@ namespace crow
 	void node_send(uint16_t sid, uint16_t rid, const void *raddr, size_t rlen,
 				   const void *data, size_t size, uint8_t qos,
 				   uint16_t ackquant);
-
-	void incoming_node_handler(crow::packet *pack);
-	void undelivered_node_handler_common(crow::packet *pack);
-	extern void (*undelivered_node_handler)(crow::packet *pack);
-
-	static inline void enable_node_subsystem()
-	{
-		crow::node_handler = crow::incoming_node_handler;
-	}
-} // namespace crow
+}
 
 #endif

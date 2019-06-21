@@ -1,8 +1,10 @@
 #include <crow/node.h>
+#include <crow/defs.h>
 #include <crow/tower.h>
 #include <igris/sync/syslock.h>
 
 igris::dlist<crow::node, &crow::node::lnk> crow::nodes;
+crow::node_protocol_cls crow::node_protocol;	
 
 void crow::node_send(uint16_t sid, uint16_t rid, const void *raddr,
 					 size_t rsize, const void *data, size_t size, uint8_t qos,
@@ -17,7 +19,7 @@ void crow::node_send(uint16_t sid, uint16_t rid, const void *raddr,
 	crow::send_v(raddr, rsize, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
-void crow::incoming_node_handler(crow::packet *pack)
+void crow::node_protocol_cls::incoming(crow::packet *pack)
 {
 	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 
@@ -33,7 +35,7 @@ void crow::incoming_node_handler(crow::packet *pack)
 	crow::release(pack);
 }
 
-void crow::undelivered_node_handler(crow::packet *pack) 
+void crow::node_protocol_cls::undelivered(crow::packet *pack) 
 {
 	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 

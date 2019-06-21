@@ -356,7 +356,7 @@ void incoming_handler(crow::packet *pack)
 			break;
 
 		case CROW_NODE_PROTOCOL:
-			crow::incoming_node_handler(pack);
+			crow::node_protocol.incoming(pack);
 			return;
 
 		default:

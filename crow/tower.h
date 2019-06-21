@@ -14,9 +14,11 @@ extern igris::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
 
 namespace crow
 {
+	extern dlist_head protocols;
+
 	extern void (*user_incoming_handler)(crow::packet *pack);
-	extern void (*pubsub_handler)(crow::packet *pack);
-	extern void (*node_handler)(crow::packet *pack);
+	//extern void (*pubsub_handler)(crow::packet *pack);
+	//extern void (*node_handler)(crow::packet *pack);
 	extern void (*user_type_handler)(crow::packet *pack);
 //	extern void (*query_tower_handler)(crow::packet *pack);
 //	extern void (*netkeep_tower_handler)(crow::packet *pack);

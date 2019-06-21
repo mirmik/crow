@@ -3,6 +3,7 @@
 */
 
 #include <crow/tower.h>
+#include <crow/protocol.h>
 #include <igris/sync/syslock.h>
 #include <stdbool.h>
 
@@ -14,7 +15,7 @@
 #include <assert.h>
 #include <string.h>
 
-#define NODTRACE 0
+#define NODTRACE 1
 #include <igris/dtrace.h>
 
 #include <crow/query.h>
@@ -27,16 +28,14 @@ igris::dlist<crow::packet, &crow::packet::lnk> crow_outters;*/
 
 igris::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
 
+struct dlist_head crow::protocols = DLIST_HEAD_INIT(crow::protocols);
 DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
 
-void (*crow::pubsub_handler)(crow::packet *pack) = nullptr;
-void (*crow::node_handler)(crow::packet *pack) = nullptr;
 void (*crow::user_type_handler)(crow::packet *pack) = nullptr;
 void (*crow::user_incoming_handler)(crow::packet *pack) = nullptr;
 void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
-void (*crow::undelivered_node_handler)(crow::packet *pack) = nullptr;
 
 static bool __diagnostic_enabled = false;
 static bool __live_diagnostic_enabled = false;
@@ -170,41 +169,21 @@ static void crow_travel_error(crow::packet *pack)
 
 static void crow_incoming_handler(crow::packet *pack)
 {
-	switch (pack->header.f.type)
+	crow::protocol * it;
+	dlist_for_each_entry(it, &crow::protocols, lnk) 
 	{
-	case CROW_NODE_PROTOCOL:
-		if (crow::node_handler)
-			crow::node_handler(pack);
-		else
-			crow::release(pack);
+		if (it->id == pack->header.f.type) 
+		{
+			it->incoming(pack);
+			return;
+		}
+	} 
 
-		break;
-
-	case CROW_PUBSUB_PROTOCOL:
-		if (crow::pubsub_handler)
-			crow::pubsub_handler(pack);
-		else
-			crow::release(pack);
-		break;
-
-/*	case CROW_QUERY_PROTOCOL:
-		crow::query_protocol_handler(pack);
+	if (crow::user_type_handler)
+		crow::user_type_handler(pack);
+	else
 		crow::release(pack);
-		break;
-
-	case CROW_NETKEEP_PROTOCOL:
-		if (crow::netkeep_protocol_handler)
-			crow::netkeep_protocol_handler(pack);
-		else
-			crow::release(pack);
-		break;
-*/
-	default:
-		if (crow::user_type_handler)
-			crow::user_type_handler(pack);
-		else
-			crow::release(pack);
-	}
+	
 }
 
 static void crow_send_ack(crow::packet *pack)
@@ -346,9 +325,7 @@ static void crow_do_travel(crow::packet *pack)
 		// if (crow_transit_handler) crow_transit_handler(pack);
 		//Ветка транзитного пакета. Логика поиска врат и пересылки.
 		crow::gateway *gate = crow_find_target_gateway(pack);
-		dprln("found gate");
-		dprptrln(gate);
-
+		
 		if (gate == NULL)
 		{
 			if (__diagnostic_enabled)
@@ -364,7 +341,6 @@ static void crow_do_travel(crow::packet *pack)
 			//Здесь пакет штампуется временем отправки и пересылается во врата.
 			//Врата должны после пересылки отправить его назад в башню
 			//с помощью return_to_tower для контроля качества.
-			dprln("SEND");
 			gate->send(pack);
 		}
 	}
@@ -472,13 +448,15 @@ void crow::onestep_travel_only()
 
 void crow_undelivered(crow::packet* pack) 
 {
-	if (pack->header.f.type == CROW_NODE_PROTOCOL
-		&& crow::undelivered_node_handler
-	) 
+	crow::protocol * it;
+	dlist_for_each_entry(it, &crow::protocols, lnk) 
 	{
-		crow::undelivered_node_handler(pack);
-		return;
-	}
+		if (it->id == pack->header.f.type) 
+		{
+			it->undelivered(pack);
+			return;
+		}
+	} 
 
 	if (crow::undelivered_handler)
 		crow::undelivered_handler(pack);

@@ -115,8 +115,10 @@ void netserve()
 
 int main(int argc, char *argv[])
 {
-	crow::pubsub_handler = incoming_pubsub_packet;
+	crow::pubsub_protocol.incoming_handler = incoming_pubsub_packet;
 	crow::undelivered_handler = undelivered_handler;
+
+	crow::pubsub_protocol.enable();
 
 	crow::netkeep_protocol_handler =
 	    crow::netkeep_protocol_handler_crowker;

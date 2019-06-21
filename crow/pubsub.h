@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <crow/tower.h>
+#include <crow/protocol.h>
 #include <igris/buffer.h>
 
 #include <string>
@@ -37,27 +38,38 @@ typedef struct crow_subheader_pubsub_control
 
 namespace crow
 {
+
+	class pubsub_protocol_cls : public crow::protocol
+	{
+	public:
+		void incoming(crow::packet *pack) override;
+		pubsub_protocol_cls() : protocol(CROW_PUBSUB_PROTOCOL) {}
+
+		void(*incoming_handler)(packet*);
+	};
+	extern pubsub_protocol_cls pubsub_protocol;
+
 	void publish(
 	    const uint8_t * raddr, uint8_t rlen,
-	    const char *theme, 
+	    const char *theme,
 	    const char *data, uint8_t dsize,
 	    uint8_t qos, uint16_t acktime);
 
 	void publish(const uint8_t * raddr, uint8_t rlen,
-		         const char *theme, 
-		         const char *data, 
-		         uint8_t qos, uint16_t acktime);
+	             const char *theme,
+	             const char *data,
+	             uint8_t qos, uint16_t acktime);
 
 	void publish(const uint8_t * raddr, uint8_t rlen,
-				 const char* theme, 
-				 const std::string& data, 
-				 uint8_t qos, uint16_t acktime);
+	             const char* theme,
+	             const std::string& data,
+	             uint8_t qos, uint16_t acktime);
 
 	void publish(
 	    const std::vector<uint8_t> & addr,
-	    const std::string & theme, 
+	    const std::string & theme,
 	    const std::string & data,
-	    uint8_t qos = 0, 
+	    uint8_t qos = 0,
 	    uint16_t acktime = DEFAULT_ACKQUANT);
 
 
@@ -71,7 +83,7 @@ namespace crow
 	               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);
 
 	void subscribe(const std::vector<uint8_t> & addr,
-	    		   const std::string & theme, 
+	               const std::string & theme,
 	               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
 	               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);
 
