@@ -18,11 +18,20 @@
 
 #include <nos/print.h>
 #include <nos/fprint.h>
+#include <igris/util/dstring.h>
+
+#include <nos/inet/tcp_server.h>
+#include <nos/inet/tcp_socket.h>
+
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
 
 std::string handshake;
 std::string netname;
 
 int udpport = -1;
+int tcpport = -1;
 bool quite = false;
 
 void incoming_pubsub_packet(struct crow::packet *pack)
@@ -32,34 +41,37 @@ void incoming_pubsub_packet(struct crow::packet *pack)
 	switch (shps->type)
 	{
 		case PUBLISH:
-		{
-			struct crow_subheader_pubsub_data *shps_d =
-			    get_subheader_pubsub_data(pack);
+			{
+				struct crow_subheader_pubsub_data *shps_d =
+				    get_subheader_pubsub_data(pack);
 
-			auto theme = std::string(crow::packet_pubsub_thmptr(pack), shps->thmsz);
-			auto data =
-			    std::string(crow::packet_pubsub_datptr(pack), shps_d->datsz);
+				auto theme = std::string(crow::packet_pubsub_thmptr(pack), shps->thmsz);
+				auto data =
+				    std::string(crow::packet_pubsub_datptr(pack), shps_d->datsz);
 
-			brocker_publish(theme, data);
-		}
-		break;
+				brocker::publish(theme, data);
+			}
+			break;
+
 		case SUBSCRIBE:
-		{
-			auto shps_c = get_subheader_pubsub_control(pack);
-			std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
-			                  sizeof(crow_subheader_pubsub_control),
-			                  shps->thmsz);
+			{
+				auto shps_c = get_subheader_pubsub_control(pack);
+				std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
+				                  sizeof(crow_subheader_pubsub_control),
+				                  shps->thmsz);
 
-			g3_brocker_subscribe(pack->addrptr(), pack->addrsize(), theme,
-			                     shps_c->qos, shps_c->ackquant);
-		}
-		break;
+				brocker::crow_subscribe(pack->addrptr(), pack->addrsize(), theme,
+				                        shps_c->qos, shps_c->ackquant);
+			}
+			break;
+
 		default:
-		{
-			printf("unresolved pubsub frame type %d", (uint8_t)shps->type);
-		}
-		break;
+			{
+				printf("unresolved pubsub frame type %d", (uint8_t)shps->type);
+			}
+			break;
 	}
+
 	crow::release(pack);
 }
 
@@ -74,9 +86,11 @@ void undelivered_handler(struct crow::packet *pack)
 			std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
 			                  sizeof(crow_subheader_pubsub_data),
 			                  shps->thmsz);
-			auto &thm = themes[theme];
-			thm.subs.erase(
+			//auto &thm = brocker::themes[theme];
+
+			brocker::erase_crow_subscriber(
 			    std::string((char *)pack->addrptr(), pack->header.alen));
+
 			if (brocker_info)
 				nos::fprintln(
 				    "g3_refuse: t:{}, r:{}", theme,
@@ -113,6 +127,101 @@ void netserve()
 	}
 }
 
+void tcp_client_listener(nos::inet::tcp_socket client)
+{
+	char buf[1024];
+	nos::inet::netaddr addr = client.getaddr();
+
+	if (brocker_info)
+		nos::println("new tcp client from", addr);
+
+	while (1)
+	{
+		int ret;
+		char cmd;
+		uint8_t datasize;
+		uint16_t thmsize;
+
+		std::string theme;
+		std::string data;
+
+		ret = client.recv(buf, 3, MSG_WAITALL);
+
+		if (ret <= 0)
+			break;
+
+		cmd = buf[0];
+		if (cmd != 's' && cmd != 'p') 
+			goto clean;
+
+		buf[3] = 0;
+		thmsize = atoi32(buf + 1, 10, nullptr);
+
+		if (thmsize == 0) 
+			goto clean;
+
+		ret = client.recv(buf, thmsize, MSG_WAITALL);
+
+		if (ret <= 0)
+			break;
+
+		theme = std::string(buf, thmsize);
+
+		if ( cmd == 's' )
+		{
+			brocker::tcp_subscribe(theme, &client);
+			continue;
+		}
+		else if (cmd == 'p')
+		{
+			ret = client.recv(buf, 6, MSG_WAITALL);
+			if (ret <= 0)
+				break;
+
+			buf[6] = 0;
+			datasize = atoi32(buf, 10, nullptr);
+			if (datasize == 0) goto clean;
+
+			ret = client.recv(buf, datasize, MSG_WAITALL);
+			if (ret <= 0)
+				break;
+
+			data = std::string(buf, datasize);
+
+			brocker::publish(theme, data);
+			continue;
+		}
+
+	clean:
+		{
+			if (brocker_info)
+				nos::println("unresolved tcp command from", addr, cmd);
+
+			continue;
+		}
+	}
+
+	if (brocker_info)
+		nos::println("tcp connection was clossed", addr);
+}
+
+void tcp_listener(int port)
+{
+	nos::inet::tcp_server srv;
+	srv.init();
+	srv.reusing(true);
+	srv.bind("0.0.0.0", port);
+	srv.listen(10);
+
+	while (1)
+	{
+		auto client = srv.accept();
+
+		std::thread thr(tcp_client_listener, std::move(client));
+		thr.detach();
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	crow::pubsub_protocol.incoming_handler = incoming_pubsub_packet;
@@ -123,7 +232,10 @@ int main(int argc, char *argv[])
 	crow::netkeep_protocol_handler =
 	    crow::netkeep_protocol_handler_crowker;
 
-	const struct option long_options[] = {{"udp", required_argument, NULL, 'u'},
+	const struct option long_options[] =
+	{
+		{"udp", required_argument, NULL, 'u'},
+		{"tcp", required_argument, NULL, 't'},
 		{"debug", no_argument, NULL, 'd'},
 		{"binfo", no_argument, NULL, 'b'},
 		{"vdebug", no_argument, NULL, 'v'},
@@ -135,7 +247,8 @@ int main(int argc, char *argv[])
 
 	int long_index = 0;
 	int opt = 0;
-	while ((opt = getopt_long(argc, argv, "usvdibhn", long_options,
+
+	while ((opt = getopt_long(argc, argv, "usvdibhtn", long_options,
 	                          &long_index)) != -1)
 	{
 		switch (opt)
@@ -143,21 +256,31 @@ int main(int argc, char *argv[])
 			case 'u':
 				udpport = atoi(optarg);
 				break;
+
+			case 't':
+				tcpport = atoi(optarg);
+				break;
+
 			case 'd':
 				crow::enable_diagnostic();
 				break;
+
 			case 'v':
 				crow::enable_live_diagnostic();
 				break;
+
 			case 'b':
 				brocker_info = true;
 				break;
+
 			case 'h':
 				handshake = optarg;
 				break;
+
 			case 'n':
 				netname = optarg;
 				break;
+
 			case 0:
 				break;
 		}
@@ -184,6 +307,13 @@ int main(int argc, char *argv[])
 	{
 		perror("udpgate open");
 		exit(-1);
+	}
+
+
+	if (tcpport != -1)
+	{
+		std::thread thr(tcp_listener, tcpport);
+		thr.detach();
 	}
 
 	crow::spin();

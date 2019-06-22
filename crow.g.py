@@ -45,7 +45,6 @@ licant.modules.module("crow.minimal",
 	srcdir = "crow/src",
 	sources = [
 		"packet.cpp",
-#		"print.cpp",
 		"tower.cpp",
 		"protocol.cpp",
 		"hexer.c"
@@ -73,5 +72,12 @@ licant.modules.module("crow.udpgate",
 licant.modules.module("crow.serial_gstuff", 
 	sources=["crow/gates/serial_gstuff.cpp"], 
 	mdepends=["igris.protocols.gstuff"])
+
+#####################################################################################
+####################################PROTOCOLS########################################
+
+licant.module("crow.protocol.pubsub",
+	sources = ["crow/src/pubsub.cpp"]
+)
 
 #####################################################################################
