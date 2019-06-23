@@ -15,7 +15,7 @@ void crow::pubsub_protocol_cls::incoming(crow::packet * pack)
 
 void crow::publish(
     const uint8_t * raddr, uint8_t rlen,
-    const char *theme, const char *data, uint8_t dlen,
+    const char *theme, const char *data, uint16_t dlen,
     uint8_t qos, uint16_t acktime)
 {
 	struct crow_subheader_pubsub subps;
