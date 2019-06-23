@@ -109,6 +109,7 @@ void brocker::subscribers::crow::publish(const std::string & theme, const std::s
 
 	crow::send_v(addr.data(), addr.size(), vec, 4,
 					 CROW_PUBSUB_PROTOCOL, qos, ackquant);*/
+	nos::println(data.size());
 	::crow::publish((uint8_t*)addr.data(), addr.size(), theme.c_str(), data.data(), data.size(), qos, ackquant);
 }
 
