@@ -15,10 +15,9 @@ with_msgtype = False
 
 mdepends = [
 	"crow", 
-
 	"crow.udpgate",
 	"crow.serial_gstuff",
-
+	"igris",
 	("igris.ctrobj", "linux")
 ]
 
@@ -44,8 +43,14 @@ application("ctrans",
 	cxxstd = "c++17"
 )
 
-@licant.routine(deps = ["ctrans"])
+@licant.routine(deps = ["ctrans", "doc"])
 def install():
 	os.system("cp ctrans /usr/local/bin")
+	os.system("cp doc/crow.1 /usr/local/share/man/man1/")
+	os.system("sudo mandb")
+
+@licant.routine
+def doc():
+	os.system("cd doc; ./make.sh")
 
 licant.ex("ctrans")
