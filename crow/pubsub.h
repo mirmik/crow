@@ -168,7 +168,7 @@ namespace crow
 	public:
 		dlist_head lnk;
 
-	private:
+	public:
 		const uint8_t * addr;
 		uint8_t alen;
 		const char * theme;
