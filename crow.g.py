@@ -5,6 +5,10 @@ licant.module("crow.netkeep_crowker",
 	sources=["crow/src/netkeep_crowker.cpp"]
 )
 
+licant.module("crow.print", 
+	sources=["crow/src/print.cpp"]
+)
+
 licant.modules.module("crow",
 	srcdir = "crow/src",
 	sources = [

@@ -3,7 +3,7 @@
 
 #include <igris/sync/syslock.h>
 
-#define NODTRACE 0
+#define NODTRACE 1
 #include <igris/dtrace.h>
 
 igris::pool _crow_packet_pool;
@@ -11,7 +11,6 @@ igris::pool _crow_packet_pool;
 void crow::engage_packet_pool(void *zone, size_t zonesize, size_t elsize)
 {
 	DTRACE();
-	dprptrln(zone);
 	_crow_packet_pool.init(zone, zonesize, elsize);
 }
 
