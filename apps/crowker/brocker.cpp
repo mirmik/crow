@@ -25,14 +25,16 @@ void brocker::erase_tcp_subscriber(const nos::inet::netaddr & addr)
 
 void brocker::publish(const std::string& theme, const std::string& data)
 {
-	if (brocker_info || log_publish)
-	{
-		nos::fprintln("publish: t:{} s:{} d:{}", theme, themes.size(), igris::dstring(data));
-	}
-
 	try
 	{
 		auto &thm = themes.at(theme);
+
+		if (brocker_info || log_publish)
+		{
+			nos::fprintln("publish: t:{} s:{} d:{}", 
+				theme, thm.count_subscribers(), igris::dstring(data));
+		}
+
 		thm.publish(data);
 	}
 	catch (std::exception ex)
@@ -119,13 +121,13 @@ void brocker::subscribers::tcp::publish(const std::string & theme, const std::st
 	sock->write(str.data(), str.size());
 }
 
-brocker::theme * get_theme(const std::string& name) 
+brocker::theme * get_theme(const std::string& name)
 {
-	if (brocker::themes.count(name)) 
+	if (brocker::themes.count(name))
 	{
 		return &brocker::themes[name];
 	}
-	else 
+	else
 	{
 		brocker::theme * thm = &brocker::themes[name];
 		thm->name = name;
@@ -151,16 +153,16 @@ void brocker::crow_subscribe(uint8_t*addr, int alen,
 	thm->link_subscriber(sub);
 }
 
-void brocker::unlink_theme_subscriber(brocker::theme* thm, brocker::subscriber* sub) 
+void brocker::unlink_theme_subscriber(brocker::theme* thm, brocker::subscriber* sub)
 {
 	thm->unlink_subscriber(sub);
-	if (thm->count_subscribers() == 0) 
+	if (thm->count_subscribers() == 0)
 	{
 		brocker::themes.erase(thm->name);
-	} 
+	}
 }
 
-void brocker::tcp_subscribe(const std::string& theme, nos::inet::tcp_socket * sock) 
+void brocker::tcp_subscribe(const std::string& theme, nos::inet::tcp_socket * sock)
 {
 	if (brocker_info)
 	{
