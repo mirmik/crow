@@ -316,5 +316,10 @@ int main(int argc, char *argv[])
 		thr.detach();
 	}
 
-	crow::spin();
+	//crow::spin();
+	while(1) 
+	{
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::microseconds(1));
+	}
 }
