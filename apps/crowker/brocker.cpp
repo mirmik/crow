@@ -25,22 +25,25 @@ void brocker::erase_tcp_subscriber(const nos::inet::netaddr & addr)
 
 void brocker::publish(const std::string& theme, const std::string& data)
 {
+	int subs_count;
+
 	try
 	{
 		auto &thm = themes.at(theme);
-
-		if (brocker_info || log_publish)
-		{
-			nos::fprintln("publish: t:{} s:{} d:{}", 
-				theme, thm.count_subscribers(), igris::dstring(data));
-		}
-
+		subs_count = thm.count_subscribers();
 		thm.publish(data);
 	}
 	catch (std::exception ex)
 	{
-		// owl::println("unres theme");
+		subs_count = 0;
 	}
+
+	if (brocker_info || log_publish)
+	{
+		nos::fprintln("publish: t:{} s:{} d:{}",
+            theme, subs_count, igris::dstring(data));
+	}
+
 }
 
 /*
