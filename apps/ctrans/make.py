@@ -47,7 +47,6 @@ application("ctrans",
 def install():
 	os.system("cp ctrans /usr/local/bin")
 	os.system("cp doc/crow.1 /usr/local/share/man/man1/")
-	os.system("sudo mandb")
 
 @licant.routine
 def doc():
