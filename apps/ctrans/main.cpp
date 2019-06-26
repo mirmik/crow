@@ -661,6 +661,7 @@ int main(int argc, char *argv[])
 		while (1)
 		{
 			crow::onestep();
+			std::this_thread::sleep_for(std::chrono::microseconds(1));			
 
 			if (cancel_token)
 			{
