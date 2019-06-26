@@ -13,6 +13,7 @@
 #include <nos/inet/tcp_socket.h>
 
 extern bool brocker_info;
+extern bool log_publish;
 
 namespace brocker
 {

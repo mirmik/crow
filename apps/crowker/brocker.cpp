@@ -6,7 +6,8 @@
 #include <igris/util/dstring.h>
 #include <sys/uio.h>
 
-bool brocker_info;
+bool brocker_info = false;
+bool log_publish = false;
 
 std::map<std::string, brocker::theme> brocker::themes;
 std::map<std::string, brocker::subscribers::crow> brocker::subscribers::crow::allsubs;
@@ -24,9 +25,9 @@ void brocker::erase_tcp_subscriber(const nos::inet::netaddr & addr)
 
 void brocker::publish(const std::string& theme, const std::string& data)
 {
-	if (brocker_info)
+	if (brocker_info || log_publish)
 	{
-		nos::fprintln("publish: t:{} d:{}", theme, igris::dstring(data));
+		nos::fprintln("publish: t:{} s:{} d:{}", theme, themes.size(), igris::dstring(data));
 	}
 
 	try

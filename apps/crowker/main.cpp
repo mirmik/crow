@@ -238,6 +238,7 @@ int main(int argc, char *argv[])
 		{"tcp", required_argument, NULL, 't'},
 		{"debug", no_argument, NULL, 'd'},
 		{"binfo", no_argument, NULL, 'b'},
+		{"logpub", no_argument, NULL, 'p'},
 		{"vdebug", no_argument, NULL, 'v'},
 		{"quite", no_argument, NULL, 'q'},
 		{"handshake", required_argument, NULL, 'h'},
@@ -271,6 +272,10 @@ int main(int argc, char *argv[])
 
 			case 'b':
 				brocker_info = true;
+				break;
+
+			case 'p':
+				log_publish = true;
 				break;
 
 			case 'h':
