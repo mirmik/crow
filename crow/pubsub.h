@@ -216,7 +216,6 @@ namespace crow
 
 		void resubscribe() 
 		{
-			dprln("resubscribe");
 			crow::subscribe(addr, alen, theme, qos, ackquant);
 		}
 		

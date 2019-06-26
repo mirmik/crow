@@ -4,7 +4,7 @@
 #include <thread>
 #include <chrono>
 
-#define NODTRACE 0
+#define NODTRACE 1
 #include <igris/dtrace.h>
 
 void crow::start_thread()
