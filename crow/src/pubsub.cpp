@@ -1,6 +1,8 @@
 #include <crow/hexer.h>
 #include <crow/pubsub.h>
 
+#include <igris/sync/syslock.h>
+
 crow::pubsub_protocol_cls crow::pubsub_protocol;	
 
 void crow::pubsub_protocol_cls::incoming(crow::packet * pack) 
@@ -117,4 +119,17 @@ void crow::subscribe(
 		theme.c_str(), 
 		qos, acktime,
 		rqos, racktime);
+}
+
+
+void crow::pubsub_protocol_cls::resubscribe_all() 
+{
+	crow::subscriber * sub;
+
+	system_lock();
+	dlist_for_each_entry(sub, &themes, lnk) 
+	{
+		sub->resubscribe();
+	}
+	system_unlock();
 }

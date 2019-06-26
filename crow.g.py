@@ -5,6 +5,10 @@ licant.module("crow.netkeep_crowker",
 	sources=["crow/src/netkeep_crowker.cpp"]
 )
 
+licant.module("crow.threads", "linux", default=True,
+	sources = ["crow/src/threads-posix.cpp"]
+)
+
 licant.modules.module("crow",
 	srcdir = "crow/src",
 	sources = [

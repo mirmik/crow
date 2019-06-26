@@ -64,6 +64,8 @@ namespace crow
 	void onestep_travel_only();
 	void spin();
 
+	void start_thread();
+
 } // namespace crow
 
 #endif
