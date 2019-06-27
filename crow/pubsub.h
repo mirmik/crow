@@ -60,7 +60,7 @@ namespace crow
 	void publish(
 	    const uint8_t * raddr, uint8_t rlen,
 	    const char *theme,
-	    const char *data, uint16_t dsize,
+	    const void* data, uint16_t dsize,
 	    uint8_t qos, uint16_t acktime);
 
 	void publish(const uint8_t * raddr, uint8_t rlen,
