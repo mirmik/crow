@@ -53,7 +53,7 @@ pycrow_lib = Extension("pycrow.libcrow",
 setup(
 	name = 'pycrow',
 	packages = ['pycrow'],
-	version = '0.1.4',
+	version = '0.1.5',
 	license='MIT',
 	description = 'Messaging system',
 	author = 'Sorokin Nikolay',

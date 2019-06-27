@@ -8,26 +8,26 @@ import os
 
 licant.libs.include("crow")
 
-licant.libs.include("nos")
-licant.libs.include("igris")
+#licant.libs.include("nos")
+#licant.libs.include("igris")
 
-with_msgtype = False
+#with_msgtype = False
 
 mdepends = [
 	"crow", 
 	"crow.udpgate",
 	"crow.serial_gstuff",
-	"igris",
-	("igris.ctrobj", "linux")
+#	"igris",
+#	("igris.ctrobj", "linux")
 ]
 
-if with_msgtype:
-	mdepends.append("igris.protocols.msgtype")
+#if with_msgtype:
+#	mdepends.append("igris.protocols.msgtype")
 
 defines = ["NOTRACE=1"]
 
-if with_msgtype:
-	defines.append("WITH_MSGTYPE=1")
+#if with_msgtype:
+#	defines.append("WITH_MSGTYPE=1")
 
 application("ctrans", 
 	sources = [
@@ -39,7 +39,7 @@ application("ctrans",
 	defines = defines,
 	mdepends = mdepends,
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline"],
+	libs = ["pthread", "readline", "igris", "nos"],
 	cxxstd = "c++17"
 )
 

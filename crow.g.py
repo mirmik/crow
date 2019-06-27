@@ -37,11 +37,11 @@ licant.modules.module("crow",
 		"crow.time",
 		"crow.include",
 
-		"igris.include",
-		"igris.syslock",
-		"igris.dprint",
+	#	"igris.include",
+	#	"igris.syslock",
+	#	"igris.dprint",
 
-		"nos"
+	#	"nos"
 	]
 )
 
@@ -79,7 +79,9 @@ licant.modules.module("crow.udpgate",
 
 licant.modules.module("crow.serial_gstuff", 
 	sources=["crow/gates/serial_gstuff.cpp"], 
-	mdepends=["igris.protocols.gstuff"])
+	mdepends=[
+		#"igris.protocols.gstuff"
+	])
 
 #####################################################################################
 ####################################PROTOCOLS########################################

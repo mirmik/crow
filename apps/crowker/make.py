@@ -8,8 +8,8 @@ import os
 
 licant.libs.include("crow")
 
-licant.libs.include("nos")
-licant.libs.include("igris")
+#licant.libs.include("nos")
+#licant.libs.include("igris")
 
 gates = [
 	"crow.udpgate",
@@ -19,9 +19,9 @@ gates = [
 mdepends = [
 	"crow",
 	"crow.netkeep_crowker",
-	"igris",
-	("igris.ctrobj", "linux"),
-	"nos.inet"
+#	"igris",
+#	("igris.ctrobj", "linux"),
+#	"nos.inet"
 ]
 mdepends.extend(gates)
 
@@ -32,7 +32,7 @@ application("crowker",
 	],
 	mdepends = mdepends,
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline"]
+	libs = ["pthread", "readline", "nos", "igris"]
 )
 
 @licant.routine(deps = ["crowker"])
