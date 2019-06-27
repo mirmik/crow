@@ -207,7 +207,7 @@ static void crow_send_ack2(crow::packet *pack)
 	crow::packet *ack = crow::create_packet(NULL, pack->header.alen, 0);
 	if (pack == nullptr)
 		return;
-	
+
 	ack->header.f.type = G1_ACK22_TYPE;
 	ack->header.f.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
@@ -417,6 +417,8 @@ void crow::send_v(const void *addr, uint8_t asize, const struct iovec *vec,
 
 void crow::return_to_tower(crow::packet *pack, uint8_t sts)
 {
+	assert(pack);
+
 	system_lock();
 
 	if (pack->ingate != NULL)
