@@ -658,3 +658,11 @@ bool crow::has_untravelled()
 		dlist_empty(&crow_incoming)
 	);
 }
+
+void crow::print_list_counts() 
+{
+	dprln();
+	dprln("crow_travelled:", dlist_size(&crow_travelled));
+	dprln("crow_outters:", dlist_size(&crow_outters));
+	dprln("crow_incoming:", dlist_size(&crow_incoming));
+}

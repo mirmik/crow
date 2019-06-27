@@ -38,6 +38,7 @@
 #include <unistd.h>
 
 bool cancel_token = false;
+bool debug_mode = false;
 
 uint8_t addr[128];
 int addrsize;
@@ -520,6 +521,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'd':
+				debug_mode = true;
 				crow::enable_diagnostic();
 				break;
 
@@ -669,6 +671,9 @@ int main(int argc, char *argv[])
 
 			if (cancel_token)
 			{
+				if (debug_mode)
+					nos::println("cancel_token was emitted. Stop crow thread.");
+
 				return;
 			}
 		}
@@ -707,9 +712,12 @@ int main(int argc, char *argv[])
 
 		while(crow::has_untravelled() || crow::has_allocated()) 
 		{
+			//PRINT(crow::has_untravelled());
+			//PRINT(crow::has_allocated());
+			//crow::print_list_counts();
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		}
-		
+
 		cancel_token = true;
 		crowthr.join();
 		exit(0);

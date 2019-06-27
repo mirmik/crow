@@ -67,6 +67,7 @@ namespace crow
 	void start_thread();
 
 	bool has_untravelled();
+	void print_list_counts();
 } // namespace crow
 
 #endif
