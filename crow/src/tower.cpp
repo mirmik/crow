@@ -189,6 +189,9 @@ static void crow_incoming_handler(crow::packet *pack)
 static void crow_send_ack(crow::packet *pack)
 {
 	crow::packet *ack = crow::create_packet(NULL, pack->header.alen, 0);
+	if (pack == nullptr)
+		return;
+
 	ack->header.f.type =
 		pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
 	ack->header.f.ack = 1;
@@ -202,6 +205,9 @@ static void crow_send_ack(crow::packet *pack)
 static void crow_send_ack2(crow::packet *pack)
 {
 	crow::packet *ack = crow::create_packet(NULL, pack->header.alen, 0);
+	if (pack == nullptr)
+		return;
+	
 	ack->header.f.type = G1_ACK22_TYPE;
 	ack->header.f.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
@@ -363,6 +369,9 @@ void crow::send(const void *addr, uint8_t asize, const char *data,
 				uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
+	if (pack == nullptr)
+		return;
+
 	pack->header.f.type = type & 0x1F;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
@@ -385,10 +394,13 @@ void crow::send_v(const void *addr, uint8_t asize, const struct iovec *vec,
 	}
 
 	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
+	if (pack == nullptr)
+		return;
+
 	pack->header.f.type = type & 0x1F;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
-	// if (addr)
+	
 	memcpy(pack->addrptr(), addr, asize);
 
 	it = vec;
