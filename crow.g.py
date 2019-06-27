@@ -9,6 +9,10 @@ licant.module("crow.print",
 	sources=["crow/src/print.cpp"]
 )
 
+licant.module("crow.threads", "linux", default=True,
+	sources = ["crow/src/threads-posix.cpp"]
+)
+
 licant.modules.module("crow",
 	srcdir = "crow/src",
 	sources = [

@@ -8,7 +8,10 @@
 #include <assert.h>
 #include <crow/tower.h>
 #include <crow/protocol.h>
+
 #include <igris/buffer.h>
+#include <igris/event/delegate.h>
+#include <igris/sync/syslock.h>
 
 #include <string>
 #include <vector>
@@ -38,14 +41,19 @@ typedef struct crow_subheader_pubsub_control
 
 namespace crow
 {
-
 	class pubsub_protocol_cls : public crow::protocol
 	{
 	public:
+		struct dlist_head themes = DLIST_HEAD_INIT(themes);
+
 		void incoming(crow::packet *pack) override;
 		pubsub_protocol_cls() : protocol(CROW_PUBSUB_PROTOCOL) {}
 
+		static void start_resubscribe_thread(int millis);
+
 		void(*incoming_handler)(packet*);
+
+		void resubscribe_all();
 	};
 	extern pubsub_protocol_cls pubsub_protocol;
 
@@ -154,6 +162,64 @@ namespace crow
 			                     shps_d->datsz);
 		}
 	} // namespace pubsub
+
+	class subscriber
+	{
+	public:
+		dlist_head lnk;
+
+	public:
+		const uint8_t * addr;
+		uint8_t alen;
+		const char * theme;
+		uint8_t qos;
+		uint16_t ackquant;
+
+		igris::delegate<void, crow::packet*> dlg;
+
+	public:
+		subscriber() = default;
+
+		void subscribe(
+		    const uint8_t * addr,
+		    uint8_t alen,
+		    const char * theme,
+		    uint8_t qos,
+		    uint16_t ackquant,
+		    igris::delegate<void, crow::packet*> dlg
+		)
+		{
+			this->addr = addr;
+			this->alen = alen;
+			this->theme = theme;
+			this->qos = qos;
+			this->ackquant = ackquant;
+			this->dlg = dlg;
+
+			system_lock();
+			dlist_add(&lnk, &pubsub_protocol.themes);
+			system_unlock();
+
+			resubscribe();
+		}
+
+		void subscribe(
+		    const std::vector<uint8_t>& addr,
+		    const char * theme,
+		    uint8_t qos,
+		    uint16_t ackquant,
+		    igris::delegate<void, crow::packet*> dlg
+		) 
+		{
+			subscribe(addr.data(), addr.size(), theme, qos, ackquant, dlg);
+		}
+
+		void resubscribe() 
+		{
+			crow::subscribe(addr, alen, theme, qos, ackquant);
+		}
+		
+	};
 } // namespace crow
 
 #endif

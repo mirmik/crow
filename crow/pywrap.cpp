@@ -68,8 +68,8 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("set_subscribe_handler", [](py::function f) {
 		subscribe_handler_bind = f;
-		crow::pubsub_protocol.incoming_handler = subscribe_handler_bind_invoke;
 		crow::pubsub_protocol.enable();
+		crow::pubsub_protocol.incoming_handler = subscribe_handler_bind_invoke;
 	});
 
 	m.def("compile_address", &compile_address);

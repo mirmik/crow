@@ -2,12 +2,14 @@ import pycrow
 import pycrow.libcrow
 
 from pycrow.libcrow import *
+import time
 
 crowker = None
 
 def spin():
 	while 1:
 		pycrow.libcrow.onestep()
+		time.sleep(0.00001)
 
 def diagnostic(pack=False, live=False):
 	if pack:

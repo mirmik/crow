@@ -1,16 +1,31 @@
 #include <crow/hexer.h>
 #include <crow/pubsub.h>
 
-crow::pubsub_protocol_cls crow::pubsub_protocol;	
+#include <igris/sync/syslock.h>
 
-void crow::pubsub_protocol_cls::incoming(crow::packet * pack) 
+crow::pubsub_protocol_cls crow::pubsub_protocol;
+
+void crow::pubsub_protocol_cls::incoming(crow::packet * pack)
 {
-	if (incoming_handler) 
+	crow::subscriber * sub;
+	igris::buffer theme = crow::pubsub::get_theme(pack);
+
+	if (incoming_handler)
 	{
 		incoming_handler(pack);
 	}
-	else 
+	else
+	{
+		dlist_for_each_entry(sub, &themes, lnk)
+		{
+			if (theme == sub->theme)
+			{
+				sub->dlg(pack);
+				return;
+			}
+		}
 		crow::release(pack);
+	}
 }
 
 void crow::publish(
@@ -94,27 +109,40 @@ std::string crow::environment_crowker()
 
 void crow::publish(
     const std::vector<uint8_t> & addr,
-    const std::string & theme, 
+    const std::string & theme,
     const std::string & data,
-    uint8_t qos, 
-    uint16_t acktime) 
+    uint8_t qos,
+    uint16_t acktime)
 {
 	publish(
-		(const uint8_t*)addr.data(), addr.size(), 
-		theme.c_str(), 
-		data.data(), data.size(),
-		qos, acktime);
+	    (const uint8_t*)addr.data(), addr.size(),
+	    theme.c_str(),
+	    data.data(), data.size(),
+	    qos, acktime);
 }
 
 void crow::subscribe(
-	const std::vector<uint8_t> & addr,
- 	const std::string & theme, 
-	uint8_t qos, uint16_t acktime,
-	uint8_t rqos, uint16_t racktime) 
+    const std::vector<uint8_t> & addr,
+    const std::string & theme,
+    uint8_t qos, uint16_t acktime,
+    uint8_t rqos, uint16_t racktime)
 {
 	subscribe(
-		(const uint8_t*)addr.data(), addr.size(), 
-		theme.c_str(), 
-		qos, acktime,
-		rqos, racktime);
+	    (const uint8_t*)addr.data(), addr.size(),
+	    theme.c_str(),
+	    qos, acktime,
+	    rqos, racktime);
+}
+
+
+void crow::pubsub_protocol_cls::resubscribe_all()
+{
+	crow::subscriber * sub;
+
+	system_lock();
+	dlist_for_each_entry(sub, &themes, lnk)
+	{
+		sub->resubscribe();
+	}
+	system_unlock();
 }
