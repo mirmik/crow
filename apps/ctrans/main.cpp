@@ -45,7 +45,7 @@ int addrsize;
 bool userqos = false;
 uint8_t qos = 0;
 uint8_t type = 0;
-uint8_t ackquant = 200;
+uint16_t ackquant = 200;
 
 bool api = false;
 bool noconsole = false;
@@ -420,7 +420,7 @@ int main(int argc, char *argv[])
 
 		{"qos", required_argument, NULL, 'q'}, // qos отправляемых сообщений. 0 по умолчанию
 		{"type", required_argument, NULL, 't'}, // метка типа отправляемых сообщений
-		{"ackquant", required_argument, NULL, 'a'}, // установка кванта ack
+		{"ackquant", required_argument, NULL, 'A'}, // установка кванта ack
 
 		{"noend", no_argument, NULL, 'x'}, // Блокирует добавление символа конца строки.
 		{"nlout", no_argument, NULL, 'N'}, // Блокирует добавление символа конца строки.
@@ -452,7 +452,7 @@ int main(int argc, char *argv[])
 	int long_index = 0;
 	int opt = 0;
 
-	while ((opt = getopt_long(argc, argv, "uqSEeidvgtB", long_options,
+	while ((opt = getopt_long(argc, argv, "uqSEeidvgtBA", long_options,
 	                          &long_index)) != -1)
 	{
 		switch (opt)
@@ -460,6 +460,10 @@ int main(int argc, char *argv[])
 			case 'q':
 				qos = (uint8_t)atoi(optarg);
 				userqos = true;
+				break;
+
+			case 'A':
+				ackquant = (uint16_t)atoi(optarg);
 				break;
 
 			case 't':
@@ -696,12 +700,19 @@ int main(int argc, char *argv[])
 // Ветка обработки pulse мода.
 	if (pulse != "")
 	{
+		DPRINT(ackquant);
 		auto msgpair = input_do(pulse);
 
 		if (msgpair.second)
 			send_do(msgpair.first);
 
-		crow::onestep();
+		while(crow::has_untravelled() || crow::has_allocated()) 
+		{
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		}
+		
+		cancel_token = true;
+		crowthr.join();
 		exit(0);
 	}
 

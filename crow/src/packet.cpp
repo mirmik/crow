@@ -68,3 +68,9 @@ void crow::packet::revert(struct iovec *vec, size_t veclen)
 	}
 	header.stg = (uint8_t)(header.stg + sz);
 }
+
+
+bool crow::has_allocated() 
+{
+	return !!allocated_count;	
+}

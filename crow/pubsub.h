@@ -77,8 +77,8 @@ namespace crow
 	    const std::vector<uint8_t> & addr,
 	    const std::string & theme,
 	    const std::string & data,
-	    uint8_t qos = 0,
-	    uint16_t acktime = DEFAULT_ACKQUANT);
+	    uint8_t qos,
+	    uint16_t acktime);
 
 
 	//void subscribe(const char *theme,
@@ -87,13 +87,13 @@ namespace crow
 
 	void subscribe(const uint8_t * raddr, uint8_t rlen,
 	               const char *theme,
-	               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
-	               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);
+	               uint8_t qo0, uint16_t acktime,
+	               uint8_t rqos, uint16_t racktime);
 
 	void subscribe(const std::vector<uint8_t> & addr,
 	               const std::string & theme,
-	               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
-	               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);
+	               uint8_t qos, uint16_t acktime,
+	               uint8_t rqos, uint16_t racktime);
 
 	void publish_buffer(const char *theme, const void *data, uint16_t datsz,
 	                    uint8_t qos, uint16_t acktime);
@@ -174,6 +174,8 @@ namespace crow
 		const char * theme;
 		uint8_t qos;
 		uint16_t ackquant;
+		uint8_t rqos;
+		uint16_t rackquant;
 
 		igris::delegate<void, crow::packet*> dlg;
 
@@ -186,6 +188,8 @@ namespace crow
 		    const char * theme,
 		    uint8_t qos,
 		    uint16_t ackquant,
+		    uint8_t rqos,
+		    uint16_t rackquant,
 		    igris::delegate<void, crow::packet*> dlg
 		)
 		{
@@ -194,6 +198,8 @@ namespace crow
 			this->theme = theme;
 			this->qos = qos;
 			this->ackquant = ackquant;
+			this->rqos = rqos;
+			this->rackquant = rackquant;
 			this->dlg = dlg;
 
 			system_lock();
@@ -208,15 +214,17 @@ namespace crow
 		    const char * theme,
 		    uint8_t qos,
 		    uint16_t ackquant,
+		    uint8_t rqos,
+		    uint16_t rackquant,
 		    igris::delegate<void, crow::packet*> dlg
 		) 
 		{
-			subscribe(addr.data(), addr.size(), theme, qos, ackquant, dlg);
+			subscribe(addr.data(), addr.size(), theme, qos, ackquant, rqos, rackquant, dlg);
 		}
 
 		void resubscribe() 
 		{
-			crow::subscribe(addr, alen, theme, qos, ackquant);
+			crow::subscribe(addr, alen, theme, qos, ackquant, rqos, rackquant);
 		}
 		
 	};

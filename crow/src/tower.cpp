@@ -649,3 +649,12 @@ void crow::spin()
 		crow::onestep();
 	}
 }
+
+bool crow::has_untravelled() 
+{
+	return ! (
+		dlist_empty(&crow_travelled) &&
+		dlist_empty(&crow_outters) &&
+		dlist_empty(&crow_incoming)
+	);
+}

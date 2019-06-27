@@ -128,6 +128,10 @@ namespace crow
 	void diagnostic(const char *notation, crow::packet *pack);
 
 	void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
+
+	extern int allocated_count;
+	bool has_allocated();
+
 } // namespace crow
 
 /**
