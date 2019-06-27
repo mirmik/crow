@@ -700,7 +700,6 @@ int main(int argc, char *argv[])
 // Ветка обработки pulse мода.
 	if (pulse != "")
 	{
-		DPRINT(ackquant);
 		auto msgpair = input_do(pulse);
 
 		if (msgpair.second)
