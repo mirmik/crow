@@ -28,13 +28,13 @@ def subscribe_handler_impl(packet):
 	thm = packet.theme()
 	subs[thm](packet)
 
-def subscribe(theme, handler, **kwargs):
+def subscribe(theme, handler, qos=0, ackquant=200, rqos=0, rackquant=200):
 	subs[theme] = handler
 
 	if not subs_init:
 		pycrow.libcrow.set_subscribe_handler(subscribe_handler_impl)
 
-	return pycrow.libcrow.subscribe(crowker, theme, **kwargs)
+	return pycrow.libcrow.subscribe(crowker, theme, qos, ackquant, rqos, rackquant)
 
 
 def use_environment_crowker():

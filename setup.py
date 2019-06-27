@@ -19,6 +19,8 @@ licant.cxx_objects("crow-objects",
 
 		"nos",
 		"igris",
+		"igris.syslock",
+		"igris.dprint",
 
 		("igris.ctrobj", "linux")
 	] 
