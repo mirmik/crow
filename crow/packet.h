@@ -59,7 +59,7 @@ namespace crow
 								///< зависимых протоколов.
 		struct crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
 		uint16_t last_request_time; ///< @todo
-		uint8_t ackcount;			///< @todo
+		uint16_t _ackcount;			///< @todo
 		uint8_t refs;
 		union {
 			uint8_t flags; ///< Местные флаги
@@ -105,6 +105,19 @@ namespace crow
 		{
 			return header.flen;
 		};
+
+		void type(uint8_t t) { header.f.type = t; }
+		void qos(uint8_t q) { header.qos = q; }
+		void ackquant(uint16_t a) { header.ackquant = a; }
+
+		uint8_t type() { return header.f.type; }
+		uint8_t qos() { return header.qos; }
+		uint16_t ackquant() { return header.ackquant; }
+
+		void ackcount(uint16_t c) { _ackcount = c; }
+		uint16_t ackcount() { return _ackcount; }
+
+		void set_infinite_ack() { _ackcount = 0xFFFF; }
 	}; //На самом деле, он не должен быть packed.
 	//__attribute__((packed));
 
@@ -132,6 +145,8 @@ namespace crow
 	extern int allocated_count;
 	bool has_allocated();
 
+	crow::packet * make_packet_v(const void *addr, uint8_t asize,
+	    const struct iovec *vec, size_t veclen);	
 } // namespace crow
 
 /**

@@ -37,6 +37,7 @@
 
 #include <unistd.h>
 
+bool infinite = false;
 bool cancel_token = false;
 bool debug_mode = false;
 
@@ -299,9 +300,23 @@ void send_do(const std::string message)
 			break;
 
 		case protoopt_e::PROTOOPT_PUBLISH:
-			crow::publish(addr, (uint8_t)addrsize, theme.c_str(),
-			              message.data(), message.size(),
-			              qos, ackquant);
+			//crow::publish(addr, (uint8_t)addrsize, theme.c_str(),
+			//              message.data(), message.size(),
+			//              qos, ackquant);
+			{
+				crow::packet * pack = crow::make_publish_packet(
+					addr, (uint8_t)addrsize, 
+					theme.c_str(),
+			        message.data(), message.size());
+				
+				pack->qos(qos);
+				pack->ackquant(ackquant);
+				if (infinite)
+					pack->set_infinite_ack();
+
+				crow::travel(pack);
+			}
+
 			break;
 
 		case protoopt_e::PROTOOPT_CHANNEL:
@@ -422,6 +437,7 @@ int main(int argc, char *argv[])
 		{"qos", required_argument, NULL, 'q'}, // qos отправляемых сообщений. 0 по умолчанию
 		{"type", required_argument, NULL, 't'}, // метка типа отправляемых сообщений
 		{"ackquant", required_argument, NULL, 'A'}, // установка кванта ack
+		{"infinite", no_argument, NULL, 'I'},
 
 		{"noend", no_argument, NULL, 'x'}, // Блокирует добавление символа конца строки.
 		{"nlout", no_argument, NULL, 'N'}, // Блокирует добавление символа конца строки.
@@ -453,7 +469,7 @@ int main(int argc, char *argv[])
 	int long_index = 0;
 	int opt = 0;
 
-	while ((opt = getopt_long(argc, argv, "uqSEeidvgtBA", long_options,
+	while ((opt = getopt_long(argc, argv, "uqSEeiIdvgtBA", long_options,
 	                          &long_index)) != -1)
 	{
 		switch (opt)
@@ -469,6 +485,10 @@ int main(int argc, char *argv[])
 
 			case 't':
 				type = (uint8_t)atoi(optarg);
+				break;
+
+			case 'I':
+				infinite = true;
 				break;
 
 			case 'u':

@@ -28,6 +28,35 @@ void crow::pubsub_protocol_cls::incoming(crow::packet * pack)
 	}
 }
 
+crow::packet* crow::make_publish_packet(
+    const uint8_t * raddr, uint8_t rlen,
+    const char *theme, 
+    const void *data, uint16_t dlen)
+{
+	struct crow_subheader_pubsub subps;
+	struct crow_subheader_pubsub_data subps_d;
+
+	subps.type = PUBLISH;
+	subps.thmsz = (uint8_t)strlen(theme);
+	subps_d.datsz = dlen;
+
+	struct iovec iov[4] =
+	{
+		{&subps, sizeof(subps)},
+		{&subps_d, sizeof(subps_d)},
+		{(void *)theme, subps.thmsz},
+		{(void *)data, subps_d.datsz},
+	};
+
+	auto pack = crow::make_packet_v(raddr, rlen, iov, 4);
+	if (!pack)
+		return nullptr;
+
+	pack->type(CROW_PUBSUB_PROTOCOL);
+
+	return pack;
+}
+
 void crow::publish(
     const uint8_t * raddr, uint8_t rlen,
     const char *theme, const void *data, uint16_t dlen,

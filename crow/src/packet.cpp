@@ -17,7 +17,7 @@ void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
 	dlist_init(&pack->lnk);
 	dlist_init(&pack->ulnk);
 	pack->ingate = ingate;
-	pack->ackcount = 0;
+	pack->ackcount(5);
 	pack->flags = 0;
 	pack->refs = 0;
 }
@@ -74,3 +74,37 @@ bool crow::has_allocated()
 {
 	return !!allocated_count;	
 }
+
+crow::packet * crow::make_packet_v(const void *addr, uint8_t asize,
+    const struct iovec *vec, size_t veclen) 
+{
+	size_t dsize = 0;
+	const struct iovec *it = vec;
+	const struct iovec *const eit = vec + veclen;
+
+	for (; it != eit; ++it)
+	{
+		dsize += it->iov_len;
+	}
+
+	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
+	if (pack == nullptr)
+		return nullptr;
+
+	//pack->header.f.type = type & 0x1F;
+	//pack->header.qos = qos;
+	//pack->header.ackquant = ackquant;
+	
+	memcpy(pack->addrptr(), addr, asize);
+
+	it = vec;
+	char *dst = pack->dataptr();
+
+	for (; it != eit; ++it)
+	{
+		memcpy(dst, it->iov_base, it->iov_len);
+		dst += it->iov_len;
+	}
+
+	return pack;
+}	

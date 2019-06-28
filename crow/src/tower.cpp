@@ -566,7 +566,10 @@ static inline void crow_onestep_outers_stage()
 		{
 			dlist_del_init(&pack->lnk);
 
-			if (++pack->ackcount == 5)
+			if (pack->_ackcount != 0xFFFF)
+				--pack->_ackcount;
+
+			if (pack->_ackcount == 0)
 			{
 				crow_tower_release(pack);
 				crow_undelivered(pack);
@@ -609,7 +612,10 @@ static inline void crow_onestep_incoming_stage()
 
 		if (curtime - pack->last_request_time > pack->header.ackquant)
 		{
-			if (++pack->ackcount == 5)
+			if (pack->_ackcount != 0xFFFF)
+				--pack->_ackcount;
+
+			if (pack->_ackcount == 0)
 			{
 				crow_utilize(pack);
 			}

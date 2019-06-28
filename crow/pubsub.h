@@ -80,6 +80,10 @@ namespace crow
 	    uint8_t qos,
 	    uint16_t acktime);
 
+	crow::packet * make_publish_packet(
+		const uint8_t * raddr, uint8_t rlen,
+	    const char* theme,
+	    const void* data, uint16_t dsize);
 
 	//void subscribe(const char *theme,
 	//               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
