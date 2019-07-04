@@ -11,8 +11,9 @@
 #include <vector>
 #endif
 
-#define CROW_HEXER_MORE3_DOT -1
-#define CROW_HEXER_ODD_GRID -2
+#define CROW_HEXER_UNDEFINED_SYMBOL -1
+#define CROW_HEXER_MORE3_DOT -4
+#define CROW_HEXER_ODD_GRID -5
 
 __BEGIN_DECLS
 
@@ -74,13 +75,15 @@ namespace crow
 		if (len == CROW_HEXER_ODD_GRID)
 			dprln("crow::hexer: odd symbols after #");
 
+		if (len == CROW_HEXER_UNDEFINED_SYMBOL)
+			dprln("crow::hexer: undefined symbol");
+
 		if (len < 0)
 			return {};
 
 		out.resize(len);
 		return out;
 	}
-
 }
 
 #endif

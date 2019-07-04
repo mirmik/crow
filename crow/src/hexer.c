@@ -70,11 +70,18 @@ int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
 				}
 			}
 			break;
+			case '@':
+				while (isalpha(*++it))
+				{
+					*dst++ = *it;
+					++sz;
+				}
+				break;
 			case '_':
 				++it;
 				break;
 			default:
-				return -1;
+				return CROW_HEXER_UNDEFINED_SYMBOL;
 		}
 	}
 
