@@ -36,6 +36,7 @@ licant.modules.module("crow",
 		"crow.allocator",
 		"crow.time",
 		"crow.include",
+		"crow.threads"
 
 	#	"igris.include",
 	#	"igris.syslock",

@@ -21,6 +21,20 @@ void crow::start_thread()
 	thr.detach();
 }
 
+void crow::start_spin()
+{
+	DTRACE();
+	std::thread thr([]()
+	{
+		while (1)
+		{
+			crow::onestep();
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		};
+	});
+	thr.detach();
+}
+
 void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
 {
 	DTRACE();

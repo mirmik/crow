@@ -64,7 +64,9 @@ namespace crow
 	void onestep_travel_only();
 	void spin();
 
+	[[deprecated]]
 	void start_thread();
+	void start_spin();
 
 	bool has_untravelled();
 	void print_list_counts();

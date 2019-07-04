@@ -25,8 +25,9 @@ __END_DECLS
 
 
 #ifdef __cplusplus
+[[deprecated]]
 static inline
-std::vector<uint8_t> compile_address(const std::string& in) 
+std::vector<uint8_t> compile_address(const std::string& in)
 {
 	std::vector<uint8_t> out;
 	out.resize(in.size());
@@ -36,4 +37,20 @@ std::vector<uint8_t> compile_address(const std::string& in)
 
 	return out;
 }
+
+namespace crow
+{
+	static inline
+	std::vector<uint8_t> address(const std::string& in)
+	{
+		std::vector<uint8_t> out;
+		out.resize(in.size());
+
+		int len = hexer_s((uint8_t*)out.data(), in.size(), in.data());
+		out.resize(len);
+
+		return out;
+	}
+}
+
 #endif
