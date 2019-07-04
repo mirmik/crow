@@ -4,10 +4,15 @@
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
+#include <igris/dprint.h>
+
 #ifdef __cplusplus
 #include <string>
 #include <vector>
 #endif
+
+#define CROW_HEXER_MORE3_DOT -1
+#define CROW_HEXER_ODD_GRID -2
 
 __BEGIN_DECLS
 
@@ -47,10 +52,35 @@ namespace crow
 		out.resize(in.size());
 
 		int len = hexer_s((uint8_t*)out.data(), in.size(), in.data());
-		out.resize(len);
+		
+		if (len < 0)
+			return {};
 
+		out.resize(len);
 		return out;
 	}
+
+	static inline
+	std::vector<uint8_t> address_warned(const std::string& in)
+	{
+		std::vector<uint8_t> out;
+		out.resize(in.size());
+
+		int len = hexer_s((uint8_t*)out.data(), in.size(), in.data());
+		
+		if (len == CROW_HEXER_MORE3_DOT)
+			dprln("crow::hexer: more then three symbols after dot.");
+
+		if (len == CROW_HEXER_ODD_GRID)
+			dprln("crow::hexer: odd symbols after #");
+
+		if (len < 0)
+			return {};
+
+		out.resize(len);
+		return out;
+	}
+
 }
 
 #endif

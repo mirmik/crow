@@ -41,8 +41,9 @@ bool infinite = false;
 bool cancel_token = false;
 bool debug_mode = false;
 
-uint8_t addr[128];
+uint8_t* addr = nullptr;
 int addrsize;
+std::vector<uint8_t> address;
 
 bool userqos = false;
 uint8_t qos = 0;
@@ -640,7 +641,16 @@ int main(int argc, char *argv[])
 // Определение целевого адреса
 	if (optind < argc)
 	{
-		addrsize = hexer(addr, 128, argv[optind], strlen(argv[optind]));
+		//addrsize = hexer(addr, 128, argv[optind], strlen(argv[optind]));
+		address = crow::address_warned(argv[optind]);
+		if (address.size() == 0)
+		{
+			nos::println("address error");
+			exit(0);
+		}
+
+		addr = address.data();
+		addrsize = address.size();
 
 		if (addrsize < 0)
 		{

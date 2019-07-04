@@ -29,7 +29,7 @@ int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
 				*dst++ = byte;
 
 				if (cnt > 3) 
-					dprln("Warn: crow::hexer: more then three symbols after dot.");
+					return CROW_HEXER_MORE3_DOT;
 			}
 			break;
 			case ':':
@@ -66,6 +66,7 @@ int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
 				{
 					*dst++ = high << 4;
 					++sz;
+					return CROW_HEXER_ODD_GRID;
 				}
 			}
 			break;
