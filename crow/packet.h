@@ -95,7 +95,7 @@ namespace crow
 		uint8_t *addrptr() { return (uint8_t *)(&header + 1); }
 		uint8_t addrsize() { return header.alen; }
 
-		char *dataptr() { return (char *)(&header + 1) + header.alen; }
+		char *dataptr() { return (char*)(addrptr() + addrsize()); }
 		uint16_t datasize()
 		{
 			return (uint16_t)(header.flen - header.alen - sizeof(crow::header));
