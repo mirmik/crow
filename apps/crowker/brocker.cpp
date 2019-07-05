@@ -41,7 +41,7 @@ void brocker::publish(const std::string& theme, const std::string& data)
 	if (brocker_info || log_publish)
 	{
 		nos::fprintln("publish: t:{} s:{} d:{}",
-            theme, subs_count, igris::dstring(data));
+		              theme, subs_count, igris::dstring(data));
 	}
 
 }
@@ -77,7 +77,7 @@ void brocker::theme::publish(const std::string &data)
 {
 	for (auto * sub : subs)
 	{
-		sub->publish(name, data);
+		sub->publish(name, data, sub->thms[this].opts);
 	}
 
 	/*struct crow_subheader_pubsub subps;
@@ -99,8 +99,10 @@ void brocker::theme::publish(const std::string &data)
 	}*/
 }
 
-void brocker::subscribers::crow::publish(const std::string & theme, const std::string & data)
+void brocker::subscribers::crow::publish(const std::string & theme, const std::string & data, options * opts)
 {
+	crow_options * copts = static_cast<crow_options*>(opts);
+
 	/*struct crow_subheader_pubsub subps;
 	struct crow_subheader_pubsub_data subps_d;
 
@@ -115,11 +117,14 @@ void brocker::subscribers::crow::publish(const std::string & theme, const std::s
 
 	crow::send_v(addr.data(), addr.size(), vec, 4,
 					 CROW_PUBSUB_PROTOCOL, qos, ackquant);*/
-	::crow::publish((uint8_t*)addr.data(), addr.size(), theme.c_str(), data.data(), data.size(), qos, ackquant);
+	::crow::publish((uint8_t*)addr.data(), addr.size(), 
+		theme.c_str(), 
+		data.data(), data.size(), copts->qos, copts->ackquant);
 }
 
-void brocker::subscribers::tcp::publish(const std::string & theme, const std::string & data)
+void brocker::subscribers::tcp::publish(const std::string & theme, const std::string & data, options * opts)
 {
+	assert(opts == nullptr);
 	std::string str = nos::format("p{:f02>}{}{:f06>}{}", theme.size(), theme, data.size(), data);
 	sock->write(str.data(), str.size());
 }
@@ -142,18 +147,34 @@ void brocker::crow_subscribe(uint8_t*addr, int alen,
                              const std::string& theme,
                              uint8_t qos, uint16_t ackquant)
 {
-	if (brocker_info)
-	{
-		nos::fprintln("subscribe(crow): a:{} t:{}", igris::dstring(addr, alen), theme);
-	}
-
 	std::string saddr{(char*)addr, (size_t)alen};
 	brocker::theme * thm = get_theme(theme);
+
 	auto * sub = brocker::subscribers::crow::get(saddr);
+	
+	// TODO: Перенести. Незачем перезаписывать адресс каждый раз.
 	sub->addr = saddr;
-	sub->qos = qos;
-	sub->ackquant = ackquant;
-	thm->link_subscriber(sub);
+
+	if (!thm->has_subscriber(sub))
+	{
+		thm->link_subscriber(sub);
+		brocker::options*& opts = sub->thms[thm].opts;
+		opts = new brocker::subscribers::crow_options{qos, ackquant};
+
+		if (brocker_info)
+			nos::fprintln("new subscribe(crow): a:{} q:{} c:{} t:{}", igris::dstring(addr, alen), qos, ackquant, theme);
+	} else 
+	{
+		brocker::subscribers::crow_options * opts = 
+			static_cast<brocker::subscribers::crow_options *>
+				(sub->thms[thm].opts);
+		if (opts->qos != qos  || opts->ackquant != ackquant) 
+		{
+			opts->qos = qos;
+			opts->ackquant = ackquant;
+			nos::fprintln("change subscribe(crow): a:{} q:{} c:{} t:{}", igris::dstring(addr, alen), qos, ackquant, theme);		
+		}
+	}
 }
 
 void brocker::unlink_theme_subscriber(brocker::theme* thm, brocker::subscriber* sub)
@@ -167,13 +188,16 @@ void brocker::unlink_theme_subscriber(brocker::theme* thm, brocker::subscriber* 
 
 void brocker::tcp_subscribe(const std::string& theme, nos::inet::tcp_socket * sock)
 {
-	if (brocker_info)
-	{
-		nos::fprintln("subscribe(tcp): a:{}", sock->getaddr());
 
-		brocker::theme * thm = get_theme(theme);
-		auto * sub = brocker::subscribers::tcp::get(sock->getaddr());
-		sub->sock = sock;
+	brocker::theme * thm = get_theme(theme);
+	auto * sub = brocker::subscribers::tcp::get(sock->getaddr());
+	sub->sock = sock;
+
+	if (!thm->has_subscriber(sub))
+	{
 		thm->link_subscriber(sub);
+
+		if (brocker_info)
+			nos::fprintln("subscribe(tcp): a:{}", sock->getaddr());
 	}
 }

@@ -18,6 +18,7 @@ extern bool log_publish;
 namespace brocker
 {
 	class subscriber;
+	struct options {};
 
 	class theme
 	{
@@ -27,6 +28,7 @@ namespace brocker
 		std::string name;
 		size_t count_subscribers() { return subs.size(); }
 		void link_subscriber(subscriber* sub) { subs.insert(sub); }
+		bool has_subscriber(subscriber* sub) { return subs.count(sub); }
 		void unlink_subscriber(subscriber* sub) { subs.erase(sub); }
 		void publish(const std::string & data);
 	};
@@ -37,16 +39,23 @@ namespace brocker
 
 	class subscriber
 	{
+		struct themenote 
+		{
+			//theme* thm;
+			options* opts = nullptr;
+			~themenote(){ delete opts; }
+		};
+
 	public:
-		std::set<theme*> thms;
+		std::unordered_map<theme*, themenote> thms;
 		
 		~subscriber() 
 		{
-			for (auto* thm : thms) 
-				unlink_theme_subscriber(thm, this);
+			for (auto& thm : thms) 
+				unlink_theme_subscriber(thm.first, this);
 		}
 
-		virtual void publish(const std::string & theme, const std::string & data) = 0;
+		virtual void publish(const std::string & theme, const std::string & data, options * opts) = 0;
 	};
 
 	namespace subscribers
@@ -55,8 +64,12 @@ namespace brocker
 		{
 		public:
 			std::string addr;
-			uint8_t qos = 0;
-			uint16_t ackquant = 200;
+			
+			//[[deprecated]]
+			//uint8_t qos = 0;
+			
+			//[[deprecated]]
+			//uint16_t ackquant = 200;
 
 			static std::map<std::string, crow> allsubs;
 			static crow * get(const std::string & addr)
@@ -64,7 +77,14 @@ namespace brocker
 				return &allsubs[addr];
 			}
 
-			void publish(const std::string & theme, const std::string & data) override;
+			void publish(const std::string & theme, const std::string & data, options * opts) override;
+		};
+
+		struct crow_options : public options 
+		{
+			uint8_t qos = 0;
+			uint16_t ackquant = 200;
+			crow_options(uint8_t qos, uint16_t ackquant) : qos(qos), ackquant(ackquant) {}
 		};
 
 		class tcp : public subscriber
@@ -78,7 +98,7 @@ namespace brocker
 				return &allsubs[addr];
 			}
 
-			void publish(const std::string & theme, const std::string & data) override;
+			void publish(const std::string & theme, const std::string & data, options * opts) override;
 		};
 	}
 
