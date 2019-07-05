@@ -162,7 +162,7 @@ void brocker::crow_subscribe(uint8_t*addr, int alen,
 		opts = new brocker::subscribers::crow_options{qos, ackquant};
 
 		if (brocker_info)
-			nos::fprintln("new subscribe(crow): a:{} q:{} c:{} t:{}", igris::dstring(addr, alen), qos, ackquant, theme);
+			nos::fprintln("new subscribe(crow): a:{} q:{} c:{} t:{}", igris::hexstring(addr, alen), qos, ackquant, theme);
 	} else 
 	{
 		brocker::subscribers::crow_options * opts = 
@@ -172,7 +172,7 @@ void brocker::crow_subscribe(uint8_t*addr, int alen,
 		{
 			opts->qos = qos;
 			opts->ackquant = ackquant;
-			nos::fprintln("change subscribe(crow): a:{} q:{} c:{} t:{}", igris::dstring(addr, alen), qos, ackquant, theme);		
+			nos::fprintln("change subscribe(crow): a:{} q:{} c:{} t:{}", igris::hexstring(addr, alen), qos, ackquant, theme);		
 		}
 	}
 }
