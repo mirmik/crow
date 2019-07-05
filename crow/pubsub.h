@@ -21,6 +21,7 @@ struct crow_theme;
 #define SUBSCRIBE 0
 #define PUBLISH 1
 #define MESSAGE 2
+//#define GETLAST 3
 
 typedef struct crow_subheader_pubsub
 {
@@ -81,7 +82,7 @@ namespace crow
 	    uint16_t acktime);
 
 	crow::packet * make_publish_packet(
-		const uint8_t * raddr, uint8_t rlen,
+	    const uint8_t * raddr, uint8_t rlen,
 	    const char* theme,
 	    const void* data, uint16_t dsize);
 
@@ -221,16 +222,16 @@ namespace crow
 		    uint8_t rqos,
 		    uint16_t rackquant,
 		    igris::delegate<void, crow::packet*> dlg
-		) 
+		)
 		{
 			subscribe(addr.data(), addr.size(), theme, qos, ackquant, rqos, rackquant, dlg);
 		}
 
-		void resubscribe() 
+		void resubscribe()
 		{
 			crow::subscribe(addr, alen, theme, qos, ackquant, rqos, rackquant);
 		}
-		
+
 	};
 } // namespace crow
 
