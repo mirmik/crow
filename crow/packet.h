@@ -60,13 +60,15 @@ namespace crow
 		struct crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
 		uint16_t last_request_time; ///< @todo
 		uint16_t _ackcount;			///< @todo
-		uint8_t refs;
+		int8_t refs;
 		union {
 			uint8_t flags; ///< Местные флаги
 			struct
 			{
 				uint8_t released_by_world : 1;
 				uint8_t released_by_tower : 1;
+				uint8_t confirmed : 1;
+				uint8_t undelivered : 1;
 			} f;
 		};
 		struct crow::header header;

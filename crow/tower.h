@@ -2,6 +2,7 @@
 #define CROW_TOWER_H
 
 #include <crow/gateway.h>
+#include <crow/packet_ptr.h>
 #include <sys/uio.h>
 
 #include <igris/container/dlist.h>
@@ -36,11 +37,11 @@ namespace crow
 	void enable_live_diagnostic();
 
 	// Отправить пакет.
-	void send(const void *addr, uint8_t asize,
+	crow::packet_ptr send(const void *addr, uint8_t asize,
 	          const char *data, uint16_t dsize,
 	          uint8_t type, uint8_t qos, uint16_t ackquant);
 
-	void send_v(const void *addr, uint8_t asize,
+	crow::packet_ptr send_v(const void *addr, uint8_t asize,
 	            const struct iovec *vec, size_t veclen,
 	            uint8_t type, uint8_t qos, uint16_t ackquant);
 

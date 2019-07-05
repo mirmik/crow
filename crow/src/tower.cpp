@@ -98,7 +98,7 @@ void crow::release(crow::packet *pack)
 	DTRACE();
 	system_lock();
 
-	if (pack->f.released_by_tower)
+	if (pack->f.released_by_tower && pack->refs == 0)
 		crow_utilize(pack);
 	else
 		pack->f.released_by_world = true;
@@ -115,7 +115,7 @@ static void crow_tower_release(crow::packet *pack)
 	//Инициализируем для последуещего освобождения в utilize
 	dlist_del_init(&pack->lnk);
 
-	if (pack->f.released_by_world)
+	if (pack->f.released_by_world && pack->refs == 0)
 		crow_utilize(pack);
 	else
 		pack->f.released_by_tower = true;
@@ -133,7 +133,8 @@ static void utilize_from_outers(crow::packet *pack)
 			pack->header.alen == it->header.alen &&
 			!memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
 		{
-			crow_utilize(it);
+			pack->f.confirmed = 1;
+			crow_tower_release(it);
 			return;
 		}
 	}
@@ -393,26 +394,26 @@ static void crow_transport(crow::packet *pack)
 	crow::travel(pack);
 }
 
-// void crow_send(crow_address& addr, const char* data, size_t len, uint8_t
-// type, uint8_t qos, uint16_t ackquant) {
-void crow::send(const void *addr, uint8_t asize, const char *data,
+crow::packet_ptr crow::send(const void *addr, uint8_t asize, const char *data,
 				uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	DTRACE();
 	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
 	if (pack == nullptr)
-		return;
+		return nullptr;
 
 	pack->header.f.type = type & 0x1F;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
-	// if (addr)
+
 	memcpy(pack->addrptr(), addr, asize);
 	memcpy(pack->dataptr(), data, dsize);
+	
 	crow_transport(pack);
+	return crow::packet_ptr(pack);
 }
 
-void crow::send_v(const void *addr, uint8_t asize, const struct iovec *vec,
+crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const struct iovec *vec,
 				  size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	DTRACE();
@@ -427,7 +428,7 @@ void crow::send_v(const void *addr, uint8_t asize, const struct iovec *vec,
 
 	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
 	if (pack == nullptr)
-		return;
+		return nullptr;
 
 	pack->header.f.type = type & 0x1F;
 	pack->header.qos = qos;
@@ -445,6 +446,7 @@ void crow::send_v(const void *addr, uint8_t asize, const struct iovec *vec,
 	}
 
 	crow_transport(pack);
+	return crow::packet_ptr(pack);
 }
 
 void crow::return_to_tower(crow::packet *pack, uint8_t sts)
@@ -617,6 +619,7 @@ static inline void crow_onestep_incoming_stage()
 
 			if (pack->_ackcount == 0)
 			{
+				pack->f.undelivered = 1;
 				crow_utilize(pack);
 			}
 			else
