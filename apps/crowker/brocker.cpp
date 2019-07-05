@@ -23,15 +23,15 @@ void brocker::erase_tcp_subscriber(const nos::inet::netaddr & addr)
 	subscribers::tcp::allsubs.erase(addr);
 }
 
-void brocker::publish(const std::string& theme, const std::string& data)
+void brocker::publish(std::shared_ptr<std::string> theme, std::shared_ptr<std::string> data)
 {
 	int subs_count;
 
 	try
 	{
-		auto &thm = themes.at(theme);
+		auto &thm = themes.at(*theme);
 		subs_count = thm.count_subscribers();
-		thm.publish(data);
+		thm.publish(*data);
 	}
 	catch (std::exception ex)
 	{
@@ -41,7 +41,7 @@ void brocker::publish(const std::string& theme, const std::string& data)
 	if (brocker_info || log_publish)
 	{
 		nos::fprintln("publish: t:{} s:{} d:{}",
-		              theme, subs_count, igris::dstring(data));
+		              *theme, subs_count, igris::dstring(*data));
 	}
 
 }

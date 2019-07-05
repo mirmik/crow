@@ -16,10 +16,10 @@ namespace crow
 
 	  public:
 		packref(crow::packet *pack_) : pack(pack_) { pack->refs++; }
-
 		packref(const crow::packref &oth) : pack(oth.pack) { pack->refs++; }
-
 		packref(crow::packref &&oth) : pack(oth.pack) { oth.pack = nullptr; }
+
+		crow::packet* get() { return pack; }
 
 		~packref()
 		{

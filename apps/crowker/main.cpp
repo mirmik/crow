@@ -42,12 +42,10 @@ void incoming_pubsub_packet(struct crow::packet *pack)
 	{
 		case PUBLISH:
 			{
-				struct crow_subheader_pubsub_data *shps_d =
-				    get_subheader_pubsub_data(pack);
-
-				auto theme = std::string(crow::packet_pubsub_thmptr(pack), shps->thmsz);
-				auto data =
-				    std::string(crow::packet_pubsub_datptr(pack), shps_d->datsz);
+				auto theme = std::make_shared<std::string>
+					(crow::pubsub::get_theme(pack));
+				auto data = std::make_shared<std::string>
+					(crow::pubsub::get_data(pack));
 
 				brocker::publish(theme, data);
 			}
@@ -72,7 +70,7 @@ void incoming_pubsub_packet(struct crow::packet *pack)
 			break;
 	}
 
-	crow::release(pack);
+	//crow::release(pack);
 }
 
 void undelivered_handler(struct crow::packet *pack)
@@ -142,8 +140,8 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 		uint8_t datasize;
 		uint16_t thmsize;
 
-		std::string theme;
-		std::string data;
+		std::shared_ptr<std::string> theme;
+		std::shared_ptr<std::string> data;
 
 		ret = client.recv(buf, 3, MSG_WAITALL);
 
@@ -165,11 +163,11 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 		if (ret <= 0)
 			break;
 
-		theme = std::string(buf, thmsize);
+		theme = std::make_shared<std::string>(buf, thmsize);
 
 		if ( cmd == 's' )
 		{
-			brocker::tcp_subscribe(theme, &client);
+			brocker::tcp_subscribe(*theme, &client);
 			continue;
 		}
 		else if (cmd == 'p')
@@ -186,7 +184,7 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 			if (ret <= 0)
 				break;
 
-			data = std::string(buf, datasize);
+			data = std::make_shared<std::string>(buf, datasize);
 
 			brocker::publish(theme, data);
 			continue;

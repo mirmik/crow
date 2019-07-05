@@ -106,7 +106,7 @@ namespace brocker
 	void erase_crow_subscriber(const std::string & addr);
 	void erase_tcp_subscriber(const nos::inet::netaddr & addr);
 
-	void publish(const std::string& theme, const std::string& data);
+	void publish(std::shared_ptr<std::string> theme, std::shared_ptr<std::string> data);
 	void crow_subscribe(uint8_t*addr, int alen, const std::string& theme, uint8_t qos, uint16_t ackquant);
 	void tcp_subscribe(const std::string& theme, nos::inet::tcp_socket * sock);
 }
