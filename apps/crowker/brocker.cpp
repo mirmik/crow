@@ -31,7 +31,7 @@ void brocker::publish(std::shared_ptr<std::string> theme, std::shared_ptr<std::s
 	{
 		auto &thm = themes.at(*theme);
 		subs_count = thm.count_subscribers();
-		thm.publish(*data);
+		thm.publish(data);
 	}
 	catch (std::exception ex)
 	{
@@ -73,12 +73,14 @@ void g3_brocker_subscribe(uint8_t *raddr, size_t rlen, const std::string &theme,
 	//}
 }
 */
-void brocker::theme::publish(const std::string &data)
+void brocker::theme::publish(std::shared_ptr<std::string> data)
 {
 	for (auto * sub : subs)
 	{
-		sub->publish(name, data, sub->thms[this].opts);
+		sub->publish(name, *data, sub->thms[this].opts);
 	}
+
+	lastdata = data;
 
 	/*struct crow_subheader_pubsub subps;
 	struct crow_subheader_pubsub_data subps_d;

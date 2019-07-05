@@ -23,6 +23,7 @@ namespace brocker
 	class theme
 	{
 		std::set<subscriber*> subs;
+		std::shared_ptr<std::string> lastdata;
 
 	public:
 		std::string name;
@@ -30,7 +31,7 @@ namespace brocker
 		void link_subscriber(subscriber* sub) { subs.insert(sub); }
 		bool has_subscriber(subscriber* sub) { return subs.count(sub); }
 		void unlink_subscriber(subscriber* sub) { subs.erase(sub); }
-		void publish(const std::string & data);
+		void publish(std::shared_ptr<std::string> data);
 	};
 	extern std::map<std::string, theme> themes;
 	void unlink_theme_subscriber(theme* thm, subscriber* sub);
