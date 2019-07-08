@@ -1,6 +1,7 @@
 #include "binout.h"
 #include "bincommon.h"
 
+#include <crow/print.h>
 #include <map>
 #include <vector>
 

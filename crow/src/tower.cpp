@@ -9,6 +9,7 @@
 
 #include <crow/hexer.h>
 #include <crow/node.h>
+#include <crow/print.h>
 
 //#include <igris/debug/dprint.h>
 
@@ -201,8 +202,14 @@ static void crow_incoming_handler(crow::packet *pack)
 
 	if (crow::user_type_handler)
 		crow::user_type_handler(pack);
-	else
+	else 
+	{
+		if (__diagnostic_enabled) 
+		{
+			crow::diagnostic("wproto", pack);
+		}
 		crow::release(pack);
+	}
 	
 }
 

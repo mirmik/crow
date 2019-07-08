@@ -719,7 +719,15 @@ int main(int argc, char *argv[])
 
 		if (ret)
 		{
-			nos::println("Handshake failure");
+			switch(ret) {
+				
+				case CROW_ERRNO_UNREGISTRED_RID:
+					nos::println("Unregistred remote rid");
+					break;
+				default: 
+					nos::println("Handshake failure");
+					break;
+			}
 
 			cancel_token = true;
 			crowthr.join();

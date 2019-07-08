@@ -6,28 +6,7 @@ from licant.cxx_modules import application
 from licant.libs import include
 import os
 
-licant.libs.include("crow")
-
-#licant.libs.include("nos")
-#licant.libs.include("igris")
-
-#with_msgtype = False
-
-mdepends = [
-	"crow", 
-	"crow.udpgate",
-	"crow.serial_gstuff",
-#	"igris",
-#	("igris.ctrobj", "linux")
-]
-
-#if with_msgtype:
-#	mdepends.append("igris.protocols.msgtype")
-
 defines = ["NOTRACE=1"]
-
-#if with_msgtype:
-#	defines.append("WITH_MSGTYPE=1")
 
 application("ctrans", 
 	sources = [
@@ -37,9 +16,8 @@ application("ctrans",
 		"bincommon.cpp",
 	],
 	defines = defines,
-	mdepends = mdepends,
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline", "igris", "nos"],
+	libs = ["pthread", "readline", "igris", "nos", "crow"],
 	cxxstd = "c++17"
 )
 

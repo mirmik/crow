@@ -22,7 +22,8 @@ licant.cxx_shared_library(target,
 	[
 		"crow",
 		"crow.crowker",
-		"crow.udpgate"
+		"crow.udpgate",
+		"crow.serial_gstuff"
 	],
 
 	cxx_flags = '-fPIC -Wall',

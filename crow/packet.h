@@ -140,8 +140,6 @@ namespace crow
 	void packet_initialization(struct crow::packet *pack,
 							   struct crow::gateway *ingate);
 
-	void diagnostic(const char *notation, crow::packet *pack);
-
 	void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
 
 	extern int allocated_count;
