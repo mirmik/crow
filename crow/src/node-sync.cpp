@@ -1,5 +1,5 @@
 #include <crow/node.h>
-#include <igris/ctrobj/wait.h>
+#include <igris/osinter/wait.h>
 
 int crow::node::waitevent() 
 {
