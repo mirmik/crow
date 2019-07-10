@@ -18,10 +18,31 @@ std::string flt32_output(void *tgt)
 	return nos::format("{}", arg);
 }
 
+std::string int64_output(void *tgt)
+{
+	int64_t arg;
+	memcpy(&arg, tgt, 8);
+	return nos::format("{}", arg);
+}
+
 std::string int32_output(void *tgt)
 {
 	int32_t arg;
 	memcpy(&arg, tgt, 4);
+	return nos::format("{}", arg);
+}
+
+std::string int16_output(void *tgt)
+{
+	int16_t arg;
+	memcpy(&arg, tgt, 2);
+	return nos::format("{}", arg);
+}
+
+std::string int8_output(void *tgt)
+{
+	int8_t arg;
+	memcpy(&arg, tgt, 1);
 	return nos::format("{}", arg);
 }
 
@@ -33,8 +54,11 @@ std::vector<std::string> binout_format;
 
 std::map<std::string, std::string (*)(void *tgt)> visitor_restore =
 {
-	{"flt32", flt32_output}, 
-	{"int32", int32_output}
+	{"f32", flt32_output}, 
+	{"i64", int64_output},
+	{"i32", int32_output},
+	{"i16", int16_output},
+	{"i8",  int8_output}
 };
 
 void binout_mode_prepare(const std::string& fmt)
