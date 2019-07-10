@@ -8,8 +8,8 @@ import os
 version = "1.0.0"
 
 licant.include("crow", "crow.g.py")
-licant.include("igris")
-licant.include("nos")
+#licant.include("igris")
+#licant.include("nos")
 
 target = "libcrow.{}.so".format(version)
 install_include_path = '/usr/local/include/crow' 
