@@ -182,6 +182,15 @@ crow::packet_ptr crow::travel(crow::packet *pack)
 	return crow::packet_ptr(pack);
 }
 
+void crow::nocontrol_travel(crow::packet *pack)
+{
+	DTRACE();
+	system_lock();
+	dlist_add_tail(&pack->lnk, &crow_travelled);
+	system_unlock();
+	DTRRET();
+}
+
 static void crow_travel_error(crow::packet *pack)
 {
 	DTRACE();

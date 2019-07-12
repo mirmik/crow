@@ -27,6 +27,7 @@ namespace crow
 
 	// Передать пакет в обработку.
 	packet_ptr travel(crow::packet *pack);
+	void nocontrol_travel(crow::packet *pack);
 
 	// Включить трассировку пакетов.
 	void diagnostic_enable();

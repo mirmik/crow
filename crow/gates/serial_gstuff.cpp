@@ -17,7 +17,7 @@ void crow::serial_gstuff::newline_handler()
 	block->revert_gate(id);
 
 	crow::packet_initialization(block, this);
-	crow::travel(block);
+	crow::nocontrol_travel(block);
 }
 
 struct crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
