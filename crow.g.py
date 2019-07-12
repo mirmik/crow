@@ -54,6 +54,7 @@ licant.modules.module("crow.minimal",
 	srcdir = "crow/src",
 	sources = [
 		"packet.cpp",
+		"packet_ptr.cpp",
 		"tower.cpp",
 		"hexer.c"
 	],
