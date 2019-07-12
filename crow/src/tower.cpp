@@ -171,13 +171,15 @@ static void add_to_outters_list(crow::packet *pack)
 	dlist_move_tail(&pack->lnk, &crow_outters);
 }
 
-void crow::travel(crow::packet *pack)
+crow::packet_ptr crow::travel(crow::packet *pack)
 {
 	DTRACE();
 	system_lock();
 	dlist_add_tail(&pack->lnk, &crow_travelled);
 	system_unlock();
 	DTRRET();
+
+	return crow::packet_ptr(pack);
 }
 
 static void crow_travel_error(crow::packet *pack)
@@ -390,7 +392,7 @@ static void crow_do_travel(crow::packet *pack)
 }
 
 uint16_t __seqcounter = 0;
-static void crow_transport(crow::packet *pack)
+static crow::packet_ptr crow_transport(crow::packet *pack)
 {
 	DTRACE();
 	pack->header.stg = 0;
@@ -398,7 +400,8 @@ static void crow_transport(crow::packet *pack)
 	system_lock();
 	pack->header.seqid = __seqcounter++;
 	system_unlock();
-	crow::travel(pack);
+	
+	return crow::travel(pack);
 }
 
 crow::packet_ptr crow::send(const void *addr, uint8_t asize, const char *data,
@@ -416,8 +419,7 @@ crow::packet_ptr crow::send(const void *addr, uint8_t asize, const char *data,
 	memcpy(pack->addrptr(), addr, asize);
 	memcpy(pack->dataptr(), data, dsize);
 	
-	crow_transport(pack);
-	return crow::packet_ptr(pack);
+	return crow_transport(pack);
 }
 
 crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const struct iovec *vec,
@@ -452,8 +454,7 @@ crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const struct iove
 		dst += it->iov_len;
 	}
 
-	crow_transport(pack);
-	return crow::packet_ptr(pack);
+	return crow_transport(pack);
 }
 
 void crow::return_to_tower(crow::packet *pack, uint8_t sts)
@@ -523,7 +524,7 @@ void crow_undelivered(crow::packet* pack)
 
 static inline void crow_onestep_send_stage()
 {
-	DTRACE();
+	//DTRACE();
 	crow::packet *pack;
 
 	system_lock();
@@ -546,12 +547,12 @@ static inline void crow_onestep_send_stage()
 	}
 	system_unlock();
 
-	DTRRET();
+	//DTRRET();
 }
 
 static inline void crow_onestep_outers_stage()
 {
-	DTRACE();
+	//DTRACE();
 
 	crow::packet *pack;
 	crow::packet *n;
@@ -599,7 +600,7 @@ static inline void crow_onestep_outers_stage()
 
 static inline void crow_onestep_incoming_stage()
 {
-	DTRACE();
+	//DTRACE();
 
 	crow::packet *pack;
 	crow::packet *n;
@@ -644,7 +645,7 @@ static inline void crow_onestep_incoming_stage()
 */
 void crow::onestep()
 {
-	DTRACE();
+	//DTRACE();
 
 	// crow::gateway* gate;
 	for (crow::gateway &gate : crow_gateways)

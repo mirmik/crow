@@ -41,5 +41,14 @@ def install():
 		symlinks=False, ignore=shutil.ignore_patterns('*.cpp', '*.c'))
 	
 	print("successfully installed")
+
+@licant.routine(deps=[])
+def uninstall():
+	os.system("rm {}".format(install_library_link))
+	os.system("rm {}".format(install_library_path))
+	
+	shutil.rmtree(install_include_path, True)
+	
+	print("successfully uninstalled")
 	
 licant.ex(target)

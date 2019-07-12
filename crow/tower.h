@@ -26,7 +26,7 @@ namespace crow
 	extern void (*undelivered_handler)(crow::packet *pack);
 
 	// Передать пакет в обработку.
-	void travel(crow::packet *pack);
+	packet_ptr travel(crow::packet *pack);
 
 	// Включить трассировку пакетов.
 	void diagnostic_enable();
