@@ -4,7 +4,8 @@
 #include <pybind11/stl.h>
 
 #include <crow/gates/udpgate.h>
-#include <crow/holders.h>
+//#include <crow/holders.h>
+#include <crow/packet_ptr.h>
 #include <crow/tower.h>
 #include <crow/pubsub.h>
 #include <crow/hexer.h>
@@ -17,31 +18,31 @@ namespace py = pybind11;
 py::function incoming_handler_bind;
 void incoming_handler_bind_invoke(crow::packet *pack)
 {
-	crow::packref control(pack);
+	crow::packet_ptr control(pack);
 	incoming_handler_bind(control);
 }
 
 py::function subscribe_handler_bind;
 void subscribe_handler_bind_invoke(crow::packet *pack)
 {
-	crow::pubsub_data_packref control(pack);
+	crow::packet_ptr control(pack);
 	subscribe_handler_bind(control);
 }
 
 PYBIND11_MODULE(libcrow, m)
 {
-	py::class_<packref>(m, "packref")
+	py::class_<packet_ptr>(m, "packet_ptr")
 		.def("rawdata",
-			 [](packref &self) -> py::bytes {
-				 auto buf = self.rawdata();
+			 [](packet_ptr &self) -> py::bytes {
+				 auto buf = self->rawdata();
 				 return {buf.data(), buf.size()};
 			 })
-		.def("addr", [](packref &self) -> py::bytes {
-			auto buf = self.addr();
+		.def("addr", [](packet_ptr &self) -> py::bytes {
+			auto buf = self->addr();
 			return {buf.data(), buf.size()};
 		});
 
-	py::class_<pubsub_packref, packref>(m, "pubsub_packref")
+	/*py::class_<pubsub_packref, packref>(m, "pubsub_packref")
 		.def("theme", [](pubsub_packref &self) -> py::str {
 			auto buf = self.theme();
 			return {buf.data(), buf.size()};
@@ -51,7 +52,7 @@ PYBIND11_MODULE(libcrow, m)
 		.def("data", [](pubsub_data_packref &self) -> py::bytes {
 			auto buf = self.data();
 			return {buf.data(), buf.size()};
-		});
+		});*/
 
 	py::class_<gateway> __gateway__(m, "gateway");
 	py::class_<udpgate>(m, "udpgate", __gateway__);

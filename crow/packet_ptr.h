@@ -33,6 +33,16 @@ namespace crow
 			return pack;
 		}
 
+		crow::packet* operator ->() 
+		{
+			return pack;
+		}
+
+		crow::packet& operator *() 
+		{
+			return *pack;
+		}
+
 		~packet_ptr();
 
 		operator bool() { return pack != nullptr; }
