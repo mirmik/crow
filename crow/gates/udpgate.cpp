@@ -44,7 +44,7 @@ void crow::udpgate::nblock_onestep()
 	crow::packet *pack = block;
 	block = NULL;
 
-	crow::travel(pack);
+	crow::nocontrol_travel(pack);
 }
 
 int crow::udpgate::open(uint16_t port)

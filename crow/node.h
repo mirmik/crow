@@ -7,22 +7,45 @@
 
 #include <igris/container/dlist.h>
 
+#define CROW_NODEPACK_COMMON 0
+#define CROW_NODEPACK_ERROR 1
+
+#define CROW_ERRNO_UNREGISTRED_RID 33
+
 namespace crow
 {
-	class node_protocol_cls : public crow::protocol 
-	{
-	public:
-		void incoming(crow::packet *pack) override;
-		void undelivered(crow::packet *pack) override;
-		node_protocol_cls() : protocol(CROW_NODE_PROTOCOL) {}
-	};
-	extern node_protocol_cls node_protocol;	
-
 	struct node_subheader
 	{
 		uint16_t sid;
 		uint16_t rid;
+		uint8_t type;
 	} __attribute__((packed));
+
+	class node_protocol_cls : public crow::protocol 
+	{
+	private:
+		void send_node_error(crow::packet *pack, int errcode);
+
+	public:
+		void incoming(crow::packet *pack) override;
+		void undelivered(crow::packet *pack) override;
+		
+		node_protocol_cls() : protocol(CROW_NODE_PROTOCOL) {}
+
+		static auto sid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->sid; }
+		static auto rid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->rid; }
+		static auto node_data(crow::packet *pack) 
+		{ 
+			return igris::buffer( 
+			pack->dataptr() + sizeof(node_subheader), 
+			pack->datasize() - sizeof(node_subheader)); 
+		}
+		static auto get_error_code(crow::packet *pack) 
+		{ 
+			return *(int*)(node_data(pack).data()); 
+		}
+	};
+	extern node_protocol_cls node_protocol;	
 	
 	struct node
 	{
@@ -43,6 +66,11 @@ namespace crow
 	void node_send(uint16_t sid, uint16_t rid, const void *raddr, size_t rlen,
 				   const void *data, size_t size, uint8_t qos,
 				   uint16_t ackquant);
+
+	/*void node_subheader_init() 
+	{
+
+	}*/
 }
 
 #endif

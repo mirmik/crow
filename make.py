@@ -8,8 +8,8 @@ import os
 version = "1.0.0"
 
 licant.include("crow", "crow.g.py")
-licant.include("igris")
-licant.include("nos")
+#licant.include("igris")
+#licant.include("nos")
 
 target = "libcrow.{}.so".format(version)
 install_include_path = '/usr/local/include/crow' 
@@ -22,7 +22,8 @@ licant.cxx_shared_library(target,
 	[
 		"crow",
 		"crow.crowker",
-		"crow.udpgate"
+		"crow.udpgate",
+		"crow.serial_gstuff"
 	],
 
 	cxx_flags = '-fPIC -Wall',
@@ -40,5 +41,14 @@ def install():
 		symlinks=False, ignore=shutil.ignore_patterns('*.cpp', '*.c'))
 	
 	print("successfully installed")
+
+@licant.routine(deps=[])
+def uninstall():
+	os.system("rm {}".format(install_library_link))
+	os.system("rm {}".format(install_library_path))
+	
+	shutil.rmtree(install_include_path, True)
+	
+	print("successfully uninstalled")
 	
 licant.ex(target)

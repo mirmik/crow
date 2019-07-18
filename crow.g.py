@@ -29,7 +29,6 @@ licant.modules.module("crow",
 		"alive.cpp",
 		"netkeep.cpp",
 		"print.cpp",
-		"protocol.cpp",
 		"hexer.c",
 	],
 
@@ -55,8 +54,8 @@ licant.modules.module("crow.minimal",
 	srcdir = "crow/src",
 	sources = [
 		"packet.cpp",
+		"packet_ptr.cpp",
 		"tower.cpp",
-		"protocol.cpp",
 		"hexer.c"
 	],
 	mdepends = ["crow.include"]

@@ -40,7 +40,6 @@ namespace crow
 
 		VALUE_GETTER(ackquant, pack->header.ackquant);
 	};
-	//using packet_ptr = packref;
 
 	class node_packref : public packref
 	{
