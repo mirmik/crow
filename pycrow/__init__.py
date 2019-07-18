@@ -2,7 +2,9 @@ import pycrow
 import pycrow.libcrow
 
 from pycrow.libcrow import *
+
 import time
+import threading
 
 crowker = None
 
@@ -10,6 +12,10 @@ def spin():
 	while 1:
 		pycrow.libcrow.onestep()
 		time.sleep(0.00001)
+
+def start_spin():
+	thr = threading.Thread(target = spin, args=())
+	thr.start()
 
 def diagnostic(pack=False, live=False):
 	if pack:
