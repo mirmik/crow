@@ -53,6 +53,12 @@ int crow::udpgate::open(uint16_t port)
 
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
 
+	if (sock < 0) 
+	{
+		perror("udp socket open:");
+		exit(0);
+	}
+
 	struct sockaddr_in ipaddr;
 	socklen_t iplen = sizeof(struct sockaddr_in);
 	memset(&ipaddr, 0, iplen);
