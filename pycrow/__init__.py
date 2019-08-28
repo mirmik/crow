@@ -31,7 +31,8 @@ subs = dict()
 subs_init = False
 
 def subscribe_handler_impl(packet):
-	thm = packet.theme()
+	packet = pycrow.packet_pubsub_ptr(packet)
+	thm = packet.theme().decode('utf-8')
 	subs[thm](packet)
 
 def subscribe(theme, handler, qos=0, ackquant=200, rqos=0, rackquant=200):

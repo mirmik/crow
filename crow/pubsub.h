@@ -241,6 +241,18 @@ namespace crow
 		}
 
 	};
+
+	class packet_pubsub_ptr : public packet_ptr
+	{
+	public:
+		packet_pubsub_ptr(const crow::packet_ptr &oth) : packet_ptr(oth.get())
+		{}
+
+		igris::buffer theme() { return pubsub::get_theme(pack); }
+		igris::buffer data() { return pubsub::get_data(pack); }
+	};
+
+
 } // namespace crow
 
 #endif

@@ -33,6 +33,11 @@ namespace crow
 			return pack;
 		}
 
+		crow::packet* get() const
+		{
+			return pack;
+		}
+
 		crow::packet* operator ->() 
 		{
 			return pack;
@@ -52,7 +57,6 @@ namespace crow
 //		VALUE_GETTER(qos, pack->header.qos);
 //		VALUE_GETTER(ackquant, pack->header.ackquant);
 	};
-
 }
 
 #endif

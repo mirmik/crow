@@ -31,7 +31,7 @@ void subscribe_handler_bind_invoke(crow::packet *pack)
 
 PYBIND11_MODULE(libcrow, m)
 {
-	py::class_<packet_ptr>(m, "packet_ptr")
+	auto pack = py::class_<packet_ptr>(m, "packet_ptr")
 		.def("rawdata",
 			 [](packet_ptr &self) -> py::bytes {
 				 auto buf = self->rawdata();
@@ -41,6 +41,18 @@ PYBIND11_MODULE(libcrow, m)
 			auto buf = self->addr();
 			return {buf.data(), buf.size()};
 		});
+
+	py::class_<packet_pubsub_ptr>(m, "packet_pubsub_ptr", pack)
+		.def(py::init<const packet_ptr&>())
+		.def("theme", [](packet_pubsub_ptr &self) -> py::bytes {
+			auto buf = self.theme();
+			return {buf.data(), buf.size()};
+		})
+		.def("data", [](packet_pubsub_ptr &self) -> py::bytes {
+			auto buf = self.data();
+			return {buf.data(), buf.size()};
+		})
+		;
 
 	/*py::class_<pubsub_packref, packref>(m, "pubsub_packref")
 		.def("theme", [](pubsub_packref &self) -> py::str {
