@@ -69,7 +69,9 @@ namespace crow
 
 	[[deprecated]]
 	void start_thread();
+	
 	void start_spin();
+	void stop_spin();
 
 	bool has_untravelled();
 	void print_list_counts();
