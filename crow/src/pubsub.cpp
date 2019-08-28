@@ -30,7 +30,7 @@ void crow::pubsub_protocol_cls::incoming(crow::packet * pack)
 
 crow::packet* crow::make_publish_packet(
     const uint8_t * raddr, uint8_t rlen,
-    const char *theme, 
+    const char *theme,
     const void *data, uint16_t dlen)
 {
 	struct crow_subheader_pubsub subps;
@@ -147,6 +147,21 @@ void crow::publish(
 	    (const uint8_t*)addr.data(), addr.size(),
 	    theme.c_str(),
 	    data.data(), data.size(),
+	    qos, acktime);
+}
+
+void crow::publish(
+    const std::vector<uint8_t> & addr,
+    const char * theme,
+    const void * data,
+    uint16_t dsize,
+    uint8_t qos,
+    uint16_t acktime)
+{
+	publish(
+	    (const uint8_t*)addr.data(), addr.size(),
+	    theme,
+	    data, dsize,
 	    qos, acktime);
 }
 

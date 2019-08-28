@@ -81,6 +81,14 @@ namespace crow
 	    uint8_t qos,
 	    uint16_t acktime);
 
+	void publish(
+	    const std::vector<uint8_t> & addr,
+	    const char* theme,
+	    const void * data,
+	    uint16_t dsize,
+	    uint8_t qos,
+	    uint16_t acktime);
+
 	crow::packet * make_publish_packet(
 	    const uint8_t * raddr, uint8_t rlen,
 	    const char* theme,
