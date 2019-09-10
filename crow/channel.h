@@ -44,8 +44,9 @@ namespace crow
 
 		dlist_head lnk;	
 		uint16_t rid;
-		void *raddr_ptr;
-		size_t raddr_len;
+		void *raddr_ptr = nullptr;
+		size_t raddr_len = 0;
+		size_t raddr_cap = 0;
 		uint8_t qos;
 		uint16_t ackquant;
 		uint16_t fid = 0;
@@ -54,13 +55,14 @@ namespace crow
 			struct {
 				uint8_t _state : 4;
 				uint8_t dynamic_addr : 1;
+				uint8_t naive_listener : 1;
 			};
 		};
 		incoming_handler_t incoming_handler;
 
-		channel() : lnk(DLIST_HEAD_INIT(lnk)) {};
+		channel() : lnk(DLIST_HEAD_INIT(lnk)) { };
 		channel(incoming_handler_t incoming_handler) : lnk(DLIST_HEAD_INIT(lnk)),
-			incoming_handler(incoming_handler) {}
+			incoming_handler(incoming_handler) { }
 
 		void init(int id, incoming_handler_t incoming_handler)
 		{
@@ -68,6 +70,13 @@ namespace crow
 			crow::link_channel(this, id);
 		}
 
+		void set_addr_buffer(char* buf, size_t sz) 
+		{
+			raddr_ptr = buf;
+			raddr_cap = sz;
+		}
+
+		void naive_listener_mode(bool en) { naive_listener = en; } 
 		uint8_t state() { return (uint8_t)_state; }
 
 		void incoming_packet(crow::packet *pack) override;

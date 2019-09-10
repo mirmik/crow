@@ -56,6 +56,9 @@ licant.modules.module("crow.minimal",
 		"packet.cpp",
 		"packet_ptr.cpp",
 		"tower.cpp",
+		"node.cpp",
+		"node-sync.cpp",
+		"channel.cpp",
 		"hexer.c"
 	],
 	mdepends = ["crow.include"]

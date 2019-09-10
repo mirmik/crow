@@ -20,13 +20,16 @@ void crow::channel::incoming_packet(crow::packet *pack)
 	{
 		case crow::Frame::HANDSHAKE_REQUEST:
 			// Кто-то пытается установить с нами связь.
-			if (_state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
+			if (naive_listener || _state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
 			{
 				crow::subheader_handshake *sh_handshake =
 				    crow::get_subheader_handshake(pack);
 				
 				// TODO: перенести аллокацию под адрес в другое место
-				raddr_ptr = malloc(pack->header.alen);
+				//raddr_ptr = malloc(pack->header.alen);
+				if (pack->header.alen > raddr_cap) 
+					return;
+
 				memcpy(raddr_ptr, pack->addrptr(), pack->header.alen);
 				raddr_len = pack->header.alen;
 				rid = sh_node->sid;
@@ -54,7 +57,10 @@ void crow::channel::incoming_packet(crow::packet *pack)
 				    crow::get_subheader_handshake(pack);
 				
 				// TODO: перенести аллокацию под адрес в другое место
-				raddr_ptr = malloc(pack->header.alen);
+				//raddr_ptr = malloc(pack->header.alen);
+				if (pack->header.alen > raddr_cap) 
+					return;
+
 				memcpy(raddr_ptr, pack->addrptr(), pack->header.alen);
 				raddr_len = pack->header.alen;
 				rid = sh_node->sid;

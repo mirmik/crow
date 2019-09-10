@@ -64,6 +64,7 @@ bool bin_input_mode = false;
 
 int acceptorno = -1;
 int channelno = -1;
+int nodeno = -1;
 
 crow::channel channel;
 crow::channel * reverse_channel;
@@ -88,6 +89,7 @@ enum class protoopt_e
 {
 	PROTOOPT_BASIC,
 	PROTOOPT_CHANNEL,
+	PROTOOPT_NODE,
 	PROTOOPT_REVERSE_CHANNEL,
 	PROTOOPT_PUBLISH
 };
@@ -331,6 +333,14 @@ void send_do(const std::string message)
 			}
 			break;
 
+		case protoopt_e::PROTOOPT_NODE:
+			{
+				crow::node_send(1, nodeno, addr, (uint8_t)addrsize,
+			           message.data(), message.size(),
+			           qos, ackquant);
+			}
+			break;
+
 		case protoopt_e::PROTOOPT_REVERSE_CHANNEL:
 			{
 				int ret = reverse_channel->send(message.data(), message.size());
@@ -373,7 +383,15 @@ void incoming_handler(crow::packet *pack)
 			break;
 
 		case CROW_NODE_PROTOCOL:
-			crow::node_protocol.incoming(pack);
+			if (((crow::node_subheader *) pack->dataptr())->rid == 1)
+			{
+				output_do(crow::node_protocol_cls::node_data(pack), pack);
+			}	
+
+			else 
+			{
+				crow::node_protocol.incoming(pack);
+			}
 			return;
 
 		default:
@@ -393,6 +411,10 @@ void print_channel_message(crow::channel* ch, crow::packet* pack)
 crow::channel* acceptor_create_channel()
 {
 	crow::channel * ch = new crow::channel(print_channel_message);
+	
+	// TODO: Утечка памяти. Удалять буффер на закрытии канала.
+	ch->set_addr_buffer((char*)malloc(128), 128);
+	
 	reverse_channel = ch;
 	return ch;
 }
@@ -454,6 +476,7 @@ int main(int argc, char *argv[])
 
 		{"chlisten", required_argument, NULL, 'w'},
 		{"channel", required_argument, NULL, 'c'},
+		{"node", required_argument, NULL, 'M'},
 		{"pipeline", required_argument, NULL, 'e'},
 
 		{"subscribe", required_argument, NULL, 'l'},
@@ -589,6 +612,11 @@ int main(int argc, char *argv[])
 				protoopt = protoopt_e::PROTOOPT_CHANNEL;
 				break;
 
+			case 'M':
+				nodeno = atoi(optarg);
+				protoopt = protoopt_e::PROTOOPT_NODE;
+				break;
+
 			case 'e':
 				pipelinecmd = optarg;
 				break;
@@ -715,6 +743,8 @@ int main(int argc, char *argv[])
 			qos = 2;
 
 		channel.init(33, print_channel_message);
+		channel.set_addr_buffer((char*)malloc(128), 128);
+
 		int ret = channel.connect(addr, addrsize, channelno, qos, ackquant);
 
 		if (ret)

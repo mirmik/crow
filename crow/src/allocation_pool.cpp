@@ -12,7 +12,6 @@ int crow::allocated_count = 0;
 void crow::engage_packet_pool(void *zone, size_t zonesize, size_t elsize)
 {
 	DTRACE();
-	dprptrln(zone);
 	_crow_packet_pool.init(zone, zonesize, elsize);
 }
 
