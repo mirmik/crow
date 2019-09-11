@@ -1,5 +1,5 @@
 #include <crow/hexer.h>
-#include <crow/pubsub.h>
+#include <crow/proto/pubsub.h>
 
 #include <igris/sync/syslock.h>
 

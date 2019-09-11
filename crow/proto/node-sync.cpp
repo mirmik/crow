@@ -1,4 +1,4 @@
-#include <crow/node.h>
+#include <crow/proto/node.h>
 #include <igris/osinter/wait.h>
 
 int crow::node::waitevent() 

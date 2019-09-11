@@ -1,7 +1,7 @@
 #ifndef CROW_CHANNEL_H
 #define CROW_CHANNEL_H
 
-#include <crow/node.h>
+#include <crow/proto/node.h>
 
 #include <igris/buffer.h>
 #include <igris/event/delegate.h>

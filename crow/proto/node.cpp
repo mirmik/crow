@@ -1,4 +1,4 @@
-#include <crow/node.h>
+#include <crow/proto/node.h>
 #include <crow/defs.h>
 #include <crow/tower.h>
 
@@ -17,10 +17,31 @@ void crow::node_send(uint16_t sid, uint16_t rid, const void *raddr,
 	sh.sid = sid;
 	sh.rid = rid;
 	sh.type = CROW_NODEPACK_COMMON;
+	sh.namerid = false;
 
 	struct iovec iov[2] = {{(void *)&sh, sizeof(sh)}, {(void *)data, size}};
 
 	crow::send_v(raddr, rsize, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
+}
+
+void crow::node_send(uint16_t sid, const char* rid, const void *raddr,
+                     size_t rsize, const void *data, size_t size, uint8_t qos,
+                     uint16_t ackquant)
+{
+	crow::node_subheader sh;
+	sh.sid = sid;
+	sh.rid = strlen(rid);
+	sh.type = CROW_NODEPACK_COMMON;
+	sh.namerid = true;
+
+	struct iovec iov[3] =
+	{
+		{(void *)&sh, sizeof(sh)},
+		{(void *)rid, sh.rid},
+		{(void *)data, size}
+	};
+
+	crow::send_v(raddr, rsize, iov, 3, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
 void crow::node_protocol_cls::send_node_error(
@@ -47,13 +68,30 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 	crow::node * srv = nullptr;
 
-	for (crow::node &srvs : crow::nodes)
+	if (sh->namerid == 0)
 	{
-		if (srvs.id == sh->rid)
+		for (crow::node &srvs : crow::nodes)
 		{
-			srv = &srvs;
-			break;
+			if (srvs.id == sh->rid)
+			{
+				srv = &srvs;
+				break;
+			}
 		}
+	}
+
+	else // named node request
+	{
+		igris::buffer name = node_protocol_cls::get_name(pack);
+
+		for (crow::node &srvs : crow::nodes)
+		{
+			if (name == srvs.mnem)
+			{
+				srv = &srvs;
+				break;
+			}
+		}	
 	}
 
 	if (srv == nullptr)
@@ -121,7 +159,7 @@ void crow::system_node_cls::incoming_packet(crow::packet *pack)
 			sprintf(buf, "%d %s %s\n", srvs.id, srvs.typestr(), srvs.mnem);
 
 			node_send(0, sh->sid, pack->addrptr(), pack->addrsize(),
-			buf, strlen(buf), 0, 200);
+			          buf, strlen(buf), 0, 200);
 		}
 	}
 }

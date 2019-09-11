@@ -1,5 +1,5 @@
-#include <crow/acceptor.h>
-#include <crow/channel.h>
+#include <crow/proto/acceptor.h>
+#include <crow/proto/channel.h>
 #include <crow/tower.h>
 
 #include <nos/trace.h>

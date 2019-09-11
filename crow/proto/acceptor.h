@@ -1,8 +1,8 @@
 #ifndef CROW_ACCEPTOR_H
 #define CROW_ACCEPTOR_H
 
-#include <crow/node.h>
-#include <crow/channel.h>
+#include <crow/proto/node.h>
+#include <crow/proto/channel.h>
 
 namespace crow
 {

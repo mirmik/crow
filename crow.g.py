@@ -14,22 +14,22 @@ licant.module("crow.threads", "linux", default=True,
 )
 
 licant.modules.module("crow",
-	srcdir = "crow/src",
+	srcdir = "crow",
 	sources = [
-		"acceptor.cpp",
-		"tower.cpp", 
-		"packet.cpp",
-		"packet_ptr.cpp",
-		"node.cpp",
-		"node-sync.cpp",
-		"channel.cpp",
-		"channel-sync.cpp",
-		"pubsub.cpp",
-		"query.cpp",
-		"alive.cpp",
-		"netkeep.cpp",
-		"print.cpp",
-		"hexer.c",
+		"src/tower.cpp", 
+		"src/packet.cpp",
+		"src/packet_ptr.cpp",
+		"src/alive.cpp",
+		"src/netkeep.cpp",
+		"src/print.cpp",
+		"src/hexer.c",
+	
+		"proto/acceptor.cpp",
+		"proto/node.cpp",
+		"proto/node-sync.cpp",
+		"proto/channel.cpp",
+		"proto/channel-sync.cpp",
+		"proto/pubsub.cpp",
 	],
 
 	mdepends = [
@@ -51,15 +51,15 @@ licant.module("crow.crowker",
 )
 
 licant.modules.module("crow.minimal",
-	srcdir = "crow/src",
+	srcdir = "crow",
 	sources = [
-		"packet.cpp",
-		"packet_ptr.cpp",
-		"tower.cpp",
-		"node.cpp",
-		"node-sync.cpp",
-		"channel.cpp",
-		"hexer.c"
+		"src/packet.cpp",
+		"src/packet_ptr.cpp",
+		"src/tower.cpp",
+		"proto/node.cpp",
+		"proto/node-sync.cpp",
+		"proto/channel.cpp",
+		"src/hexer.c"
 	],
 	mdepends = ["crow.include"]
 )
@@ -91,7 +91,7 @@ licant.modules.module("crow.serial_gstuff",
 ####################################PROTOCOLS########################################
 
 licant.module("crow.protocol.pubsub",
-	sources = ["crow/src/pubsub.cpp"]
+	sources = ["crow/proto/pubsub.cpp"]
 )
 
 #####################################################################################

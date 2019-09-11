@@ -2,9 +2,9 @@
 #include <crow/gates/udpgate.h>
 
 #include <crow/tower.h>
-#include <crow/pubsub.h>
-#include <crow/channel.h>
-#include <crow/acceptor.h>
+#include <crow/proto/pubsub.h>
+#include <crow/proto/channel.h>
+#include <crow/proto/acceptor.h>
 
 #include <crow/hexer.h>
 
@@ -65,6 +65,7 @@ bool bin_input_mode = false;
 int acceptorno = -1;
 int channelno = -1;
 int nodeno = -1;
+std::string nodename = "";
 
 crow::channel channel;
 crow::channel * reverse_channel;
@@ -199,7 +200,7 @@ void output_do(igris::buffer data, crow::packet* pack)
 			BUG();
 	}
 
-	if (nlout) 
+	if (nlout)
 	{
 		write(DATAOUTPUT_FILENO, "\n", 1);
 	}
@@ -308,10 +309,10 @@ void send_do(const std::string message)
 			//              qos, ackquant);
 			{
 				crow::packet * pack = crow::make_publish_packet(
-					addr, (uint8_t)addrsize, 
-					theme.c_str(),
-			        message.data(), message.size());
-				
+				                          addr, (uint8_t)addrsize,
+				                          theme.c_str(),
+				                          message.data(), message.size());
+
 				pack->qos(qos);
 				pack->ackquant(ackquant);
 				if (infinite)
@@ -335,9 +336,17 @@ void send_do(const std::string message)
 
 		case protoopt_e::PROTOOPT_NODE:
 			{
-				crow::node_send(1, nodeno, addr, (uint8_t)addrsize,
-			           message.data(), message.size(),
-			           qos, ackquant);
+				if (nodename != "")
+					crow::node_send(1, nodename.c_str(), addr, (uint8_t)addrsize,
+					                message.data(), message.size(),
+					                qos, ackquant);
+
+
+
+				else
+					crow::node_send(1, nodeno, addr, (uint8_t)addrsize,
+					                message.data(), message.size(),
+					                qos, ackquant);
 			}
 			break;
 
@@ -386,9 +395,9 @@ void incoming_handler(crow::packet *pack)
 			if (((crow::node_subheader *) pack->dataptr())->rid == 1)
 			{
 				output_do(crow::node_protocol_cls::node_data(pack), pack);
-			}	
+			}
 
-			else 
+			else
 			{
 				crow::node_protocol.incoming(pack);
 			}
@@ -411,10 +420,10 @@ void print_channel_message(crow::channel* ch, crow::packet* pack)
 crow::channel* acceptor_create_channel()
 {
 	crow::channel * ch = new crow::channel(print_channel_message);
-	
+
 	// TODO: Утечка памяти. Удалять буффер на закрытии канала.
 	ch->set_addr_buffer((char*)malloc(128), 128);
-	
+
 	reverse_channel = ch;
 	return ch;
 }
@@ -613,7 +622,11 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'M':
-				nodeno = atoi(optarg);
+				if (isalpha(*optarg))
+					nodename = optarg;
+				else
+					nodeno = atoi(optarg);
+
 				protoopt = protoopt_e::PROTOOPT_NODE;
 				break;
 
@@ -725,7 +738,7 @@ int main(int argc, char *argv[])
 		while (1)
 		{
 			crow::onestep();
-			std::this_thread::sleep_for(std::chrono::microseconds(1));			
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
 
 			if (cancel_token)
 			{
@@ -749,12 +762,13 @@ int main(int argc, char *argv[])
 
 		if (ret)
 		{
-			switch(ret) {
-				
+			switch (ret)
+			{
+
 				case CROW_ERRNO_UNREGISTRED_RID:
 					nos::println("Unregistred remote rid");
 					break;
-				default: 
+				default:
 					nos::println("Handshake failure");
 					break;
 			}
@@ -778,7 +792,7 @@ int main(int argc, char *argv[])
 		if (msgpair.second)
 			send_do(msgpair.first);
 
-		while(crow::has_untravelled() || crow::has_allocated()) 
+		while (crow::has_untravelled() || crow::has_allocated())
 		{
 			//PRINT(crow::has_untravelled());
 			//PRINT(crow::has_allocated());

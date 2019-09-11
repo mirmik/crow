@@ -2,7 +2,7 @@
 #define CROW_NODE_H
 
 #include <crow/packet.h>
-#include <crow/protocol.h>
+#include <crow/proto/protocol.h>
 #include <sys/uio.h>
 
 #include <igris/container/dlist.h>
@@ -18,13 +18,23 @@ namespace crow
 	{
 		uint16_t sid;
 		uint16_t rid;
-		uint8_t type;
+		union
+		{
+			uint8_t flags = 0;
+
+			struct
+			{
+				uint8_t namerid : 1;
+				uint8_t reserved : 3;
+				uint8_t type : 4;
+			};
+		};
 	} __attribute__((packed));
 
 	struct node
 	{
 		struct dlist_head lnk = DLIST_HEAD_INIT(lnk);
-		struct dlist_head waitlnk = DLIST_HEAD_INIT(waitlnk);	
+		struct dlist_head waitlnk = DLIST_HEAD_INIT(waitlnk);
 		uint16_t id = 0;
 		const char* mnem = NULL;
 
@@ -38,17 +48,17 @@ namespace crow
 
 	void link_node(node *srvs, uint16_t id);
 
-	class system_node_cls : public node 
+	class system_node_cls : public node
 	{
 		void incoming_packet(crow::packet *pack) override;
-		
+
 		void undelivered_packet(crow::packet *pack) override
 		{
 			crow::release(pack);
 		}
 	};
 
-	class node_protocol_cls : public crow::protocol 
+	class node_protocol_cls : public crow::protocol
 	{
 	private:
 		void send_node_error(crow::packet *pack, int errcode);
@@ -59,8 +69,8 @@ namespace crow
 	public:
 		void incoming(crow::packet *pack) override;
 		void undelivered(crow::packet *pack) override;
-		
-		node_protocol_cls() : protocol(CROW_NODE_PROTOCOL) 
+
+		node_protocol_cls() : protocol(CROW_NODE_PROTOCOL)
 		{
 			link_node(&system_node, 0);
 			system_node.mnem = "twrinfo";
@@ -68,28 +78,48 @@ namespace crow
 
 		static auto sid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->sid; }
 		static auto rid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->rid; }
-		static auto node_data(crow::packet *pack) 
-		{ 
-			return igris::buffer( 
-			pack->dataptr() + sizeof(node_subheader), 
-			pack->datasize() - sizeof(node_subheader)); 
+		
+		static auto node_data(crow::packet *pack)
+		{
+			crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
+
+			if (sh->namerid == 0)
+				return igris::buffer(
+					   pack->dataptr() + sizeof(node_subheader),
+					   pack->datasize() - sizeof(node_subheader));
+			else 
+				return igris::buffer(
+						pack->dataptr() + sizeof(node_subheader) + sh->rid,
+						pack->datasize() - sizeof(node_subheader) - sh->rid);
 		}
-		static auto get_error_code(crow::packet *pack) 
-		{ 
-			return *(int*)(node_data(pack).data()); 
+
+		static auto get_name(crow::packet *pack)
+		{
+			crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
+
+			if (sh->namerid == 0)
+				return igris::buffer();
+			else 
+				return igris::buffer(
+					pack->dataptr() + sizeof(node_subheader),
+					sh->rid);
+		}
+
+		static auto get_error_code(crow::packet *pack)
+		{
+			return *(int*)(node_data(pack).data());
 		}
 	};
-	extern node_protocol_cls node_protocol;	
+	extern node_protocol_cls node_protocol;
 	extern igris::dlist<node, &node::lnk> nodes;
 
 	void node_send(uint16_t sid, uint16_t rid, const void *raddr, size_t rlen,
 				   const void *data, size_t size, uint8_t qos,
 				   uint16_t ackquant);
 
-	/*void node_subheader_init() 
-	{
-
-	}*/
+	void node_send(uint16_t sid, const char * rid, const void *raddr, size_t rlen,
+				   const void *data, size_t size, uint8_t qos,
+				   uint16_t ackquant);
 }
 
 #endif

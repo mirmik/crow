@@ -16,9 +16,6 @@ namespace crow
 		virtual void incoming(crow::packet * pack) = 0;
 		virtual void undelivered(crow::packet * pack) { crow::release(pack); }
 		
-		[[deprecated]]
-		void enable(){}
-
 		protocol(int id) : id(id) 
 		{
 			dlist_add_tail(&lnk, &crow::protocols);

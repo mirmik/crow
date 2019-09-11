@@ -1,5 +1,5 @@
-#include <crow/channel.h>
-#include <crow/acceptor.h>
+#include <crow/proto/channel.h>
+#include <crow/proto/acceptor.h>
 #include <crow/tower.h>
 #include <sys/uio.h>
 

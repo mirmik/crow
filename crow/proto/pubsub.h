@@ -1,13 +1,9 @@
-/**
-	@file
-*/
-
 #ifndef CROW_PUBSUB_H
 #define CROW_PUBSUB_H
 
 #include <assert.h>
 #include <crow/tower.h>
-#include <crow/protocol.h>
+#include <crow/proto/protocol.h>
 
 #include <igris/buffer.h>
 #include <igris/event/delegate.h>
