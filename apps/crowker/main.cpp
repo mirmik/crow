@@ -1,5 +1,5 @@
 #include <crow/gates/udpgate.h>
-#include <crow/pubsub.h>
+#include <crow/proto/pubsub.h>
 #include <crow/tower.h>
 #include <crow/hexer.h>
 #include <crow/alive.h>

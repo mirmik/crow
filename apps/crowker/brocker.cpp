@@ -1,6 +1,6 @@
 #include "brocker.h"
 #include <crow/tower.h>
-#include <crow/pubsub.h>
+#include <crow/proto/pubsub.h>
 #include <nos/print.h>
 #include <nos/fprint.h>
 #include <igris/util/dstring.h>
