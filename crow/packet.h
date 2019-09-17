@@ -58,8 +58,8 @@ namespace crow
 		struct dlist_head ulnk; ///< Для подключения в список пользователя и
 								///< зависимых протоколов.
 		struct crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
-		uint16_t last_request_time; ///< @todo
-		uint16_t _ackcount;			///< @todo
+		uint16_t last_request_time; ///< время последней отправки
+		uint16_t _ackcount;			///< счетчик количества попыток отправки
 		int8_t refs;
 		union {
 			uint8_t flags; ///< Местные флаги
