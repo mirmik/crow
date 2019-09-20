@@ -1,7 +1,6 @@
 #include <crow/proto/channel.h>
 #include <crow/proto/acceptor.h>
 #include <crow/tower.h>
-#include <sys/uio.h>
 
 #include <igris/util/bug.h>
 #include <nos/print.h>
@@ -122,7 +121,7 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint
 	sh_handshake.qos = this->qos = qos;
 	sh_handshake.ackquant = this->ackquant = ackquant;
 
-	iovec vec[] =
+	igris::buffer vec[] =
 	{
 		{&sh_node, sizeof(sh_node)},
 		{&sh_channel, sizeof(sh_channel)},
@@ -132,7 +131,7 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint
 	_state = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER;
 
 	//_state = crow::State::CONNECTED;
-	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec),
+	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(igris::buffer),
 	             CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
@@ -152,7 +151,7 @@ void crow::channel::send_handshake_answer()
 	sh_handshake.qos = this->qos;
 	sh_handshake.ackquant = this->ackquant;
 
-	iovec vec[] =
+	igris::buffer vec[] =
 	{
 		{&sh_node, sizeof(sh_node)},
 		{&sh_channel, sizeof(sh_channel)},
@@ -160,7 +159,7 @@ void crow::channel::send_handshake_answer()
 	};
 
 	//_state = crow::State::CONNECTED;
-	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(iovec),
+	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(igris::buffer),
 	             CROW_NODE_PROTOCOL, 2, ackquant);	
 }
 
@@ -181,14 +180,14 @@ int crow::channel::send(const char *data, size_t size)
 	sh_channel.frame_id = this->fid++;
 	sh_channel.ftype = crow::Frame::DATA;
 
-	iovec vec[] =
+	igris::buffer vec[] =
 	{
 		{&sh_node, sizeof(sh_node)},
 		{&sh_channel, sizeof(sh_channel)},
 		{(void *)data, size},
 	};
 
-	crow::send_v(this->raddr_ptr, this->raddr_len, vec, sizeof(vec) / sizeof(iovec),
+	crow::send_v(this->raddr_ptr, this->raddr_len, vec, sizeof(vec) / sizeof(igris::buffer),
 	             CROW_NODE_PROTOCOL, this->qos, this->ackquant);
 
 	return 0;

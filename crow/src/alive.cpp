@@ -12,7 +12,7 @@ void crow::send_alive(const uint8_t* raddr, size_t rlen,
 	header.type = type; // crowker, или обычная башня
 	header.nlen = __netname ? strlen(__netname) : 0;
 
-	struct iovec iov[] =
+	igris::buffer iov[] =
 	{
 		{&header, sizeof(alive_header)},
 		{(void *)__netname, header.nlen},

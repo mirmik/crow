@@ -34,7 +34,7 @@ void crow::udpgate::nblock_onestep()
 
 	crow::packet_initialization(block, this);
 
-	struct iovec vec[3] =
+	igris::buffer vec[3] =
 	{
 		{&id, 1}, {&sender.sin_addr.s_addr, 4}, {&sender.sin_port, 2}
 	};

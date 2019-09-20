@@ -40,7 +40,7 @@ crow::packet* crow::make_publish_packet(
 	subps.thmsz = (uint8_t)strlen(theme);
 	subps_d.datsz = dlen;
 
-	struct iovec iov[4] =
+	const igris::buffer iov[4] =
 	{
 		{&subps, sizeof(subps)},
 		{&subps_d, sizeof(subps_d)},
@@ -69,7 +69,7 @@ void crow::publish(
 	subps.thmsz = (uint8_t)strlen(theme);
 	subps_d.datsz = dlen;
 
-	struct iovec iov[4] =
+	const igris::buffer iov[4] =
 	{
 		{&subps, sizeof(subps)},
 		{&subps_d, sizeof(subps_d)},
@@ -111,7 +111,7 @@ void crow::subscribe(
 	subps_c.qos = rqos;
 	subps_c.ackquant = racktime;
 
-	struct iovec iov[3] =
+	const igris::buffer iov[3] =
 	{
 		{&subps, sizeof(subps)},
 		{&subps_c, sizeof(subps_c)},

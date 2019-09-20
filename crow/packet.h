@@ -8,7 +8,6 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <sys/uio.h>
 
 #include <crow/defs.h>
 #include <igris/datastruct/dlist.h>
@@ -92,7 +91,7 @@ namespace crow
 		igris::buffer addr() { return igris::buffer(addrptr(), addrsize()); }
 
 		void revert_gate(uint8_t gateindex);
-		void revert(struct iovec *vec, size_t veclen);
+		void revert(igris::buffer *vec, size_t veclen);
 
 		uint8_t *addrptr() { return (uint8_t *)(&header + 1); }
 		uint8_t addrsize() { return header.alen; }
@@ -146,7 +145,7 @@ namespace crow
 	bool has_allocated();
 
 	crow::packet * make_packet_v(const void *addr, uint8_t asize,
-	    const struct iovec *vec, size_t veclen);	
+	    const igris::buffer *vec, size_t veclen);	
 } // namespace crow
 
 /**

@@ -19,7 +19,7 @@ void crow::node_send(uint16_t sid, uint16_t rid, const void *raddr,
 	sh.type = CROW_NODEPACK_COMMON;
 	sh.namerid = false;
 
-	struct iovec iov[2] = {{(void *)&sh, sizeof(sh)}, {(void *)data, size}};
+	const igris::buffer iov[2] = {{(void *)&sh, sizeof(sh)}, {(void *)data, size}};
 
 	crow::send_v(raddr, rsize, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
 }
@@ -34,7 +34,7 @@ void crow::node_send(uint16_t sid, const char* rid, const void *raddr,
 	sh.type = CROW_NODEPACK_COMMON;
 	sh.namerid = true;
 
-	struct iovec iov[3] =
+	const igris::buffer iov[3] =
 	{
 		{(void *)&sh, sizeof(sh)},
 		{(void *)rid, sh.rid},
@@ -53,7 +53,7 @@ void crow::node_protocol_cls::send_node_error(
 	sh.rid = crow::node_protocol.sid(pack);
 	sh.type = CROW_NODEPACK_ERROR;
 
-	struct iovec iov[2] =
+	const igris::buffer iov[2] =
 	{
 		{(void *)&sh, sizeof(sh)},
 		{(void *)&errcode, sizeof(errcode)}
@@ -161,5 +161,13 @@ void crow::system_node_cls::incoming_packet(crow::packet *pack)
 			node_send(0, sh->sid, pack->addrptr(), pack->addrsize(),
 			          buf, strlen(buf), 0, 200);
 		}
+	}
+
+	else 
+	{
+		sprintf(buf, "Unrecognized command\n");
+		node_send(0, sh->sid, pack->addrptr(), pack->addrsize(),
+	          buf, strlen(buf), 0, 200);
+			
 	}
 }

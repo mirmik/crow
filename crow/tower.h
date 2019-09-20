@@ -3,7 +3,6 @@
 
 #include <crow/gateway.h>
 #include <crow/packet_ptr.h>
-#include <sys/uio.h>
 
 #include <igris/container/dlist.h>
 
@@ -44,7 +43,7 @@ namespace crow
 	          uint8_t type, uint8_t qos, uint16_t ackquant);
 
 	crow::packet_ptr send_v(const void *addr, uint8_t asize,
-	            const struct iovec *vec, size_t veclen,
+	            const igris::buffer* vec, size_t veclen,
 	            uint8_t type, uint8_t qos, uint16_t ackquant);
 
 	// Эта функция вызывается вратами после обработки отсылаемого пакета.

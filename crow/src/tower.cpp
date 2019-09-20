@@ -377,16 +377,16 @@ crow::packet_ptr crow::send(const void *addr, uint8_t asize, const char *data,
 	return crow_transport(pack);
 }
 
-crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const struct iovec *vec,
+crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const igris::buffer *vec,
 				  size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	size_t dsize = 0;
-	const struct iovec *it = vec;
-	const struct iovec *const eit = vec + veclen;
+	const igris::buffer *it = vec;
+	const igris::buffer *const eit = vec + veclen;
 
 	for (; it != eit; ++it)
 	{
-		dsize += it->iov_len;
+		dsize += it->size();
 	}
 
 	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
@@ -404,8 +404,8 @@ crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const struct iove
 
 	for (; it != eit; ++it)
 	{
-		memcpy(dst, it->iov_base, it->iov_len);
-		dst += it->iov_len;
+		memcpy(dst, it->data(), it->size());
+		dst += it->size();
 	}
 
 	return crow_transport(pack);

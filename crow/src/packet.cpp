@@ -50,19 +50,19 @@ void crow::packet::revert_gate(uint8_t gateindex)
 	++header.stg;
 }
 
-void crow::packet::revert(struct iovec *vec, size_t veclen)
+void crow::packet::revert(igris::buffer *vec, size_t veclen)
 {
-	struct iovec *it = vec + veclen - 1;
-	struct iovec *eit = vec - 1;
+	igris::buffer *it = vec + veclen - 1;
+	igris::buffer *eit = vec - 1;
 
 	size_t sz = 0;
 	uint8_t *tgt = stageptr();
 
 	for (; it != eit; --it)
 	{
-		sz += it->iov_len;
-		char *ptr = (char *)it->iov_base + it->iov_len;
-		char *eptr = (char *)it->iov_base;
+		sz += it->size();
+		char *ptr = (char *)it->data() + it->size();
+		char *eptr = (char *)it->data();
 		while (ptr != eptr)
 			*tgt++ = *--ptr;
 	}
@@ -76,15 +76,15 @@ bool crow::has_allocated()
 }
 
 crow::packet * crow::make_packet_v(const void *addr, uint8_t asize,
-    const struct iovec *vec, size_t veclen) 
+    const igris::buffer *vec, size_t veclen) 
 {
 	size_t dsize = 0;
-	const struct iovec *it = vec;
-	const struct iovec *const eit = vec + veclen;
+	const igris::buffer *it = vec;
+	const igris::buffer *const eit = vec + veclen;
 
 	for (; it != eit; ++it)
 	{
-		dsize += it->iov_len;
+		dsize += it->size();
 	}
 
 	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
@@ -102,8 +102,8 @@ crow::packet * crow::make_packet_v(const void *addr, uint8_t asize,
 
 	for (; it != eit; ++it)
 	{
-		memcpy(dst, it->iov_base, it->iov_len);
-		dst += it->iov_len;
+		memcpy(dst, it->data(), it->size());
+		dst += it->size();
 	}
 
 	return pack;

@@ -3,7 +3,6 @@
 
 #include <crow/packet.h>
 #include <crow/proto/protocol.h>
-#include <sys/uio.h>
 
 #include <igris/container/dlist.h>
 
