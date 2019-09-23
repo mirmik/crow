@@ -2,6 +2,7 @@
 #include <crow/tower.h>
 
 #include <fcntl.h>
+#include <unistd.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <stdio.h>
@@ -52,6 +53,11 @@ int crow::udpgate::open(uint16_t port)
 	int ret ;
 
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
+
+	const int       optVal = 1;
+	const socklen_t optLen = sizeof(optVal);
+	
+	int rtn = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
 
 	if (sock < 0) 
 	{
@@ -114,4 +120,10 @@ crow::udpgate *crow::create_udpgate(uint8_t id, uint16_t port)
 	g->open(port); // TODO: should return NULL on error
 	crow::link_gate(g, id);
 	return g;
+}
+
+void crow::udpgate::finish() 
+{
+	shutdown(sock, SHUT_RDWR);
+	close(sock);
 }

@@ -126,4 +126,5 @@ PYBIND11_MODULE(libcrow, m)
 	m.add_object("_cleanup", cleanup);
 
 	m.def("diagnostic_enable", diagnostic_enable);
+	m.def("finish", finish);
 }

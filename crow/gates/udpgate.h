@@ -21,6 +21,7 @@ namespace crow
 		void nblock_onestep() override;
 
 		int open(uint16_t port);
+		void finish();
 	};
 
 	udpgate *create_udpgate(uint8_t id, uint16_t port);

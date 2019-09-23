@@ -632,3 +632,11 @@ void crow::print_list_counts()
 	dprln("crow_outters:", dlist_size(&crow_outters));
 	dprln("crow_incoming:", dlist_size(&crow_incoming));
 }
+
+void crow::finish() 
+{
+	for (crow::gateway &gate : crow_gateways)
+	{
+		gate.finish();
+	}
+}

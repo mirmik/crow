@@ -74,6 +74,9 @@ namespace crow
 
 	bool has_untravelled();
 	void print_list_counts();
+
+	// Завершить операции и потоки.
+	void finish();
 } // namespace crow
 
 #endif
