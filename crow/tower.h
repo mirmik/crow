@@ -31,11 +31,19 @@ namespace crow
 	// Включить трассировку пакетов.
 	void diagnostic_enable();
 	void enable_diagnostic();
-	inline void diagnostic(bool en) { diagnostic_enable(); }
 
 	// Включить трассировку аллокации.
 	void live_diagnostic_enable();
 	void enable_live_diagnostic();
+
+	inline void diagnostic(bool en, bool len=false) 
+	{ 
+		if (en)
+			diagnostic_enable(); 
+
+		if (len)
+			live_diagnostic_enable();
+	}
 
 	// Отправить пакет.
 	crow::packet_ptr send(const void *addr, uint8_t asize,

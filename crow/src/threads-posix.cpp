@@ -4,7 +4,7 @@
 #include <thread>
 #include <chrono>
 
-#define NODTRACE 1
+#define NODTRACE 0
 #include <igris/dtrace.h>
 
 static bool cancel_token = false;
