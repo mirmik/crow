@@ -7,7 +7,7 @@
 //#include <crow/holders.h>
 #include <crow/packet_ptr.h>
 #include <crow/tower.h>
-#include <crow/pubsub.h>
+#include <crow/proto/pubsub.h>
 #include <crow/hexer.h>
 
 //#include <igris/print.h>
@@ -81,11 +81,10 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("set_subscribe_handler", [](py::function f) {
 		subscribe_handler_bind = f;
-		crow::pubsub_protocol.enable();
 		crow::pubsub_protocol.incoming_handler = subscribe_handler_bind_invoke;
 	});
 
-	m.def("compile_address", &compile_address);
+	m.def("compile_address", &address);
 
 	m.def("diagnostic", &diagnostic_enable);
 	m.def("live_diagnostic", &live_diagnostic_enable);

@@ -7,15 +7,21 @@ import time
 import threading
 
 crowker = None
+spin_cancel = False
 
 def spin():
 	while 1:
+		if spin_cancel: return
 		pycrow.libcrow.onestep()
 		time.sleep(0.00001)
 
 def start_spin():
 	thr = threading.Thread(target = spin, args=())
 	thr.start()
+
+def finish_spin():
+	global spin_cancel
+	spin_cancel = True
 
 def diagnostic(pack=False, live=False):
 	if pack:
