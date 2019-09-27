@@ -92,9 +92,14 @@ namespace crow
 						pack->datasize() - sizeof(node_subheader) - sh->rid);
 		}
 
+		static node_subheader* subheader(crow::packet *pack) 
+		{
+			return (crow::node_subheader*) pack->dataptr();
+		}
+
 		static auto get_name(crow::packet *pack)
 		{
-			crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
+			node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 
 			if (sh->namerid == 0)
 				return igris::buffer();
