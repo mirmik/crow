@@ -191,6 +191,31 @@ namespace crow
 	public:
 		subscriber() = default;
 
+		subscriber(
+		    const uint8_t * addr,
+		    uint8_t alen,
+		    const char * theme,
+		    uint8_t qos,
+		    uint16_t ackquant,
+		    uint8_t rqos,
+		    uint16_t rackquant,
+		    igris::delegate<void, crow::packet*> dlg
+		)
+		{
+			this->addr = addr;
+			this->alen = alen;
+			this->theme = theme;
+			this->qos = qos;
+			this->ackquant = ackquant;
+			this->rqos = rqos;
+			this->rackquant = rackquant;
+			this->dlg = dlg;
+
+			system_lock();
+			dlist_add(&lnk, &pubsub_protocol.themes);
+			system_unlock();
+		}
+
 		void subscribe(
 		    const uint8_t * addr,
 		    uint8_t alen,
