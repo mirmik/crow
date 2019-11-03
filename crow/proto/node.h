@@ -117,12 +117,20 @@ namespace crow
 	extern node_protocol_cls node_protocol;
 	extern igris::dlist<node, &node::lnk> nodes;
 
-	void node_send(uint16_t sid, uint16_t rid, const void *raddr, size_t rlen,
+	crow::packet_ptr node_send(uint16_t sid, uint16_t rid, const void *raddr, size_t rlen,
 				   const void *data, size_t size, uint8_t qos,
 				   uint16_t ackquant);
 
-	void node_send(uint16_t sid, const char * rid, const void *raddr, size_t rlen,
+	crow::packet_ptr node_send(uint16_t sid, const char * rid, const void *raddr, size_t rlen,
 				   const void *data, size_t size, uint8_t qos,
+				   uint16_t ackquant);
+
+	crow::packet_ptr node_send_v(uint16_t sid, uint16_t rid, const igris::buffer addr,
+				   const igris::buffer * vec, size_t veclen, uint8_t qos,
+				   uint16_t ackquant);
+
+	crow::packet_ptr node_send_v(uint16_t sid, const char * rid, const igris::buffer addr,
+				   const igris::buffer * vec, size_t veclen, uint8_t qos,
 				   uint16_t ackquant);
 }
 
