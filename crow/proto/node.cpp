@@ -77,7 +77,7 @@ crow::packet_ptr crow::node_send_v(uint16_t sid, const char * rid, const igris::
 		{(void *)rid, sh.rid},
 	};
 
-	return crow::send_vv(addr, iov, 3, vec, veclen, CROW_NODE_PROTOCOL, qos, ackquant);
+	return crow::send_vv(addr, iov, 2, vec, veclen, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
 void crow::node_protocol_cls::send_node_error(

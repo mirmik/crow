@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <vector>
+#include <map>
+#include <chrono>
 
 #include <crow/proto/node.h>
 #include <crow/tower.h>
@@ -68,7 +70,7 @@ namespace crow
 	{
 		struct record 
 		{
-			uint16_t lasttime;
+			std::chrono::milliseconds lasttime;
 			std::string name;
 		};
 		std::map<std::vector<uint8_t>,record> dict;

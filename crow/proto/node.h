@@ -132,6 +132,11 @@ namespace crow
 	crow::packet_ptr node_send_v(uint16_t sid, const char * rid, const igris::buffer addr,
 				   const igris::buffer * vec, size_t veclen, uint8_t qos,
 				   uint16_t ackquant);
+
+	static inline igris::buffer node_data(crow::packet *pack) 
+	{
+		return node_protocol_cls::node_data(pack);
+	}
 }
 
 #endif
