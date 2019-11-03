@@ -26,6 +26,7 @@ licant.modules.module("crow",
 	
 		"proto/acceptor.cpp",
 		"proto/node.cpp",
+		"proto/socket.cpp",
 		"proto/node-sync.cpp",
 		"proto/channel.cpp",
 		"proto/channel-sync.cpp",

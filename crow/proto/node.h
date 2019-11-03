@@ -125,6 +125,20 @@ namespace crow
 				   const void *data, size_t size, uint8_t qos,
 				   uint16_t ackquant);
 
+	static inline crow::packet_ptr node_send(uint16_t sid, uint16_t rid, const igris::buffer addr,
+				   const igris::buffer data, uint8_t qos,
+				   uint16_t ackquant) 
+	{
+		return crow::node_send(sid, rid, addr.data(), addr.size(), data.data(), data.size(), qos, ackquant);
+	}
+
+	static inline crow::packet_ptr node_send(uint16_t sid, const char * rid, const igris::buffer addr,
+				   const igris::buffer data, uint8_t qos,
+				   uint16_t ackquant) 
+	{
+		return crow::node_send(sid, rid, addr.data(), addr.size(), data.data(), data.size(), qos, ackquant);
+	}
+
 	crow::packet_ptr node_send_v(uint16_t sid, uint16_t rid, const igris::buffer addr,
 				   const igris::buffer * vec, size_t veclen, uint8_t qos,
 				   uint16_t ackquant);

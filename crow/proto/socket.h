@@ -7,33 +7,45 @@ namespace crow
 {
 	class socket_base : public node 
 	{
+	public:
+		dlist_head q = DLIST_HEAD_INIT(q);
+
 		void incoming_packet(crow::packet *pack) 
 		{
 			dlist_add(&pack->ulnk, &q);
 		}
-	}
+	};
 
 	class socket : public socket_base
 	{
-		dlist_head q = DLIST_INIT(q);
-		bool is_alive = true;
-
-		void *raddr_ptr = nullptr;
-		size_t raddr_len = 0;
-
 	public:
-		socket() {}
+		socket(int nodeno) { link_node(this, nodeno); }
 
 		void undelivered_packet(crow::packet *pack) 
 		{
-			is_alive = false;
 			crow::release(pack);
 		}
 
+		crow::packet_ptr send(int rid, igris::buffer addr, const char* data, size_t len, uint8_t qos, uint16_t ackquant) 
+		{
+			return node_send(id, rid, addr, igris::buffer(data, len), qos, ackquant);
+		}
 
+		crow::packet * recv() 
+		{
+			while (!dlist_empty(&q)) 
+			{
+				waitevent();
+				dprln("unwait recv");
+			}
+
+			auto it = dlist_first_entry(&q, crow::packet, ulnk);
+			dlist_del(&it->ulnk);
+			return it;
+		}
 	};
 
-	class socket_acceptor_basic : public socket_base
+	/*class socket_acceptor_basic : public socket_base
 	{
 		dlist_head q = DLIST_INIT(q);
 
@@ -59,7 +71,7 @@ namespace crow
 			memcpy(ret->raddr_ptr, addr.data(), addr.size());
 			return ret;
 		}
-	};
+	};*/
 }
 
 #endif
