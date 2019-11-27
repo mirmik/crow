@@ -28,6 +28,7 @@ licant.cxx_shared_library(target,
 
 	cxx_flags = '-fPIC -Wall',
 	cc_flags = '-fPIC -Wall',
+	libs=["igris"]
 )
 
 @licant.routine(deps=[target])

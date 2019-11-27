@@ -66,6 +66,7 @@ namespace crow
 		else 
 		{
 			int ret = it->second(argc, argv, buf, sizeof(buf));
+			(void) ret;
 		}
 		
 		if (strlen(buf))
