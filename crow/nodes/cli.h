@@ -15,6 +15,8 @@ namespace crow
 		Dictionary dictionary;
 
 	public:
+		bool debug_mode = false;
+
 		cli_node(Dictionary&& dictionary) : dictionary(std::move(dictionary)) {}
 		cli_node(const Dictionary& dictionary) : dictionary(dictionary) {}
 
@@ -32,6 +34,11 @@ namespace crow
 		auto sh = crow::node_protocol_cls::subheader(pack);
 		auto data = crow::node_protocol_cls::node_data(pack);
 
+		if (debug_mode)
+		{
+			dpr("clidata: "); debug_write(data.data(), data.size()); dprln();
+		}
+
 		char buf[32];
 		memset(buf, 0, 32);
 		typename Dictionary::iterator it;
@@ -46,6 +53,10 @@ namespace crow
 
 		if (data.data()[data.size()-1] == '\n')
 			data.data()[data.size()-1] = 0;
+		else 
+		{
+			data.data()[data.size()] = 0;	
+		}
 
 		argc = argvc_internal_split_n(data.data(), data.size(), argv, 10);
 
@@ -61,7 +72,7 @@ namespace crow
 		it = dictionary.find(argv[0]);
 
 		if (it == dictionary.end()) {
-			sprintf(buf, "Unrecognized command\n");
+			sprintf(buf, "Unrecognized command: %s\n", argv[0]);
 		}
 		else 
 		{
