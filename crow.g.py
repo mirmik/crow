@@ -1,9 +1,9 @@
 import licant.modules
 import licant
 
-licant.module("crow.netkeep_crowker", 
-	sources=["crow/src/netkeep_crowker.cpp"]
-)
+#licant.module("crow.netkeep_crowker", 
+#	sources=["crow/src/netkeep_crowker.cpp"]
+#)
 
 licant.module("crow.print", 
 	sources=["crow/src/print.cpp"]
@@ -20,12 +20,13 @@ licant.modules.module("crow",
 		"src/packet.cpp",
 		"src/packet_ptr.cpp",
 		"src/alive.cpp",
-		"src/netkeep.cpp",
+		#"src/netkeep.cpp",
 		"src/print.cpp",
 		"src/hexer.c",
 	
 		"proto/acceptor.cpp",
 		"proto/node.cpp",
+		"proto/socket.cpp",
 		"proto/node-sync.cpp",
 		"proto/channel.cpp",
 		"proto/channel-sync.cpp",
@@ -47,7 +48,7 @@ licant.modules.module("crow",
 )
 
 licant.module("crow.crowker",
-	mdepends = ["crow.netkeep_crowker"]
+	#mdepends = ["crow.netkeep_crowker"]
 )
 
 licant.modules.module("crow.minimal",

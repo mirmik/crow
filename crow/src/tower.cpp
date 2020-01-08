@@ -411,6 +411,59 @@ crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const igris::buff
 	return crow_transport(pack);
 }
 
+crow::packet_ptr crow::send_vv(const igris::buffer addr,
+            const igris::buffer* vec, size_t veclen,
+            const igris::buffer* vec2, size_t veclen2,
+            uint8_t type, uint8_t qos, uint16_t ackquant) 
+{
+	size_t dsize = 0;
+	const igris::buffer *it;
+	const igris::buffer *eit;
+
+	it = vec;
+	eit = vec + veclen;
+	for (; it != eit; ++it)
+	{
+		dsize += it->size();
+	}
+
+	it = vec2;
+	eit = vec2 + veclen2;
+	for (; it != eit; ++it)
+	{
+		dsize += it->size();
+	}
+
+	crow::packet *pack = crow::create_packet(NULL, addr.size(), dsize);
+	if (pack == nullptr)
+		return nullptr;
+
+	pack->header.f.type = type & 0x1F;
+	pack->header.qos = qos;
+	pack->header.ackquant = ackquant;
+	
+	memcpy(pack->addrptr(), addr.data(), addr.size());
+	char *dst = pack->dataptr();
+
+	it = vec;
+	eit = vec + veclen;
+	for (; it != eit; ++it)
+	{
+		memcpy(dst, it->data(), it->size());
+		dst += it->size();
+	}
+
+	it = vec2;
+	eit = vec2 + veclen2;
+	for (; it != eit; ++it)
+	{
+		memcpy(dst, it->data(), it->size());
+		dst += it->size();
+	}
+
+	return crow_transport(pack);
+}
+
 void crow::return_to_tower(crow::packet *pack, uint8_t sts)
 {
 	assert(pack);
