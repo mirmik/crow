@@ -2,6 +2,7 @@
 #coding: utf-8
 
 import licant
+import licant.install
 from licant.cxx_modules import application
 from licant.libs import include
 import os
@@ -18,8 +19,6 @@ application("crowpulse",
 	cxxstd = "c++17"
 )
 
-@licant.routine(deps = ["crowpulse"])
-def install():
-	os.system("cp crowpulse /usr/local/bin")
+licant.install.install_application(tgt="install", src="crowpulse", dst="crowpulse")
 
 licant.ex("crowpulse")

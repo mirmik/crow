@@ -29,7 +29,7 @@ namespace crow
 	void nocontrol_travel(crow::packet *pack);
 
 	// Включить трассировку пакетов.
-	void diagnostic_enable();
+	void diagnostic_enable(); 
 	void enable_diagnostic();
 
 	// Включить трассировку аллокации.

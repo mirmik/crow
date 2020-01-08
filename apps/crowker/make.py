@@ -2,6 +2,7 @@
 #coding: utf-8
 
 import licant
+import licant.install
 from licant.cxx_modules import application
 from licant.libs import include
 import os
@@ -15,8 +16,7 @@ application("crowker",
 	libs = ["pthread", "readline", "nos", "igris", "crow"]
 )
 
-@licant.routine(deps = ["crowker"])
-def install():
-	os.system("cp crowker /usr/local/bin")
+
+licant.install.install_application(tgt="install", src="crowker", dst="crowker")
 
 licant.ex("crowker")
