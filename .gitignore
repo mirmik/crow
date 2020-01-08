@@ -176,6 +176,7 @@ apps/ctrans/ctrans
 apps/crowker/crowker
 apps/crow_subscribe/crow_subscribe
 apps/crow_publish/crow_publish
+apps/crowpulse/crowpulse
 target
 
 dox/html
