@@ -5,3 +5,6 @@ cd $PWD0/crowker
 
 cd $PWD0/ctrans
 ./make.py && sudo ./make.py install
+
+cd $PWD0/crowpulse
+./make.py && sudo ./make.py install
