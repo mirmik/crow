@@ -289,8 +289,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	crow::alive_node alive_node;
-	crow::link_node(&alive_node, 1);
+	//crow::alive_node alive_node;
+	//crow::link_node(&alive_node, 1);
 
 	//std::thread netkeep_thread {netserve};
 	//netkeep_thread.detach();
