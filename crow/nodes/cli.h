@@ -63,12 +63,6 @@ namespace crow
 		if (argc == 0) 
 			goto __end__;
 			
-		//nos::print("GGG");
-		//nos::print((const char*)argv[0]);
-		//nos::print((const char*)argv[1]);
-		//nos::print((const char*)argv[2]);
-		//nos::print("EEE");
-
 		it = dictionary.find(argv[0]);
 
 		if (it == dictionary.end()) {

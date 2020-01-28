@@ -44,15 +44,14 @@ licant.cxx_shared_library(target,
 #	
 #	print("successfully installed")
 
-licant.install.install_library(tgt="install", libtgt=target, headers="crow", hroot="crow")
+licant.install.install_library(tgt="install", libtgt=target, headers="crow", hroot="crow", 
+	uninstall="uninstall")
 
-@licant.routine(deps=[])
-def uninstall():
-	os.system("rm {}".format(install_library_link))
-	os.system("rm {}".format(install_library_path))
-	
-	shutil.rmtree(install_include_path, True)
-	
-	print("successfully uninstalled")
+#@licant.routine(deps=[])
+#def uninstall():
+#	os.system("rm {}".format(install_library_link))
+#	os.system("rm {}".format(install_library_path))
+#	shutil.rmtree(install_include_path, True)	
+#	print("successfully uninstalled")
 	
 licant.ex(target)
