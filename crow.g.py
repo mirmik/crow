@@ -65,6 +65,10 @@ licant.modules.module("crow.minimal",
 	mdepends = ["crow.include"]
 )
 
+licant.modules.module("crow.diagnostic-debug",
+	sources=["crow/src/print-debug.cpp"]
+)
+
 licant.modules.module("crow.include", 
 	include_paths=["."])
 
