@@ -99,7 +99,7 @@ void undelivered_handler(struct crow::packet *pack)
 	crow::release(pack);
 }
 
-void alivespam()
+/*void alivespam()
 {
 	uint8_t raddr[128];
 	uint8_t rlen;
@@ -123,7 +123,7 @@ void netserve()
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		crow::netkeep_serve();
 	}
-}
+}*/
 
 void tcp_client_listener(nos::inet::tcp_socket client)
 {
@@ -227,8 +227,8 @@ int main(int argc, char *argv[])
 
 	//crow::pubsub_protocol.enable();
 
-	crow::netkeep_protocol_handler =
-	    crow::netkeep_protocol_handler_crowker;
+	//crow::netkeep_protocol_handler =
+	//    crow::netkeep_protocol_handler_crowker;
 
 	const struct option long_options[] =
 	{
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 		{"logpub", no_argument, NULL, 'p'},
 		{"vdebug", no_argument, NULL, 'v'},
 		{"quite", no_argument, NULL, 'q'},
-		{"handshake", required_argument, NULL, 'h'},
+		//{"handshake", required_argument, NULL, 'h'},
 		{"netname", required_argument, NULL, 'n'},
 		{NULL, 0, NULL, 0}
 	};
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
 	int long_index = 0;
 	int opt = 0;
 
-	while ((opt = getopt_long(argc, argv, "usvdibhtn", long_options,
+	while ((opt = getopt_long(argc, argv, "usvdibtn", long_options,
 	                          &long_index)) != -1)
 	{
 		switch (opt)
@@ -276,9 +276,9 @@ int main(int argc, char *argv[])
 				log_publish = true;
 				break;
 
-			case 'h':
+			/*case 'h':
 				handshake = optarg;
-				break;
+				break;*/
 
 			case 'n':
 				netname = optarg;
@@ -289,16 +289,19 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	std::thread netkeep_thread {netserve};
-	netkeep_thread.detach();
+	//crow::alive_node alive_node;
+	//crow::link_node(&alive_node, 1);
 
-	crow::set_netname(netname.c_str());
+	//std::thread netkeep_thread {netserve};
+	//netkeep_thread.detach();
 
-	if (!handshake.empty())
+	//crow::set_netname(netname.c_str());
+
+	/*if (!handshake.empty())
 	{
 		std::thread alive_thread {alivespam};
 		alive_thread.detach();
-	}
+	}*/
 
 	if (udpport == -1)
 	{

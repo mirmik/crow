@@ -6,6 +6,7 @@
 #include <crow/gates/udpgate.h>
 //#include <crow/holders.h>
 #include <crow/packet_ptr.h>
+#include <crow/alive.h>
 #include <crow/tower.h>
 #include <crow/proto/pubsub.h>
 #include <crow/hexer.h>
@@ -66,6 +67,10 @@ PYBIND11_MODULE(libcrow, m)
 			return {buf.data(), buf.size()};
 		});*/
 
+	py::class_<igris::buffer>(m, "igris_buffer")
+		.def(py::init<const std::string&>())
+	;
+
 	py::class_<gateway> __gateway__(m, "gateway");
 	py::class_<udpgate>(m, "udpgate", __gateway__);
 
@@ -73,6 +78,11 @@ PYBIND11_MODULE(libcrow, m)
 		  py::return_value_policy::reference);
 	m.def("onestep", &crow::onestep);
 	m.def("spin", &crow::spin);
+	m.def("start_spin", &crow::start_spin);
+	m.def("stop_spin", &crow::stop_spin);
+
+	m.def("start_alive", (void(*)(const std::vector<uint8_t>&, const char*, uint16_t, uint16_t, uint8_t, uint16_t))&crow::start_alive, py::arg("addr"), py::arg("netname"), py::arg("resend_time"), py::arg("dietime"), py::arg("qos"), py::arg("ackquant"));
+	m.def("stop_alive", &crow::stop_alive);
 
 	m.def("set_incoming_handler", [](py::function f) {
 		incoming_handler_bind = f;

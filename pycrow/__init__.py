@@ -1,7 +1,9 @@
-import pycrow
-import pycrow.libcrow
-
-from pycrow.libcrow import *
+try:
+	import pycrow.libcrow
+	from pycrow.libcrow import *
+except Exception as ex:
+	print("PyCrow: Import libs error. ex:", ex)
+	exit(0)
 
 import time
 import threading

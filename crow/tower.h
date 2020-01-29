@@ -29,7 +29,7 @@ namespace crow
 	void nocontrol_travel(crow::packet *pack);
 
 	// Включить трассировку пакетов.
-	void diagnostic_enable();
+	void diagnostic_enable(); 
 	void enable_diagnostic();
 
 	// Включить трассировку аллокации.
@@ -52,6 +52,18 @@ namespace crow
 
 	crow::packet_ptr send_v(const void *addr, uint8_t asize,
 	            const igris::buffer* vec, size_t veclen,
+	            uint8_t type, uint8_t qos, uint16_t ackquant);
+
+	static inline crow::packet_ptr send_v(const igris::buffer buf,
+	            const igris::buffer* vec, size_t veclen,
+	            uint8_t type, uint8_t qos, uint16_t ackquant) 
+	{
+		return send_v(buf.data(), buf.size(), vec, veclen, type, qos, ackquant);
+	}
+
+	crow::packet_ptr send_vv(const igris::buffer buf,
+	            const igris::buffer* vec, size_t veclen,
+	            const igris::buffer* vec2, size_t veclen2,
 	            uint8_t type, uint8_t qos, uint16_t ackquant);
 
 	// Эта функция вызывается вратами после обработки отсылаемого пакета.

@@ -260,7 +260,48 @@ namespace crow
 		{
 			crow::subscribe(addr, alen, theme, qos, ackquant, rqos, rackquant);
 		}
+	};
 
+	class publisher 
+	{
+	private:
+		const char * theme;
+		const uint8_t * addr;
+		uint8_t alen;
+		uint8_t qos=0;
+		uint16_t acktime=50;
+	
+	public:
+		publisher(){}
+
+		publisher(const uint8_t* addr, uint8_t alen, const char* theme);
+
+		void init(const uint8_t* addr, uint8_t alen, const char* theme) 
+		{ 
+			this->addr = addr; 
+			this->alen = alen; 
+			this->theme = theme; 
+		}
+		
+		void init(const uint8_t* addr, uint8_t alen, const char* theme, 
+			uint8_t qos, uint16_t acktime) 
+		{ 
+			this->addr = addr; 
+			this->alen = alen;  
+			this->theme = theme; 
+			this->qos = qos; 
+			this->acktime = acktime; 
+		}
+
+		void publish(const char* data, int len) 
+		{
+			crow::publish(addr, alen, theme, data, len, qos, acktime);			
+		}	
+
+		void publish(const char* data, int len, uint8_t qos, uint16_t acktime) 
+		{
+			crow::publish(addr, alen, theme, data, len, qos, acktime);			
+		}
 	};
 
 	class packet_pubsub_ptr : public packet_ptr
