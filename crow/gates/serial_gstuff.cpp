@@ -102,11 +102,12 @@ void crow::serial_gstuff::send(struct crow::packet *pack)
 
 void crow::serial_gstuff::nblock_onestep()
 {
+#define GSTUFF_MAXPACK_SIZE 512
 	if (rpack == NULL)
 	{
 		rpack = (struct crow::packet *)malloc(
-			128 + sizeof(struct crow::packet) - sizeof(struct crow::header));
-		gstuff_autorecv_setbuf(&recver, (char *)&rpack->header, 128);
+			GSTUFF_MAXPACK_SIZE + sizeof(struct crow::packet) - sizeof(struct crow::header));
+		gstuff_autorecv_setbuf(&recver, (char *)&rpack->header, GSTUFF_MAXPACK_SIZE);
 	}
 
 	char c;
