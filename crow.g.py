@@ -31,6 +31,8 @@ licant.modules.module("crow",
 		"proto/channel.cpp",
 		"proto/channel-sync.cpp",
 		"proto/pubsub.cpp",
+
+		"addons/noslogger.cpp",
 	],
 
 	mdepends = [
