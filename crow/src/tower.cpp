@@ -324,7 +324,6 @@ static void crow_do_travel(crow::packet *pack)
 	}
 	else
 	{
-		// if (crow_transit_handler) crow_transit_handler(pack);
 		//Ветка транзитного пакета. Логика поиска врат и пересылки.
 		crow::gateway *gate = crow_find_target_gateway(pack);
 		
@@ -549,14 +548,10 @@ static inline void crow_onestep_send_stage()
 		system_lock();
 	}
 	system_unlock();
-
-	//DTRRET();
 }
 
 static inline void crow_onestep_outers_stage()
 {
-	//DTRACE();
-
 	crow::packet *pack;
 	crow::packet *n;
 
@@ -586,11 +581,6 @@ static inline void crow_onestep_outers_stage()
 			{
 				crow_tower_release(pack);
 				crow_undelivered(pack);
-
-				//if (crow::undelivered_handler)
-				//	crow::undelivered_handler(pack);
-				//else
-				//	crow::release(pack);
 			}
 			else
 			{
@@ -603,8 +593,6 @@ static inline void crow_onestep_outers_stage()
 
 static inline void crow_onestep_incoming_stage()
 {
-	//DTRACE();
-
 	crow::packet *pack;
 	crow::packet *n;
 
@@ -648,9 +636,6 @@ static inline void crow_onestep_incoming_stage()
 */
 void crow::onestep()
 {
-	//DTRACE();
-
-	// crow::gateway* gate;
 	for (crow::gateway &gate : crow_gateways)
 	{
 		gate.nblock_onestep();

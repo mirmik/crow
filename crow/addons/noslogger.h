@@ -4,6 +4,8 @@
 #include <nos/log/logger.h>
 #include <nos/timestamp.h>
 
+#include <crow/proto/pubsub.h>
+
 namespace crow 
 {
 	class publish_logger : public nos::log::logger 
@@ -33,6 +35,7 @@ namespace crow
 			nos::timestamp(buftime, 32);
 			nos::format_buffer(buffer0, fmt, arglist);
 			nos::format_buffer(buffer1, "[{}|{}] {}", _name, buftime, buffer0);
+			crow::publish(addr, alen, theme, buffer1, strlen(buffer1), 0, 200);
 		}
 	};
 }

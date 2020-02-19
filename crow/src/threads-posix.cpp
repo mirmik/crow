@@ -4,15 +4,11 @@
 #include <thread>
 #include <chrono>
 
-#define NODTRACE 0
-#include <igris/dtrace.h>
-
 static bool cancel_token = false;
 static std::thread _thread;
 
 void crow::start_thread()
 {
-	DTRACE();
 	std::thread thr([]()
 	{
 		while (1)
@@ -26,7 +22,6 @@ void crow::start_thread()
 
 void crow::start_spin()
 {
-	DTRACE();
 	_thread = std::thread([]()
 	{
 		while (1)
@@ -49,7 +44,6 @@ void crow::stop_spin()
 
 void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
 {
-	DTRACE();
 	std::thread thr([ = ]()
 	{
 		while (1)
