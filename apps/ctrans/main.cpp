@@ -494,6 +494,7 @@ int main(int argc, char *argv[])
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
 		{"debug", no_argument, NULL, 'd'}, // Включает информацию о событиях башни.
+		{"debug-data-size", required_argument, NULL, 's'}, // Включает информацию о событиях башни.
 		{"vdebug", no_argument, NULL, 'v'}, // Активирует информацию о времени жизни пакетов.
 		{"gdebug", no_argument, NULL, 'g'}, // Активирует информацию о вратах.
 		{NULL, 0, NULL, 0}
@@ -502,7 +503,7 @@ int main(int argc, char *argv[])
 	int long_index = 0;
 	int opt = 0;
 
-	while ((opt = getopt_long(argc, argv, "uqSEeiIdvgtBA", long_options,
+	while ((opt = getopt_long(argc, argv, "uqSEeisIdvgtBA", long_options,
 	                          &long_index)) != -1)
 	{
 		switch (opt)
@@ -514,6 +515,10 @@ int main(int argc, char *argv[])
 
 			case 'A':
 				ackquant = (uint16_t)atoi(optarg);
+				break;
+
+			case 's':
+				crow::debug_data_size = (uint16_t)atoi(optarg);
 				break;
 
 			case 't':

@@ -29,12 +29,13 @@ namespace crow
 
 		void log(nos::log::level lvl, const char* fmt, const nos::visitable_arglist& arglist) 
 		{
+			DPRINT(fmt);
 			char buftime[32];
 			char buffer0[128];
 			char buffer1[128];
 			nos::timestamp(buftime, 32);
 			nos::format_buffer(buffer0, fmt, arglist);
-			nos::format_buffer(buffer1, "[{}|{}] {}", _name, buftime, buffer0);
+			nos::format_buffer(buffer1, "[{}|{}] {}\r\n", _name, buftime, buffer0);
 			crow::publish(addr, alen, theme, buffer1, strlen(buffer1), 0, 200);
 		}
 	};

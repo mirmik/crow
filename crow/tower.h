@@ -14,7 +14,10 @@ extern igris::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
 
 namespace crow
 {
+	extern uint16_t debug_data_size;
+
 	extern dlist_head protocols;
+	extern bool diagnostic_noack;
 
 	extern void (*user_incoming_handler)(crow::packet *pack);
 	//extern void (*pubsub_handler)(crow::packet *pack);

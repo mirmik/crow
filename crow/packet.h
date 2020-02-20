@@ -11,6 +11,7 @@
 
 #include <crow/defs.h>
 #include <igris/datastruct/dlist.h>
+#include <igris/container/pool.h>
 
 #include <igris/buffer.h>
 
@@ -139,7 +140,9 @@ namespace crow
 	void packet_initialization(struct crow::packet *pack,
 							   struct crow::gateway *ingate);
 
+	// Только для аллокации через pool.
 	void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
+	igris::pool * get_package_pool();
 
 	extern int allocated_count;
 	bool has_allocated();
@@ -147,35 +150,5 @@ namespace crow
 	crow::packet * make_packet_v(const void *addr, uint8_t asize,
 	    const igris::buffer *vec, size_t veclen);	
 } // namespace crow
-
-/**
- * Выделить память для пакета.
- *
- * Выделяет adlen + sizeof(crow::packet) байт
- * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
- */
-/*crow::packet* crow_allocate_packet(size_t adlen);
-
-///Вернуть память выделенную для пакета pack
-void crow_deallocate_packet(crow::packet* pack);
-
-///
-crow::packet* crow_create_packet(struct crow::gateway* ingate, size_t addrsize,
-size_t datasize);
-
-///
-void crow_utilize(crow::packet* pack);
-
-void crow_print(crow::packet* pack);
-void crow_println(crow::packet* pack);
-
-__END_DECLS
-
-#ifdef __cplusplus
-
-namespace crow
-{
-	static inline void utilize(crow::packet* pack) { crow_utilize(pack); }
-}*/
 
 #endif

@@ -10,6 +10,9 @@
 
 igris::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
 
+bool crow::diagnostic_noack = false;
+uint16_t crow::debug_data_size = 20;
+
 struct dlist_head crow::protocols = DLIST_HEAD_INIT(crow::protocols);
 DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
@@ -20,7 +23,7 @@ void (*crow::user_incoming_handler)(crow::packet *pack) = nullptr;
 void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
 
 static bool __diagnostic_enabled = false;
-static bool __live_diagnostic_enabled = false;
+bool __live_diagnostic_enabled = false;
 
 void crow::diagnostic_enable()
 {
@@ -101,8 +104,8 @@ static void utilize_from_outers(crow::packet *pack)
 	dlist_for_each_entry(it, &crow_outters, lnk)
 	{
 		if (it->header.seqid == pack->header.seqid &&
-			pack->header.alen == it->header.alen &&
-			!memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
+		        pack->header.alen == it->header.alen &&
+		        !memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
 		{
 			pack->f.confirmed = 1;
 			crow_tower_release(it);
@@ -117,8 +120,8 @@ static void qos_release_from_incoming(crow::packet *pack)
 	dlist_for_each_entry(it, &crow_incoming, lnk)
 	{
 		if (it->header.seqid == pack->header.seqid &&
-			pack->header.alen == it->header.alen &&
-			!memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
+		        pack->header.alen == it->header.alen &&
+		        !memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
 		{
 			crow_tower_release(it);
 			return;
@@ -162,26 +165,26 @@ static void crow_travel_error(crow::packet *pack)
 static void crow_incoming_handler(crow::packet *pack)
 {
 	crow::protocol * it;
-	dlist_for_each_entry(it, &crow::protocols, lnk) 
+	dlist_for_each_entry(it, &crow::protocols, lnk)
 	{
-		if (it->id == pack->header.f.type) 
+		if (it->id == pack->header.f.type)
 		{
 			it->incoming(pack);
 			return;
 		}
-	} 
+	}
 
 	if (crow::user_type_handler)
 		crow::user_type_handler(pack);
-	else 
+	else
 	{
-		if (__diagnostic_enabled) 
+		if (__diagnostic_enabled)
 		{
 			crow::diagnostic("wproto", pack);
 		}
 		crow::release(pack);
 	}
-	
+
 }
 
 static void crow_send_ack(crow::packet *pack)
@@ -191,9 +194,10 @@ static void crow_send_ack(crow::packet *pack)
 		return;
 
 	ack->header.f.type =
-		pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
+	    pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
 	ack->header.f.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
+	ack->header.ackquant = pack->header.ackquant;
 	ack->header.seqid = pack->header.seqid;
 	memcpy(ack->addrptr(), pack->addrptr(), pack->header.alen);
 	ack->f.released_by_world = true;
@@ -209,6 +213,7 @@ static void crow_send_ack2(crow::packet *pack)
 	ack->header.f.type = G1_ACK22_TYPE;
 	ack->header.f.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
+	ack->header.ackquant = pack->header.ackquant;
 	ack->header.seqid = pack->header.seqid;
 	memcpy(ack->addrptr(), pack->addrptr(), pack->header.alen);
 	crow::travel(ack);
@@ -237,30 +242,30 @@ static void crow_do_travel(crow::packet *pack)
 		if (pack->header.f.ack)
 		{
 			//Перехватываем ack пакеты.
-			if (__diagnostic_enabled)
+			if (__diagnostic_enabled && crow::diagnostic_noack == false)
 				crow::diagnostic("inack", pack);
 
 			switch (pack->header.f.type)
 			{
-			case G1_ACK_TYPE:
-				utilize_from_outers(pack);
-				break;
+				case G1_ACK_TYPE:
+					utilize_from_outers(pack);
+					break;
 
-			case G1_ACK21_TYPE:
-				utilize_from_outers(pack);
-				crow_send_ack2(pack);
-				break;
+				case G1_ACK21_TYPE:
+					utilize_from_outers(pack);
+					crow_send_ack2(pack);
+					break;
 
-			case G1_ACK22_TYPE:
-				qos_release_from_incoming(pack);
-				break;
+				case G1_ACK22_TYPE:
+					qos_release_from_incoming(pack);
+					break;
 
-			default:
-				break;
+				default:
+					break;
 			}
 
 			crow_utilize(pack);
-			
+
 			return;
 		}
 
@@ -274,7 +279,7 @@ static void crow_do_travel(crow::packet *pack)
 			//Для пакетов с подтверждение посылаем ack первого или второго
 			//типов.
 			if (pack->header.qos == CROW_TARGET_ACK ||
-				pack->header.qos == CROW_BINARY_ACK)
+			        pack->header.qos == CROW_BINARY_ACK)
 				crow_send_ack(pack);
 
 			if (pack->header.qos == CROW_BINARY_ACK)
@@ -285,12 +290,12 @@ static void crow_do_travel(crow::packet *pack)
 				dlist_for_each_entry(inc, &crow_incoming, lnk)
 				{
 					if (inc->header.seqid == pack->header.seqid &&
-						inc->header.alen == pack->header.alen &&
-						memcmp(inc->addrptr(), pack->addrptr(),
-							   inc->header.alen) == 0)
+					        inc->header.alen == pack->header.alen &&
+					        memcmp(inc->addrptr(), pack->addrptr(),
+					               inc->header.alen) == 0)
 					{
 						crow_utilize(pack);
-						
+
 						return;
 					}
 				}
@@ -326,7 +331,7 @@ static void crow_do_travel(crow::packet *pack)
 	{
 		//Ветка транзитного пакета. Логика поиска врат и пересылки.
 		crow::gateway *gate = crow_find_target_gateway(pack);
-		
+
 		if (gate == NULL)
 		{
 			if (__diagnostic_enabled)
@@ -336,9 +341,16 @@ static void crow_do_travel(crow::packet *pack)
 		}
 		else
 		{
-			if (__diagnostic_enabled)
-				crow::diagnostic("trans", pack);
-
+			if (pack->header.f.ack)
+			{
+				if (__diagnostic_enabled && crow::diagnostic_noack == false)
+					crow::diagnostic("track", pack);
+			}
+			else
+			{
+				if (__diagnostic_enabled)
+					crow::diagnostic("trans", pack);
+			}
 			//Здесь пакет штампуется временем отправки и пересылается во врата.
 			//Врата должны после пересылки отправить его назад в башню
 			//с помощью return_to_tower для контроля качества.
@@ -355,12 +367,12 @@ static crow::packet_ptr crow_transport(crow::packet *pack)
 	system_lock();
 	pack->header.seqid = __seqcounter++;
 	system_unlock();
-	
+
 	return crow::travel(pack);
 }
 
 crow::packet_ptr crow::send(const void *addr, uint8_t asize, const char *data,
-				uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant)
+                            uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
 	if (pack == nullptr)
@@ -372,12 +384,12 @@ crow::packet_ptr crow::send(const void *addr, uint8_t asize, const char *data,
 
 	memcpy(pack->addrptr(), addr, asize);
 	memcpy(pack->dataptr(), data, dsize);
-	
+
 	return crow_transport(pack);
 }
 
 crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const igris::buffer *vec,
-				  size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
+                              size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	size_t dsize = 0;
 	const igris::buffer *it = vec;
@@ -395,7 +407,7 @@ crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const igris::buff
 	pack->header.f.type = type & 0x1F;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
-	
+
 	memcpy(pack->addrptr(), addr, asize);
 
 	it = vec;
@@ -411,9 +423,9 @@ crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const igris::buff
 }
 
 crow::packet_ptr crow::send_vv(const igris::buffer addr,
-            const igris::buffer* vec, size_t veclen,
-            const igris::buffer* vec2, size_t veclen2,
-            uint8_t type, uint8_t qos, uint16_t ackquant) 
+                               const igris::buffer* vec, size_t veclen,
+                               const igris::buffer* vec2, size_t veclen2,
+                               uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	size_t dsize = 0;
 	const igris::buffer *it;
@@ -440,7 +452,7 @@ crow::packet_ptr crow::send_vv(const igris::buffer addr,
 	pack->header.f.type = type & 0x1F;
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
-	
+
 	memcpy(pack->addrptr(), addr.data(), addr.size());
 	char *dst = pack->dataptr();
 
@@ -494,30 +506,30 @@ void crow::onestep_travel_only()
 	{
 		bool empty = dlist_empty(&crow_travelled);
 
-		if (empty) 
+		if (empty)
 			break;
 
 		crow::packet *pack =
-			dlist_first_entry(&crow_travelled, crow::packet, lnk);
+		    dlist_first_entry(&crow_travelled, crow::packet, lnk);
 		dlist_del_init(&pack->lnk);
-	
+
 		crow_do_travel(pack);
 	}
 
 	system_unlock();
 }
 
-void crow_undelivered(crow::packet* pack) 
+void crow_undelivered(crow::packet* pack)
 {
 	crow::protocol * it;
-	dlist_for_each_entry(it, &crow::protocols, lnk) 
+	dlist_for_each_entry(it, &crow::protocols, lnk)
 	{
-		if (it->id == pack->header.f.type) 
+		if (it->id == pack->header.f.type)
 		{
 			it->undelivered(pack);
 			return;
 		}
-	} 
+	}
 
 	if (crow::undelivered_handler)
 		crow::undelivered_handler(pack);
@@ -654,16 +666,16 @@ void crow::spin()
 	}
 }
 
-bool crow::has_untravelled() 
+bool crow::has_untravelled()
 {
 	return ! (
-		dlist_empty(&crow_travelled) &&
-		dlist_empty(&crow_outters) &&
-		dlist_empty(&crow_incoming)
-	);
+	           dlist_empty(&crow_travelled) &&
+	           dlist_empty(&crow_outters) &&
+	           dlist_empty(&crow_incoming)
+	       );
 }
 
-void crow::print_list_counts() 
+void crow::print_list_counts()
 {
 	dprln();
 	dprln("crow_travelled:", dlist_size(&crow_travelled));
@@ -671,7 +683,7 @@ void crow::print_list_counts()
 	dprln("crow_incoming:", dlist_size(&crow_incoming));
 }
 
-void crow::finish() 
+void crow::finish()
 {
 	for (crow::gateway &gate : crow_gateways)
 	{
