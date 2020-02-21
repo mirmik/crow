@@ -54,8 +54,8 @@ namespace crow
 
 	struct packet
 	{
-		struct dlist_head lnk; ///< Для подключения в списки башни crow.
-		struct dlist_head ulnk; ///< Для подключения в список пользователя и
+		struct dlist_head lnk = DLIST_HEAD_INIT(lnk);; ///< Для подключения в списки башни crow.
+		struct dlist_head ulnk = DLIST_HEAD_INIT(ulnk); ///< Для подключения в список пользователя и
 								///< зависимых протоколов.
 		struct crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
 		uint16_t last_request_time; ///< время последней отправки
@@ -149,6 +149,8 @@ namespace crow
 
 	crow::packet * make_packet_v(const void *addr, uint8_t asize,
 	    const igris::buffer *vec, size_t veclen);	
+
+	void diagnostic(const char* label, crow::packet* pack);
 } // namespace crow
 
 #endif

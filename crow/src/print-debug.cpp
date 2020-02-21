@@ -42,5 +42,6 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
 	dpr(",addr:");debug_writehex(pack->addrptr(), pack->addrsize());
 	dpr(",stg:");dpr(pack->header.stg);
 	dpr(",rescount:");dpr((uint8_t)pack->_ackcount);
+	dpr(",data:");dpr(pack->rawdata().slice(0,20));
 	dprln(")");
 }

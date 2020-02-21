@@ -39,7 +39,7 @@ namespace crow
 	void live_diagnostic_enable();
 	void enable_live_diagnostic();
 
-	inline void diagnostic(bool en, bool len=false) 
+	inline void diagnostic_setup(bool en, bool len=false) 
 	{ 
 		if (en)
 			diagnostic_enable(); 

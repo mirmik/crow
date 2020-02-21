@@ -29,7 +29,6 @@ namespace crow
 
 		void log(nos::log::level lvl, const char* fmt, const nos::visitable_arglist& arglist) 
 		{
-			DPRINT(fmt);
 			char buftime[32];
 			char buffer0[128];
 			char buffer1[128];
