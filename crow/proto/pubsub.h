@@ -293,12 +293,12 @@ namespace crow
 			this->acktime = acktime; 
 		}
 
-		void publish(const char* data, int len) 
+		void publish(const void* data, int len) 
 		{
 			crow::publish(addr, alen, theme, data, len, qos, acktime);			
 		}	
 
-		void publish(const char* data, int len, uint8_t qos, uint16_t acktime) 
+		void publish(const void* data, int len, uint8_t qos, uint16_t acktime) 
 		{
 			crow::publish(addr, alen, theme, data, len, qos, acktime);			
 		}
