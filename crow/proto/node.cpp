@@ -175,6 +175,29 @@ void crow::link_node(crow::node *srv, uint16_t id)
 	system_unlock();
 }
 
+crow::node * crow::find_node(int id) 
+{
+	for (crow::node& node : nodes) 
+	{
+		if (node.id == id) 
+			return &node;
+	}
+
+	return nullptr;
+}
+
+void crow::bind_node_dynamic(crow::node *srv) 
+{
+	// Динамические порты располагаются в верхнем полупространстве.
+	static uint16_t counter = (1 << 15);
+	
+	do {
+		counter++;
+		if (counter == 0) counter = (1<<15);
+	} while (crow::find_node(counter) != nullptr);
+	
+	crow::link_node(srv, counter);
+}
 
 
 

@@ -30,6 +30,11 @@ namespace crow
 		};
 	} __attribute__((packed));
 
+	struct node;
+	crow::node * find_node(int id);
+	void link_node(node *srvs, uint16_t id);
+	void bind_node_dynamic(node *srvs);
+
 	struct node
 	{
 		struct dlist_head lnk = DLIST_HEAD_INIT(lnk);
@@ -43,9 +48,10 @@ namespace crow
 		void notify_one(int future);
 
 		virtual const char* typestr() { return "node"; }
-	};
 
-	void link_node(node *srvs, uint16_t id);
+		void bind(int addr) { link_node(this, addr); };
+		void bind() { bind_node_dynamic(this); };
+	};
 
 	class system_node_cls : public node
 	{

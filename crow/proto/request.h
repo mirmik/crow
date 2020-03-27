@@ -5,10 +5,12 @@
 
 namespace crow 
 {
-	class msgbox : public crow::node
+	int sync_query(
+		uint8_t* addr, uint8_t alen, int sid, int rid, 
+		const void * data, uint16_t dlen) 
 	{
-
-	};
+		auto tempnode = crow::node();
+	}
 }
 
 #endif

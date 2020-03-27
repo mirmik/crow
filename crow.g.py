@@ -5,8 +5,9 @@ import licant
 #	sources=["crow/src/netkeep_crowker.cpp"]
 #)
 
-licant.module("crow.print", 
-	sources=["crow/src/print.cpp"]
+licant.module("crow.diagnostic", "nos",
+	sources=["crow/src/print.cpp"],
+	default = True
 )
 
 licant.module("crow.threads", "linux", default=True,
@@ -21,7 +22,6 @@ licant.modules.module("crow",
 		"src/packet_ptr.cpp",
 		"src/alive.cpp",
 		#"src/netkeep.cpp",
-		"src/print.cpp",
 		"src/hexer.c",
 	
 		"proto/acceptor.cpp",
@@ -39,7 +39,8 @@ licant.modules.module("crow",
 		"crow.allocator",
 		"crow.time",
 		"crow.include",
-		"crow.threads"
+		"crow.threads",
+		"crow.diagnostic"
 
 	#	"igris.include",
 	#	"igris.syslock",
@@ -64,10 +65,10 @@ licant.modules.module("crow.minimal",
 		"proto/channel.cpp",
 		"src/hexer.c"
 	],
-	mdepends = ["crow.include"]
+	mdepends = ["crow.include", "crow.diagnostic"]
 )
 
-licant.modules.module("crow.diagnostic-debug",
+licant.modules.module("crow.diagnostic", "debug",
 	sources=["crow/src/print-debug.cpp"]
 )
 
