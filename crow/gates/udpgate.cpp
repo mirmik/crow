@@ -69,6 +69,7 @@ int crow::udpgate::open(uint16_t port)
 	socklen_t iplen = sizeof(struct sockaddr_in);
 	memset(&ipaddr, 0, iplen);
 	ipaddr.sin_port = htons(port);
+	ipaddr.sin_family = PF_INET;
 
 	if (port != 0)
 	{
@@ -76,7 +77,7 @@ int crow::udpgate::open(uint16_t port)
 
 		if (ret != 0)
 		{
-			perror("bind");
+			perror("crow::udpgate::bind");
 			exit(-1);
 		}
 	} 
