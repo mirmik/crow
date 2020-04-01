@@ -57,7 +57,7 @@ int crow::udpgate::open(uint16_t port)
 	const int       optVal = 1;
 	const socklen_t optLen = sizeof(optVal);
 	
-	int rtn = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
+	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
 
 	if (sock < 0) 
 	{
@@ -72,7 +72,7 @@ int crow::udpgate::open(uint16_t port)
 
 	if (port != 0)
 	{
-		ret = bind(sock, (struct sockaddr *)&ipaddr, iplen);
+		ret = ::bind(sock, (struct sockaddr *)&ipaddr, iplen);
 
 		if (ret != 0)
 		{
@@ -116,7 +116,6 @@ void crow::udpgate::send(crow::packet *pack)
 crow::udpgate *crow::create_udpgate(uint8_t id, uint16_t port)
 {
 	crow::udpgate *g = new crow::udpgate;
-	g->block = NULL;
 	g->open(port); // TODO: should return NULL on error
 	crow::link_gate(g, id);
 	return g;

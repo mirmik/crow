@@ -1,4 +1,5 @@
-/// @file
+#ifndef CROW_HEXER_H
+#define CROW_HEXER_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -31,59 +32,11 @@ __END_DECLS
 
 
 #ifdef __cplusplus
-[[deprecated]]
-static inline
-std::vector<uint8_t> compile_address(const std::string& in)
-{
-	std::vector<uint8_t> out;
-	out.resize(in.size());
-
-	int len = hexer_s((uint8_t*)out.data(), in.size(), in.data());
-	out.resize(len);
-
-	return out;
-}
-
 namespace crow
 {
-	static inline
-	std::vector<uint8_t> address(const std::string& in)
-	{
-		std::vector<uint8_t> out;
-		out.resize(in.size());
-
-		int len = hexer_s((uint8_t*)out.data(), in.size(), in.data());
-		
-		if (len < 0)
-			return {};
-
-		out.resize(len);
-		return out;
-	}
-
-	static inline
-	std::vector<uint8_t> address_warned(const std::string& in)
-	{
-		std::vector<uint8_t> out;
-		out.resize(in.size());
-
-		int len = hexer_s((uint8_t*)out.data(), in.size(), in.data());
-		
-		if (len == CROW_HEXER_MORE3_DOT)
-			dprln("crow::hexer: more then three symbols after dot.");
-
-		if (len == CROW_HEXER_ODD_GRID)
-			dprln("crow::hexer: odd symbols after #");
-
-		if (len == CROW_HEXER_UNDEFINED_SYMBOL)
-			dprln("crow::hexer: undefined symbol");
-
-		if (len < 0)
-			return {};
-
-		out.resize(len);
-		return out;
-	}
+	std::vector<uint8_t> address(const std::string& in);
+	std::vector<uint8_t> address_warned(const std::string& in);
 }
+#endif
 
 #endif

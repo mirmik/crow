@@ -37,8 +37,8 @@ namespace crow
 
 	struct node
 	{
-		struct dlist_head lnk = DLIST_HEAD_INIT(lnk);
-		struct dlist_head waitlnk = DLIST_HEAD_INIT(waitlnk);
+		struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
+		struct dlist_head waitlnk = DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
 		uint16_t id = 0;
 		const char* mnem = NULL;
 
@@ -49,8 +49,8 @@ namespace crow
 
 		virtual const char* typestr() { return "node"; }
 
-		void bind(int addr) { link_node(this, addr); };
-		void bind() { bind_node_dynamic(this); };
+		node& bind(int addr) 	{ link_node(this, addr); return *this; };
+		node& bind() 			{ bind_node_dynamic(this); return *this; };
 	};
 
 	class system_node_cls : public node

@@ -15,7 +15,7 @@ def spin():
 	while 1:
 		if spin_cancel: return
 		pycrow.libcrow.onestep()
-		time.sleep(0.00001)
+		time.sleep(0.0001)
 
 def start_spin():
 	thr = threading.Thread(target = spin, args=())
@@ -24,6 +24,10 @@ def start_spin():
 def finish_spin():
 	global spin_cancel
 	spin_cancel = True
+
+def waitall():
+	while not pycrow.fully_empty():
+		time.sleep(0.0001) 
 
 def diagnostic(pack=False, live=False):
 	if pack:

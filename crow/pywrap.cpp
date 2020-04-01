@@ -8,13 +8,17 @@
 #include <crow/packet_ptr.h>
 #include <crow/alive.h>
 #include <crow/tower.h>
+#include <crow/towerxx.h>
 #include <crow/proto/pubsub.h>
+#include <crow/proto/node.h>
+#include <crow/proto/msgbox.h>
 #include <crow/hexer.h>
 
 //#include <igris/print.h>
 
 using namespace crow;
 namespace py = pybind11;
+using ungil = py::call_guard<py::gil_scoped_release>;
 
 py::function incoming_handler_bind;
 void incoming_handler_bind_invoke(crow::packet *pack)
@@ -72,7 +76,13 @@ PYBIND11_MODULE(libcrow, m)
 	;
 
 	py::class_<gateway> __gateway__(m, "gateway");
-	py::class_<udpgate>(m, "udpgate", __gateway__);
+	py::class_<udpgate>(m, "udpgate", __gateway__)
+		.def(py::init<>())
+		.def(py::init<uint16_t>())
+		.def("bind", &gateway::bind)
+	;
+
+	m.def("send", py::overload_cast<const std::vector<uint8_t>&, const std::string&, uint8_t, uint8_t, uint16_t >(&crow::send));
 
 	m.def("create_udpgate", &crow::create_udpgate,
 		  py::return_value_policy::reference);
@@ -95,6 +105,7 @@ PYBIND11_MODULE(libcrow, m)
 	});
 
 	m.def("compile_address", &address);
+	m.def("address", &address);
 
 	m.def("diagnostic", &diagnostic_enable);
 	m.def("live_diagnostic", &live_diagnostic_enable);
@@ -137,4 +148,19 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("diagnostic_enable", diagnostic_enable);
 	m.def("finish", finish);
+
+	py::class_<crow::node>(m, "node")
+	.def("bind", py::overload_cast<>(&crow::node::bind))
+	.def("bind", py::overload_cast<int>(&crow::node::bind))
+	;
+
+	py::class_<crow::msgbox, crow::node>(m, "msgbox")
+		.def(py::init<>())
+		.def("send", py::overload_cast<const std::vector<uint8_t>&, uint16_t, const std::string&, uint8_t, uint16_t>(&crow::msgbox::send))
+		.def("send", py::overload_cast<void*, uint8_t, uint16_t, void*, size_t, uint8_t, uint16_t>(&crow::msgbox::send))
+		.def("query", &crow::msgbox::query, ungil())
+		.def("receive", &crow::msgbox::receive, ungil())
+	; 
+
+	m.def("fully_empty", &crow::fully_empty);
 }

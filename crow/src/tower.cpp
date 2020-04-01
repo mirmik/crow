@@ -690,3 +690,9 @@ void crow::finish()
 		gate.finish();
 	}
 }
+
+bool crow::fully_empty()
+{
+	igris::syslock_guard guard();
+	return dlist_empty(&crow_travelled) && dlist_empty(&crow_incoming) && dlist_empty(&crow_outters);
+}

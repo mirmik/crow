@@ -26,6 +26,8 @@ namespace crow
 		virtual void send(crow::packet *) = 0;
 		virtual void nblock_onestep() = 0;
 		virtual void finish(){};
+
+		gateway& bind(int gateno);
 	};
 } // namespace crow
 

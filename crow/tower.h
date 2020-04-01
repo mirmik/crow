@@ -73,10 +73,18 @@ namespace crow
 	void return_to_tower(crow::packet *pack, uint8_t sts);
 
 	// Присоеденить врата к башне.
-	static inline void link_gate(struct crow::gateway *gate, uint8_t id)
+	static inline int link_gate(crow::gateway *gate, uint8_t id)
 	{
 		gate->id = id;
+
+		for (auto & gate: crow_gateways) 
+		{
+			if (gate.id == id)
+				return -1;
+		}
+
 		crow_gateways.add_last(*gate);
+		return 0;
 	}
 
 	// Используется пользовательским кодом для освобождения пакета.
@@ -98,7 +106,9 @@ namespace crow
 	bool has_untravelled();
 	void print_list_counts();
 
-	// Завершить операции и потоки.
+	bool fully_empty();
+
+	// Завершить гейты.
 	void finish();
 } // namespace crow
 

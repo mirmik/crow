@@ -12,10 +12,14 @@
 namespace crow
 {
 
-	struct udpgate : public gateway
+	class udpgate : public gateway
 	{
-		int sock;
-		crow::packet *block;
+		int sock = 0;
+		crow::packet *block = nullptr;
+
+	public:
+		udpgate(){}
+		udpgate(uint16_t port) { open(port); }
 
 		void send(crow::packet *) override;
 		void nblock_onestep() override;
