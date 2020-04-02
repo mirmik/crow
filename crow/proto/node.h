@@ -83,22 +83,22 @@ namespace crow
 
 		static auto sid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->sid; }
 		static auto rid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->rid; }
-		
+
 		static auto node_data(crow::packet *pack)
 		{
 			crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 
 			if (sh->namerid == 0)
 				return igris::buffer(
-					   pack->dataptr() + sizeof(node_subheader),
-					   pack->datasize() - sizeof(node_subheader));
-			else 
+				           pack->dataptr() + sizeof(node_subheader),
+				           pack->datasize() - sizeof(node_subheader));
+			else
 				return igris::buffer(
-						pack->dataptr() + sizeof(node_subheader) + sh->rid,
-						pack->datasize() - sizeof(node_subheader) - sh->rid);
+				           pack->dataptr() + sizeof(node_subheader) + sh->rid,
+				           pack->datasize() - sizeof(node_subheader) - sh->rid);
 		}
 
-		static node_subheader* subheader(crow::packet *pack) 
+		static node_subheader* subheader(crow::packet *pack)
 		{
 			return (crow::node_subheader*) pack->dataptr();
 		}
@@ -109,10 +109,10 @@ namespace crow
 
 			if (sh->namerid == 0)
 				return igris::buffer();
-			else 
+			else
 				return igris::buffer(
-					pack->dataptr() + sizeof(node_subheader),
-					sh->rid);
+				           pack->dataptr() + sizeof(node_subheader),
+				           sh->rid);
 		}
 
 		static auto get_error_code(crow::packet *pack)
@@ -124,39 +124,54 @@ namespace crow
 	extern igris::dlist<node, &node::lnk> nodes;
 
 	crow::packet_ptr node_send(uint16_t sid, uint16_t rid, const void *raddr, size_t rlen,
-				   const void *data, size_t size, uint8_t qos,
-				   uint16_t ackquant);
+	                           const void *data, size_t size, uint8_t qos,
+	                           uint16_t ackquant);
 
 	crow::packet_ptr node_send(uint16_t sid, const char * rid, const void *raddr, size_t rlen,
-				   const void *data, size_t size, uint8_t qos,
-				   uint16_t ackquant);
+	                           const void *data, size_t size, uint8_t qos,
+	                           uint16_t ackquant);
 
 	static inline crow::packet_ptr node_send(uint16_t sid, uint16_t rid, const igris::buffer addr,
-				   const igris::buffer data, uint8_t qos,
-				   uint16_t ackquant) 
+	        const igris::buffer data, uint8_t qos,
+	        uint16_t ackquant)
 	{
 		return crow::node_send(sid, rid, addr.data(), addr.size(), data.data(), data.size(), qos, ackquant);
 	}
 
 	static inline crow::packet_ptr node_send(uint16_t sid, const char * rid, const igris::buffer addr,
-				   const igris::buffer data, uint8_t qos,
-				   uint16_t ackquant) 
+	        const igris::buffer data, uint8_t qos,
+	        uint16_t ackquant)
 	{
 		return crow::node_send(sid, rid, addr.data(), addr.size(), data.data(), data.size(), qos, ackquant);
 	}
 
 	crow::packet_ptr node_send_v(uint16_t sid, uint16_t rid, const igris::buffer addr,
-				   const igris::buffer * vec, size_t veclen, uint8_t qos,
-				   uint16_t ackquant);
+	                             const igris::buffer * vec, size_t veclen, uint8_t qos,
+	                             uint16_t ackquant);
 
 	crow::packet_ptr node_send_v(uint16_t sid, const char * rid, const igris::buffer addr,
-				   const igris::buffer * vec, size_t veclen, uint8_t qos,
-				   uint16_t ackquant);
+	                             const igris::buffer * vec, size_t veclen, uint8_t qos,
+	                             uint16_t ackquant);
 
-	static inline igris::buffer node_data(crow::packet *pack) 
+	static inline igris::buffer node_data(crow::packet *pack)
 	{
 		return node_protocol_cls::node_data(pack);
 	}
+
+
+
+	class node_packet_ptr : public packet_ptr
+	{
+	public:
+		node_packet_ptr(crow::packet *pack_) : packet_ptr(pack_) {}
+		node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
+		node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}
+
+		igris::buffer message() 
+		{
+			return node_data(pack);
+		}
+	};
 }
 
 #endif

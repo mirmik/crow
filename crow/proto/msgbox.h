@@ -32,7 +32,7 @@ namespace crow
 			crow::node_send(id, rid, addr.data(), addr.size(), data.data(), data.size(), qos, ackquant);
 		}
 
-		crow::packet_ptr query(void* addr, uint8_t alen, uint16_t rid,
+		crow::node_packet_ptr query(void* addr, uint8_t alen, uint16_t rid,
 			void* data, size_t dlen, 
 			uint8_t qos, uint16_t ackquant) 
 		{

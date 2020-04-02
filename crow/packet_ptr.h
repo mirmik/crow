@@ -52,10 +52,10 @@ namespace crow
 
 		operator bool() { return pack != nullptr; }
 
-//		VALUE_GETTER(addr, pack->addr());
-//		VALUE_GETTER(rawdata, pack->rawdata());
-//		VALUE_GETTER(qos, pack->header.qos);
-//		VALUE_GETTER(ackquant, pack->header.ackquant);
+		bool operator == (std::nullptr_t) 
+		{
+			return pack == nullptr;
+		}
 	};
 }
 
