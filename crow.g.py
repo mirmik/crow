@@ -5,6 +5,15 @@ import licant
 #	sources=["crow/src/netkeep_crowker.cpp"]
 #)
 
+licant.module("crow.select", "impl",
+	sources=["crow/select.cpp"],
+	defines = ["CROW_WITHOUT_SELECT_FDS=0"], default=True
+)
+
+licant.module("crow.select", "stub",
+	defines = ["CROW_WITHOUT_SELECT_FDS=1"]
+)
+
 licant.module("crow.diagnostic", "nos",
 	sources=["crow/src/print.cpp"],
 	default = True
@@ -22,7 +31,6 @@ licant.modules.module("crow",
 		"src/packet.cpp",
 		"src/packet_ptr.cpp",
 		"src/alive.cpp",
-		#"src/netkeep.cpp",
 		"src/hexer.c",
 		"src/address.cpp",
 		"src/gateway.cpp",
@@ -43,13 +51,8 @@ licant.modules.module("crow",
 		"crow.time",
 		"crow.include",
 		"crow.threads",
-		"crow.diagnostic"
-
-	#	"igris.include",
-	#	"igris.syslock",
-	#	"igris.dprint",
-
-	#	"nos"
+		"crow.diagnostic",
+		"crow.select"
 	]
 )
 

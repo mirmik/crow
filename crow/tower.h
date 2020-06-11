@@ -102,11 +102,15 @@ namespace crow
 	
 	void start_spin();
 	void stop_spin();
+	void start_spin_with_select();
 
 	bool has_untravelled();
+	bool has_untravelled_now();
 	void print_list_counts();
 
 	bool fully_empty();
+
+	int64_t get_minimal_timeout();
 
 	// Завершить гейты.
 	void finish();

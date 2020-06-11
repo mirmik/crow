@@ -7,6 +7,7 @@
 #include <crow/proto/acceptor.h>
 
 #include <crow/hexer.h>
+#include <crow/select.h>
 
 #include <igris/util/string.h>
 #include <igris/util/dstring.h>
@@ -25,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 #include <string>
 #include <map>
@@ -85,6 +87,8 @@ std::string pipelinecmd;
 
 int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
+
+int unselect_pipe_fd[2];
 
 enum class protoopt_e
 {
@@ -449,6 +453,9 @@ void *console_listener(void *arg)
 
 		if (msgpair.second)
 			send_do(msgpair.first);
+
+		//send unselect signal
+		write(unselect_pipe_fd[1], "a", 1);
 	}
 
 	exit(0);
@@ -460,6 +467,11 @@ char *serial_port = NULL;
 int main(int argc, char *argv[])
 {
 	pthread_t console_thread;
+
+	pipe(unselect_pipe_fd);
+	int flags = fcntl(unselect_pipe_fd[0], F_GETFL, 0);
+	fcntl(unselect_pipe_fd[0], F_SETFL, flags | O_NONBLOCK);
+	fcntl(unselect_pipe_fd[1], F_SETFL, flags | O_NONBLOCK);
 
 	const struct option long_options[] =
 	{
@@ -737,12 +749,20 @@ int main(int argc, char *argv[])
 		pipeline(pipelinecmd);
 	}
 
+	
 	//START CROW
+	crow::select_collect_fds();
+	crow::add_select_fd(unselect_pipe_fd[0]);
+
 	std::thread crowthr([]()
 	{
 		while (1)
 		{
-			crow::onestep();
+			crow::select();
+			do
+				crow::onestep();
+			while(crow::has_untravelled_now());
+
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 
 			if (cancel_token)
@@ -752,6 +772,9 @@ int main(int argc, char *argv[])
 
 				return;
 			}
+
+			char buf[512];
+			read(unselect_pipe_fd[0], buf, 512);
 		}
 	});
 

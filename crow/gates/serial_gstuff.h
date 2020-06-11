@@ -29,6 +29,11 @@ namespace crow
 
 		void send(crow::packet *) override;
 		void nblock_onestep() override;
+
+#if CROW_ENABLE_WITHOUT_FDS
+#else
+		virtual int get_fd() { return fd; }
+#endif
 	};
 
 	crow::serial_gstuff *create_serial_gstuff(const char *path,

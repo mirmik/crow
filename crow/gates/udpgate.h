@@ -26,6 +26,12 @@ namespace crow
 
 		int open(uint16_t port);
 		void finish();
+
+#if CROW_ENABLE_WITHOUT_FDS
+#else
+		int get_fd() { return sock; }
+#endif
+
 	};
 
 	udpgate *create_udpgate(uint8_t id, uint16_t port);

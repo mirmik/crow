@@ -33,7 +33,7 @@ void brocker::publish(std::shared_ptr<std::string> theme, std::shared_ptr<std::s
 		subs_count = thm.count_subscribers();
 		thm.publish(data);
 	}
-	catch (std::exception ex)
+	catch (std::exception& ex)
 	{
 		subs_count = 0;
 	}

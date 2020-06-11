@@ -4,9 +4,12 @@
 #include <thread>
 #include <chrono>
 
+#include <crow/select.h>
+
 static bool cancel_token = false;
 static std::thread _thread;
 
+__attribute__((deprecated))
 void crow::start_thread()
 {
 	std::thread thr([]()
@@ -34,6 +37,24 @@ void crow::start_spin()
 		};
 	});
 	//_thread.detach();
+}
+
+void crow::start_spin_with_select() 
+{
+	_thread = std::thread([]()
+	{
+		crow::select_collect_fds();
+		while (1)
+		{
+			if (cancel_token)
+				return;
+
+			crow::select();
+			do
+				crow::onestep();
+			while(crow::has_untravelled_now());
+		};
+	});
 }
 
 void crow::stop_spin() 

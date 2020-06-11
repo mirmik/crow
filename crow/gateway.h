@@ -28,6 +28,9 @@ namespace crow
 		virtual void finish(){};
 
 		gateway& bind(int gateno);
+#if !CROW_ENABLE_WITHOUT_FDS
+		virtual int get_fd() { return -1; }
+#endif
 	};
 } // namespace crow
 

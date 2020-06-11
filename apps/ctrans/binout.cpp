@@ -72,7 +72,7 @@ void binout_mode_prepare(const std::string& fmt)
 			binout_sizes.push_back(visitor_size.at(str));
 			binout_restores.push_back(visitor_restore.at(str));
 		}
-		catch (std::out_of_range ex) 
+		catch (std::out_of_range& ex) 
 		{
 			dpr(str); dprln(" is not in format list");
 			exit(-1);

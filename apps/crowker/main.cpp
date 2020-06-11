@@ -3,6 +3,7 @@
 #include <crow/tower.h>
 #include <crow/hexer.h>
 #include <crow/alive.h>
+#include <crow/select.h>
 
 #include <crow/netkeep.h>
 
@@ -322,10 +323,14 @@ int main(int argc, char *argv[])
 		thr.detach();
 	}
 
-	//crow::spin();
+	crow::select_collect_fds();
+	//crow::add_select_fd(unselect_pipe_fd[0]);
 	while(1) 
 	{
-		crow::onestep();
+		crow::select();
+		do
+			crow::onestep();
+		while(crow::has_untravelled_now());
 		std::this_thread::sleep_for(std::chrono::microseconds(1));
 	}
 }
