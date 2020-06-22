@@ -52,6 +52,37 @@ namespace crow
 		uint8_t qos; ///< Поле качества обслуживания.
 	} __attribute__((packed));
 
+	/*.................. version 2*/
+	struct transport_header
+	{
+		uint8_t proto_version;
+		uint8_t alen;  ///< Длина поля адреса.
+		uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
+					 ///< знала, какую часть адреса обрабатывать.
+		uint16_t flen; ///< Полная длина пакета
+	} __attribute__((packed));
+
+	struct package_header
+	{
+		union {
+			uint8_t pflag; ///< Флаги пакета
+			struct
+			{
+				uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
+								 ///< передается в типе.
+				uint8_t RESERVED : 1;
+				uint8_t noexec : 1; ///< Флаг предотвращает исполнение пакета.
+									///< Используется для запросов существования
+				uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
+			} f;
+		};
+		uint16_t ackquant; ///< Таймаут для пересылки пакета.
+		uint16_t seqid; ///< Порядковый номер пакета. Присваивается отправителем.
+		uint8_t qos; ///< Поле качества обслуживания.
+	} __attribute__((packed));
+
+	/*....................*/
+
 	struct packet
 	{
 		struct dlist_head lnk = DLIST_HEAD_INIT(lnk);; ///< Для подключения в списки башни crow.
