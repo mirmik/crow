@@ -106,8 +106,8 @@ static void utilize_from_outers(crow::packet *pack)
 	dlist_for_each_entry(it, &crow_outters, lnk)
 	{
 		if (it->header.seqid == pack->header.seqid &&
-				pack->header.alen == it->header.alen &&
-				!memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
+		        pack->header.alen == it->header.alen &&
+		        !memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
 		{
 			pack->f.confirmed = 1;
 			crow_tower_release(it);
@@ -122,8 +122,8 @@ static void qos_release_from_incoming(crow::packet *pack)
 	dlist_for_each_entry(it, &crow_incoming, lnk)
 	{
 		if (it->header.seqid == pack->header.seqid &&
-				pack->header.alen == it->header.alen &&
-				!memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
+		        pack->header.alen == it->header.alen &&
+		        !memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
 		{
 			crow_tower_release(it);
 			return;
@@ -131,7 +131,7 @@ static void qos_release_from_incoming(crow::packet *pack)
 	}
 }
 
-bool crow_time_comparator(crow::packet* a, crow::packet* b) 
+bool crow_time_comparator(crow::packet* a, crow::packet* b)
 {
 	uint64_t a_timer = a->last_request_time + a->header.ackquant;
 	uint64_t b_timer = b->last_request_time + b->header.ackquant;
@@ -204,7 +204,7 @@ static void crow_send_ack(crow::packet *pack)
 		return;
 
 	ack->header.f.type =
-		pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
+	    pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
 	ack->header.f.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
 	ack->header.ackquant = pack->header.ackquant;
@@ -289,7 +289,7 @@ static void crow_do_travel(crow::packet *pack)
 			//Для пакетов с подтверждение посылаем ack первого или второго
 			//типов.
 			if (pack->header.qos == CROW_TARGET_ACK ||
-					pack->header.qos == CROW_BINARY_ACK)
+			        pack->header.qos == CROW_BINARY_ACK)
 				crow_send_ack(pack);
 
 			if (pack->header.qos == CROW_BINARY_ACK)
@@ -300,9 +300,9 @@ static void crow_do_travel(crow::packet *pack)
 				dlist_for_each_entry(inc, &crow_incoming, lnk)
 				{
 					if (inc->header.seqid == pack->header.seqid &&
-							inc->header.alen == pack->header.alen &&
-							memcmp(inc->addrptr(), pack->addrptr(),
-								   inc->header.alen) == 0)
+					        inc->header.alen == pack->header.alen &&
+					        memcmp(inc->addrptr(), pack->addrptr(),
+					               inc->header.alen) == 0)
 					{
 						crow_utilize(pack);
 
@@ -381,10 +381,13 @@ static crow::packet_ptr crow_transport(crow::packet *pack)
 	return crow::travel(pack);
 }
 
-crow::packet_ptr crow::send(const void *addr, uint8_t asize, const char *data,
-							uint16_t dsize, uint8_t type, uint8_t qos, uint16_t ackquant)
+crow::packet_ptr crow::send(const crow::hostaddr & addr,
+                            const igris::buffer data,
+                            uint8_t type,
+                            uint8_t qos,
+                            uint16_t ackquant)
 {
-	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
+	crow::packet *pack = crow::create_packet(NULL, addr.size(), data.size());
 	if (pack == nullptr)
 		return nullptr;
 
@@ -392,14 +395,14 @@ crow::packet_ptr crow::send(const void *addr, uint8_t asize, const char *data,
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
 
-	memcpy(pack->addrptr(), addr, asize);
-	memcpy(pack->dataptr(), data, dsize);
+	memcpy(pack->addrptr(), addr.data(), addr.size());
+	memcpy(pack->dataptr(), data.data(), data.size());
 
 	return crow_transport(pack);
 }
 
-crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const igris::buffer *vec,
-							  size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
+crow::packet_ptr crow::send_v(const crow::hostaddr & addr, const igris::buffer *vec,
+                              size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	size_t dsize = 0;
 	const igris::buffer *it = vec;
@@ -410,7 +413,7 @@ crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const igris::buff
 		dsize += it->size();
 	}
 
-	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
+	crow::packet *pack = crow::create_packet(NULL, addr.size(), dsize);
 	if (pack == nullptr)
 		return nullptr;
 
@@ -418,7 +421,7 @@ crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const igris::buff
 	pack->header.qos = qos;
 	pack->header.ackquant = ackquant;
 
-	memcpy(pack->addrptr(), addr, asize);
+	memcpy(pack->addrptr(), addr.data(), addr.size());
 
 	it = vec;
 	char *dst = pack->dataptr();
@@ -432,10 +435,10 @@ crow::packet_ptr crow::send_v(const void *addr, uint8_t asize, const igris::buff
 	return crow_transport(pack);
 }
 
-crow::packet_ptr crow::send_vv(const igris::buffer addr,
-							   const igris::buffer* vec, size_t veclen,
-							   const igris::buffer* vec2, size_t veclen2,
-							   uint8_t type, uint8_t qos, uint16_t ackquant)
+crow::packet_ptr crow::send_vv(const crow::hostaddr & addr,
+                               const igris::buffer* vec, size_t veclen,
+                               const igris::buffer* vec2, size_t veclen2,
+                               uint8_t type, uint8_t qos, uint16_t ackquant)
 {
 	size_t dsize = 0;
 	const igris::buffer *it;
@@ -520,7 +523,7 @@ void crow::onestep_travel_only()
 			break;
 
 		crow::packet *pack =
-			dlist_first_entry(&crow_travelled, crow::packet, lnk);
+		    dlist_first_entry(&crow_travelled, crow::packet, lnk);
 		dlist_del_init(&pack->lnk);
 
 		crow_do_travel(pack);
@@ -682,10 +685,10 @@ void crow::spin()
 bool crow::has_untravelled()
 {
 	return ! (
-			   dlist_empty(&crow_travelled) &&
-			   dlist_empty(&crow_outters) &&
-			   dlist_empty(&crow_incoming)
-		   );
+	           dlist_empty(&crow_travelled) &&
+	           dlist_empty(&crow_outters) &&
+	           dlist_empty(&crow_incoming)
+	       );
 }
 
 bool crow::has_untravelled_now()
@@ -715,27 +718,29 @@ bool crow::fully_empty()
 	return dlist_empty(&crow_travelled) && dlist_empty(&crow_incoming) && dlist_empty(&crow_outters);
 }
 
-int64_t crow::get_minimal_timeout() 
+int64_t crow::get_minimal_timeout()
 {
 	int64_t result;
 	int64_t i_finish;
 	int64_t o_finish;
-	int64_t curtime = crow::millis(); 
-	
-	if (!dlist_empty(&crow_incoming)) {
+	int64_t curtime = crow::millis();
+
+	if (!dlist_empty(&crow_incoming))
+	{
 		crow::packet * i = dlist_first_entry(&crow_incoming, crow::packet, lnk);
-		i_finish = i->last_request_time + i->header.ackquant; 
+		i_finish = i->last_request_time + i->header.ackquant;
 	}
-	else 
+	else
 	{
 		i_finish = -1;
 	}
 
-	if (!dlist_empty(&crow_outters)) {
+	if (!dlist_empty(&crow_outters))
+	{
 		crow::packet * o = dlist_first_entry(&crow_outters, crow::packet, lnk);
 		o_finish = o->last_request_time + o->header.ackquant;
 	}
-	else 
+	else
 	{
 		o_finish = -1;
 	}
@@ -749,10 +754,10 @@ int64_t crow::get_minimal_timeout()
 	else if (i_finish > 0)
 		result = i_finish - curtime;
 
-	else 
+	else
 		return -1;
 
-	if (result < 0) 
+	if (result < 0)
 		return 0;
 
 	return result;

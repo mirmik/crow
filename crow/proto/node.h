@@ -2,6 +2,7 @@
 #define CROW_NODE_H
 
 #include <crow/packet.h>
+#include <crow/address.h>
 #include <crow/proto/protocol.h>
 
 #include <igris/container/dlist.h>
@@ -13,6 +14,21 @@
 
 namespace crow
 {
+	crow::packet_ptr node_send(uint16_t sid,
+	                           uint16_t rid,
+	                           const crow::hostaddr & addr,
+	                           const igris::buffer data,
+	                           uint8_t qos,
+	                           uint16_t ackquant);
+
+	crow::packet_ptr node_send_v(uint16_t sid,
+	                             uint16_t rid,
+	                             const crow::hostaddr & addr,
+	                             const igris::buffer * vec,
+	                             size_t veclen,
+	                             uint8_t qos,
+	                             uint16_t ackquant);
+
 	struct node_subheader
 	{
 		uint16_t sid;
@@ -47,10 +63,39 @@ namespace crow
 		int waitevent();
 		void notify_one(int future);
 
-		virtual const char* typestr() { return "node"; }
+		virtual const char* typestr()
+		{
+			return "node";
+		}
 
-		node& bind(int addr) 	{ link_node(this, addr); return *this; };
-		node& bind() 			{ bind_node_dynamic(this); return *this; };
+		node& bind(int addr)
+		{
+			link_node(this, addr); return *this;
+		};
+
+		node& bind()
+		{
+			bind_node_dynamic(this); return *this;
+		};
+
+		crow::packet_ptr send(uint16_t rid,
+		                      const crow::hostaddr& raddr,
+		                      const igris::buffer data,
+		                      uint8_t qos,
+		                      uint16_t ackquant)
+		{
+			return crow::node_send(id, rid, raddr, data, qos, ackquant);
+		}
+
+		crow::packet_ptr send_v(uint16_t rid,
+		                        const crow::hostaddr& raddr,
+		                        const igris::buffer * vdat,
+		                        size_t vlen,
+		                        uint8_t qos,
+		                        uint16_t ackquant)
+		{
+			return crow::node_send_v(id, rid, raddr, vdat, vlen, qos, ackquant);
+		}
 	};
 
 	class system_node_cls : public node
@@ -123,36 +168,6 @@ namespace crow
 	extern node_protocol_cls node_protocol;
 	extern igris::dlist<node, &node::lnk> nodes;
 
-	crow::packet_ptr node_send(uint16_t sid, uint16_t rid, const void *raddr, size_t rlen,
-	                           const void *data, size_t size, uint8_t qos,
-	                           uint16_t ackquant);
-
-	crow::packet_ptr node_send(uint16_t sid, const char * rid, const void *raddr, size_t rlen,
-	                           const void *data, size_t size, uint8_t qos,
-	                           uint16_t ackquant);
-
-	static inline crow::packet_ptr node_send(uint16_t sid, uint16_t rid, const igris::buffer addr,
-	        const igris::buffer data, uint8_t qos,
-	        uint16_t ackquant)
-	{
-		return crow::node_send(sid, rid, addr.data(), addr.size(), data.data(), data.size(), qos, ackquant);
-	}
-
-	static inline crow::packet_ptr node_send(uint16_t sid, const char * rid, const igris::buffer addr,
-	        const igris::buffer data, uint8_t qos,
-	        uint16_t ackquant)
-	{
-		return crow::node_send(sid, rid, addr.data(), addr.size(), data.data(), data.size(), qos, ackquant);
-	}
-
-	crow::packet_ptr node_send_v(uint16_t sid, uint16_t rid, const igris::buffer addr,
-	                             const igris::buffer * vec, size_t veclen, uint8_t qos,
-	                             uint16_t ackquant);
-
-	crow::packet_ptr node_send_v(uint16_t sid, const char * rid, const igris::buffer addr,
-	                             const igris::buffer * vec, size_t veclen, uint8_t qos,
-	                             uint16_t ackquant);
-
 	static inline igris::buffer node_data(crow::packet *pack)
 	{
 		return node_protocol_cls::node_data(pack);
@@ -167,7 +182,7 @@ namespace crow
 		node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
 		node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}
 
-		igris::buffer message() 
+		igris::buffer message()
 		{
 			return node_data(pack);
 		}

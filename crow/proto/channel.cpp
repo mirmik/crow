@@ -23,10 +23,10 @@ void crow::channel::incoming_packet(crow::packet *pack)
 			{
 				crow::subheader_handshake *sh_handshake =
 				    crow::get_subheader_handshake(pack);
-				
+
 				// TODO: перенести аллокацию под адрес в другое место
 				//raddr_ptr = malloc(pack->header.alen);
-				if (pack->header.alen > raddr_cap) 
+				if (pack->header.alen > raddr_cap)
 					return;
 
 				memcpy(raddr_ptr, pack->addrptr(), pack->header.alen);
@@ -35,12 +35,12 @@ void crow::channel::incoming_packet(crow::packet *pack)
 
 				this->qos = sh_handshake->qos;
 				this->ackquant = sh_handshake->ackquant;
-				
+
 				send_handshake_answer();
-				
+
 				_state = CROW_CHANNEL_CONNECTED;
 			}
-			else 
+			else
 			{
 				dprln("WARN: HANDSHAKE_REQUEST on another state");
 			}
@@ -49,15 +49,15 @@ void crow::channel::incoming_packet(crow::packet *pack)
 
 		case crow::Frame::HANDSHAKE_ANSWER:
 			// Кто-то ответил на зов.
-			if (_state == CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER) 
+			if (_state == CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER)
 			{
 				// Если мы еще ни с кем и никогда.
 				crow::subheader_handshake *sh_handshake =
 				    crow::get_subheader_handshake(pack);
-				
+
 				// TODO: перенести аллокацию под адрес в другое место
 				//raddr_ptr = malloc(pack->header.alen);
-				if (pack->header.alen > raddr_cap) 
+				if (pack->header.alen > raddr_cap)
 					return;
 
 				memcpy(raddr_ptr, pack->addrptr(), pack->header.alen);
@@ -65,13 +65,13 @@ void crow::channel::incoming_packet(crow::packet *pack)
 				rid = sh_node->sid;
 				qos = sh_handshake->qos;
 				ackquant = sh_handshake->ackquant;
-				
+
 				_state = CROW_CHANNEL_CONNECTED;
 				notify_one(0);
 			}
-			else 
+			else
 			{
-				dprln("WARN: HANDSHAKE_ANSWER on another state");				
+				dprln("WARN: HANDSHAKE_ANSWER on another state");
 			}
 
 			break;
@@ -104,8 +104,11 @@ void crow::channel::undelivered_packet(crow::packet * pack)
 	crow::release(pack);
 }
 
-void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint16_t rid, 
-	uint8_t qos, uint16_t ackquant)
+void crow::channel::handshake(const uint8_t *raddr_ptr,
+                              uint16_t raddr_len,
+                              uint16_t rid,
+                              uint8_t qos,
+                              uint16_t ackquant)
 {
 	crow::node_subheader sh_node;
 	crow::subheader_channel sh_channel;
@@ -131,11 +134,11 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len, uint
 	_state = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER;
 
 	//_state = crow::State::CONNECTED;
-	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(igris::buffer),
+	crow::send_v({raddr_ptr, raddr_len}, vec, sizeof(vec) / sizeof(igris::buffer),
 	             CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
-void crow::channel::send_handshake_answer() 
+void crow::channel::send_handshake_answer()
 {
 	crow::node_subheader sh_node;
 	crow::subheader_channel sh_channel;
@@ -159,13 +162,13 @@ void crow::channel::send_handshake_answer()
 	};
 
 	//_state = crow::State::CONNECTED;
-	crow::send_v(raddr_ptr, raddr_len, vec, sizeof(vec) / sizeof(igris::buffer),
-	             CROW_NODE_PROTOCOL, 2, ackquant);	
+	crow::send_v({raddr_ptr, raddr_len}, vec, sizeof(vec) / sizeof(igris::buffer),
+	             CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
 int crow::channel::send(const char *data, size_t size)
 {
-	if (_state != CROW_CHANNEL_CONNECTED) 
+	if (_state != CROW_CHANNEL_CONNECTED)
 	{
 		return CROW_CHANNEL_ERR_NOCONNECT;
 	}
@@ -176,7 +179,7 @@ int crow::channel::send(const char *data, size_t size)
 	sh_node.sid = this->id;
 	sh_node.rid = this->rid;
 	sh_node.type = CROW_NODEPACK_COMMON;
-	
+
 	sh_channel.frame_id = this->fid++;
 	sh_channel.ftype = crow::Frame::DATA;
 
@@ -187,7 +190,7 @@ int crow::channel::send(const char *data, size_t size)
 		{(void *)data, size},
 	};
 
-	crow::send_v(this->raddr_ptr, this->raddr_len, vec, sizeof(vec) / sizeof(igris::buffer),
+	crow::send_v({this->raddr_ptr, this->raddr_len}, vec, sizeof(vec) / sizeof(igris::buffer),
 	             CROW_NODE_PROTOCOL, this->qos, this->ackquant);
 
 	return 0;

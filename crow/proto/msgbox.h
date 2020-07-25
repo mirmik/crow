@@ -1,56 +1,44 @@
 #ifndef CROW_MSGBOX_H
 #define CROW_MSGBOX_H
 
+#include <crow/address.h>
 #include <crow/proto/node.h>
 #include <igris/datastruct/dlist.h>
 #include <igris/sync/syslock.h>
+
+#include <vector>
 
 #define CROW_MSGBOX_STATE_NONE 0
 #define CROW_MSGBOX_STATE_SEND 1
 #define CROW_MSGBOX_STATE_RECEIVE 2
 
-namespace crow 
+namespace crow
 {
 	class msgbox : public crow::node
 	{
 		struct dlist_head messages = DLIST_HEAD_INIT(messages);
 
 	public:
-		void send(void* addr, uint8_t alen, uint16_t rid,
-			void* data, size_t dlen, 
-			uint8_t qos, uint16_t ackquant) 
-		{
-		//	state = CROW_MSGBOX_STATE_SEND;
-			crow::node_send(id, rid, addr, alen, data, dlen, qos, ackquant);
-		}
-
-		void send(const std::vector<uint8_t>& addr, uint16_t rid,
-			const std::string& data, 
-			uint8_t qos, uint16_t ackquant) 
-		{
-		//	state = CROW_MSGBOX_STATE_SEND;
-			crow::node_send(id, rid, addr.data(), addr.size(), data.data(), data.size(), qos, ackquant);
-		}
-
-		crow::node_packet_ptr query(void* addr, uint8_t alen, uint16_t rid,
-			void* data, size_t dlen, 
-			uint8_t qos, uint16_t ackquant) 
+		crow::node_packet_ptr query(uint16_t rid,
+		                            const crow::hostaddr & addr,
+		                            const igris::buffer data,
+		                            uint8_t qos, uint16_t ackquant)
 		{
 			assert(dlist_empty(&messages));
-			send(addr, alen, rid, data, dlen, qos, ackquant);
+			send(rid, addr, data, qos, ackquant);
 			return receive();
-		}		
+		}
 
-		crow::packet_ptr receive() 
+		crow::packet_ptr receive()
 		{
 			system_lock();
 
-			while (dlist_empty(&messages)) 
+			while (dlist_empty(&messages))
 			{
 				system_unlock();
 
 				int sts = waitevent();
-				if (sts == -1) 
+				if (sts == -1)
 					return nullptr;
 
 				system_lock();
@@ -64,7 +52,7 @@ namespace crow
 			return pack;
 		}
 
-		void incoming_packet(crow::packet *pack) override 
+		void incoming_packet(crow::packet *pack) override
 		{
 			system_lock();
 			dlist_add_tail(&pack->ulnk, &messages);
@@ -72,7 +60,7 @@ namespace crow
 			system_unlock();
 		}
 
-		void undelivered_packet(crow::packet *pack) override 
+		void undelivered_packet(crow::packet *pack) override
 		{
 			system_lock();
 			notify_one(-1);

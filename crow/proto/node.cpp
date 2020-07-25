@@ -9,9 +9,12 @@
 igris::dlist<crow::node, &crow::node::lnk> crow::nodes;
 crow::node_protocol_cls crow::node_protocol;
 
-crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid, const void *raddr,
-                     size_t rsize, const void *data, size_t size, uint8_t qos,
-                     uint16_t ackquant)
+crow::packet_ptr crow::node_send(uint16_t sid,
+                                 uint16_t rid,
+                                 const crow::hostaddr & addr,
+                                 const igris::buffer data,
+                                 uint8_t qos,
+                                 uint16_t ackquant)
 {
 	crow::node_subheader sh;
 	sh.sid = sid;
@@ -19,65 +22,31 @@ crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid, const void *raddr,
 	sh.type = CROW_NODEPACK_COMMON;
 	sh.namerid = false;
 
-	const igris::buffer iov[2] = {{(void *)&sh, sizeof(sh)}, {(void *)data, size}};
+	const igris::buffer iov[2] = {{(void *)&sh, sizeof(sh)}, {(void *)data.data(), data.size()}};
 
-	return crow::send_v(raddr, rsize, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
+	return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
-crow::packet_ptr crow::node_send(uint16_t sid, const char* rid, const void *raddr,
-                     size_t rsize, const void *data, size_t size, uint8_t qos,
-                     uint16_t ackquant)
+crow::packet_ptr crow::node_send_v(uint16_t sid,
+                                   uint16_t rid,
+                                   const crow::hostaddr & addr,
+                                   const igris::buffer * vec,
+                                   size_t veclen,
+                                   uint8_t qos,
+                                   uint16_t ackquant)
 {
 	crow::node_subheader sh;
 	sh.sid = sid;
-	sh.rid = strlen(rid);
+	sh.rid = rid;
 	sh.type = CROW_NODEPACK_COMMON;
-	sh.namerid = true;
+	sh.namerid = false;
 
-	const igris::buffer iov[3] =
+	const igris::buffer iov[1] =
 	{
-		{(void *)&sh, sizeof(sh)},
-		{(void *)rid, sh.rid},
-		{(void *)data, size}
-	};
-
-	return crow::send_v(raddr, rsize, iov, 3, CROW_NODE_PROTOCOL, qos, ackquant);
-}
-
-crow::packet_ptr crow::node_send_v(uint16_t sid, uint16_t rid, const igris::buffer addr,
-    	const igris::buffer * vec, size_t veclen, uint8_t qos,
-	    uint16_t ackquant) 
-{
-	crow::node_subheader sh;
-	sh.sid = sid;
-	sh.rid = rid;
-	sh.type = CROW_NODEPACK_COMMON;
-	sh.namerid = false;
-
-	const igris::buffer iov[1] = {
 		{(void *)&sh, sizeof(sh)}
 	};
 
 	return crow::send_vv(addr, iov, 1, vec, veclen, CROW_NODE_PROTOCOL, qos, ackquant);
-}
-
-crow::packet_ptr crow::node_send_v(uint16_t sid, const char * rid, const igris::buffer addr,
-	   const igris::buffer * vec, size_t veclen, uint8_t qos,
-	   uint16_t ackquant) 
-{
-	crow::node_subheader sh;
-	sh.sid = sid;
-	sh.rid = strlen(rid);
-	sh.type = CROW_NODEPACK_COMMON;
-	sh.namerid = true;
-
-	const igris::buffer iov[2] =
-	{
-		{(void *)&sh, sizeof(sh)},
-		{(void *)rid, sh.rid},
-	};
-
-	return crow::send_vv(addr, iov, 2, vec, veclen, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
 void crow::node_protocol_cls::send_node_error(
@@ -95,8 +64,7 @@ void crow::node_protocol_cls::send_node_error(
 		{(void *)&errcode, sizeof(errcode)}
 	};
 
-	crow::send_v(pack->addrptr(), pack->addrsize(),
-	             iov, 2, CROW_NODE_PROTOCOL, 0, pack->ackquant());
+	crow::send_v(pack->addr(), iov, 2, CROW_NODE_PROTOCOL, 0, pack->ackquant());
 }
 
 void crow::node_protocol_cls::incoming(crow::packet *pack)
@@ -127,7 +95,7 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 				srv = &srvs;
 				break;
 			}
-		}	
+		}
 	}
 
 	if (srv == nullptr)
@@ -175,27 +143,29 @@ void crow::link_node(crow::node *srv, uint16_t id)
 	system_unlock();
 }
 
-crow::node * crow::find_node(int id) 
+crow::node * crow::find_node(int id)
 {
-	for (crow::node& node : nodes) 
+	for (crow::node& node : nodes)
 	{
-		if (node.id == id) 
+		if (node.id == id)
 			return &node;
 	}
 
 	return nullptr;
 }
 
-void crow::bind_node_dynamic(crow::node *srv) 
+void crow::bind_node_dynamic(crow::node *srv)
 {
 	// Динамические порты располагаются в верхнем полупространстве.
 	static uint16_t counter = (1 << 15);
-	
-	do {
+
+	do
+	{
 		counter++;
-		if (counter == 0) counter = (1<<15);
-	} while (crow::find_node(counter) != nullptr);
-	
+		if (counter == 0) counter = (1 << 15);
+	}
+	while (crow::find_node(counter) != nullptr);
+
 	crow::link_node(srv, counter);
 }
 
@@ -217,16 +187,14 @@ void crow::system_node_cls::incoming_packet(crow::packet *pack)
 			//buf[len+1] = 0;
 			sprintf(buf, "%d %s %s\n", srvs.id, srvs.typestr(), srvs.mnem);
 
-			node_send(0, sh->sid, pack->addrptr(), pack->addrsize(),
-			          buf, strlen(buf), 0, 200);
+			node_send(0, sh->sid, {pack->addrptr(), pack->addrsize()}, {buf, strlen(buf)}, 0, 200);
 		}
 	}
 
-	else 
+	else
 	{
 		sprintf(buf, "Unrecognized command\n");
-		node_send(0, sh->sid, pack->addrptr(), pack->addrsize(),
-	          buf, strlen(buf), 0, 200);
-			
+		node_send(0, sh->sid, pack->addr(), {buf, strlen(buf)}, 0, 200);
+
 	}
 }

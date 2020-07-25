@@ -1,5 +1,5 @@
-#ifndef CROW_HEXER_H
-#define CROW_HEXER_H
+#ifndef CROW_ADDRESS_H
+#define CROW_ADDRESS_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -10,6 +10,7 @@
 #ifdef __cplusplus
 #include <string>
 #include <vector>
+#include <igris/buffer.h>
 #endif
 
 #define CROW_HEXER_UNDEFINED_SYMBOL -1
@@ -36,6 +37,21 @@ namespace crow
 {
 	std::vector<uint8_t> address(const std::string& in);
 	std::vector<uint8_t> address_warned(const std::string& in);
+
+	class hostaddr
+	{
+	public:
+		const void * addr;
+		size_t       alen;
+
+		hostaddr() = default;
+		hostaddr(const std::vector<uint8_t> & v) : addr(v.data()), alen(v.size()) {}
+		hostaddr(const igris::buffer & v) : addr(v.data()), alen(v.size()) {}
+		hostaddr(const void * addr, size_t alen) : addr(addr), alen(alen) {}
+
+		const void * data() const { return addr; }
+		const size_t size() const { return alen; }
+	};
 }
 #endif
 

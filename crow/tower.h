@@ -1,6 +1,7 @@
 #ifndef CROW_TOWER_H
 #define CROW_TOWER_H
 
+#include <crow/address.h>
 #include <crow/gateway.h>
 #include <crow/packet_ptr.h>
 
@@ -32,42 +33,42 @@ namespace crow
 	void nocontrol_travel(crow::packet *pack);
 
 	// Включить трассировку пакетов.
-	void diagnostic_enable(); 
+	void diagnostic_enable();
 	void enable_diagnostic();
 
 	// Включить трассировку аллокации.
 	void live_diagnostic_enable();
 	void enable_live_diagnostic();
 
-	inline void diagnostic_setup(bool en, bool len=false) 
-	{ 
+	inline void diagnostic_setup(bool en, bool len = false)
+	{
 		if (en)
-			diagnostic_enable(); 
+			diagnostic_enable();
 
 		if (len)
 			live_diagnostic_enable();
 	}
 
 	// Отправить пакет.
-	crow::packet_ptr send(const void *addr, uint8_t asize,
-	          const char *data, uint16_t dsize,
-	          uint8_t type, uint8_t qos, uint16_t ackquant);
+	crow::packet_ptr send(const crow::hostaddr & addr,
+	                      igris::buffer data,
+	                      uint8_t type,
+	                      uint8_t qos,
+	                      uint16_t ackquant);
 
-	crow::packet_ptr send_v(const void *addr, uint8_t asize,
-	            const igris::buffer* vec, size_t veclen,
-	            uint8_t type, uint8_t qos, uint16_t ackquant);
+	crow::packet_ptr send_v(const crow::hostaddr & addr,
+	                        const igris::buffer* vec,
+	                        size_t veclen,
+	                        uint8_t type,
+	                        uint8_t qos,
+	                        uint16_t ackquant);
 
-	static inline crow::packet_ptr send_v(const igris::buffer buf,
-	            const igris::buffer* vec, size_t veclen,
-	            uint8_t type, uint8_t qos, uint16_t ackquant) 
-	{
-		return send_v(buf.data(), buf.size(), vec, veclen, type, qos, ackquant);
-	}
-
-	crow::packet_ptr send_vv(const igris::buffer buf,
-	            const igris::buffer* vec, size_t veclen,
-	            const igris::buffer* vec2, size_t veclen2,
-	            uint8_t type, uint8_t qos, uint16_t ackquant);
+	crow::packet_ptr send_vv(const crow::hostaddr & addr,
+	                         const igris::buffer* vec, size_t veclen,
+	                         const igris::buffer* vec2, size_t veclen2,
+	                         uint8_t type,
+	                         uint8_t qos,
+	                         uint16_t ackquant);
 
 	// Эта функция вызывается вратами после обработки отсылаемого пакета.
 	void return_to_tower(crow::packet *pack, uint8_t sts);
@@ -77,7 +78,7 @@ namespace crow
 	{
 		gate->id = id;
 
-		for (auto & gate: crow_gateways) 
+		for (auto & gate : crow_gateways)
 		{
 			if (gate.id == id)
 				return -1;
@@ -99,7 +100,7 @@ namespace crow
 
 	[[deprecated]]
 	void start_thread();
-	
+
 	void start_spin();
 	void stop_spin();
 	void start_spin_with_select();
