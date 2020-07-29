@@ -12,14 +12,11 @@ licant.libs.include("nos")
 application("target", 
 	sources = ["main.cpp"],
 	mdepends = [
-		("crow.minimal"),
-		
-		("crow.allocator", "malloc"),
-		("crow.time", "chrono"),
-
+		"crow",
 		"igris", "nos"
 	],
 	cxx_flags = "",
+	libs=["pthread"]
 )
 
 licant.ex("target")

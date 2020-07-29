@@ -10,36 +10,8 @@ static bool cancel_token = false;
 static std::thread _thread;
 
 __attribute__((deprecated))
-void crow::start_thread()
-{
-	std::thread thr([]()
-	{
-		while (1)
-		{
-			crow::onestep();
-			std::this_thread::sleep_for(std::chrono::microseconds(1));
-		};
-	});
-	thr.detach();
-}
 
-void crow::start_spin()
-{
-	_thread = std::thread([]()
-	{
-		while (1)
-		{
-			if (cancel_token)
-				return;
-
-			crow::onestep();
-			std::this_thread::sleep_for(std::chrono::microseconds(1));
-		};
-	});
-	//_thread.detach();
-}
-
-void crow::start_spin_with_select() 
+void crow::start_spin() 
 {
 	_thread = std::thread([]()
 	{
@@ -53,6 +25,21 @@ void crow::start_spin_with_select()
 			do
 				crow::onestep();
 			while(crow::has_untravelled_now());
+		};
+	});
+}
+
+void crow::start_spin_without_select()
+{
+	_thread = std::thread([]()
+	{
+		while (1)
+		{
+			if (cancel_token)
+				return;
+
+			crow::onestep();
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		};
 	});
 }

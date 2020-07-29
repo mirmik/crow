@@ -9,7 +9,7 @@
 #include <igris/event/delegate.h>
 #include <igris/sync/syslock.h>
 
-#include <string>
+#include <string_view>
 #include <vector>
 
 struct crow_theme;
@@ -55,33 +55,9 @@ namespace crow
 	extern pubsub_protocol_cls pubsub_protocol;
 
 	void publish(
-	    const uint8_t * raddr, uint8_t rlen,
-	    const char *theme,
-	    const void* data, uint16_t dsize,
-	    uint8_t qos, uint16_t acktime);
-
-	void publish(const uint8_t * raddr, uint8_t rlen,
-	             const char *theme,
-	             const char *data,
-	             uint8_t qos, uint16_t acktime);
-
-	void publish(const uint8_t * raddr, uint8_t rlen,
-	             const char* theme,
-	             const std::string& data,
-	             uint8_t qos, uint16_t acktime);
-
-	void publish(
-	    const std::vector<uint8_t> & addr,
-	    const std::string & theme,
-	    const std::string & data,
-	    uint8_t qos,
-	    uint16_t acktime);
-
-	void publish(
-	    const std::vector<uint8_t> & addr,
-	    const char* theme,
-	    const void * data,
-	    uint16_t dsize,
+	    const crow::hostaddr & addr,
+	    const std::string_view theme,
+	    const igris::buffer data,
 	    uint8_t qos,
 	    uint16_t acktime);
 
@@ -94,14 +70,9 @@ namespace crow
 	//               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
 	//               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);
 
-	void subscribe(const uint8_t * raddr, uint8_t rlen,
-	               const char *theme,
+	void subscribe(const crow::hostaddr & addr,
+	               std::string_view theme,
 	               uint8_t qo0, uint16_t acktime,
-	               uint8_t rqos, uint16_t racktime);
-
-	void subscribe(const std::vector<uint8_t> & addr,
-	               const std::string & theme,
-	               uint8_t qos, uint16_t acktime,
 	               uint8_t rqos, uint16_t racktime);
 
 	void publish_buffer(const char *theme, const void *data, uint16_t datsz,
@@ -178,8 +149,7 @@ namespace crow
 		dlist_head lnk;
 
 	public:
-		const uint8_t * addr;
-		uint8_t alen;
+		crow::hostaddr addr;
 		const char * theme;
 		uint8_t qos;
 		uint16_t ackquant;
@@ -192,8 +162,7 @@ namespace crow
 		subscriber() = default;
 
 		subscriber(
-		    const uint8_t * addr,
-		    uint8_t alen,
+		    const crow::hostaddr & addr,
 		    const char * theme,
 		    uint8_t qos,
 		    uint16_t ackquant,
@@ -201,9 +170,8 @@ namespace crow
 		    uint16_t rackquant,
 		    igris::delegate<void, crow::packet*> dlg
 		)
+			: addr(addr)
 		{
-			this->addr = addr;
-			this->alen = alen;
 			this->theme = theme;
 			this->qos = qos;
 			this->ackquant = ackquant;
@@ -217,8 +185,7 @@ namespace crow
 		}
 
 		void subscribe(
-		    const uint8_t * addr,
-		    uint8_t alen,
+		    const crow::hostaddr & addr,
 		    const char * theme,
 		    uint8_t qos,
 		    uint16_t ackquant,
@@ -228,7 +195,6 @@ namespace crow
 		)
 		{
 			this->addr = addr;
-			this->alen = alen;
 			this->theme = theme;
 			this->qos = qos;
 			this->ackquant = ackquant;
@@ -243,64 +209,42 @@ namespace crow
 			resubscribe();
 		}
 
-		void subscribe(
-		    const std::vector<uint8_t>& addr,
-		    const char * theme,
-		    uint8_t qos,
-		    uint16_t ackquant,
-		    uint8_t rqos,
-		    uint16_t rackquant,
-		    igris::delegate<void, crow::packet*> dlg
-		)
-		{
-			subscribe(addr.data(), addr.size(), theme, qos, ackquant, rqos, rackquant, dlg);
-		}
-
 		void resubscribe()
 		{
-			crow::subscribe(addr, alen, theme, qos, ackquant, rqos, rackquant);
+			crow::subscribe(addr, theme, qos, ackquant, rqos, rackquant);
 		}
 	};
 
-	class publisher 
+	class publisher
 	{
 	private:
 		const char * theme;
-		const uint8_t * addr;
-		uint8_t alen;
-		uint8_t qos=0;
-		uint16_t acktime=50;
-	
+		crow::hostaddr addr;
+		uint8_t qos = 0;
+		uint16_t acktime = 50;
+
 	public:
-		publisher(){}
+		publisher() {}
 
-		publisher(const uint8_t* addr, uint8_t alen, const char* theme);
+		publisher(const crow::hostaddr & addr, const char* theme);
 
-		void init(const uint8_t* addr, uint8_t alen, const char* theme) 
-		{ 
-			this->addr = addr; 
-			this->alen = alen; 
-			this->theme = theme; 
-		}
-		
-		void init(const uint8_t* addr, uint8_t alen, const char* theme, 
-			uint8_t qos, uint16_t acktime) 
-		{ 
-			this->addr = addr; 
-			this->alen = alen;  
-			this->theme = theme; 
-			this->qos = qos; 
-			this->acktime = acktime; 
+		void init(const crow::hostaddr & addr, const char* theme,
+		          uint8_t qos = 0, uint16_t acktime = 50)
+		{
+			this->addr = addr;
+			this->theme = theme;
+			this->qos = qos;
+			this->acktime = acktime;
 		}
 
-		void publish(const void* data, int len) 
+		void publish(const igris::buffer data)
 		{
-			crow::publish(addr, alen, theme, data, len, qos, acktime);			
-		}	
+			crow::publish(addr, theme, data, qos, acktime);
+		}
 
-		void publish(const void* data, int len, uint8_t qos, uint16_t acktime) 
+		void publish(const igris::buffer data, uint8_t qos, uint16_t acktime)
 		{
-			crow::publish(addr, alen, theme, data, len, qos, acktime);			
+			crow::publish(addr, theme, data, qos, acktime);
 		}
 	};
 

@@ -58,50 +58,37 @@ crow::packet* crow::make_publish_packet(
 }
 
 void crow::publish(
-    const uint8_t * raddr, uint8_t rlen,
-    const char *theme, const void *data, uint16_t dlen,
+    const crow::hostaddr & addr, 
+    const std::string_view theme, 
+    const igris::buffer data,
     uint8_t qos, uint16_t acktime)
 {
 	struct crow_subheader_pubsub subps;
 	struct crow_subheader_pubsub_data subps_d;
 
 	subps.type = PUBLISH;
-	subps.thmsz = (uint8_t)strlen(theme);
-	subps_d.datsz = dlen;
+	subps.thmsz = theme.size();
+	subps_d.datsz = data.size();
 
 	const igris::buffer iov[4] =
 	{
 		{&subps, sizeof(subps)},
 		{&subps_d, sizeof(subps_d)},
-		{(void *)theme, subps.thmsz},
-		{(void *)data, subps_d.datsz},
+		{theme.data(), subps.thmsz},
+		data,
 	};
 
-	crow::send_v(raddr, rlen, iov, 4, CROW_PUBSUB_PROTOCOL,
+	crow::send_v(addr, iov, 4, CROW_PUBSUB_PROTOCOL,
 	             qos, acktime);
 }
 
-
-void crow::publish(const uint8_t * raddr, uint8_t rlen,
-                   const char *theme, const char *data, uint8_t qos,
-                   uint16_t acktime)
-{
-	crow::publish(raddr, rlen, theme, data, (uint16_t)strlen(data), qos, acktime);
-}
-
-void crow::publish(const uint8_t * raddr, uint8_t rlen,
-                   const char *theme, const std::string& data, uint8_t qos,
-                   uint16_t acktime)
-{
-	crow::publish(raddr, rlen, theme, data.data(), data.size(), qos, acktime);
-}
-
 void crow::subscribe(
-    const uint8_t * raddr, uint8_t rlen,
-    const char *theme, uint8_t qos, uint16_t acktime,
+    const crow::hostaddr & addr, 
+    const std::string_view theme, 
+    uint8_t qos, uint16_t acktime,
     uint8_t rqos, uint16_t racktime)
 {
-	size_t thmsz = strlen(theme);
+	size_t thmsz = theme.size();
 
 	struct crow_subheader_pubsub subps;
 	struct crow_subheader_pubsub_control subps_c;
@@ -115,10 +102,10 @@ void crow::subscribe(
 	{
 		{&subps, sizeof(subps)},
 		{&subps_c, sizeof(subps_c)},
-		{(void *)theme, thmsz},
+		theme,
 	};
 
-	crow::send_v(raddr, rlen, iov, 3, CROW_PUBSUB_PROTOCOL, qos,
+	crow::send_v(addr, iov, 3, CROW_PUBSUB_PROTOCOL, qos,
 	             acktime);
 }
 
@@ -135,49 +122,6 @@ std::string crow::environment_crowker()
 	const char *envcr = getenv("CROWKER");
 	return std::string(envcr);
 }
-
-void crow::publish(
-    const std::vector<uint8_t> & addr,
-    const std::string & theme,
-    const std::string & data,
-    uint8_t qos,
-    uint16_t acktime)
-{
-	publish(
-	    (const uint8_t*)addr.data(), addr.size(),
-	    theme.c_str(),
-	    data.data(), data.size(),
-	    qos, acktime);
-}
-
-void crow::publish(
-    const std::vector<uint8_t> & addr,
-    const char * theme,
-    const void * data,
-    uint16_t dsize,
-    uint8_t qos,
-    uint16_t acktime)
-{
-	publish(
-	    (const uint8_t*)addr.data(), addr.size(),
-	    theme,
-	    data, dsize,
-	    qos, acktime);
-}
-
-void crow::subscribe(
-    const std::vector<uint8_t> & addr,
-    const std::string & theme,
-    uint8_t qos, uint16_t acktime,
-    uint8_t rqos, uint16_t racktime)
-{
-	subscribe(
-	    (const uint8_t*)addr.data(), addr.size(),
-	    theme.c_str(),
-	    qos, acktime,
-	    rqos, racktime);
-}
-
 
 void crow::pubsub_protocol_cls::resubscribe_all()
 {

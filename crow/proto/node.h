@@ -6,6 +6,7 @@
 #include <crow/proto/protocol.h>
 
 #include <igris/container/dlist.h>
+#include <igris/binreader.h>
 
 #define CROW_NODEPACK_COMMON 0
 #define CROW_NODEPACK_ERROR 1
@@ -29,6 +30,7 @@ namespace crow
 	                             uint8_t qos,
 	                             uint16_t ackquant);
 
+	// TODO: replace with annotation
 	struct node_subheader
 	{
 		uint16_t sid;
@@ -39,17 +41,55 @@ namespace crow
 
 			struct
 			{
-				uint8_t namerid : 1;
-				uint8_t reserved : 3;
+				uint8_t reserved : 4;
 				uint8_t type : 4;
 			};
 		};
 	} __attribute__((packed));
 
+	struct node_subheader_annotation
+	{
+		uint16_t sid;
+		uint16_t rid;
+		union
+		{
+			uint8_t flags = 0;
+
+			struct
+			{
+				uint8_t reserved : 4;
+				uint8_t type : 4;
+			};
+		};
+
+		int parse(igris::buffer data) 
+		{
+			igris::binreader reader(data.data());
+
+			if (data.size() < sizeof(node_subheader))
+				return -1;
+
+			reader.read_binary(sid);
+			reader.read_binary(rid);
+			reader.read_binary(flags);
+		
+			return 0;
+		}
+	};
+
 	struct node;
 	crow::node * find_node(int id);
 	void link_node(node *srvs, uint16_t id);
 	void bind_node_dynamic(node *srvs);
+
+	static auto node_data(crow::packet *pack)
+	{
+		crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
+
+		return igris::buffer(
+		           pack->dataptr() + sizeof(node_subheader),
+		           pack->datasize() - sizeof(node_subheader));
+	}
 
 	struct node
 	{
@@ -96,6 +136,26 @@ namespace crow
 		{
 			return crow::node_send_v(id, rid, raddr, vdat, vlen, qos, ackquant);
 		}
+
+		static
+		igris::buffer message(crow::packet * pack)
+		{
+			return node_data(pack);
+		}
+		
+		static 
+		node_subheader* subheader(crow::packet *pack)
+		{
+			return (crow::node_subheader*) pack->dataptr();
+		}
+
+		static 
+		node_subheader_annotation annotation(crow::packet *pack)
+		{
+			node_subheader_annotation annot;
+			annot.parse(pack->dataptr());
+			return annot;
+		}
 	};
 
 	class system_node_cls : public node
@@ -129,26 +189,7 @@ namespace crow
 		static auto sid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->sid; }
 		static auto rid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->rid; }
 
-		static auto node_data(crow::packet *pack)
-		{
-			crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
-
-			if (sh->namerid == 0)
-				return igris::buffer(
-				           pack->dataptr() + sizeof(node_subheader),
-				           pack->datasize() - sizeof(node_subheader));
-			else
-				return igris::buffer(
-				           pack->dataptr() + sizeof(node_subheader) + sh->rid,
-				           pack->datasize() - sizeof(node_subheader) - sh->rid);
-		}
-
-		static node_subheader* subheader(crow::packet *pack)
-		{
-			return (crow::node_subheader*) pack->dataptr();
-		}
-
-		static auto get_name(crow::packet *pack)
+		/*static auto get_name(crow::packet *pack)
 		{
 			node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 
@@ -158,7 +199,7 @@ namespace crow
 				return igris::buffer(
 				           pack->dataptr() + sizeof(node_subheader),
 				           sh->rid);
-		}
+		}*/
 
 		static auto get_error_code(crow::packet *pack)
 		{
@@ -167,13 +208,6 @@ namespace crow
 	};
 	extern node_protocol_cls node_protocol;
 	extern igris::dlist<node, &node::lnk> nodes;
-
-	static inline igris::buffer node_data(crow::packet *pack)
-	{
-		return node_protocol_cls::node_data(pack);
-	}
-
-
 
 	class node_packet_ptr : public packet_ptr
 	{

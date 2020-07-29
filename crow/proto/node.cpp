@@ -20,7 +20,6 @@ crow::packet_ptr crow::node_send(uint16_t sid,
 	sh.sid = sid;
 	sh.rid = rid;
 	sh.type = CROW_NODEPACK_COMMON;
-	sh.namerid = false;
 
 	const igris::buffer iov[2] = {{(void *)&sh, sizeof(sh)}, {(void *)data.data(), data.size()}};
 
@@ -39,7 +38,6 @@ crow::packet_ptr crow::node_send_v(uint16_t sid,
 	sh.sid = sid;
 	sh.rid = rid;
 	sh.type = CROW_NODEPACK_COMMON;
-	sh.namerid = false;
 
 	const igris::buffer iov[1] =
 	{
@@ -72,29 +70,12 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 	crow::node * srv = nullptr;
 
-	if (sh->namerid == 0)
+	for (crow::node &srvs : crow::nodes)
 	{
-		for (crow::node &srvs : crow::nodes)
+		if (srvs.id == sh->rid)
 		{
-			if (srvs.id == sh->rid)
-			{
-				srv = &srvs;
-				break;
-			}
-		}
-	}
-
-	else // named node request
-	{
-		igris::buffer name = node_protocol_cls::get_name(pack);
-
-		for (crow::node &srvs : crow::nodes)
-		{
-			if (name == srvs.mnem)
-			{
-				srv = &srvs;
-				break;
-			}
+			srv = &srvs;
+			break;
 		}
 	}
 
@@ -174,7 +155,7 @@ void crow::bind_node_dynamic(crow::node *srv)
 void crow::system_node_cls::incoming_packet(crow::packet *pack)
 {
 	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
-	auto data = node_protocol_cls::node_data(pack);
+	auto data = node_data(pack);
 
 	char buf[32];
 
@@ -182,11 +163,7 @@ void crow::system_node_cls::incoming_packet(crow::packet *pack)
 	{
 		for (crow::node &srvs : crow::nodes)
 		{
-			//int len = i32toa(srvs.id, buf, 10) - buf;
-			//buf[len] = '\n';
-			//buf[len+1] = 0;
 			sprintf(buf, "%d %s %s\n", srvs.id, srvs.typestr(), srvs.mnem);
-
 			node_send(0, sh->sid, {pack->addrptr(), pack->addrsize()}, {buf, strlen(buf)}, 0, 200);
 		}
 	}

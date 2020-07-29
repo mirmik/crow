@@ -11,19 +11,16 @@ namespace crow
 	class publish_logger : public nos::log::logger 
 	{
 	public:
-		uint8_t * addr;
-		uint8_t alen;
+		crow::hostaddr addr;
 		const char* theme;
 
 		const char * _name = "crowlog";
 
 		void init(
-			uint8_t * addr,
-			uint8_t alen,
+			crow::hostaddr addr,
 			const char* theme) 
 		{
 			this -> addr = addr;
-			this -> alen = alen;
 			this -> theme = theme;
 		}
 
@@ -35,7 +32,7 @@ namespace crow
 			nos::timestamp(buftime, 32);
 			nos::format_buffer(buffer0, fmt, arglist);
 			nos::format_buffer(buffer1, "[{}|{}] {}\r\n", _name, buftime, buffer0);
-			crow::publish(addr, alen, theme, buffer1, strlen(buffer1), 0, 200);
+			crow::publish(addr, theme, { buffer1, strlen(buffer1) }, 0, 200);
 		}
 	};
 }
