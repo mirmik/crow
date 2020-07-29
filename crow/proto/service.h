@@ -18,7 +18,7 @@
 
 namespace crow
 {
-	class service;
+	/*class service;
 
 	struct service_package_annotation
 	{
@@ -135,5 +135,5 @@ namespace crow
 			    qos,
 			    ackquant);
 		}
-	};
+	};*/
 }

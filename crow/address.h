@@ -51,6 +51,11 @@ namespace crow
 
 		const void * data() const { return addr; }
 		const size_t size() const { return alen; }
+
+		bool operator == (igris::buffer buf) 
+		{
+			return alen == buf.size() && memcmp(addr, buf.data(), alen) == 0;
+		}
 	};
 }
 #endif

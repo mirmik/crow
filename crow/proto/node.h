@@ -84,8 +84,6 @@ namespace crow
 
 	static auto node_data(crow::packet *pack)
 	{
-		crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
-
 		return igris::buffer(
 		           pack->dataptr() + sizeof(node_subheader),
 		           pack->datasize() - sizeof(node_subheader));
