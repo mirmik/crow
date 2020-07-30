@@ -46,6 +46,12 @@ namespace crow
 		uint16_t ackquant
 	) 
 	{
+		if (qos == 0) 
+		{
+			dprln("WARN: async_request qos is 0. changed to 2");
+			qos = 2;
+		}
+
 		oneshoot_async_requester * req = new oneshoot_async_requester(dlg, arg);
 		req.bind();
 
@@ -65,6 +71,12 @@ namespace crow
 		uint16_t ackquant
 	) 
 	{
+		if (qos == 0) 
+		{
+			dprln("WARN: async_request qos is 0. changed to 2");
+			qos = 2;
+		}
+
 		oneshoot_async_requester * req = new oneshoot_async_requester(dlg, arg);
 		req.bind();
 

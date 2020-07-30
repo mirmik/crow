@@ -18,6 +18,15 @@ namespace crow
 	void callback(void* arg, int sts, crow::packet * pack) 
 	{
 		crowker_service_callback_record * cbrec = (crowker_service_callback_record *) arg;
+		cbrec->service->send(
+			{ cbrec->host.data(), cbrec->host.size() }, 
+			cbrec->id,
+			node::message(pack),
+			pack->qos(),
+			pack->ackquant()
+		);
+
+		delete cbrec;
 	}
 
 	class crowker_service_node : public crow::node 
@@ -36,7 +45,8 @@ namespace crow
 				{pack->addrptr(), pack->addrsize()}, 
 				node::subheader(pack)->sid);
 
-			crow::async_request(callback, cbrec, { host.data(), host.size() }, );
+			crow::async_request(callback, cbrec, { host.data(), host.size() }, nid, 
+				node::message(pack), 2, pack->ackquant());
 		}
 
 		void undelivered_packet(crow::packet * pack) override 
