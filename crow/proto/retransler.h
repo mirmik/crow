@@ -1,12 +1,13 @@
 #ifndef CROW_PROTO_RETRANSLER_H
 #define CROW_PROTO_RETRANSLER_H
 
+#include <crow/types.h>
 #include <igris/event/delegate.h>
 #include <crow/proto/node.h>
 
-namespace crow 
+namespace crow
 {
-	class retransler : public crow::node
+	class service_retransler : public crow::node
 	{
 		crow::hostaddr host_a;
 		crow::hostaddr host_b;
@@ -14,10 +15,10 @@ namespace crow
 		uint16_t aid;
 		uint16_t bid;
 
-		igris::delegate<void, retransler *, crow::packet *> error_handler;
+		igris::delegate<void, service_retransler *, crow::packet *> error_handler;
 
 	protected:
-		void init(uint16_t aid, crow::hostaddr host_a, uint16_t bid, crow::hostaddr host_b) 
+		void init(uint16_t aid, crow::hostaddr host_a, uint16_t bid, crow::hostaddr host_b)
 		{
 			this->aid = aid;
 			this->bid = bid;
@@ -27,27 +28,43 @@ namespace crow
 			bind();
 		}
 
-		void incoming_packet(crow::packet * pack) 
+		void opposite_address(crow::packet * pack, nid_t & rid, crow::hostaddr & host) 
 		{
 			auto sh = crow::node::subheader(pack);
 
-			if (aid == sh->sid && host_a == pack->addr()) 
+			if (aid == sh->sid && host_a == pack->addr())
 			{
-				send(bid, host_b, crow::node_data(pack), 
-					pack->header.qos, pack->header.ackquant);
+				host = host_b;
+				rid = bid;
 			}
 
-			if (bid == sh->sid && host_b == pack->addr()) 
+			if (bid == sh->sid && host_b == pack->addr())
 			{
-				send(aid, host_a, crow::node_data(pack), 
-					pack->header.qos, pack->header.ackquant);
+				host = host_a;
+				rid = aid;
 			}
 		}
 
-		void undelivered_packet(crow::packet * pack) 
+		void incoming_packet(crow::packet * pack)
 		{
-			error_handler(this, pack);
-			crow::release(pack);		
+			nid_t rid;
+			crow::hostaddr host;
+
+			opposite_address(pack, rid, host);
+			node::send(rid, host, crow::node_data(pack),
+			           pack->header.qos, pack->header.ackquant);
+			crow::release(pack);
+		}
+
+		void undelivered_packet(crow::packet * pack)
+		{
+			nid_t rid;
+			crow::hostaddr host;
+			
+			opposite_address(pack, rid, host);
+			node::send_special(rid, host, CROW_NODE_SPECIAL_BUS_ERROR, "",
+			           pack->header.qos, pack->header.ackquant);
+			crow::release(pack);
 		}
 	};
 }

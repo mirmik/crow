@@ -11,6 +11,8 @@
 #define CROW_NODEPACK_COMMON 0
 #define CROW_NODEPACK_ERROR 1
 
+#define CROW_NODE_SPECIAL_BUS_ERROR -2
+
 #define CROW_ERRNO_UNREGISTRED_RID 33
 
 namespace crow
@@ -21,6 +23,14 @@ namespace crow
 	                           const igris::buffer data,
 	                           uint8_t qos,
 	                           uint16_t ackquant);
+
+	crow::packet_ptr node_send_special(uint16_t sid,
+	                                   uint16_t rid,
+	                                   const crow::hostaddr & addr,
+	                                   uint8_t type,
+	                                   const igris::buffer data,
+	                                   uint8_t qos,
+	                                   uint16_t ackquant);
 
 	crow::packet_ptr node_send_v(uint16_t sid,
 	                             uint16_t rid,
@@ -62,7 +72,7 @@ namespace crow
 			};
 		};
 
-		int parse(igris::buffer data) 
+		int parse(igris::buffer data)
 		{
 			igris::binreader reader(data.data());
 
@@ -72,7 +82,7 @@ namespace crow
 			reader.read_binary(sid);
 			reader.read_binary(rid);
 			reader.read_binary(flags);
-		
+
 			return 0;
 		}
 	};
@@ -125,6 +135,16 @@ namespace crow
 			return crow::node_send(id, rid, raddr, data, qos, ackquant);
 		}
 
+		crow::packet_ptr send_special(uint16_t rid,
+		                              const crow::hostaddr& raddr,
+		                              uint8_t type,
+		                              const igris::buffer data,
+		                              uint8_t qos,
+		                              uint16_t ackquant)
+		{
+			return crow::node_send_special(id, rid, raddr, type, data, qos, ackquant);
+		}
+
 		crow::packet_ptr send_v(uint16_t rid,
 		                        const crow::hostaddr& raddr,
 		                        const igris::buffer * vdat,
@@ -140,14 +160,14 @@ namespace crow
 		{
 			return node_data(pack);
 		}
-		
-		static 
+
+		static
 		node_subheader* subheader(crow::packet *pack)
 		{
 			return (crow::node_subheader*) pack->dataptr();
 		}
 
-		static 
+		static
 		node_subheader_annotation annotation(crow::packet *pack)
 		{
 			node_subheader_annotation annot;

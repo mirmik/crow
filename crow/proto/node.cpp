@@ -26,6 +26,24 @@ crow::packet_ptr crow::node_send(uint16_t sid,
 	return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
+crow::packet_ptr crow::node_send_special(uint16_t sid,
+                                         uint16_t rid,
+                                         const crow::hostaddr & addr,
+                                         uint8_t type,
+                                         const igris::buffer data,
+                                         uint8_t qos,
+                                         uint16_t ackquant)
+{
+	crow::node_subheader sh;
+	sh.sid = sid;
+	sh.rid = rid;
+	sh.type = type;
+
+	const igris::buffer iov[2] = {{(void *)&sh, sizeof(sh)}, {(void *)data.data(), data.size()}};
+
+	return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
+}
+
 crow::packet_ptr crow::node_send_v(uint16_t sid,
                                    uint16_t rid,
                                    const crow::hostaddr & addr,
