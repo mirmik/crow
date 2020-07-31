@@ -28,9 +28,6 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
-std::string handshake;
-std::string netname;
-
 int udpport = -1;
 int tcpport = -1;
 bool quite = false;
@@ -70,8 +67,6 @@ void incoming_pubsub_packet(struct crow::packet *pack)
 			}
 			break;
 	}
-
-	//crow::release(pack);
 }
 
 void undelivered_handler(struct crow::packet *pack)
@@ -85,7 +80,6 @@ void undelivered_handler(struct crow::packet *pack)
 			std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
 			                  sizeof(crow_subheader_pubsub_data),
 			                  shps->thmsz);
-			//auto &thm = brocker::themes[theme];
 
 			brocker::erase_crow_subscriber(
 			    std::string((char *)pack->addrptr(), pack->header.alen));
@@ -99,32 +93,6 @@ void undelivered_handler(struct crow::packet *pack)
 
 	crow::release(pack);
 }
-
-/*void alivespam()
-{
-	uint8_t raddr[128];
-	uint8_t rlen;
-
-	rlen = hexer_s(raddr, 128, handshake.c_str());
-
-	while (1)
-	{
-		crow::send_alive(raddr, rlen,
-		                 CROW_ALIVE_HANDSHAKE, CROW_TOWER_TYPE_CROWKER,
-		                 0, 200);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-	}
-
-}
-
-void netserve()
-{
-	while (1)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		crow::netkeep_serve();
-	}
-}*/
 
 void tcp_client_listener(nos::inet::tcp_socket client)
 {
@@ -233,14 +201,12 @@ int main(int argc, char *argv[])
 
 	const struct option long_options[] =
 	{
-		{"udp", required_argument, NULL, 'u'},
+		{"udp", required_argument, NULL, 'u'}, // crow udpgate port
 		{"tcp", required_argument, NULL, 't'},
-		{"debug", no_argument, NULL, 'd'},
-		{"binfo", no_argument, NULL, 'b'},
+		{"debug", no_argument, NULL, 'd'}, // crow transport log
+		{"binfo", no_argument, NULL, 'b'}, // browker log
 		{"logpub", no_argument, NULL, 'p'},
-		{"vdebug", no_argument, NULL, 'v'},
-		{"quite", no_argument, NULL, 'q'},
-		//{"handshake", required_argument, NULL, 'h'},
+		{"vdebug", no_argument, NULL, 'v'}, // vital packet log
 		{"netname", required_argument, NULL, 'n'},
 		{NULL, 0, NULL, 0}
 	};
@@ -277,32 +243,10 @@ int main(int argc, char *argv[])
 				log_publish = true;
 				break;
 
-			/*case 'h':
-				handshake = optarg;
-				break;*/
-
-			case 'n':
-				netname = optarg;
-				break;
-
 			case 0:
 				break;
 		}
 	}
-
-	//crow::alive_node alive_node;
-	//crow::link_node(&alive_node, 1);
-
-	//std::thread netkeep_thread {netserve};
-	//netkeep_thread.detach();
-
-	//crow::set_netname(netname.c_str());
-
-	/*if (!handshake.empty())
-	{
-		std::thread alive_thread {alivespam};
-		alive_thread.detach();
-	}*/
 
 	if (udpport == -1)
 	{

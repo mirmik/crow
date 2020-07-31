@@ -53,7 +53,9 @@ licant.modules.module("crow",
 		"crow.include",
 		"crow.threads",
 		"crow.diagnostic",
-		"crow.select"
+		"crow.select",
+
+		"crow.crowker.service_node"
 	]
 )
 
@@ -110,3 +112,5 @@ licant.module("crow.protocol.pubsub",
 )
 
 #####################################################################################
+
+licant.module("crow.crowker.service_node", sources=["crow/brocker/service.cpp"])

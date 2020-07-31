@@ -2,7 +2,7 @@
 #define CROW_PROTO_REQUEST_H
 
 #include <crow/types.h>
-#include <crow/node.h>
+#include <crow/proto/node.h>
 
 namespace crow 
 {
@@ -17,13 +17,13 @@ namespace crow
 		{}
 
 	protected:
-		void incoming_packet() override 
+		void incoming_packet(crow::packet * pack) override 
 		{
 			_dlg(this, 0, pack);	
 			destroy();
 		}
 
-		void undelivered_packet() override
+		void undelivered_packet(crow::packet * pack) override
 		{
 			_dlg(this, -1, pack);	
 			destroy();
@@ -53,9 +53,9 @@ namespace crow
 		}
 
 		oneshoot_async_requester * req = new oneshoot_async_requester(dlg, arg);
-		req.bind();
+		req->bind();
 
-		req.send(rid, addr, data, qos, ackquant);
+		req->send(rid, addr, data, qos, ackquant);
 		return req;
 	}
 
@@ -78,9 +78,9 @@ namespace crow
 		}
 
 		oneshoot_async_requester * req = new oneshoot_async_requester(dlg, arg);
-		req.bind();
+		req->bind();
 
-		req.send_(rid, addr, data, len, qos, ackquant);
+		req->send_v(rid, addr, data, len, qos, ackquant);
 		return req;
 	}
 }

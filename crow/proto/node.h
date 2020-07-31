@@ -168,12 +168,20 @@ namespace crow
 		}
 
 		static
+		nid_t sid(crow::packet *pack)
+		{
+			return subheader(pack)->sid;
+		}
+
+		static
 		node_subheader_annotation annotation(crow::packet *pack)
 		{
 			node_subheader_annotation annot;
 			annot.parse(pack->dataptr());
 			return annot;
 		}
+
+		virtual ~node() =default;
 	};
 
 	class system_node_cls : public node
