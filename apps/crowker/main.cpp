@@ -4,6 +4,7 @@
 #include <crow/hexer.h>
 #include <crow/alive.h>
 #include <crow/select.h>
+#include <crow/brocker/service.h>
 
 #include <crow/netkeep.h>
 
@@ -266,6 +267,9 @@ int main(int argc, char *argv[])
 		std::thread thr(tcp_listener, tcpport);
 		thr.detach();
 	}
+
+	auto * service_control_node = crow::crowker_service_control_node();
+	service_control_node->bind(CROWKER_CONTROL_SERVICE_NID);
 
 	crow::select_collect_fds();
 	//crow::add_select_fd(unselect_pipe_fd[0]);

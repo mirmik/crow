@@ -77,7 +77,7 @@ void brocker::theme::publish(std::shared_ptr<std::string> data)
 {
 	for (auto * sub : subs)
 	{
-		sub->publish(name, *data, sub->thms[this].opts);
+		sub->publish(name, {data->data(), data->size()}, sub->thms[this].opts);
 	}
 
 	lastdata = data;
@@ -105,23 +105,12 @@ void brocker::subscribers::crow::publish(const std::string & theme, const std::s
 {
 	crow_options * copts = static_cast<crow_options*>(opts);
 
-	/*struct crow_subheader_pubsub subps;
-	struct crow_subheader_pubsub_data subps_d;
-
-	subps.type = PUBLISH;
-	subps.thmsz = theme.size();
-	subps_d.datsz = data.size();
-
-	iovec vec[4] = {{&subps, sizeof(subps)},
-					{&subps_d, sizeof(subps_d)},
-					{(void *)theme.data(), theme.size()},
-					{(void *)data.data(), data.size()}};
-
-	crow::send_v(addr.data(), addr.size(), vec, 4,
-					 CROW_PUBSUB_PROTOCOL, qos, ackquant);*/
-	::crow::publish((uint8_t*)addr.data(), addr.size(), 
+	::crow::publish(
+		{addr.data(), addr.size()}, 
 		theme.c_str(), 
-		data.data(), data.size(), copts->qos, copts->ackquant);
+		{data.data(), data.size()}, 
+		copts->qos, 
+		copts->ackquant);
 }
 
 void brocker::subscribers::tcp::publish(const std::string & theme, const std::string & data, options * opts)

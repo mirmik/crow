@@ -19,12 +19,14 @@ namespace crow
 	protected:
 		void incoming_packet(crow::packet * pack) override 
 		{
+			dprln("ASYNC_REQUESTER_INCOMING");
 			_dlg(this, 0, pack);	
 			destroy();
 		}
 
 		void undelivered_packet(crow::packet * pack) override
 		{
+			dprln("ASYNC_REQUESTER_UNDELIVERED");
 			_dlg(this, -1, pack);	
 			destroy();
 		}

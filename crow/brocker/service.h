@@ -9,17 +9,19 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#define	CROW_SERVICE_ONESHOOT 0
-#define	CROW_SERVICE_NODE_RETRANS 1
-#define	CROW_SERVICE_CHANNEL_RETRANS 2
-#define	CROW_SERVICE_CLOSE 3
+#include <igris/util/bug.h>
 
-#define	CROW_SERVICE_REGISTER_NODE 4
-#define	CROW_SERVICE_REGISTER_CHANNEL 5
+#define	CROW_SERVICE_ONESHOOT            0
+#define	CROW_SERVICE_NODE_RETRANS        1
+#define	CROW_SERVICE_CHANNEL_RETRANS     2
+#define	CROW_SERVICE_CLOSE               3
+
+#define	CROW_SERVICE_REGISTER_NODE 8
+#define	CROW_SERVICE_REGISTER_CHANNEL 9
 
 namespace crow
 {
-	struct nodeaddr_t 
+	struct nodeaddr_t
 	{
 		std::vector<uint8_t> naddr;
 		nid_t nid;
@@ -33,15 +35,8 @@ namespace crow
 
 	class crowker_service_node;
 
-	struct crowker_service_callback_record
-	{
-		std::vector<uint8_t> host;
-		nid_t                id;
-		crowker_service_node * service;
-	};
+	void async_request_callback(void* arg, int sts, crow::packet * pack);
 
-	void crowker_service_callback(void* arg, int sts, crow::packet * pack);
-	
 	class node_retransler;
 	class channel_retransler;
 
@@ -59,23 +54,19 @@ namespace crow
 	{
 		//using register_record_t = std::pair<nodeaddr_t, std::string name>;
 
-		std::unordered_map<std::string, crow::nodeaddr_t> services;
+		std::unordered_map<std::string, service_record> services;
 
 		//std::vector<uint8_t> host;
 		//nodeid_t             nid;
 		//std::unordered_set<crow::hostaddr *>;
 
-		crowker_service_control_node_cls()
-		{}
+	//public:
+	//	crowker_service_control_node_cls() = default;
 
+	protected:
 		void incoming_packet(crow::packet * pack) override
 		{
-			/*auto cbrec = new crowker_service_callback_record(
-				{pack->addrptr(), pack->addrsize()},
-				node::subheader(pack)->sid);
-
-			crow::async_request(callback, cbrec, { host.data(), host.size() }, nid,
-				node::message(pack), 2, pack->ackquant());*/
+			dprln("CONTROL NODE INCOMMING");
 
 			auto nodemsg = node::message(pack);
 			igris::buffer saddr = pack->addr();
@@ -91,48 +82,71 @@ namespace crow
 			reader.read_binary(namelen);
 			reader.bind_buffer(name, namelen);
 
-			switch (cmd)
+			if (cmd & 0b1000)
 			{
-				case CROW_SERVICE_ONESHOOT:
+				service_record & srv_addr = services[name];
+
+				switch (cmd)
 				{
-					uint16_t datalen;
-					char * data;
+					case CROW_SERVICE_ONESHOOT:
+						{
+							uint16_t datalen;
+							char * data;
 
-					reader.read_binary(datalen);
-					reader.bind_buffer(data, datalen);
+							std::vector<uint8_t> addr(
+							    saddr.begin(), saddr.end());
 
-					auto cbrec = new crowker_service_callback_record(
-					{pack->addrptr(), pack->addrsize()},
-					node::subheader(pack)->sid);
+							reader.read_binary(datalen);
+							reader.bind_buffer(data, datalen);
 
-					crow::async_request(callback, cbrec, { host.data(), host.size() }, nid,
-					                    node::message(pack), 2, pack->ackquant());
+							crow::async_request(
+							    async_request_callback,
+							    &srv_addr,
+							    srv_addr.naddr.nid,
+							    srv_addr.naddr.naddr,
+							    node::message(pack),
+							    2,
+							    pack->ackquant());
+						} break;
+
+					case CROW_SERVICE_NODE_RETRANS: BUG(); break;
+					case CROW_SERVICE_CHANNEL_RETRANS: BUG(); break;
+					case CROW_SERVICE_CLOSE: BUG(); break;
 				}
-				break;
-				case CROW_SERVICE_NODE_RETRANS: BUG(); break;
-				case CROW_SERVICE_CHANNEL_RETRANS: BUG(); break;
-				case CROW_SERVICE_CLOSE: BUG(); break;
-
-				case CROW_SERVICE_REGISTER_NODE:
-				{
-					services.insert(
-					{name, namelen},
-					new service_record(
-					{{saddr.data(), saddr.size()}, sid},
-					CROWKER_SERVICE_TYPE_NODE));
-				}
-				break;
-
-				case CROW_SERVICE_REGISTER_CHANNEL:
-					BUG();
-					break;
 			}
 
+			else
+			{
+				switch (cmd)
+				{
+					case CROW_SERVICE_REGISTER_NODE:
+						{
+							std::vector<uint8_t> addr(
+							    saddr.begin(),
+							    saddr.end());
+
+							services.insert_or_assign(
+								std::string(name, namelen),
+							    service_record {
+									{addr, sid},
+									CROWKER_SERVICE_TYPE_NODE
+								}
+							);
+						}
+						break;
+
+					case CROW_SERVICE_REGISTER_CHANNEL:
+						BUG();
+						break;
+				}
+			}
 			crow::release(pack);
 		}
 
+
 		void undelivered_packet(crow::packet * pack) override
 		{
+			dprln("CONTROL_NODE_UNDELIVERED");
 			crow::release(pack);
 		}
 	};

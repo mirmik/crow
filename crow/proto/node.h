@@ -1,6 +1,7 @@
 #ifndef CROW_NODE_H
 #define CROW_NODE_H
 
+#include <crow/types.h>
 #include <crow/packet.h>
 #include <crow/address.h>
 #include <crow/proto/protocol.h>

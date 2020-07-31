@@ -302,9 +302,10 @@ void send_do(const std::string message)
 	switch (protoopt)
 	{
 		case protoopt_e::PROTOOPT_BASIC:
-			crow::send(addr, (uint8_t)addrsize,
-			           message.data(), message.size(), type,
-			           qos, ackquant);
+			crow::send(
+				{addr, (uint8_t)addrsize},
+				{message.data(), message.size()}, 
+				type, qos, ackquant);
 			break;
 
 		case protoopt_e::PROTOOPT_PUBLISH:
@@ -340,16 +341,13 @@ void send_do(const std::string message)
 
 		case protoopt_e::PROTOOPT_NODE:
 			{
-				if (nodename != "")
+				/*if (nodename != "")
 					crow::node_send(1, nodename.c_str(), addr, (uint8_t)addrsize,
 					                message.data(), message.size(),
-					                qos, ackquant);
-
-
-
-				else
-					crow::node_send(1, nodeno, addr, (uint8_t)addrsize,
-					                message.data(), message.size(),
+					                qos, ackquant);*/
+					crow::node_send(1, nodeno, 
+									{addr, (uint8_t)addrsize},
+					                {message.data(), message.size()},
 					                qos, ackquant);
 			}
 			break;
@@ -372,8 +370,10 @@ void incoming_handler(crow::packet *pack)
 	if (echo)
 	{
 		// Переотослать пакет точно повторяющий входящий.
-		crow::send(pack->addrptr(), pack->header.alen, pack->dataptr(),
-		           pack->datasize(), pack->header.f.type, pack->header.qos,
+		crow::send({pack->addrptr(), pack->header.alen}, 
+				   {pack->dataptr(), pack->datasize()}, 
+				   pack->header.f.type, 
+				   pack->header.qos,
 		           pack->header.ackquant);
 	}
 
@@ -398,7 +398,7 @@ void incoming_handler(crow::packet *pack)
 		case CROW_NODE_PROTOCOL:
 			if (((crow::node_subheader *) pack->dataptr())->rid == 1)
 			{
-				output_do(crow::node_protocol_cls::node_data(pack), pack);
+				output_do(crow::node::message(pack), pack);
 			}
 
 			else
@@ -749,7 +749,7 @@ int main(int argc, char *argv[])
 		pipeline(pipelinecmd);
 	}
 
-	
+
 	//START CROW
 	crow::select_collect_fds();
 	crow::add_select_fd(unselect_pipe_fd[0]);
@@ -761,7 +761,7 @@ int main(int argc, char *argv[])
 			crow::select();
 			do
 				crow::onestep();
-			while(crow::has_untravelled_now());
+			while (crow::has_untravelled_now());
 
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 
@@ -849,7 +849,10 @@ int main(int argc, char *argv[])
 		{
 			while (1)
 			{
-				crow::subscribe(addr, addrsize, theme.c_str(), qos, ackquant, qos, ackquant);
+				crow::subscribe(
+					{addr, (size_t)addrsize}, 
+					theme.c_str(), 
+					qos, ackquant, qos, ackquant);
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			}
 		}).detach();

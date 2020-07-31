@@ -12,7 +12,6 @@ application("crowker",
 		"main.cpp",
 		"brocker.cpp"
 	],
-	#mdepends = ["crow.crowker.service_node"],
 	cxx_flags = "-Wextra -Wall",
 	libs = ["pthread", "readline", "nos", "igris", "crow"]
 )
