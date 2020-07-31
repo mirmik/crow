@@ -16,7 +16,8 @@ application("crowker",
 	libs = ["pthread", "readline", "nos", "igris", "crow"]
 )
 
+licant.install.install_application(tgt="install_crowker", src="crowker", dst="crowker")
 
-licant.install.install_application(tgt="install", src="crowker", dst="crowker")
-
-licant.ex("crowker")
+if __name__ == "__main__":
+	licant.install.install_application(tgt="install", src="crowker", dst="crowker")
+	licant.ex("crowker")

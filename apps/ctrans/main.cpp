@@ -464,6 +464,28 @@ void *console_listener(void *arg)
 uint16_t udpport = 0;
 char *serial_port = NULL;
 
+void print_help() 
+{
+	printf(
+		"Usage: ctrans [OPTION]... ADDRESS\n"
+		"\n"
+		"Common option list:\n"
+		"  -h, --help            print this page\n"
+		"\n"
+		"Gate`s option list:\n"
+		"  -u, --udp             set udp address (gate 12)\n"
+		"  -S, --serial          make gate on serial device\n"
+		"\n"
+		"Package settings option list:\n"
+		"  -q, --qos             set QOS policy mode\n"            
+		"  -A, --ackquant        set time quant (for QOS:1 and QOS:2)\n"
+		"  -t, --type            set package type (if protocol isn't choosen)\n"
+		"\n"
+		"Crow address reference:\n"
+		"man crow-protocol\n"
+	);
+}
+
 int main(int argc, char *argv[])
 {
 	pthread_t console_thread;
@@ -475,6 +497,8 @@ int main(int argc, char *argv[])
 
 	const struct option long_options[] =
 	{
+		{"help", no_argument, NULL, 'h'},
+
 		{"udp", required_argument, NULL, 'u'}, // udp порт для 12-ого гейта.
 		{"serial", required_argument, NULL, 'S'}, // serial...
 
@@ -515,11 +539,15 @@ int main(int argc, char *argv[])
 	int long_index = 0;
 	int opt = 0;
 
-	while ((opt = getopt_long(argc, argv, "uqSEeisIdvgtBA", long_options,
+	while ((opt = getopt_long(argc, argv, "", long_options,
 	                          &long_index)) != -1)
 	{
 		switch (opt)
 		{
+			case 'h':
+				print_help();
+				exit(0);
+
 			case 'q':
 				qos = (uint8_t)atoi(optarg);
 				userqos = true;

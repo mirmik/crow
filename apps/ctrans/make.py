@@ -22,15 +22,13 @@ application("ctrans",
 	cxxstd = "c++17"
 )
 
-#@licant.routine(deps = ["ctrans", "doc"])
-#def install():
-#	os.system("cp ctrans /usr/local/bin")
-#	os.system("cp doc/crow.1 /usr/local/share/man/man1/")
-
-licant.install.install_application(tgt="install", src="ctrans", dst="ctrans")
 
 @licant.routine
 def doc():
 	os.system("cd doc; ./make.sh")
 
-licant.ex("ctrans")
+licant.install.install_application(tgt="install_ctrans", src="ctrans", dst="ctrans")
+	
+if __name__ == "__main__":
+	licant.install.install_application(tgt="install", src="ctrans", dst="ctrans")
+	licant.ex("ctrans")

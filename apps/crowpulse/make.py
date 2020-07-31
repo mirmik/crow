@@ -19,6 +19,8 @@ application("crowpulse",
 	cxxstd = "c++17"
 )
 
-licant.install.install_application(tgt="install", src="crowpulse", dst="crowpulse")
+licant.install.install_application(tgt="install_crowpulse", src="crowpulse", dst="crowpulse")
 
-licant.ex("crowpulse")
+if __name__ == "__main__":
+	licant.install.install_application(tgt="install", src="crowpulse", dst="crowpulse")
+	licant.ex("crowpulse")

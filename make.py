@@ -8,6 +8,10 @@ import os
 
 licant.include("crow", "crow.g.py")
 
+licant.execute("apps/crowker/make.py")
+licant.execute("apps/ctrans/make.py")
+licant.execute("apps/crowpulse/make.py")
+
 target = "libcrow.so"
 install_include_path = '/usr/local/include/crow' 
 install_directory_path = '/usr/lib/'
@@ -28,7 +32,20 @@ licant.cxx_shared_library(target,
 	libs=["igris"]
 )
 
+licant.fileset("apps", targets=[
+	"ctrans",
+	"crowker",
+	"crowpulse"
+], deps=["libcrow.so"])
+
 licant.install.install_library(tgt="install", libtgt=target, headers="crow", hroot="crow", 
 	uninstall="uninstall")
+
+@licant.routine(deps=["apps"])
+def install_apps():
+	pass
+	licant.do(["install_crowker", "makefile"])
+	licant.do(["install_crowpulse", "makefile"])
+	licant.do(["install_ctrans", "makefile"])
 
 licant.ex(target)
