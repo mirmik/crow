@@ -22,7 +22,7 @@ namespace crow
 
 		std::map<nodeaddr, record> targets;
 
-		std::chrono::milliseconds timeout = 10000ms;
+		std::chrono::milliseconds timeout = 5000ms;
 		uint8_t qos = 0;
 		uint16_t ackquant = 50;
 	
@@ -60,11 +60,16 @@ namespace crow
 		void incoming_packet(crow::packet * pack) override
 		{
 			auto time = std::chrono::system_clock::now();
-			
+
 			std::vector<uint8_t> addr(pack->addrptr(), pack->addrptr() + pack->addrsize());
 			targets[nodeaddr{addr, node::sid(pack)}] = record{time};
 
 			crow::release(pack);
+		}
+
+		int count_of_subscribers() 
+		{
+			return targets.size();
 		}
 	};
 
