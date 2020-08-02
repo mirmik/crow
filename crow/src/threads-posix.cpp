@@ -6,13 +6,24 @@
 
 #include <crow/select.h>
 
+#include <unistd.h>
+
 static bool cancel_token = false;
 static std::thread _thread;
 
-__attribute__((deprecated))
+int crow::unselect_pipe[2];
+
+void crow::unselect() 
+{ 
+	char c = 42;
+	::write(unselect_pipe[0], &c, 1);
+}
 
 void crow::start_spin_with_select() 
 {
+	::pipe(unselect_pipe);
+	crow::unsleep_handler = unselect;
+
 	_thread = std::thread([]()
 	{
 		crow::select_collect_fds();

@@ -28,6 +28,8 @@ namespace crow
 //	extern void (*netkeep_tower_handler)(crow::packet *pack);
 	extern void (*undelivered_handler)(crow::packet *pack);
 
+	extern void (*unsleep_handler)();
+
 	// Передать пакет в обработку.
 	packet_ptr travel(crow::packet *pack);
 	void nocontrol_travel(crow::packet *pack);

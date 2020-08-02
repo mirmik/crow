@@ -20,6 +20,7 @@ DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
 
+void (*crow::unsleep_handler)();
 void (*crow::user_type_handler)(crow::packet *pack) = nullptr;
 void (*crow::user_incoming_handler)(crow::packet *pack) = nullptr;
 void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
@@ -155,6 +156,8 @@ crow::packet_ptr crow::travel(crow::packet *pack)
 {
 	system_lock();
 	dlist_add_tail(&pack->lnk, &crow_travelled);
+	if (unsleep_handler)
+		unsleep_handler();
 	system_unlock();
 
 	return crow::packet_ptr(pack);
@@ -714,7 +717,7 @@ void crow::finish()
 
 bool crow::fully_empty()
 {
-	igris::syslock_guard guard();
+	igris::syslock_guard guard;
 	return dlist_empty(&crow_travelled) && dlist_empty(&crow_incoming) && dlist_empty(&crow_outters);
 }
 
