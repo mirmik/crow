@@ -7,8 +7,6 @@
 #include <crow/select.h>
 
 #include <unistd.h>
-#include <nos/print.h>
-
 #include <igris/osutil/fd.h>
 
 static bool cancel_token = false;
@@ -18,7 +16,6 @@ int crow::unselect_pipe[2];
 
 void crow::unselect()
 {
-	nos::println("unselect");
 	char c = 42;
 	::write(unselect_pipe[1], &c, 1);
 }
