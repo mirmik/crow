@@ -18,6 +18,7 @@ void crow::select_collect_fds()
 			fds.push_back(i);
 		}
 	}
+	fds.push_back(crow::unselect_pipe[1]);
 }
 
 void crow::add_select_fd(int fd) 
