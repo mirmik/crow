@@ -11,7 +11,7 @@ static std::thread _thread;
 
 __attribute__((deprecated))
 
-void crow::start_spin() 
+void crow::start_spin_with_select() 
 {
 	_thread = std::thread([]()
 	{

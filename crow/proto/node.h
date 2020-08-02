@@ -108,7 +108,7 @@ namespace crow
 		const char* mnem = NULL;
 
 		virtual void incoming_packet(crow::packet *pack) = 0;
-		virtual void undelivered_packet(crow::packet *pack) = 0;
+		virtual void undelivered_packet(crow::packet *pack) { crow::release(pack); }
 		int waitevent();
 		void notify_one(int future);
 

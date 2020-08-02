@@ -1,62 +1,74 @@
 #ifndef CROW_NODE_SPAMMER_H
 #define CROW_NODE_SPAMMER_H
 
+#include <crow/extra/nodeaddr.h>
 #include <crow/proto/node.h>
 #include <chrono>
 
-namespace crow 
+#include <igris/event/delegate.h>
+
+#include <nos/print.h>
+
+using namespace std::literals::chrono_literals;
+
+namespace crow
 {
-	class spammer 
+	class spammer : public crow::node
 	{
-		class record 
+		struct record
 		{
-			std::chrono::system_clock::tstamp last_subscribe;
+			std::chrono::time_point<std::chrono::system_clock> last_subscribe;
 		};
 
 		std::map<nodeaddr, record> targets;
 
-		unsigned int timeout = 10000;
+		std::chrono::milliseconds timeout = 10000ms;
 		uint8_t qos = 0;
 		uint16_t ackquant = 50;
-		//std::vector<crow::nodeaddr> targets;
-
-		void send(igris::buffer data) 
+	
+	public:
+		void send(igris::buffer data)
 		{
+			nos::println("send");
 			auto time = std::chrono::system_clock::now();
 
 			std::vector<std::map<nodeaddr, record>::iterator> to_delete;
 
 			auto eit = targets.end();
-			auto it = targets.begin()
-			for (; it != eit; it++) 
+			auto it = targets.begin();
+			for (; it != eit; it++)
 			{
-				if (time - t.second.last_subscribe > timeout) 
+				if (time - it->second.last_subscribe > timeout)
 				{
 					to_delete.push_back(it);
 					continue;
 				}
 
 				node::send(
-					t.nid, 
-					t.addr.to_hostaddr(), 
-					data,
-					qos,
-					ackquant);
+				    it->first.nid,
+				    it->first.hostaddr(),
+				    data,
+				    qos,
+				    ackquant);
 			}
 
-			for (auto it : to_delete) 
+			for (auto it : to_delete)
 			{
-				targets.remove(it);
+				targets.erase(it);
 				nos::println("TO_DELETE", targets.size());
 			}
 		}
 
-		void incoming_handler(crow::packet * pack) override
-		{	
+		void incoming_packet(crow::packet * pack) override
+		{
+			nos::println("incoming_packet");
+
 			auto time = std::chrono::system_clock::now();
 
+			std::vector<uint8_t> addr(pack->addrptr(), pack->addrptr() + pack->addrsize());
+			targets[nodeaddr{addr, node::sid(pack)}] = record{time};
 
-			crow::release();
+			crow::release(pack);
 		}
 	};
 
@@ -64,14 +76,16 @@ namespace crow
 	{
 		igris::delegate<void, igris::buffer> dlg;
 
-		void subscribe(nid_t nid, crow::hostaddr_t host, uint8_t qos=2, uint16_t ackquant=200) 
+	public:
+		void subscribe(nid_t nid, crow::hostaddr host, uint8_t qos = 2, uint16_t ackquant = 200)
 		{
 			node::send(nid, host, "", qos, ackquant);
-		}		
+		}
 
-		void incoming_handler(crow::packet * pack) 
+		void incoming_packet(crow::packet * pack) override
 		{
-			
+			dlg(node::message(pack));
+			crow::release(pack);
 		}
 	};
 }

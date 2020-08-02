@@ -190,3 +190,8 @@ dist
 *.egg-info
 
 pycrow/__tunels__/*
+
+
+crowker
+ctrans
+crowpulse
