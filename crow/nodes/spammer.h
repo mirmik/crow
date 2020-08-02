@@ -29,7 +29,6 @@ namespace crow
 	public:
 		void send(igris::buffer data)
 		{
-			nos::println("send");
 			auto time = std::chrono::system_clock::now();
 
 			std::vector<std::map<nodeaddr, record>::iterator> to_delete;
@@ -55,14 +54,11 @@ namespace crow
 			for (auto it : to_delete)
 			{
 				targets.erase(it);
-				nos::println("TO_DELETE", targets.size());
 			}
 		}
 
 		void incoming_packet(crow::packet * pack) override
 		{
-			nos::println("incoming_packet");
-
 			auto time = std::chrono::system_clock::now();
 
 			std::vector<uint8_t> addr(pack->addrptr(), pack->addrptr() + pack->addrsize());
