@@ -60,7 +60,7 @@ namespace crow
 		void incoming_packet(crow::packet * pack) override
 		{
 			auto time = std::chrono::system_clock::now();
-
+			
 			std::vector<uint8_t> addr(pack->addrptr(), pack->addrptr() + pack->addrsize());
 			targets[nodeaddr{addr, node::sid(pack)}] = record{time};
 
@@ -73,6 +73,8 @@ namespace crow
 		igris::delegate<void, igris::buffer> dlg;
 
 	public:
+		spam_subscriber(igris::delegate<void, igris::buffer> dlg) : dlg(dlg) {}
+
 		void subscribe(nid_t nid, crow::hostaddr host, uint8_t qos = 2, uint16_t ackquant = 200)
 		{
 			node::send(nid, host, "", qos, ackquant);
