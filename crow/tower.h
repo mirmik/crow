@@ -99,12 +99,14 @@ namespace crow
 	void onestep();
 	void onestep_travel_only();
 	void spin();
+	void spin_with_select();
 
 	void stop_spin();
 	void start_spin_with_select();
 	void start_spin_without_select();
 
 	void start_spin();
+	void spin_join();
 
 	bool has_untravelled();
 	bool has_untravelled_now();

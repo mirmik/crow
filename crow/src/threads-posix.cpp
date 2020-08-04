@@ -21,35 +21,36 @@ void crow::unselect()
 	::write(unselect_pipe[1], &c, 1);
 }
 
-void crow::unselect_init() 
+void crow::unselect_init()
 {
 	crow::add_unselect_to_fds = true;
 	::pipe(unselect_pipe);
 	igris::osutil::nonblock(unselect_pipe[0], true);
-	crow::unsleep_handler = unselect;	
+	crow::unsleep_handler = unselect;
+}
+
+void crow::spin_with_select()
+{
+	crow::unselect_init();
+	crow::select_collect_fds();
+	while (1)
+	{
+		char unselect_read_buffer[512];
+
+		if (cancel_token)
+			return;
+
+		crow::select();
+		read(unselect_pipe[0], unselect_read_buffer, 512);
+		do
+			crow::onestep();
+		while (crow::has_untravelled_now());
+	};
 }
 
 void crow::start_spin_with_select()
 {
-	crow::unselect_init();
-
-	_thread = std::thread([]()
-	{
-		crow::select_collect_fds();
-		while (1)
-		{
-			char unselect_read_buffer[512];
-
-			if (cancel_token)
-				return;
-
-			crow::select();
-			read(unselect_pipe[0], unselect_read_buffer, 512);
-			do
-				crow::onestep();
-			while (crow::has_untravelled_now());
-		};
-	});
+	_thread = std::thread(spin_with_select);
 }
 
 void crow::start_spin() { crow::start_spin_with_select(); }
@@ -86,4 +87,9 @@ void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
 		}
 	});
 	thr.detach();
+}
+
+void crow::spin_join() 
+{
+	_thread.join();
 }
