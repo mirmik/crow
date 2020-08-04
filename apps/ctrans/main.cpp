@@ -501,6 +501,8 @@ void print_help()
 		"Control option list:\n"
 		"      --noconsole       disable console input\n"
 		"      --pulse           oneshoot mode. leave after first message\n"
+		"      --echo            echo input packages to sender\n"
+		"      --api             enable incoming console (cmds: 'exit')"
 		"\n"
 		"Crow address reference:\n"
 		"      man crow-protocol\n"

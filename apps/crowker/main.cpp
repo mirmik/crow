@@ -42,9 +42,9 @@ void incoming_pubsub_packet(struct crow::packet *pack)
 		case PUBLISH:
 			{
 				auto theme = std::make_shared<std::string>
-					(crow::pubsub::get_theme(pack));
+				             (crow::pubsub::get_theme(pack));
 				auto data = std::make_shared<std::string>
-					(crow::pubsub::get_data(pack));
+				            (crow::pubsub::get_data(pack));
 
 				brocker::publish(theme, data);
 			}
@@ -119,13 +119,13 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 			break;
 
 		cmd = buf[0];
-		if (cmd != 's' && cmd != 'p') 
+		if (cmd != 's' && cmd != 'p')
 			goto clean;
 
 		buf[3] = 0;
 		thmsize = atoi32(buf + 1, 10, nullptr);
 
-		if (thmsize == 0) 
+		if (thmsize == 0)
 			goto clean;
 
 		ret = client.recv(buf, thmsize, MSG_WAITALL);
@@ -160,7 +160,7 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 			continue;
 		}
 
-	clean:
+clean:
 		{
 			if (brocker_info)
 				nos::println("unresolved tcp command from", addr, cmd);
@@ -190,6 +190,21 @@ void tcp_listener(int port)
 	}
 }
 
+void print_help()
+{
+	printf(
+	    "Usage: crowker [OPTION]...\n"
+	    "\n"
+		"Common option list:\n"
+		"  -h, --help            print this page\n"
+		"\n"
+		"Gate`s option list:\n"
+		"  -u, --udp             set udp address (gate 12)\n"
+		"  -S, --serial          make gate on serial device\n"
+		"\n"
+	);
+}
+
 int main(int argc, char *argv[])
 {
 	crow::pubsub_protocol.incoming_handler = incoming_pubsub_packet;
@@ -202,6 +217,7 @@ int main(int argc, char *argv[])
 
 	const struct option long_options[] =
 	{
+		{"help", no_argument, NULL, 'h'},
 		{"udp", required_argument, NULL, 'u'}, // crow udpgate port
 		{"tcp", required_argument, NULL, 't'},
 		{"debug", no_argument, NULL, 'd'}, // crow transport log
@@ -220,6 +236,10 @@ int main(int argc, char *argv[])
 	{
 		switch (opt)
 		{
+			case 'h':
+				print_help();
+				exit(0);
+
 			case 'u':
 				udpport = atoi(optarg);
 				break;
