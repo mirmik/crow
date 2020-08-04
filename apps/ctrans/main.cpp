@@ -88,7 +88,7 @@ std::string pipelinecmd;
 int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
-int unselect_pipe_fd[2];
+//int unselect_pipe_fd[2];
 
 enum class protoopt_e
 {
@@ -455,7 +455,7 @@ void *console_listener(void *arg)
 			send_do(msgpair.first);
 
 		//send unselect signal
-		write(unselect_pipe_fd[1], "a", 1);
+		//write(crow::unselect_pipe[1], "a", 1);
 	}
 
 	exit(0);
@@ -490,10 +490,10 @@ int main(int argc, char *argv[])
 {
 	pthread_t console_thread;
 
-	pipe(unselect_pipe_fd);
-	int flags = fcntl(unselect_pipe_fd[0], F_GETFL, 0);
-	fcntl(unselect_pipe_fd[0], F_SETFL, flags | O_NONBLOCK);
-	fcntl(unselect_pipe_fd[1], F_SETFL, flags | O_NONBLOCK);
+	//pipe(unselect_pipe_fd);
+	//int flags = fcntl(unselect_pipe_fd[0], F_GETFL, 0);
+	//fcntl(unselect_pipe_fd[0], F_SETFL, flags | O_NONBLOCK);
+	//fcntl(unselect_pipe_fd[1], F_SETFL, flags | O_NONBLOCK);
 
 	const struct option long_options[] =
 	{
@@ -779,30 +779,23 @@ int main(int argc, char *argv[])
 
 
 	//START CROW
+	crow::unselect_init();
 	crow::select_collect_fds();
-	crow::add_select_fd(unselect_pipe_fd[0]);
-
+	
 	std::thread crowthr([]()
 	{
 		while (1)
 		{
+			char unselect_read_buffer[512];
+
+			if (cancel_token)
+				return;
+
 			crow::select();
+			read(crow::unselect_pipe[0], unselect_read_buffer, 512);
 			do
 				crow::onestep();
 			while (crow::has_untravelled_now());
-
-			std::this_thread::sleep_for(std::chrono::microseconds(1));
-
-			if (cancel_token)
-			{
-				if (debug_mode)
-					nos::println("cancel_token was emitted. Stop crow thread.");
-
-				return;
-			}
-
-			char buf[512];
-			read(unselect_pipe_fd[0], buf, 512);
 		}
 	});
 

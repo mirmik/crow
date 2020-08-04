@@ -8,6 +8,7 @@
 
 #include <unistd.h>
 #include <igris/osutil/fd.h>
+#include <nos/print.h>
 
 static bool cancel_token = false;
 static std::thread _thread;
@@ -20,11 +21,17 @@ void crow::unselect()
 	::write(unselect_pipe[1], &c, 1);
 }
 
-void crow::start_spin_with_select()
+void crow::unselect_init() 
 {
+	crow::add_unselect_to_fds = true;
 	::pipe(unselect_pipe);
 	igris::osutil::nonblock(unselect_pipe[0], true);
-	crow::unsleep_handler = unselect;
+	crow::unsleep_handler = unselect;	
+}
+
+void crow::start_spin_with_select()
+{
+	crow::unselect_init();
 
 	_thread = std::thread([]()
 	{

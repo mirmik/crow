@@ -156,10 +156,11 @@ crow::packet_ptr crow::travel(crow::packet *pack)
 {
 	system_lock();
 	dlist_add_tail(&pack->lnk, &crow_travelled);
-	if (unsleep_handler)
-		unsleep_handler();
 	system_unlock();
 
+	if (unsleep_handler)
+		unsleep_handler();
+	
 	return crow::packet_ptr(pack);
 }
 
