@@ -498,6 +498,7 @@ void print_help()
 		"      --gdebug\n"
 		"Control option list:\n"
 		"      --noconsole       disable console input\n"
+		"      --pulse           oneshoot mode. leave after first message\n"
 		"Crow address reference:\n"
 		"      man crow-protocol\n"
 	);
