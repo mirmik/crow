@@ -40,7 +40,6 @@
 #include <unistd.h>
 
 bool infinite = false;
-bool cancel_token = false;
 bool debug_mode = false;
 
 uint8_t* addr = nullptr;
@@ -88,7 +87,7 @@ std::string pipelinecmd;
 int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
-int unselect_pipe_fd[2];
+//int unselect_pipe_fd[2];
 
 enum class protoopt_e
 {
@@ -134,9 +133,11 @@ std::string informat_tostr()
 		case input_format::INPUT_BINARY: return "INPUT_BINARY";
 
 #ifdef WITH_MSGTYPE
-
 		case input_format::INPUT_MSGTYPE: return "INPUT_MSGTYPE";
 #endif
+
+		default: 
+			BUG();
 	}
 
 	return std::string();
@@ -153,9 +154,11 @@ std::string outformat_tostr()
 		case output_format::OUTPUT_BINARY: return "OUTPUT_BINARY";
 
 #ifdef WITH_MSGTYPE
-
 		case output_format::OUTPUT_MSGTYPE: return "OUTPUT_MSGTYPE";
 #endif
+
+		default: 
+			BUG();
 	}
 
 	return std::string();
@@ -455,7 +458,7 @@ void *console_listener(void *arg)
 			send_do(msgpair.first);
 
 		//send unselect signal
-		write(unselect_pipe_fd[1], "a", 1);
+		//write(crow::unselect_pipe[1], "a", 1);
 	}
 
 	exit(0);
@@ -481,19 +484,34 @@ void print_help()
 		"  -A, --ackquant        set time quant (for QOS:1 and QOS:2)\n"
 		"  -t, --type            set package type (if protocol isn't choosen)\n"
 		"\n"
+		"Protocol option list:\n"
+		"      --chlisten        (channel) enable acceptor mode\n"
+		"      --channel         (channel) connect to channel on nid\n"
+		"      --node            (node)    send message to specified node\n"
+		"      --subscribe       (pubsub)  subscribe to crowker theme\n"
+		"      --publish         (pubsub)  publish to crowker theme\n"		
+		"\n"
+		"Info option list:\n"
+		"      --info\n"
+		"      --debug\n"
+		"      --debug-data-size\n"
+		"      --vdebug\n"
+		"      --gdebug\n"
+		"\n"
+		"Control option list:\n"
+		"      --noconsole       disable console input\n"
+		"      --pulse           oneshoot mode. leave after first message\n"
+		"      --echo            echo input packages to sender\n"
+		"      --api             enable incoming console (cmds: 'exit')"
+		"\n"
 		"Crow address reference:\n"
-		"man crow-protocol\n"
+		"      man crow-protocol\n"
 	);
 }
 
 int main(int argc, char *argv[])
 {
 	pthread_t console_thread;
-
-	pipe(unselect_pipe_fd);
-	int flags = fcntl(unselect_pipe_fd[0], F_GETFL, 0);
-	fcntl(unselect_pipe_fd[0], F_SETFL, flags | O_NONBLOCK);
-	fcntl(unselect_pipe_fd[1], F_SETFL, flags | O_NONBLOCK);
 
 	const struct option long_options[] =
 	{
@@ -724,10 +742,9 @@ int main(int argc, char *argv[])
 		informat = input_format::INPUT_RAW;
 	}
 
-// Определение целевого адреса
+	// Определение целевого адреса
 	if (optind < argc)
 	{
-		//addrsize = hexer(addr, 128, argv[optind], strlen(argv[optind]));
 		address = crow::address_warned(argv[optind]);
 		if (address.size() == 0)
 		{
@@ -755,8 +772,9 @@ int main(int argc, char *argv[])
 		printf("gates:\n");
 		printf("\tgate %d: udp port %d\n", G1_UDPGATE, udpport);
 
-		if (serial_port != 0)
-			printf("\tgate %d: serial port %s\n", 42, serial_port);
+		if (serial_port != NULL)
+			nos::println("gate is here (TODO)");
+			//printf("\tgate %d: serial port %s\n", 42, serial_port);
 
 		nos::println("informat:", informat_tostr());
 		nos::println("outformat:", outformat_tostr());
@@ -777,34 +795,10 @@ int main(int argc, char *argv[])
 		pipeline(pipelinecmd);
 	}
 
-
 	//START CROW
+	crow::unselect_init();
 	crow::select_collect_fds();
-	crow::add_select_fd(unselect_pipe_fd[0]);
-
-	std::thread crowthr([]()
-	{
-		while (1)
-		{
-			crow::select();
-			do
-				crow::onestep();
-			while (crow::has_untravelled_now());
-
-			std::this_thread::sleep_for(std::chrono::microseconds(1));
-
-			if (cancel_token)
-			{
-				if (debug_mode)
-					nos::println("cancel_token was emitted. Stop crow thread.");
-
-				return;
-			}
-
-			char buf[512];
-			read(unselect_pipe_fd[0], buf, 512);
-		}
-	});
+	crow::start_spin_with_select();
 
 	if (channelno >= 0)
 	{
@@ -829,8 +823,8 @@ int main(int argc, char *argv[])
 					break;
 			}
 
-			cancel_token = true;
-			crowthr.join();
+			crow::stop_spin();
+			crow::spin_join();
 			exit(0);
 		}
 	}
@@ -840,7 +834,7 @@ int main(int argc, char *argv[])
 		acceptor.init(acceptorno, acceptor_create_channel);
 	}
 
-// Ветка обработки pulse мода.
+	// Ветка обработки pulse мода.
 	if (pulse != "")
 	{
 		auto msgpair = input_do(pulse);
@@ -850,18 +844,15 @@ int main(int argc, char *argv[])
 
 		while (crow::has_untravelled() || crow::has_allocated())
 		{
-			//PRINT(crow::has_untravelled());
-			//PRINT(crow::has_allocated());
-			//crow::print_list_counts();
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		}
 
-		cancel_token = true;
-		crowthr.join();
+		crow::stop_spin();
+		crow::spin_join();
 		exit(0);
 	}
 
-// Создание консольного ввода, если необходимо.
+	// Создание консольного ввода, если необходимо.
 	if (!noconsole)
 	{
 		if (pthread_create(&console_thread, NULL, console_listener, NULL))
@@ -886,5 +877,5 @@ int main(int argc, char *argv[])
 		}).detach();
 	}
 
-	crowthr.join();
+	crow::spin_join();
 }

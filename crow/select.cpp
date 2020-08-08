@@ -7,6 +7,7 @@
 #include <nos/print.h>
 
 static std::vector<int> fds;
+bool crow::add_unselect_to_fds = false;
 
 void crow::select_collect_fds() 
 {
@@ -18,7 +19,9 @@ void crow::select_collect_fds()
 			fds.push_back(i);
 		}
 	}
-	fds.push_back(crow::unselect_pipe[0]);
+	
+	if (add_unselect_to_fds)
+		fds.push_back(crow::unselect_pipe[0]);
 }
 
 void crow::add_select_fd(int fd) 

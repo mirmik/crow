@@ -8,6 +8,7 @@
 
 #include <unistd.h>
 #include <igris/osutil/fd.h>
+#include <nos/print.h>
 
 static bool cancel_token = false;
 static std::thread _thread;
@@ -20,29 +21,36 @@ void crow::unselect()
 	::write(unselect_pipe[1], &c, 1);
 }
 
-void crow::start_spin_with_select()
+void crow::unselect_init()
 {
+	crow::add_unselect_to_fds = true;
 	::pipe(unselect_pipe);
 	igris::osutil::nonblock(unselect_pipe[0], true);
 	crow::unsleep_handler = unselect;
+}
 
-	_thread = std::thread([]()
+void crow::spin_with_select()
+{
+	crow::unselect_init();
+	crow::select_collect_fds();
+	while (1)
 	{
-		crow::select_collect_fds();
-		while (1)
-		{
-			char unselect_read_buffer[512];
+		char unselect_read_buffer[512];
 
-			if (cancel_token)
-				return;
+		if (cancel_token)
+			return;
 
-			crow::select();
-			read(unselect_pipe[0], unselect_read_buffer, 512);
-			do
-				crow::onestep();
-			while (crow::has_untravelled_now());
-		};
-	});
+		crow::select();
+		read(unselect_pipe[0], unselect_read_buffer, 512);
+		do
+			crow::onestep();
+		while (crow::has_untravelled_now());
+	};
+}
+
+void crow::start_spin_with_select()
+{
+	_thread = std::thread(spin_with_select);
 }
 
 void crow::start_spin() { crow::start_spin_with_select(); }
@@ -79,4 +87,9 @@ void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
 		}
 	});
 	thr.detach();
+}
+
+void crow::spin_join() 
+{
+	_thread.join();
 }
