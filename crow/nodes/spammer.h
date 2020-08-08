@@ -57,6 +57,38 @@ namespace crow
 			}
 		}
 
+		void send_v(igris::buffer * data, size_t sz) 
+		{
+
+			auto time = std::chrono::system_clock::now();
+
+			std::vector<std::map<nodeaddr, record>::iterator> to_delete;
+
+			auto eit = targets.end();
+			auto it = targets.begin();
+			for (; it != eit; it++)
+			{
+				if (time - it->second.last_subscribe > timeout)
+				{
+					to_delete.push_back(it);
+					continue;
+				}
+
+				node::send_v(
+				    it->first.nid,
+				    it->first.hostaddr(),
+				    data,
+				    sz,
+				    qos,
+				    ackquant);
+			}
+
+			for (auto it : to_delete)
+			{
+				targets.erase(it);
+			}
+		}
+
 		void incoming_packet(crow::packet * pack) override
 		{
 			auto time = std::chrono::system_clock::now();
