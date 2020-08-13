@@ -106,8 +106,10 @@ namespace crow
 	void start_spin_without_select();
 
 	void start_spin();
+
+	[[deprecated]]
 	void spin_join();
-	static void join_spin() { spin_join(); }
+	void join_spin();
 
 	bool has_untravelled();
 	bool has_untravelled_now();

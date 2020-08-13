@@ -93,3 +93,8 @@ void crow::spin_join()
 {
 	_thread.join();
 }
+
+void crow::join_spin() 
+{
+	_thread.join(); 
+}
