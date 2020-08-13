@@ -8,6 +8,7 @@ except Exception as ex:
 import time
 import threading
 
+THREAD = None
 crowker = None
 spin_cancel = False
 
@@ -18,12 +19,17 @@ def spin():
 		time.sleep(0.0001)
 
 def start_spin():
-	thr = threading.Thread(target = spin, args=())
-	thr.start()
+	global THREAD
+	THREAD = threading.Thread(target = spin, args=())
+	THREAD.start()
 
-def finish_spin():
+def stop_spin():
 	global spin_cancel
 	spin_cancel = True
+
+
+def join_spin():
+	THREAD.join()
 
 def waitall():
 	while not pycrow.fully_empty():

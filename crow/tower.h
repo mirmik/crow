@@ -107,6 +107,7 @@ namespace crow
 
 	void start_spin();
 	void spin_join();
+	static void join_spin() { spin_join(); }
 
 	bool has_untravelled();
 	bool has_untravelled_now();

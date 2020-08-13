@@ -6,13 +6,12 @@
 #include <crow/gates/udpgate.h>
 //#include <crow/holders.h>
 #include <crow/packet_ptr.h>
-#include <crow/alive.h>
 #include <crow/tower.h>
-#include <crow/towerxx.h>
 #include <crow/proto/pubsub.h>
 #include <crow/proto/node.h>
+#include <crow/proto/pynode.h>
 #include <crow/proto/msgbox.h>
-#include <crow/hexer.h>
+#include <crow/address.h>
 
 //#include <igris/print.h>
 
@@ -37,27 +36,31 @@ void subscribe_handler_bind_invoke(crow::packet *pack)
 PYBIND11_MODULE(libcrow, m)
 {
 	auto pack = py::class_<packet_ptr>(m, "packet_ptr")
-		.def("rawdata",
-			 [](packet_ptr &self) -> py::bytes {
-				 auto buf = self->rawdata();
-				 return {buf.data(), buf.size()};
-			 })
-		.def("addr", [](packet_ptr &self) -> py::bytes {
-			auto buf = self->addr();
-			return {buf.data(), buf.size()};
-		});
+	            .def("rawdata",
+	                 [](packet_ptr & self) -> py::bytes
+	{
+		auto buf = self->rawdata();
+		return {buf.data(), buf.size()};
+	})
+	.def("addr", [](packet_ptr & self) -> py::bytes
+	{
+		auto buf = self->addr();
+		return {buf.data(), buf.size()};
+	});
 
 	py::class_<packet_pubsub_ptr>(m, "packet_pubsub_ptr", pack)
-		.def(py::init<const packet_ptr&>())
-		.def("theme", [](packet_pubsub_ptr &self) -> py::bytes {
-			auto buf = self.theme();
-			return {buf.data(), buf.size()};
-		})
-		.def("data", [](packet_pubsub_ptr &self) -> py::bytes {
-			auto buf = self.data();
-			return {buf.data(), buf.size()};
-		})
-		;
+	.def(py::init<const packet_ptr&>())
+	.def("theme", [](packet_pubsub_ptr & self) -> py::bytes
+	{
+		auto buf = self.theme();
+		return {buf.data(), buf.size()};
+	})
+	.def("data", [](packet_pubsub_ptr & self) -> py::bytes
+	{
+		auto buf = self.data();
+		return {buf.data(), buf.size()};
+	})
+	;
 
 	/*py::class_<pubsub_packref, packref>(m, "pubsub_packref")
 		.def("theme", [](pubsub_packref &self) -> py::str {
@@ -71,35 +74,57 @@ PYBIND11_MODULE(libcrow, m)
 			return {buf.data(), buf.size()};
 		});*/
 
+
+	py::class_<crow::hostaddr>(m, "crow_hostaddr")
+	.def(py::init<const std::vector<uint8_t>&>())
+	;
+
+
 	py::class_<igris::buffer>(m, "igris_buffer")
-		.def(py::init<const std::string&>())
+	.def(py::init<const std::string&>())
 	;
 
 	py::class_<gateway> __gateway__(m, "gateway");
 	py::class_<udpgate>(m, "udpgate", __gateway__)
-		.def(py::init<>())
-		.def(py::init<uint16_t>())
-		.def("bind", &gateway::bind)
+	.def(py::init<>())
+	.def(py::init<uint16_t>())
+	.def("bind", &gateway::bind)
 	;
 
-	m.def("send", py::overload_cast<const std::vector<uint8_t>&, const std::string&, uint8_t, uint8_t, uint16_t >(&crow::send));
+	m.def("send", [](
+	          const std::vector<uint8_t>& addr,
+	          const std::string & data,
+	          uint8_t type,
+	          uint8_t qos,
+	          uint16_t ackquant)
+	{
+		return crow::send(
+		           crow::hostaddr(addr),
+		           igris::buffer(data),
+		           type,
+		           qos,
+		           ackquant
+		       );
+	});
 
 	m.def("create_udpgate", &crow::create_udpgate,
-		  py::return_value_policy::reference);
+	      py::return_value_policy::reference);
 	m.def("onestep", &crow::onestep);
 	m.def("spin", &crow::spin);
 	m.def("start_spin", &crow::start_spin);
 	m.def("stop_spin", &crow::stop_spin);
 
-	m.def("start_alive", (void(*)(const std::vector<uint8_t>&, const char*, uint16_t, uint16_t, uint8_t, uint16_t))&crow::start_alive, py::arg("addr"), py::arg("netname"), py::arg("resend_time"), py::arg("dietime"), py::arg("qos"), py::arg("ackquant"));
-	m.def("stop_alive", &crow::stop_alive);
+	//m.def("start_alive", (void(*)(const std::vector<uint8_t>&, const char*, uint16_t, uint16_t, uint8_t, uint16_t))&crow::start_alive, py::arg("addr"), py::arg("netname"), py::arg("resend_time"), py::arg("dietime"), py::arg("qos"), py::arg("ackquant"));
+	//m.def("stop_alive", &crow::stop_alive);
 
-	m.def("set_incoming_handler", [](py::function f) {
+	m.def("set_incoming_handler", [](py::function f)
+	{
 		incoming_handler_bind = f;
 		crow::user_incoming_handler = incoming_handler_bind_invoke;
 	});
 
-	m.def("set_subscribe_handler", [](py::function f) {
+	m.def("set_subscribe_handler", [](py::function f)
+	{
 		subscribe_handler_bind = f;
 		crow::pubsub_protocol.incoming_handler = subscribe_handler_bind_invoke;
 	});
@@ -114,30 +139,31 @@ PYBIND11_MODULE(libcrow, m)
 	m.def("envcrowker", &envcrowker);
 	m.def("environment_crowker", &environment_crowker);
 
-	m.def("subscribe", 
-		  (void (*)(
-		  	const std::vector<uint8_t> & addr,
-		  	const std::string & theme,
-		  	uint8_t ack, uint16_t ackquant,
-		    uint8_t rack, uint16_t rackquant)) &subscribe, 
-		  py::arg("addr"), 
-		  py::arg("theme"), 
-		  py::arg("ack"), py::arg("ackquant"), 
-		  py::arg("rack"), py::arg("rackquant"));
+	m.def("subscribe",
+	      (void (*)(
+	           const std::vector<uint8_t> & addr,
+	           const std::string & theme,
+	           uint8_t ack, uint16_t ackquant,
+	           uint8_t rack, uint16_t rackquant)) &subscribe,
+	      py::arg("addr"),
+	      py::arg("theme"),
+	      py::arg("ack"), py::arg("ackquant"),
+	      py::arg("rack"), py::arg("rackquant"));
 
 	m.def("publish",
-		  (void (*)(
-		  	const std::vector<uint8_t> & addr,
-		  	const std::string & theme, 
-		  	const std::string & data, 
-		  	uint8_t ack, uint16_t ackquant)) & publish,
-		  py::arg("addr"),
-		  py::arg("theme"), 
-		  py::arg("data"), 
-		  py::arg("ack"), py::arg("ackquant"));
+	      (void (*)(
+	           const std::vector<uint8_t> & addr,
+	           const std::string & theme,
+	           const std::string & data,
+	           uint8_t ack, uint16_t ackquant)) & publish,
+	      py::arg("addr"),
+	      py::arg("theme"),
+	      py::arg("data"),
+	      py::arg("ack"), py::arg("ackquant"));
 
 	static int unused; // the capsule needs something to reference
-	py::capsule cleanup(&unused, [](void *) {
+	py::capsule cleanup(&unused, [](void *)
+	{
 		user_incoming_handler = nullptr;
 		incoming_handler_bind.release();
 
@@ -154,13 +180,24 @@ PYBIND11_MODULE(libcrow, m)
 	.def("bind", py::overload_cast<int>(&crow::node::bind))
 	;
 
-	py::class_<crow::msgbox, crow::node>(m, "msgbox")
+	py::class_<crow::pynode_delegate, crow::node>(m, "PyNode")
+		.def(py::init<
+			std::function<void(crow::packet_ptr)>, 
+			std::function<void(crow::packet_ptr)>
+		>())
+	;
+
+	/*py::class_<crow::msgbox, crow::node>(m, "msgbox")
 		.def(py::init<>())
 		.def("send", py::overload_cast<const std::vector<uint8_t>&, uint16_t, const std::string&, uint8_t, uint16_t>(&crow::msgbox::send))
 		.def("send", py::overload_cast<void*, uint8_t, uint16_t, void*, size_t, uint8_t, uint16_t>(&crow::msgbox::send))
 		.def("query", &crow::msgbox::query, ungil())
 		.def("receive", &crow::msgbox::receive, ungil())
-	; 
+	; */
 
 	m.def("fully_empty", &crow::fully_empty);
+
+	m.def("join_spin", &crow::join_spin, py::call_guard<py::gil_scoped_release>());
+	m.def("start_spin", &crow::start_spin);
+	m.def("stop_spin", &crow::stop_spin);
 }

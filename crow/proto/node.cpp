@@ -181,7 +181,7 @@ void crow::system_node_cls::incoming_packet(crow::packet *pack)
 	{
 		for (crow::node &srvs : crow::nodes)
 		{
-			sprintf(buf, "%d %s %s\n", srvs.id, srvs.typestr(), srvs.mnem);
+			sprintf(buf, "%d %s\n", srvs.id, srvs.typestr());
 			node_send(0, sh->sid, {pack->addrptr(), pack->addrsize()}, {buf, strlen(buf)}, 0, 200);
 		}
 	}

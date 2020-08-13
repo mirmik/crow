@@ -105,7 +105,6 @@ namespace crow
 		struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
 		struct dlist_head waitlnk = DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
 		uint16_t id = 0;
-		const char* mnem = NULL;
 
 		virtual void incoming_packet(crow::packet *pack) = 0;
 		virtual void undelivered_packet(crow::packet *pack) { crow::release(pack); }
@@ -210,7 +209,6 @@ namespace crow
 		node_protocol_cls() : protocol(CROW_NODE_PROTOCOL)
 		{
 			link_node(&system_node, 0);
-			system_node.mnem = "twrinfo";
 		}
 
 		static auto sid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->sid; }
