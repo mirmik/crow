@@ -48,6 +48,14 @@ PYBIND11_MODULE(libcrow, m)
 		return {buf.data(), buf.size()};
 	});
 
+	py::class_<node_packet_ptr>(m, "node_packet_ptr", pack)
+	            .def("message",
+	                 [](node_packet_ptr & self) -> py::bytes
+	{
+		auto buf = self.message();
+		return {buf.data(), buf.size()};
+	});
+
 	py::class_<packet_pubsub_ptr>(m, "packet_pubsub_ptr", pack)
 	.def(py::init<const packet_ptr&>())
 	.def("theme", [](packet_pubsub_ptr & self) -> py::bytes
@@ -178,13 +186,29 @@ PYBIND11_MODULE(libcrow, m)
 	py::class_<crow::node>(m, "node")
 	.def("bind", py::overload_cast<>(&crow::node::bind))
 	.def("bind", py::overload_cast<int>(&crow::node::bind))
+	.def("send", [](
+	         crow::node & self,
+	         uint16_t rid,
+	         const std::vector<uint8_t>& addr,
+	         const std::string & data,
+	         uint8_t qos,
+	         uint16_t ackquant)
+	{
+		return self.send(
+		           rid,
+		           crow::hostaddr(addr),
+		           igris::buffer(data),
+		           qos,
+		           ackquant
+		       );
+	})
 	;
 
 	py::class_<crow::pynode_delegate, crow::node>(m, "PyNode")
-		.def(py::init<
-			std::function<void(crow::packet_ptr)>, 
-			std::function<void(crow::packet_ptr)>
-		>())
+	.def(py::init <
+	     std::function<void(crow::node_packet_ptr)>,
+	     std::function<void(crow::node_packet_ptr)>
+	     > ())
 	;
 
 	/*py::class_<crow::msgbox, crow::node>(m, "msgbox")
