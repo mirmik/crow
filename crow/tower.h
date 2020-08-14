@@ -42,15 +42,8 @@ namespace crow
 	void live_diagnostic_enable();
 	void enable_live_diagnostic();
 
-	inline void diagnostic_setup(bool en, bool len = false)
-	{
-		if (en)
-			diagnostic_enable();
-
-		if (len)
-			live_diagnostic_enable();
-	}
-
+	void diagnostic_setup(bool en, bool len = false);
+	
 	// Отправить пакет.
 	crow::packet_ptr send(const crow::hostaddr & addr,
 	                      igris::buffer data,

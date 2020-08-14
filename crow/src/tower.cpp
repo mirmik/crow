@@ -48,6 +48,16 @@ void crow::enable_live_diagnostic()
 	__live_diagnostic_enabled = true;
 }
 
+void crow::diagnostic_setup(bool en, bool len)
+{
+	if (en)
+		diagnostic_enable();
+
+	if (len)
+		live_diagnostic_enable();
+}
+
+
 static void crow_utilize(crow::packet *pack)
 {
 	if (__live_diagnostic_enabled)
@@ -160,7 +170,7 @@ crow::packet_ptr crow::travel(crow::packet *pack)
 
 	if (unsleep_handler)
 		unsleep_handler();
-	
+
 	return crow::packet_ptr(pack);
 }
 

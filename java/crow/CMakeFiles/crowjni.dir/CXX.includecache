@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mirmik/project/crow/java/crow/Crow.cpp
+iostream
+-
+Crow.h
+/home/mirmik/project/crow/java/crow/Crow.h
+crow/tower.h
+-
+crow/gates/udpgate.h
+-
+
+/home/mirmik/project/crow/java/crow/Crow.h
+jni.h
+-
+
+/usr/lib/jvm/java-11-openjdk-amd64/include/jni.h
+stdio.h
+-
+stdarg.h
+-
+jni_md.h
+/usr/lib/jvm/java-11-openjdk-amd64/include/jni_md.h
+
+/usr/lib/jvm/java-11-openjdk-amd64/include/linux/jni_md.h
+

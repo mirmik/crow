@@ -29,7 +29,7 @@ licant.cxx_shared_library(target,
 
 	cxx_flags = '-fPIC -Wall',
 	cc_flags = '-fPIC -Wall',
-	libs=["igris"]
+	libs=["igris", "nos"]
 )
 
 licant.fileset("apps", targets=[
