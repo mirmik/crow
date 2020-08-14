@@ -4,6 +4,7 @@
 #include <crow/extra/nodeaddr.h>
 #include <crow/proto/node.h>
 #include <chrono>
+#include <map>
 
 #include <igris/event/delegate.h>
 

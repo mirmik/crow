@@ -1,1 +1,1 @@
-/usr/bin/c++ -fPIC  -std=c++17 -O3 -DNDEBUG  -shared -Wl,-soname,libcrowjni.so -o libcrowjni.so CMakeFiles/crowjni.dir/Crow.cpp.o  -lcrow 
+/usr/bin/c++ -fPIC  -std=c++17 -O3 -DNDEBUG  -shared -Wl,-soname,libcrowjni.so -o libcrowjni.so CMakeFiles/crowjni.dir/Crow.cpp.o CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.o  -lcrow 

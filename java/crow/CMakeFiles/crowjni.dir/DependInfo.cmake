@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/mirmik/project/crow/java/crow/Crow.cpp" "/home/mirmik/project/crow/java/crow/CMakeFiles/crowjni.dir/Crow.cpp.o"
+  "/home/mirmik/project/crow/java/crow/CrowSpamSubscriber.cpp" "/home/mirmik/project/crow/java/crow/CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

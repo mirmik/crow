@@ -6,3 +6,8 @@ CMakeFiles/crowjni.dir/Crow.cpp.o: Crow.h
 CMakeFiles/crowjni.dir/Crow.cpp.o: /usr/lib/jvm/java-11-openjdk-amd64/include/jni.h
 CMakeFiles/crowjni.dir/Crow.cpp.o: /usr/lib/jvm/java-11-openjdk-amd64/include/linux/jni_md.h
 
+CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.o: CrowSpamSubscriber.cpp
+CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.o: CrowSpamSubscriber.h
+CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.o: /usr/lib/jvm/java-11-openjdk-amd64/include/jni.h
+CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.o: /usr/lib/jvm/java-11-openjdk-amd64/include/linux/jni_md.h
+

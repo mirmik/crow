@@ -20,6 +20,22 @@ crow/gates/udpgate.h
 jni.h
 -
 
+/home/mirmik/project/crow/java/crow/CrowSpamSubscriber.cpp
+jni.h
+-
+iostream
+-
+CrowSpamSubscriber.h
+/home/mirmik/project/crow/java/crow/CrowSpamSubscriber.h
+crow/tower.h
+-
+crow/nodes/spammer.h
+-
+
+/home/mirmik/project/crow/java/crow/CrowSpamSubscriber.h
+jni.h
+-
+
 /usr/lib/jvm/java-11-openjdk-amd64/include/jni.h
 stdio.h
 -

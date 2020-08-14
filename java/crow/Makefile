@@ -150,6 +150,33 @@ Crow.cpp.s:
 	$(MAKE) -f CMakeFiles/crowjni.dir/build.make CMakeFiles/crowjni.dir/Crow.cpp.s
 .PHONY : Crow.cpp.s
 
+CrowSpamSubscriber.o: CrowSpamSubscriber.cpp.o
+
+.PHONY : CrowSpamSubscriber.o
+
+# target to build an object file
+CrowSpamSubscriber.cpp.o:
+	$(MAKE) -f CMakeFiles/crowjni.dir/build.make CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.o
+.PHONY : CrowSpamSubscriber.cpp.o
+
+CrowSpamSubscriber.i: CrowSpamSubscriber.cpp.i
+
+.PHONY : CrowSpamSubscriber.i
+
+# target to preprocess a source file
+CrowSpamSubscriber.cpp.i:
+	$(MAKE) -f CMakeFiles/crowjni.dir/build.make CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.i
+.PHONY : CrowSpamSubscriber.cpp.i
+
+CrowSpamSubscriber.s: CrowSpamSubscriber.cpp.s
+
+.PHONY : CrowSpamSubscriber.s
+
+# target to generate assembly for a file
+CrowSpamSubscriber.cpp.s:
+	$(MAKE) -f CMakeFiles/crowjni.dir/build.make CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.s
+.PHONY : CrowSpamSubscriber.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -162,6 +189,9 @@ help:
 	@echo "... Crow.o"
 	@echo "... Crow.i"
 	@echo "... Crow.s"
+	@echo "... CrowSpamSubscriber.o"
+	@echo "... CrowSpamSubscriber.i"
+	@echo "... CrowSpamSubscriber.s"
 .PHONY : help
 
 

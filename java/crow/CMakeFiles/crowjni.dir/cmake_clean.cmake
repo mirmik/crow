@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/crowjni.dir/Crow.cpp.o"
+  "CMakeFiles/crowjni.dir/CrowSpamSubscriber.cpp.o"
   "libcrowjni.pdb"
   "libcrowjni.so"
 )
