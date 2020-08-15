@@ -11,7 +11,7 @@ import licant
 
 licant.include("nos", local_tunel=("pycrow/__tunels__/nos", "nos.g.py"))
 licant.include("igris", local_tunel=("pycrow/__tunels__/igris", "igris.g.py"))
-licant.include("crow", path="crow.g.py")
+licant.include("crow", path="../../crow.g.py")
 licant.cxx_objects("crow-objects", 
 	mdepends = [
 		"crow",
@@ -25,6 +25,7 @@ licant.cxx_objects("crow-objects",
 		("igris.ctrobj", "linux")
 	] 
 )
+
 crowopts = licant.core.core.get("crow-objects").finalopts
 
 class bdist_wheel(bdist_wheel_):
@@ -45,7 +46,7 @@ class bdist_wheel(bdist_wheel_):
 		self.plat_name = platform_name
 
 pycrow_lib = Extension("pycrow.libcrow",
-	sources = ["crow/pywrap.cpp"] + crowopts["sources"],
+	sources = ["pywrap.cpp"] + crowopts["sources"],
 	extra_compile_args=['-fPIC', '-std=c++17'],
 	extra_link_args=['-Wl,-rpath,$ORIGIN/libs'],
 	include_dirs = crowopts["include_paths"],

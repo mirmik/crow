@@ -1,3 +1,0 @@
-/home/mirmik/project/crow/java/crow/CMakeFiles/rebuild_cache.dir
-/home/mirmik/project/crow/java/crow/CMakeFiles/crowjni.dir
-/home/mirmik/project/crow/java/crow/CMakeFiles/edit_cache.dir
