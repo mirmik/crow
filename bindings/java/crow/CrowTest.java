@@ -9,7 +9,7 @@ public class CrowTest {
 
 		Crow.create_udpgate(12, 10010);
 
-		var subscriber = new CrowSpamSubscriber();
+		CrowSpamSubscriber subscriber = new CrowSpamSubscriber();
 		subscriber.bind(12);
 
 		Crow.start_spin();

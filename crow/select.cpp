@@ -49,7 +49,10 @@ void crow::select()
 	} 
 	else 
 	{
-		struct timeval timeout_struct = { timeout / 1000, (timeout % 1000) * 1000 };
+		struct timeval timeout_struct = {
+				(time_t )(timeout / 1000),
+				(suseconds_t)((timeout % 1000) * 1000)
+		};
         ::select(nfds+1, &read_fds, NULL, NULL, &timeout_struct);
 	}
 
