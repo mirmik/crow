@@ -40,11 +40,12 @@ void crow::spin_with_select()
 		if (cancel_token)
 			return;
 
-		crow::select();
-		read(unselect_pipe[0], unselect_read_buffer, 512);
 		do
 			crow::onestep();
 		while (crow::has_untravelled_now());
+		
+		crow::select();
+		read(unselect_pipe[0], unselect_read_buffer, 512);
 	};
 }
 

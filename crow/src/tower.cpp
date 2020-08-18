@@ -384,7 +384,8 @@ static void crow_do_travel(crow::packet *pack)
 }
 
 uint16_t __seqcounter = 0;
-static crow::packet_ptr crow_transport(crow::packet *pack)
+crow::packet_ptr crow_transport(crow::packet *pack, bool fastsend = false);
+crow::packet_ptr crow_transport(crow::packet *pack, bool fastsend)
 {
 	pack->header.stg = 0;
 	pack->header.f.ack = 0;
@@ -392,14 +393,22 @@ static crow::packet_ptr crow_transport(crow::packet *pack)
 	pack->header.seqid = __seqcounter++;
 	system_unlock();
 
-	return crow::travel(pack);
+	if (fastsend == false)
+		return crow::travel(pack);
+	else
+	{
+		crow::packet_ptr ptr(pack);
+		crow_do_travel(pack);
+		return ptr;
+	}
 }
 
 crow::packet_ptr crow::send(const crow::hostaddr & addr,
                             const igris::buffer data,
                             uint8_t type,
                             uint8_t qos,
-                            uint16_t ackquant)
+                            uint16_t ackquant,
+                            bool fastsend)
 {
 	crow::packet *pack = crow::create_packet(NULL, addr.size(), data.size());
 	if (pack == nullptr)
@@ -416,7 +425,8 @@ crow::packet_ptr crow::send(const crow::hostaddr & addr,
 }
 
 crow::packet_ptr crow::send_v(const crow::hostaddr & addr, const igris::buffer *vec,
-                              size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant)
+                              size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant,
+                              bool fastsend)
 {
 	size_t dsize = 0;
 	const igris::buffer *it = vec;
@@ -446,13 +456,14 @@ crow::packet_ptr crow::send_v(const crow::hostaddr & addr, const igris::buffer *
 		dst += it->size();
 	}
 
-	return crow_transport(pack);
+	return crow_transport(pack, fastsend);
 }
 
 crow::packet_ptr crow::send_vv(const crow::hostaddr & addr,
                                const igris::buffer* vec, size_t veclen,
                                const igris::buffer* vec2, size_t veclen2,
-                               uint8_t type, uint8_t qos, uint16_t ackquant)
+                               uint8_t type, uint8_t qos, uint16_t ackquant,
+                               bool fastsend)
 {
 	size_t dsize = 0;
 	const igris::buffer *it;
@@ -499,7 +510,7 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr & addr,
 		dst += it->size();
 	}
 
-	return crow_transport(pack);
+	return crow_transport(pack, fastsend);
 }
 
 void crow::return_to_tower(crow::packet *pack, uint8_t sts)

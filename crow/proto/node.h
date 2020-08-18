@@ -23,7 +23,8 @@ namespace crow
 	                           const crow::hostaddr & addr,
 	                           const igris::buffer data,
 	                           uint8_t qos,
-	                           uint16_t ackquant);
+	                           uint16_t ackquant,
+	                           bool fastsend = false);
 
 	crow::packet_ptr node_send_special(uint16_t sid,
 	                                   uint16_t rid,
@@ -31,7 +32,8 @@ namespace crow
 	                                   uint8_t type,
 	                                   const igris::buffer data,
 	                                   uint8_t qos,
-	                                   uint16_t ackquant);
+	                                   uint16_t ackquant,
+	                                   bool fastsend = false);
 
 	crow::packet_ptr node_send_v(uint16_t sid,
 	                             uint16_t rid,
@@ -39,7 +41,8 @@ namespace crow
 	                             const igris::buffer * vec,
 	                             size_t veclen,
 	                             uint8_t qos,
-	                             uint16_t ackquant);
+	                             uint16_t ackquant,
+	                             bool fastsend = false);
 
 	// TODO: replace with annotation
 	struct node_subheader
@@ -130,9 +133,10 @@ namespace crow
 		                      const crow::hostaddr& raddr,
 		                      const igris::buffer data,
 		                      uint8_t qos,
-		                      uint16_t ackquant)
+		                      uint16_t ackquant,
+		                      bool fastsend = false)
 		{
-			return crow::node_send(id, rid, raddr, data, qos, ackquant);
+			return crow::node_send(id, rid, raddr, data, qos, ackquant, fastsend);
 		}
 
 		crow::packet_ptr send_special(uint16_t rid,
@@ -140,9 +144,10 @@ namespace crow
 		                              uint8_t type,
 		                              const igris::buffer data,
 		                              uint8_t qos,
-		                              uint16_t ackquant)
+		                              uint16_t ackquant,
+		                              bool fastsend = false)
 		{
-			return crow::node_send_special(id, rid, raddr, type, data, qos, ackquant);
+			return crow::node_send_special(id, rid, raddr, type, data, qos, ackquant, fastsend);
 		}
 
 		crow::packet_ptr send_v(uint16_t rid,
@@ -150,9 +155,10 @@ namespace crow
 		                        const igris::buffer * vdat,
 		                        size_t vlen,
 		                        uint8_t qos,
-		                        uint16_t ackquant)
+		                        uint16_t ackquant,
+		                        bool fastsend = false)
 		{
-			return crow::node_send_v(id, rid, raddr, vdat, vlen, qos, ackquant);
+			return crow::node_send_v(id, rid, raddr, vdat, vlen, qos, ackquant, fastsend);
 		}
 
 		static
@@ -181,7 +187,7 @@ namespace crow
 			return annot;
 		}
 
-		virtual ~node() =default;
+		virtual ~node() = default;
 	};
 
 	class system_node_cls : public node

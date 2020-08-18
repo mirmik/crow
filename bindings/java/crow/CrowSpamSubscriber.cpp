@@ -12,7 +12,6 @@ struct envobj
 };
 
 JavaVM * g_vm;
-jobject g_obj;
 
 void spam_subscriber_helper(
     void * privarg,
@@ -23,7 +22,7 @@ void spam_subscriber_helper(
 	if (getEnvStat == JNI_EDETACHED)
 	{
 		std::cout << "GetEnv: not attached" << std::endl;
-		if (g_vm->AttachCurrentThread((void **) &env, NULL) != 0)
+		if (g_vm->AttachCurrentThread(&env, NULL) != 0)
 		{
 			std::cout << "Failed to attach" << std::endl;
 		}
@@ -36,7 +35,7 @@ void spam_subscriber_helper(
 	{
 		std::cout << "GetEnv: version not supported" << std::endl;
 	}
-	jclass cls = env->GetObjectClass(g_obj);
+	jclass cls = env->GetObjectClass((jobject)privarg);
 	if (cls == NULL)
 	{
 		std::cout << "Unable to class" << std::endl;
@@ -52,7 +51,10 @@ void spam_subscriber_helper(
 	env->SetByteArrayRegion(jb, 0, 
 		data.size(), (const jbyte *)data.data());
 
-	env->CallVoidMethod(g_obj, g_mid, jb);
+	env->CallVoidMethod((jobject)privarg, g_mid, jb);
+
+	//env->ReleaseByteArrayElements(jb, (jbyte*) data.data(), JNI_ABORT);
+	env->DeleteLocalRef(jb);
 }
 
 static
@@ -92,23 +94,54 @@ static crow::spam_subscriber *getObject(JNIEnv *env, jobject self)
 	return reinterpret_cast<crow::spam_subscriber *>(nativeObjectPointer);
 }
 
-JNIEXPORT jlong JNICALL Java_crow_CrowSpamSubscriber_nativeNew
+extern "C" JNIEXPORT jlong JNICALL Java_crow_CrowSpamSubscriber_nativeNew
 (JNIEnv * env, jobject obj)
 {
 	env->GetJavaVM(&g_vm);
 	//auto eo = new envobj { env, obj };
 
 	auto ptr = new crow::spam_subscriber(
-	    igris::make_delegate(spam_subscriber_helper, nullptr));
-
-	g_obj = env->NewGlobalRef(obj);
+	    igris::make_delegate(spam_subscriber_helper, env->NewGlobalRef(obj)));
 
 	return (jlong) ptr;
 }
 
-JNIEXPORT void JNICALL Java_crow_CrowSpamSubscriber_bind
+extern "C" JNIEXPORT void JNICALL Java_crow_CrowSpamSubscriber_bind
 (JNIEnv * env, jobject jobj, jint id)
 {
 	auto sub = getObject(env, jobj);
 	sub->bind(id);
+}
+
+std::string jstring2string(JNIEnv *env, jstring jStr) {
+	if (!jStr)
+		return "";
+
+	const jclass stringClass = env->GetObjectClass(jStr);
+	const jmethodID getBytes = env->GetMethodID(stringClass, "getBytes", "(Ljava/lang/String;)[B");
+	const jbyteArray stringJbytes = (jbyteArray) env->CallObjectMethod(jStr, getBytes, env->NewStringUTF("UTF-8"));
+
+	size_t length = (size_t) env->GetArrayLength(stringJbytes);
+	jbyte* pBytes = env->GetByteArrayElements(stringJbytes, NULL);
+
+	std::string ret = std::string((char *)pBytes, length);
+	env->ReleaseByteArrayElements(stringJbytes, pBytes, JNI_ABORT);
+
+	env->DeleteLocalRef(stringJbytes);
+	env->DeleteLocalRef(stringClass);
+	return ret;
+}
+
+extern "C" JNIEXPORT void JNICALL Java_crow_CrowSpamSubscriber_subscribe
+(JNIEnv * env, jobject jobj, jint nid, jstring addr, jint qos, jint ackquant)
+{
+	auto sub = getObject(env, jobj);
+	sub->subscribe(nid, crow::address(jstring2string(env, addr)), qos, ackquant);
+}
+
+extern "C" JNIEXPORT void JNICALL Java_crow_CrowSpamSubscriber_resubscribe
+		(JNIEnv * env, jobject jobj, jint qos, jint ackquant)
+{
+	auto sub = getObject(env, jobj);
+	sub->resubscribe(qos, ackquant);
 }

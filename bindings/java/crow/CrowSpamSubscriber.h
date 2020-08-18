@@ -23,6 +23,22 @@ JNIEXPORT jlong JNICALL Java_crow_CrowSpamSubscriber_nativeNew
 JNIEXPORT void JNICALL Java_crow_CrowSpamSubscriber_bind
   (JNIEnv *, jobject, jint);
 
+/*
+ * Class:     crow_CrowSpamSubscriber
+ * Method:    subscribe
+ * Signature: (ILjava/lang/String;II)V
+ */
+JNIEXPORT void JNICALL Java_crow_CrowSpamSubscriber_subscribe
+  (JNIEnv *, jobject, jint, jstring, jint, jint);
+
+/*
+ * Class:     crow_CrowSpamSubscriber
+ * Method:    resubscribe
+ * Signature: (II)V
+ */
+JNIEXPORT void JNICALL Java_crow_CrowSpamSubscriber_resubscribe
+  (JNIEnv *, jobject, jint, jint);
+
 #ifdef __cplusplus
 }
 #endif
