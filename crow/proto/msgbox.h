@@ -1,7 +1,6 @@
 #ifndef CROW_MSGBOX_H
 #define CROW_MSGBOX_H
 
-#include <crow/address.h>
 #include <crow/proto/node.h>
 #include <igris/datastruct/dlist.h>
 #include <igris/sync/syslock.h>

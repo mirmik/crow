@@ -1,10 +1,9 @@
 #ifndef CROW_NODEADDR_H
 #define CROW_NODEADDR_H
 
+#include <crow/address.h>
 #include <crow/types.h>
 #include <vector>
-
-#include <crow/address.h>
 
 namespace crow
 {

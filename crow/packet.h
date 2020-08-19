@@ -9,10 +9,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <crow/hostaddr.h>
 #include <crow/defs.h>
+
 #include <igris/datastruct/dlist.h>
 #include <igris/container/pool.h>
-
 #include <igris/buffer.h>
 
 /// Качество обслуживания.

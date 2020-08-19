@@ -2,12 +2,12 @@
 #define CROW_BROCKER_SERVICE_H
 
 #include <crow/types.h>
-#include <crow/address.h>
 #include <crow/proto/node.h>
 #include <crow/proto/request.h>
 
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include <igris/util/bug.h>
 

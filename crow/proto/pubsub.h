@@ -10,7 +10,6 @@
 #include <igris/sync/syslock.h>
 
 #include <string_view>
-#include <vector>
 
 struct crow_theme;
 

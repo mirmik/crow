@@ -1,10 +1,8 @@
 #ifndef CROW_TOWER_H
 #define CROW_TOWER_H
 
-#include <crow/address.h>
 #include <crow/gateway.h>
 #include <crow/packet_ptr.h>
-
 #include <igris/container/dlist.h>
 
 #define CROW_SENDED 0

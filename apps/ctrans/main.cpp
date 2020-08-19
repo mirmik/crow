@@ -1,4 +1,5 @@
 #include <crow/gates/serial_gstuff.h>
+#include <crow/gates/serial_gstuff_v1.h>
 #include <crow/gates/udpgate.h>
 
 #include <crow/tower.h>
@@ -466,6 +467,7 @@ void *console_listener(void *arg)
 
 uint16_t udpport = 0;
 char *serial_port = NULL;
+char *serial_port_v1 = NULL;
 
 void print_help() 
 {
@@ -519,6 +521,7 @@ int main(int argc, char *argv[])
 
 		{"udp", required_argument, NULL, 'u'}, // udp порт для 12-ого гейта.
 		{"serial", required_argument, NULL, 'S'}, // serial...
+		{"serial_v1", required_argument, NULL, 'C'}, // serial...
 
 		{"qos", required_argument, NULL, 'q'}, // qos отправляемых сообщений. 0 по умолчанию
 		{"type", required_argument, NULL, 't'}, // метка типа отправляемых сообщений
@@ -594,6 +597,11 @@ int main(int argc, char *argv[])
 			case 'S':
 				serial_port = (char *)malloc(strlen(optarg) + 1);
 				strcpy(serial_port, optarg);
+				break;
+
+			case 'C':
+				serial_port_v1 = (char *)malloc(strlen(optarg) + 1);
+				strcpy(serial_port_v1, optarg);
 				break;
 
 			case 'E':
@@ -721,7 +729,15 @@ int main(int argc, char *argv[])
 			exit(-1);
 		}
 	}
-
+	
+	if (serial_port_v1 != NULL)
+	{
+		if (crow::create_serial_gstuff_v1(serial_port_v1, 115200, 42, gdebug) == NULL)
+		{
+			perror("serialgate open");
+			exit(-1);
+		}
+	}
 // Переопределение стандартного обработчика (Для возможности перехвата и api)
 	crow::user_incoming_handler = incoming_handler;
 
@@ -824,7 +840,7 @@ int main(int argc, char *argv[])
 			}
 
 			crow::stop_spin();
-			crow::spin_join();
+			crow::join_spin();
 			exit(0);
 		}
 	}
@@ -848,7 +864,7 @@ int main(int argc, char *argv[])
 		}
 
 		crow::stop_spin();
-		crow::spin_join();
+		crow::join_spin();
 		exit(0);
 	}
 
@@ -877,5 +893,5 @@ int main(int argc, char *argv[])
 		}).detach();
 	}
 
-	crow::spin_join();
+	crow::join_spin();
 }

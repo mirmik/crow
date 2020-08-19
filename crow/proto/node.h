@@ -3,7 +3,6 @@
 
 #include <crow/types.h>
 #include <crow/packet.h>
-#include <crow/address.h>
 #include <crow/proto/protocol.h>
 
 #include <igris/container/dlist.h>
