@@ -26,9 +26,9 @@ namespace crow
 		std::chrono::milliseconds timeout = 5000ms;
 		uint8_t qos = 0;
 		uint16_t ackquant = 50;
-	
+
 	public:
-		void send(igris::buffer data)
+		void send(igris::buffer data, bool fastsend = false)
 		{
 			auto time = std::chrono::system_clock::now();
 
@@ -49,7 +49,7 @@ namespace crow
 				    it->first.hostaddr(),
 				    data,
 				    qos,
-				    ackquant);
+				    ackquant, fastsend);
 			}
 
 			for (auto it : to_delete)
@@ -58,7 +58,7 @@ namespace crow
 			}
 		}
 
-		void send_v(igris::buffer * data, size_t sz) 
+		void send_v(igris::buffer * data, size_t sz, bool fastsend = false)
 		{
 
 			auto time = std::chrono::system_clock::now();
@@ -81,7 +81,7 @@ namespace crow
 				    data,
 				    sz,
 				    qos,
-				    ackquant);
+				    ackquant, fastsend);
 			}
 
 			for (auto it : to_delete)
@@ -100,7 +100,7 @@ namespace crow
 			crow::release(pack);
 		}
 
-		int count_of_subscribers() 
+		int count_of_subscribers()
 		{
 			return targets.size();
 		}
@@ -109,13 +109,22 @@ namespace crow
 	class spam_subscriber : public crow::node
 	{
 		igris::delegate<void, igris::buffer> dlg;
+		std::vector<uint8_t> addr;
+		int nid;
 
 	public:
 		spam_subscriber(igris::delegate<void, igris::buffer> dlg) : dlg(dlg) {}
 
 		void subscribe(nid_t nid, crow::hostaddr host, uint8_t qos = 2, uint16_t ackquant = 200)
 		{
+			this->addr = std::vector<uint8_t>((uint8_t*)host.data(), (uint8_t*)host.data() + host.size());
+			this->nid = nid;
 			node::send(nid, host, "", qos, ackquant);
+		}
+
+		void resubscribe(uint8_t qos = 2, uint16_t ackquant = 200)
+		{
+			node::send(nid, {addr.data(), addr.size()}, "", qos, ackquant);
 		}
 
 		void incoming_packet(crow::packet * pack) override

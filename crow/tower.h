@@ -47,21 +47,24 @@ namespace crow
 	                      igris::buffer data,
 	                      uint8_t type,
 	                      uint8_t qos,
-	                      uint16_t ackquant);
+	                      uint16_t ackquant,
+	                      bool fastsend=false);
 
 	crow::packet_ptr send_v(const crow::hostaddr & addr,
 	                        const igris::buffer* vec,
 	                        size_t veclen,
 	                        uint8_t type,
 	                        uint8_t qos,
-	                        uint16_t ackquant);
+	                        uint16_t ackquant,
+	                        bool fastsend=false);
 
 	crow::packet_ptr send_vv(const crow::hostaddr & addr,
 	                         const igris::buffer* vec, size_t veclen,
 	                         const igris::buffer* vec2, size_t veclen2,
 	                         uint8_t type,
 	                         uint8_t qos,
-	                         uint16_t ackquant);
+	                         uint16_t ackquant,
+	                         bool fastsend=false);
 
 	// Эта функция вызывается вратами после обработки отсылаемого пакета.
 	void return_to_tower(crow::packet *pack, uint8_t sts);
