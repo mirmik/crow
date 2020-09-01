@@ -4,32 +4,6 @@
 
 void crow::diagnostic(const char *notation, crow::packet *pack)
 {
-	//bool postfix_points = pack->rawdata().size() > 16;
-
-	/*nos::fprint(
-		"{}: ("
-		"qos:{}, "
-		"ack:{}, "
-		"alen:{}, "
-		"flen:{}, "
-		"type:{}, "
-		"addr:{}, "
-		"stg:{}, "
-		"dlen:{}, "
-		"data:{}",
-		notation, pack->header.qos, (uint8_t)pack->header.f.ack,
-		(uint8_t)pack->header.alen, (uint16_t)pack->header.flen,
-		(uint8_t)pack->header.f.type,
-		igris::hexascii_encode(pack->addrptr(), pack->addrsize()),
-		pack->header.stg,
-		pack->rawdata().size(),
-		igris::dstring(pack->rawdata().data(), pack->rawdata().size() > 16 ? 16 : pack->rawdata().size()));
-
-		if (postfix_points) 
-			nos::println("...)");
-		else
-			nos::println(")");*/
-
 	dpr(notation);
 	dpr(": (");
 	dpr("ptr:");dprptr(pack);

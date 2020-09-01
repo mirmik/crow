@@ -50,11 +50,8 @@ void crow::enable_live_diagnostic()
 
 void crow::diagnostic_setup(bool en, bool len)
 {
-	if (en)
-		diagnostic_enable();
-
-	if (len)
-		live_diagnostic_enable();
+	__diagnostic_enabled = en;
+	__live_diagnostic_enabled = len;
 }
 
 

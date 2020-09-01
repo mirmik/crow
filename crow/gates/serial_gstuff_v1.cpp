@@ -58,6 +58,8 @@ struct crow::serial_gstuff_v1 *crow::create_serial_gstuff_v1(const char *path,
 
 	/* control modes - set 8 bit chars */
 	tattr.c_cflag |= (CS8);
+	tattr.c_cflag |= (PARENB);
+	tattr.c_cflag &= ~(PARODD);
 
 	/* local modes - clear giving: echoing off, canonical off (no erase with
 	   backspace, ^U,...),  no extended functions, no signal chars (^Z,^C) */
