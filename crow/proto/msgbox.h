@@ -31,7 +31,6 @@ namespace crow
 		crow::packet_ptr receive()
 		{
 			system_lock();
-
 			while (dlist_empty(&messages))
 			{
 				system_unlock();
@@ -65,6 +64,11 @@ namespace crow
 			notify_one(-1);
 			crow::release(pack);
 			system_unlock();
+		}
+
+		~msgbox()
+		{
+			assert(dlist_empty(&messages));
 		}
 	};
 }

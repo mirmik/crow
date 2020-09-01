@@ -12,3 +12,8 @@ void crow::node::notify_one(int future)
 {
 	unwait_one(&waitlnk, (void*)(uintptr_t)future);
 }
+
+void crow::node::notify_all(int future) 
+{
+	unwait_all(&waitlnk, (void*)(uintptr_t)future);	
+}

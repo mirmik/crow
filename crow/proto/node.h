@@ -7,6 +7,7 @@
 
 #include <igris/container/dlist.h>
 #include <igris/binreader.h>
+#include <igris/sync/syslock.h>
 
 #define CROW_NODEPACK_COMMON 0
 #define CROW_NODEPACK_ERROR 1
@@ -112,6 +113,7 @@ namespace crow
 		virtual void undelivered_packet(crow::packet *pack) { crow::release(pack); }
 		int waitevent();
 		void notify_one(int future);
+		void notify_all(int future);
 
 		virtual const char* typestr()
 		{
@@ -120,12 +122,14 @@ namespace crow
 
 		node& bind(int addr)
 		{
-			link_node(this, addr); return *this;
+			link_node(this, addr); 
+			return *this;
 		};
 
 		node& bind()
 		{
-			bind_node_dynamic(this); return *this;
+			bind_node_dynamic(this); 
+			return *this;
 		};
 
 		crow::packet_ptr send(uint16_t rid,
@@ -186,7 +190,7 @@ namespace crow
 			return annot;
 		}
 
-		virtual ~node() = default;
+		virtual ~node();
 	};
 
 	class system_node_cls : public node

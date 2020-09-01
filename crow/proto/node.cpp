@@ -14,7 +14,7 @@ crow::packet_ptr crow::node_send(uint16_t sid,
                                  const crow::hostaddr & addr,
                                  const igris::buffer data,
                                  uint8_t qos,
-                                 uint16_t ackquant, 
+                                 uint16_t ackquant,
                                  bool fastsend)
 {
 	crow::node_subheader sh;
@@ -28,13 +28,13 @@ crow::packet_ptr crow::node_send(uint16_t sid,
 }
 
 crow::packet_ptr crow::node_send_special(uint16_t sid,
-                                         uint16_t rid,
-                                         const crow::hostaddr & addr,
-                                         uint8_t type,
-                                         const igris::buffer data,
-                                         uint8_t qos,
-                                         uint16_t ackquant, 
-                                         bool fastsend)
+        uint16_t rid,
+        const crow::hostaddr & addr,
+        uint8_t type,
+        const igris::buffer data,
+        uint8_t qos,
+        uint16_t ackquant,
+        bool fastsend)
 {
 	crow::node_subheader sh;
 	sh.sid = sid;
@@ -52,7 +52,7 @@ crow::packet_ptr crow::node_send_v(uint16_t sid,
                                    const igris::buffer * vec,
                                    size_t veclen,
                                    uint8_t qos,
-                                   uint16_t ackquant, 
+                                   uint16_t ackquant,
                                    bool fastsend)
 {
 	crow::node_subheader sh;
@@ -147,10 +147,18 @@ void crow::link_node(crow::node *srv, uint16_t id)
 
 crow::node * crow::find_node(int id)
 {
+	int protector = 0;
+
+	//TODO: переделать на хештаблицу
+
 	for (crow::node& node : nodes)
 	{
+		protector++;
+
 		if (node.id == id)
 			return &node;
+
+		assert(protector < 512);
 	}
 
 	return nullptr;
@@ -161,6 +169,7 @@ void crow::bind_node_dynamic(crow::node *srv)
 	// Динамические порты располагаются в верхнем полупространстве.
 	static uint16_t counter = (1 << 15);
 
+	system_lock();
 	do
 	{
 		counter++;
@@ -169,6 +178,7 @@ void crow::bind_node_dynamic(crow::node *srv)
 	while (crow::find_node(counter) != nullptr);
 
 	crow::link_node(srv, counter);
+	system_unlock();
 }
 
 
@@ -195,4 +205,16 @@ void crow::system_node_cls::incoming_packet(crow::packet *pack)
 		node_send(0, sh->sid, pack->addr(), {buf, strlen(buf)}, 0, 200);
 
 	}
+}
+
+crow::node::~node()
+{
+	system_lock();
+
+	if (!dlist_empty(&waitlnk))
+		notify_all(-1);
+
+	dlist_del(&lnk);
+
+	system_unlock();
 }
