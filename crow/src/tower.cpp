@@ -211,9 +211,10 @@ static void crow_incoming_handler(crow::packet *pack)
 static void crow_send_ack(crow::packet *pack)
 {
 	crow::packet *ack = crow::create_packet(NULL, pack->header.alen, 0);
-	if (pack == nullptr)
-		return;
-
+	
+	assert(pack);
+	assert(ack);
+	
 	ack->header.f.type =
 	    pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
 	ack->header.f.ack = 1;
@@ -228,9 +229,10 @@ static void crow_send_ack(crow::packet *pack)
 static void crow_send_ack2(crow::packet *pack)
 {
 	crow::packet *ack = crow::create_packet(NULL, pack->header.alen, 0);
-	if (pack == nullptr)
-		return;
-
+	
+	assert(pack);
+	assert(ack);
+	
 	ack->header.f.type = G1_ACK22_TYPE;
 	ack->header.f.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
@@ -610,9 +612,7 @@ static inline void crow_onestep_outers_stage()
 		system_unlock();
 		return;
 	}
-	system_unlock();
 
-	system_lock();
 	dlist_for_each_entry_safe(pack, n, &crow_outters, lnk)
 	{
 		assert(pack->f.released_by_tower == 0);
@@ -651,9 +651,7 @@ static inline void crow_onestep_incoming_stage()
 		system_unlock();
 		return;
 	}
-	system_unlock();
 
-	system_lock();
 	dlist_for_each_entry_safe(pack, n, &crow_incoming, lnk)
 	{
 		assert(pack->f.released_by_tower == 0);
