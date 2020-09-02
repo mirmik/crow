@@ -68,7 +68,9 @@ namespace crow
 
 		~msgbox()
 		{
+			system_lock();
 			assert(dlist_empty(&messages));
+			system_unlock();
 		}
 	};
 }

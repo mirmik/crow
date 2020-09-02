@@ -18,6 +18,7 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
 		"alen:{}, "
 		"flen:{}, "
 		"type:{}, "
+		"seqid:{}, "
 		"addr:{}, "
 		"stg:{}, "
 		"dlen:{}, "
@@ -25,6 +26,7 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
 		notation, pack->header.qos, (uint8_t)pack->header.f.ack, (uint16_t)pack->header.ackquant,
 		(uint8_t)pack->header.alen, (uint16_t)pack->header.flen,
 		(uint8_t)pack->header.f.type,
+		pack->header.seqid,
 		igris::hexascii_encode(pack->addrptr(), pack->addrsize()),
 		pack->header.stg,
 		pack->rawdata().size(),
