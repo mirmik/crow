@@ -142,6 +142,20 @@ namespace crow
 		}
 	} // namespace pubsub
 
+	class pubsub_packet_ptr : public packet_ptr
+	{
+	public:
+		pubsub_packet_ptr(crow::packet * pack) : packet_ptr(pack)
+		{}
+
+		pubsub_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth.get())
+		{}
+
+		igris::buffer theme() { return pubsub::get_theme(pack); }
+		igris::buffer data() { return pubsub::get_data(pack); }
+		igris::buffer message() { return pubsub::get_data(pack); }
+	};
+
 	class subscriber
 	{
 	public:
@@ -155,7 +169,7 @@ namespace crow
 		uint8_t rqos;
 		uint16_t rackquant;
 
-		igris::delegate<void, crow::packet*> dlg;
+		igris::delegate<void, crow::pubsub_packet_ptr> dlg;
 
 	public:
 		subscriber() = default;
@@ -167,7 +181,7 @@ namespace crow
 		    uint16_t ackquant,
 		    uint8_t rqos,
 		    uint16_t rackquant,
-		    igris::delegate<void, crow::packet*> dlg
+		    igris::delegate<void, crow::pubsub_packet_ptr> dlg
 		)
 			: addr(addr)
 		{
@@ -190,7 +204,7 @@ namespace crow
 		    uint16_t ackquant,
 		    uint8_t rqos,
 		    uint16_t rackquant,
-		    igris::delegate<void, crow::packet*> dlg
+		    igris::delegate<void, crow::pubsub_packet_ptr> dlg
 		)
 		{
 			this->addr = addr;
@@ -246,17 +260,6 @@ namespace crow
 			crow::publish(addr, theme, data, qos, acktime);
 		}
 	};
-
-	class packet_pubsub_ptr : public packet_ptr
-	{
-	public:
-		packet_pubsub_ptr(const crow::packet_ptr &oth) : packet_ptr(oth.get())
-		{}
-
-		igris::buffer theme() { return pubsub::get_theme(pack); }
-		igris::buffer data() { return pubsub::get_data(pack); }
-	};
-
 
 } // namespace crow
 
