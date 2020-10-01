@@ -60,6 +60,14 @@ namespace crow
 	    uint8_t qos,
 	    uint16_t acktime);
 
+	void publish_v(
+	    const crow::hostaddr & addr,
+	    const std::string_view theme,
+	    const igris::buffer * vec,
+	    int vecsz,
+	    uint8_t qos,
+	    uint16_t acktime);
+
 	crow::packet * make_publish_packet(
 	    const uint8_t * raddr, uint8_t rlen,
 	    const char* theme,
@@ -244,6 +252,16 @@ namespace crow
 		void publish(const igris::buffer data, uint8_t qos, uint16_t acktime)
 		{
 			crow::publish(addr, theme, data, qos, acktime);
+		}
+
+		void publish_v(const igris::buffer* vec, int vecsz)
+		{
+			crow::publish_v(addr, theme, vec, vecsz, qos, acktime);
+		}
+
+		void publish_v(const igris::buffer* vec, int vecsz, uint8_t qos, uint16_t acktime)
+		{
+			crow::publish_v(addr, theme, vec, vecsz, qos, acktime);
 		}
 	};
 

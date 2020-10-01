@@ -82,6 +82,36 @@ void crow::publish(
 	             qos, acktime);
 }
 
+void crow::publish_v(
+    const crow::hostaddr & addr, 
+    const std::string_view theme, 
+    const igris::buffer * vec,
+    int vecsz,
+    uint8_t qos, uint16_t acktime)
+{
+	struct crow_subheader_pubsub subps;
+	struct crow_subheader_pubsub_data subps_d;
+
+	subps.type = PUBLISH;
+	subps.thmsz = theme.size();
+	subps_d.datsz = 0;
+
+	for (int i = 0; i < vecsz; i++) 
+	{
+		subps_d.datsz += vec[i].size();		
+	}
+
+	const igris::buffer iov[4] =
+	{
+		{&subps, sizeof(subps)},
+		{&subps_d, sizeof(subps_d)},
+		{theme.data(), subps.thmsz},
+	};
+
+	crow::send_vv(addr, iov, 4, vec, vecsz, CROW_PUBSUB_PROTOCOL,
+	             qos, acktime);
+}
+
 void crow::subscribe(
     const crow::hostaddr & addr, 
     const std::string_view theme, 
