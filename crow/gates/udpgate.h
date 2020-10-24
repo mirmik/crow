@@ -34,6 +34,7 @@ namespace crow
 
 	};
 
+	udpgate *create_udpgate(uint8_t id);
 	udpgate *create_udpgate(uint8_t id, uint16_t port);
 } // namespace crow
 

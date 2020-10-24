@@ -122,6 +122,14 @@ crow::udpgate *crow::create_udpgate(uint8_t id, uint16_t port)
 	return g;
 }
 
+crow::udpgate *crow::create_udpgate(uint8_t id)
+{
+	crow::udpgate *g = new crow::udpgate;
+	g->open(0); // TODO: should return NULL on error
+	crow::link_gate(g, id);
+	return g;
+}
+
 void crow::udpgate::finish() 
 {
 	shutdown(sock, SHUT_RDWR);
