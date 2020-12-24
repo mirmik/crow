@@ -1,5 +1,4 @@
 #include <crow/proto/rpc.h>
-#include <nos/print.h>
 
 void crow::rpc_node::incoming_packet(crow::packet *pack)
 {
@@ -71,7 +70,6 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
 
 	else if (format == CROW_RPC_TEXT_FORMAT) 
 	{
-		nos::println("CROW_RPC_TEXT_FORMAT");
 		std::string outdata;
 		std::string senddata;
 		igris::archive::binary_string_writer writer(senddata);
@@ -80,7 +78,6 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
 
 		writer.dump(status);
 		igris::serialize(writer, outdata);
-		PRINT(outdata);
 
 		crow::node_send(
 		    nsh->rid,

@@ -233,8 +233,6 @@ static void __bind(Arg & arg, const igris::trent& tr)
 	{
 		arg = tr.as_string();
 	}
-
-	nos::println(arg);
 }
 
 template <class Tuple, size_t ... I>
