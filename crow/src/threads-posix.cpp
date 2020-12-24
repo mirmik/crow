@@ -65,11 +65,15 @@ void crow::spin_with_select()
 	{
 		char unselect_read_buffer[512];
 
-		if (cancel_token)
-			return;
+		if (cancel_token) 
+		{
+			break;
+		}
 
 		do
+		{
 			crow::onestep();
+		}
 		while (crow::has_untravelled_now());
 		
 		crow::select();
@@ -102,7 +106,8 @@ void crow::start_spin_without_select()
 void crow::stop_spin()
 {
 	cancel_token = true;
-	_thread.join();
+	crow::unselect();
+	//_thread.join();
 }
 
 void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)

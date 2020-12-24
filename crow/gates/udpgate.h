@@ -1,9 +1,5 @@
-/**
-	@file
-*/
-
-#ifndef G1_GATES_UDPGATE_H
-#define G1_GATES_UDPGATE_H
+#ifndef CROW_GATES_UDPGATE_H
+#define CROW_GATES_UDPGATE_H
 
 #include <crow/defs.h>
 #include <crow/gateway.h>
@@ -24,8 +20,13 @@ namespace crow
 		void send(crow::packet *) override;
 		void nblock_onestep() override;
 
-		int open(uint16_t port);
+		int open(uint16_t port = 0);
 		void finish();
+
+		void bind(int gate_no = CROW_UDPGATE_NO) 
+		{
+			gateway::bind(gate_no);
+		}
 
 #if CROW_ENABLE_WITHOUT_FDS
 #else
@@ -36,6 +37,6 @@ namespace crow
 
 	udpgate *create_udpgate(uint8_t id);
 	udpgate *create_udpgate(uint8_t id, uint16_t port);
-} // namespace crow
+}
 
 #endif

@@ -43,6 +43,7 @@ licant.modules.module("crow",
 		"proto/channel-sync.cpp",
 		"proto/pubsub.cpp",
 		"proto/service.cpp",
+		"proto/rpc.cpp",
 
 		"addons/noslogger.cpp",
 	],

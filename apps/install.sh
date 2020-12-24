@@ -8,3 +8,9 @@ cd $PWD0/ctrans
 
 cd $PWD0/crowpulse
 ./make.py && ./make.py install
+
+cd $PWD0/crowrequest
+./make.py && ./make.py install
+
+cd $PWD0/crowcalc
+./make.py && ./make.py install

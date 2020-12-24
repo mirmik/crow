@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	if (crow::create_udpgate(CROW_UDPGATE, udpport) == NULL)
+	if (crow::create_udpgate(CROW_UDPGATE_NO, udpport) == NULL)
 	{
 		perror("udpgate open");
 		exit(-1);

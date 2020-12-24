@@ -5,9 +5,7 @@
 #ifndef CROW_DEFS_H
 #define CROW_DEFS_H
 
-#define G1_UDPGATE 12
 #define CROW_UDPGATE_NO 12
-#define CROW_UDPGATE 12
 
 #define G1_ACK_TYPE 0
 #define G1_ACK21_TYPE 1
@@ -18,6 +16,7 @@
 
 #define CROWKER_CLI_NODE_NO 0
 #define CROWKER_ALIVE_NODE_NO 1
+#define CROW_RPC_NODE_NO 2
 
 #define CROWKER_CONTROL_SERVICE_NID 6
 

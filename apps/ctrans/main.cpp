@@ -715,7 +715,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (crow::create_udpgate(G1_UDPGATE, udpport) == NULL)
+	if (crow::create_udpgate(CROW_UDPGATE_NO, udpport) == NULL)
 	{
 		perror("udpgate open");
 		exit(-1);
@@ -786,7 +786,7 @@ int main(int argc, char *argv[])
 	if (info)
 	{
 		printf("gates:\n");
-		printf("\tgate %d: udp port %d\n", G1_UDPGATE, udpport);
+		printf("\tgate %d: udp port %d\n", CROW_UDPGATE_NO, udpport);
 
 		if (serial_port != NULL)
 			nos::println("gate is here (TODO)");
