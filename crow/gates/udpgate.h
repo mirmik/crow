@@ -21,7 +21,7 @@ namespace crow
 		void nblock_onestep() override;
 
 		int open(uint16_t port = 0);
-		void finish();
+		void finish() override;
 
 		void bind(int gate_no = CROW_UDPGATE_NO) 
 		{
@@ -30,7 +30,7 @@ namespace crow
 
 #if CROW_ENABLE_WITHOUT_FDS
 #else
-		int get_fd() { return sock; }
+		int get_fd() override { return sock; }
 #endif
 
 	};

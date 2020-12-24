@@ -2,14 +2,15 @@
 #define CROW_HOSTADDR_H
 
 #include <igris/buffer.h>
+#include <vector>
 
 namespace std 
 {
-	template<class T> 
-		class allocator;
+	//template<class T> 
+	//	class allocator;
 	
-	template<typename _Tp, typename _Alloc> 
-		class vector;
+	//template<typename _Tp, typename _Alloc> 
+	//	class vector;
 }
 
 namespace crow
