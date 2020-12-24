@@ -190,6 +190,8 @@ apps/crowker/crowker
 apps/crow_subscribe/crow_subscribe
 apps/crow_publish/crow_publish
 apps/crowpulse/crowpulse
+apps/crowpulse/crowcalc
+apps/crowpulse/crowrequest
 target
 
 dox/html
