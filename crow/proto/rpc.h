@@ -245,7 +245,7 @@ static void __expand(std::index_sequence<I...>, Tuple&& tpl, const igris::trent&
 {
 	std::apply([&](auto && ... args)
 	{
-		(__bind(args, tr[I]), ...);
+		(__bind(args, tr[(int)I]), ...);
 	}, tpl);
 }
 
