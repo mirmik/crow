@@ -194,14 +194,11 @@ namespace crow
 			wnode.remote_request_text_format(
 			    addr, rid, fname, in);
 
-			nos::println("waitevent");
 			wnode.waitevent();
 
-			nos::println("parse_incoming_text_format");
 			status = wnode.parse_incoming_text_format(out);
 
 			crow::release(wnode.incpack);
-			nos::println("release");
 			return status;
 		}
 	};

@@ -203,7 +203,7 @@ dist
 *.egg-info
 
 bindings/python/pycrow/__tunels__/*
-
+**/__tunels__/*
 
 crowker
 ctrans

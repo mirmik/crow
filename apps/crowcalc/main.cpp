@@ -46,7 +46,7 @@ int main()
 	rpcnode.add_delegate("mul", igris::make_delegate(func_mul));
 	rpcnode.add_delegate("div", igris::make_delegate(func_div));
 
-	crow::diagnostic_enable();
+//	crow::diagnostic_enable();
 
 	crow::start_spin();
 	crow::join_spin();
