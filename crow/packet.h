@@ -70,6 +70,7 @@ namespace crow
 				uint8_t released_by_tower : 1;
 				uint8_t confirmed : 1;
 				uint8_t undelivered : 1;
+				uint8_t sended_to_gate : 1;
 			} f;
 		};
 		struct crow::header header;

@@ -20,7 +20,7 @@ DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
 
-void (*crow::unsleep_handler)();
+void (*crow::unsleep_handler)() = nullptr;
 void (*crow::user_type_handler)(crow::packet *pack) = nullptr;
 void (*crow::user_incoming_handler)(crow::packet *pack) = nullptr;
 void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
@@ -377,6 +377,8 @@ static void crow_do_travel(crow::packet *pack)
 			//Здесь пакет штампуется временем отправки и пересылается во врата.
 			//Врата должны после пересылки отправить его назад в башню
 			//с помощью return_to_tower для контроля качества.
+			assert(pack->f.sended_to_gate == 0);
+			pack->f.sended_to_gate = 1;
 			gate->send(pack);
 		}
 	}
@@ -514,6 +516,7 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr & addr,
 
 void crow::return_to_tower(crow::packet *pack, uint8_t sts)
 {
+	pack->f.sended_to_gate = 0;
 	assert(pack);
 
 	system_lock();
