@@ -322,9 +322,9 @@ static void crow_do_travel(crow::packet *pack)
 						return;
 					}
 				}
-				system_lock();
+				igris::system_lock();
 				add_to_incoming_list(pack);
-				system_unlock();
+				igris::system_unlock();
 			}
 			else
 			{
@@ -638,7 +638,7 @@ static inline void crow_onestep_outers_stage()
 			}
 		}
 	}
-	system_unlock();
+	igris::system_unlock();
 }
 
 static inline void crow_onestep_incoming_stage()
@@ -679,7 +679,7 @@ static inline void crow_onestep_incoming_stage()
 			}
 		}
 	}
-	system_unlock();
+	igris::system_unlock();
 }
 
 /**
