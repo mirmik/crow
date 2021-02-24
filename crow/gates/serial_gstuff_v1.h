@@ -32,7 +32,7 @@ namespace crow
 
 #if CROW_ENABLE_WITHOUT_FDS
 #else
-		virtual int get_fd() { return fd; }
+		virtual int get_fd() override { return fd; }
 #endif
 	};
 
