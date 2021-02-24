@@ -47,7 +47,5 @@ crow::packet *crow::allocate_packet(size_t adlen)
 		debug_print("\r\n");
 	}
 
-	assert(ret);
-
 	return (crow::packet *)ret;
 }
