@@ -94,12 +94,15 @@ namespace crow
 	void onestep_travel_only();
 	void spin();
 	void spin_with_select();
+	void spin_with_select_realtime();
 
 	void stop_spin();
 	void start_spin_with_select();
+	void start_spin_with_select_realtime();
 	void start_spin_without_select();
 
 	void start_spin();
+	void start_spin_realtime();
 
 	[[deprecated]]
 	void spin_join();
