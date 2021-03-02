@@ -49,7 +49,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
 		size_t outsize = procedure->outsize();
 		void * outbuf = alloca(outsize);
 		outdata = igris::buffer{outbuf, outsize};
-		status = procedure->invoke(format, data, outdata);
+		status = procedure->invoke(data, outdata);
 
 		igris::buffer vdata[] =
 		{
@@ -74,7 +74,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
 		std::string senddata;
 		igris::archive::binary_string_writer writer(senddata);
 
-		status = procedure->invoke_text_format(format, data, outdata);
+		status = procedure->invoke_text_format(data, outdata);
 
 		writer.dump(status);
 		igris::serialize(writer, outdata);

@@ -29,7 +29,7 @@ namespace crow
 		hostaddr(const std::vector<uint8_t, Alloc> & v) : addr(v.data()), alen(v.size()) {}
 
 		const void * data() const { return addr; }
-		const size_t size() const { return alen; }
+		size_t size() const { return alen; }
 
 		bool operator == (igris::buffer buf) 
 		{

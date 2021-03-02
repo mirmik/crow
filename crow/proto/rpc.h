@@ -20,6 +20,7 @@
 #define CROW_RPC_BINARY_FORMAT 0
 #define CROW_RPC_TEXT_FORMAT 1
 
+#define CROW_RPC_ERROR_UNDELIVERED -1
 #define CROW_RPC_ERROR_FUNCTION_NOT_FOUNDED -2
 #define CROW_RPC_ERROR_UNRESOLVED_FORMAT -4
 
@@ -31,8 +32,8 @@ namespace crow
 	class remote_function_basic
 	{
 	public:
-		virtual int invoke(int8_t format, igris::buffer data, igris::buffer out) = 0;
-		virtual int invoke_text_format(int8_t format, igris::buffer data, std::string& out) = 0;
+		virtual int invoke(            igris::buffer data, igris::buffer out) = 0;
+		virtual int invoke_text_format(igris::buffer data, std::string& out) = 0;
 		virtual size_t outsize() = 0;
 	};
 
@@ -45,13 +46,9 @@ namespace crow
 		remote_function(igris::delegate<Ret, Args...> dlg) : dlg(dlg)
 		{}
 
-		int invoke(int8_t format, igris::buffer data, igris::buffer output) override;
-		int invoke_text_format(int8_t format, igris::buffer data, std::string & output) override;
-		size_t outsize() override
-		{
-			dprln("outsize");
-			return sizeof_helper<Ret>::size;
-		}
+		int invoke(            igris::buffer data, igris::buffer output) override;
+		int invoke_text_format(igris::buffer data, std::string & output) override;
+		size_t outsize() override {return sizeof_helper<Ret>::size;}
 	};
 
 	class rpc_node : public crow::node
@@ -176,7 +173,8 @@ namespace crow
 			wnode.remote_request<Ret, Args...>(
 			    addr, rid, fname, std::forward<Args>(args) ...);
 
-			wnode.waitevent();
+			if ((status = wnode.waitevent()))
+				return status;
 
 			status = wnode.parse_incoming<Ret>(out);
 
@@ -193,8 +191,9 @@ namespace crow
 
 			wnode.remote_request_text_format(
 			    addr, rid, fname, in);
-
-			wnode.waitevent();
+			
+			if ((status = wnode.waitevent()))
+				return status;
 
 			status = wnode.parse_incoming_text_format(out);
 
@@ -206,14 +205,14 @@ namespace crow
 
 
 template <class Ret, class ... Args>
-int crow::remote_function<Ret, Args...>::invoke(int8_t format, igris::buffer data, igris::buffer out)
+int crow::remote_function<Ret, Args...>::invoke(/*int8_t format, */igris::buffer data, igris::buffer out)
 {
 	std::tuple<Args ...> args = igris::deserialize<std::tuple<Args ...>>(data);
 
 	Ret ret = std::apply(dlg, args);
 
 	igris::archive::binwriter writer(out.data(), out.size());
-	writer.dump(ret);
+	igris::serialize(writer, ret);
 
 	return 0;
 }
@@ -221,17 +220,17 @@ int crow::remote_function<Ret, Args...>::invoke(int8_t format, igris::buffer dat
 template <class Arg>
 static void __bind(Arg & arg, const igris::trent& tr)
 {
-	if constexpr (std::is_floating_point_v<Arg>) 
+	if constexpr (std::is_floating_point_v<Arg>)
 	{
-		arg = tr.as_numer();
-	} 
-	else if constexpr (std::is_integral_v<Arg>) 
-	{
-		arg = tr.as_numer();
+		arg = tr.as_numer_except();
 	}
-	else if constexpr (std::is_same_v<Arg, std::string>) 
+	else if constexpr (std::is_integral_v<Arg>)
 	{
-		arg = tr.as_string();
+		arg = tr.as_numer_except();
+	}
+	else if constexpr (std::is_same_v<Arg, std::string>)
+	{
+		arg = tr.as_string_except();
 	}
 }
 
@@ -246,23 +245,36 @@ static void __expand(std::index_sequence<I...>, Tuple&& tpl, const igris::trent&
 
 
 template <class Ret, class ... Args>
-int crow::remote_function<Ret, Args...>::invoke_text_format(
-    int8_t format, igris::buffer data, std::string & out)
+int crow::remote_function<Ret, Args...>::invoke_text_format(igris::buffer data, std::string & out)
 {
+	igris::trent tr;
 	std::string strargs = igris::deserialize<std::string>(data);
 
-	igris::trent tr = igris::json::parse(strargs);
+	try 
+	{
+		tr = igris::json::parse(strargs);
+	}
+	catch(const std::exception& ex) 
+	{
+		nos::println(ex.what());
+		return CROW_RPC_ERROR_UNRESOLVED_FORMAT;
+	}
+
+	if (!tr.is_list()) 
+		return CROW_RPC_ERROR_UNRESOLVED_FORMAT;
 
 	std::tuple<Args ...> args;
-	//trent_to_tuple(args, tr);
-	__expand(std::make_index_sequence<sizeof...(Args)>(), args, tr);
-
-	Ret ret = std::apply(dlg, args);
-	//nos::println(ret);
-
-	//igris::archive::binary_string_writer writer(out);
-	//igris::serialize(writer, ret);
+	try 
+	{
+		__expand(std::make_index_sequence<sizeof...(Args)>(), args, tr);
+	}
+	catch(const std::exception& ex) 
+	{
+		nos::println(ex.what());
+		return CROW_RPC_ERROR_UNRESOLVED_FORMAT;
+	}
 	
+	Ret ret = std::apply(dlg, args);
 	nos::string_writer writer(out);
 
 	nos::print_to(writer, ret);

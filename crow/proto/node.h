@@ -110,7 +110,11 @@ namespace crow
 		uint16_t id = 0;
 
 		virtual void incoming_packet(crow::packet *pack) = 0;
-		virtual void undelivered_packet(crow::packet *pack) { crow::release(pack); }
+		virtual void undelivered_packet(crow::packet *pack) 
+		{ 
+			notify_all(-1);
+			crow::release(pack); 
+		}
 		int waitevent();
 		void notify_one(int future);
 		void notify_all(int future);

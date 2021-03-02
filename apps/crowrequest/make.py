@@ -9,13 +9,16 @@ import os
 
 defines = ["NOTRACE=1"]
 
+licant.libs.include("crow")
+
 application("crowrequest", 
 	sources = [
 		"main.cpp"
 	],
+	mdepends=["crow", "crow.udpgate"],
 	defines = defines,
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline", "igris", "nos", "crow"],
+	libs = ["pthread", "readline", "igris", "nos"],
 	cxxstd = "c++17"
 )
 

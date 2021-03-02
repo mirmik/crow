@@ -7,15 +7,18 @@ from licant.cxx_modules import application
 from licant.libs import include
 import os
 
+licant.libs.include("crow")
+
 defines = ["NOTRACE=1"]
 
 application("crowcalc", 
 	sources = [
 		"main.cpp"
 	],
+	mdepends=["crow", "crow.udpgate"],
 	defines = defines,
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline", "igris", "nos", "crow"],
+	libs = ["pthread", "readline", "igris", "nos"],
 	cxxstd = "c++17"
 )
 
