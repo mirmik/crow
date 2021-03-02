@@ -422,7 +422,7 @@ crow::packet_ptr crow::send(const crow::hostaddr & addr,
 	memcpy(pack->addrptr(), addr.data(), addr.size());
 	memcpy(pack->dataptr(), data.data(), data.size());
 
-	return crow_transport(pack);
+	return crow_transport(pack, fastsend);
 }
 
 crow::packet_ptr crow::send_v(const crow::hostaddr & addr, const igris::buffer *vec,

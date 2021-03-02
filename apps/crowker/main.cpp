@@ -284,7 +284,8 @@ int main(int argc, char *argv[])
 		thr.detach();
 	}
 
-	control_node.bind(100);
+	//control_node.bind(100);
+	init_control_node();
 
 	auto * service_control_node = crow::crowker_service_control_node();
 	service_control_node->bind(CROWKER_CONTROL_SERVICE_NID);

@@ -6,12 +6,36 @@
 #include <igris/util/dstring.h>
 #include <sys/uio.h>
 
+#include <chrono>
+
 bool brocker_info = false;
 bool log_publish = false;
 
 std::map<std::string, brocker::theme> brocker::themes;
 std::map<std::string, brocker::subscribers::crow> brocker::subscribers::crow::allsubs;
 std::map<nos::inet::netaddr, brocker::subscribers::tcp> brocker::subscribers::tcp::allsubs;
+
+int64_t eval_timestamp() 
+{
+	auto now = std::chrono::system_clock::now();
+	auto duration = now.time_since_epoch();
+	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+	return millis;
+}
+
+brocker::theme * get_theme(const std::string& name)
+{
+	if (brocker::themes.count(name))
+	{
+		return &brocker::themes[name];
+	}
+	else
+	{
+		brocker::theme * thm = &brocker::themes[name];
+		thm->name = name;
+		return thm;
+	}
+}
 
 void brocker::erase_crow_subscriber(const std::string & addr)
 {
@@ -27,17 +51,11 @@ void brocker::publish(std::shared_ptr<std::string> theme, std::shared_ptr<std::s
 {
 	int subs_count;
 
-	try
-	{
-		auto &thm = themes.at(*theme);
-		subs_count = thm.count_subscribers();
-		thm.publish(data);
-	}
-	catch (std::exception& ex)
-	{
-		subs_count = 0;
-	}
+	auto * thm = get_theme(*theme);
+	subs_count = thm->count_subscribers();
 
+	thm->publish(data);
+	
 	if (brocker_info || log_publish)
 	{
 		nos::fprintln("publish: t:{} s:{} d:{}",
@@ -46,33 +64,6 @@ void brocker::publish(std::shared_ptr<std::string> theme, std::shared_ptr<std::s
 
 }
 
-/*
-
-void g3_brocker_subscribe(uint8_t *raddr, size_t rlen, const std::string &theme,
-						  uint8_t qos, uint16_t ackquant)
-{
-	if (brocker_info)
-	{
-		nos::fprintln("g3_subscribe: t:{} f:{}", theme,
-					  igris::hexascii_encode(raddr, rlen));
-	}
-
-	if (themes.count(theme) == 0)
-	{
-		themes[theme] = crow::theme(theme);
-	}
-
-	auto &thm = themes[theme];
-	thm.subs[std::string((char *)raddr, rlen)] =
-		crow::g3_subscriber(raddr, rlen, qos, ackquant);
-	// if (ret.second == false)
-	//{
-	// auto s = crow::g3_subscriber(raddr, rlen, qos, ackquant);
-	// thm.subs[s]->qos = qos;
-	// thm.subs[s]->ackquant = ackquant;
-	//}
-}
-*/
 void brocker::theme::publish(std::shared_ptr<std::string> data)
 {
 	for (auto * sub : subs)
@@ -80,25 +71,7 @@ void brocker::theme::publish(std::shared_ptr<std::string> data)
 		sub->publish(name, {data->data(), data->size()}, sub->thms[this].opts);
 	}
 
-	lastdata = data;
-
-	/*struct crow_subheader_pubsub subps;
-	struct crow_subheader_pubsub_data subps_d;
-
-	subps.type = PUBLISH;
-	subps.thmsz = name.size();
-	subps_d.datsz = data.size();
-
-	iovec vec[4] = {{&subps, sizeof(subps)},
-					{&subps_d, sizeof(subps_d)},
-					{(void *)name.data(), name.size()},
-					{(void *)data.data(), data.size()}};
-
-	for (auto &sub : subs)
-	{
-		crow::send_v(sub.second.host.data(), sub.second.host.size(), vec, 4,
-					 CROW_PUBSUB_PROTOCOL, sub.second.qos, sub.second.ackquant);
-	}*/
+	timestamp_publish = timestamp_activity = eval_timestamp();
 }
 
 void brocker::subscribers::crow::publish(const std::string & theme, const std::string & data, options * opts)
@@ -120,26 +93,13 @@ void brocker::subscribers::tcp::publish(const std::string & theme, const std::st
 	sock->write(str.data(), str.size());
 }
 
-brocker::theme * get_theme(const std::string& name)
-{
-	if (brocker::themes.count(name))
-	{
-		return &brocker::themes[name];
-	}
-	else
-	{
-		brocker::theme * thm = &brocker::themes[name];
-		thm->name = name;
-		return thm;
-	}
-}
-
 void brocker::crow_subscribe(uint8_t*addr, int alen,
                              const std::string& theme,
                              uint8_t qos, uint16_t ackquant)
 {
 	std::string saddr{(char*)addr, (size_t)alen};
 	brocker::theme * thm = get_theme(theme);
+	thm->timestamp_activity = eval_timestamp();
 
 	auto * sub = brocker::subscribers::crow::get(saddr);
 	

@@ -23,8 +23,10 @@ namespace brocker
 
 	class theme
 	{
+	public:
 		std::set<subscriber*> subs;
-		std::shared_ptr<std::string> lastdata;
+		int64_t timestamp_publish;
+		int64_t timestamp_activity;
 
 	public:
 		std::string name;
@@ -35,15 +37,13 @@ namespace brocker
 		void publish(std::shared_ptr<std::string> data);
 	};
 	extern std::map<std::string, theme> themes;
-	void unlink_theme_subscriber(theme* thm, subscriber* sub);
 
-	//std::set<subscriber*> all_subscribers;
+	void unlink_theme_subscriber(theme* thm, subscriber* sub);
 
 	class subscriber
 	{
 		struct themenote 
 		{
-			//theme* thm;
 			options* opts = nullptr;
 			~themenote(){ delete opts; }
 		};
@@ -66,12 +66,6 @@ namespace brocker
 		{
 		public:
 			std::string addr;
-			
-			//[[deprecated]]
-			//uint8_t qos = 0;
-			
-			//[[deprecated]]
-			//uint16_t ackquant = 200;
 
 			static std::map<std::string, crow> allsubs;
 			static crow * get(const std::string & addr)

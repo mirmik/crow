@@ -21,7 +21,7 @@ void func()
 
 	switch (status)
 	{
-		case 0: nos::println(result);
+		case 0: nos::print(result);
 			break;
 		case CROW_ERRNO_UNREGISTRED_RID:
 			nos::println("ConnectionError: Unregistred remote node id.");
@@ -44,7 +44,9 @@ void func()
 void print_help()
 {
 	printf(
-	    "Usage: ctrans [OPTION] ADDRESS FUNC [ARGS(TRENT)]\n"
+	    "Usage: crowrequest [OPTION] ADDRESS FUNC ARGS(TRENT)\n"
+	    "example: crowrequest .12.127.0.0.1:10009 hello [42,38,35.12]\n"
+	    "example: crowrequest .12.127.0.0.1:10009 hello []\n"
 	    "\n"
 	    "Common option list:\n"
 	    "  -h, --help            print this page\n"
@@ -110,6 +112,8 @@ int main(int argc, char** argv)
 
 	if (optind + 3 == argc)
 		strargs = argv[optind + 2];
+	else
+		strargs = "[]";
 
 	crow::create_udpgate(12, 0);
 
