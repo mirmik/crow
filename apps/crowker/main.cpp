@@ -4,18 +4,20 @@
 #include <crow/address.h>
 #include <crow/select.h>
 #include <crow/brocker/service.h>
-
+#include <crow/nodes/cli.h>
 #include <crow/netkeep.h>
 
-//#include <thread>
 #include <getopt.h>
 #include <stdbool.h>
 
 #include <stdio.h>
+
+#include <map>
 #include <string>
 #include <thread>
 
 #include "brocker.h"
+#include "control_node.h"
 
 #include <nos/print.h>
 #include <nos/fprint.h>
@@ -209,11 +211,6 @@ int main(int argc, char *argv[])
 	crow::pubsub_protocol.incoming_handler = incoming_pubsub_packet;
 	crow::undelivered_handler = undelivered_handler;
 
-	//crow::pubsub_protocol.enable();
-
-	//crow::netkeep_protocol_handler =
-	//    crow::netkeep_protocol_handler_crowker;
-
 	const struct option long_options[] =
 	{
 		{"help", no_argument, NULL, 'h'},
@@ -286,6 +283,8 @@ int main(int argc, char *argv[])
 		std::thread thr(tcp_listener, tcpport);
 		thr.detach();
 	}
+
+	control_node.bind(100);
 
 	auto * service_control_node = crow::crowker_service_control_node();
 	service_control_node->bind(CROWKER_CONTROL_SERVICE_NID);

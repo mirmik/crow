@@ -10,10 +10,15 @@
 
 #include <crow/crow.h>
 
-#include <nos/print.h>
+#include <nos/fprint.h>
 
 crow::udpgate ugate;
 crow::rpc_node rpcnode;
+
+std::string hello(std::string inpstr) 
+{
+	return nos::format("HelloWorld: {}", inpstr);
+}
 
 double func_add(double a, double b) 
 {
@@ -38,9 +43,15 @@ double func_div(double a, double b)
 int main()
 {
 	ugate.bind();
-	ugate.open(10020);
 
+	int port = 10020;
+	nos::println("Make udp server, port : 10020");
+	ugate.open(port);
+
+	nos::println("Use node :", CROW_RPC_NODE_NO);
 	rpcnode.bind();
+
+	rpcnode.add_delegate("hello", igris::make_delegate(hello));
 	rpcnode.add_delegate("add", igris::make_delegate(func_add));
 	rpcnode.add_delegate("sub", igris::make_delegate(func_sub));
 	rpcnode.add_delegate("mul", igris::make_delegate(func_mul));

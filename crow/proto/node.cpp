@@ -102,7 +102,7 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 
 	if (srv == nullptr)
 	{
-		//send_node_error(pack, CROW_ERRNO_UNREGISTRED_RID);
+		send_node_error(pack, CROW_ERRNO_UNREGISTRED_RID);
 		crow::release(pack);
 		return;
 	}

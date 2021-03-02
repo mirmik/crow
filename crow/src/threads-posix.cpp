@@ -8,6 +8,7 @@
 
 #include <unistd.h>
 #include <igris/osutil/fd.h>
+#include <igris/osutil/realtime.h>
 #include <nos/print.h>
 
 #include <signal.h>
@@ -81,12 +82,30 @@ void crow::spin_with_select()
 	};
 }
 
+void crow::spin_with_select_realtime() 
+{
+	int ret;
+	if ((ret = this_thread_set_realtime_priority()))
+	{
+		dprln("Error on set_realtime_priority", ret);
+		abort();
+	}
+
+	crow::spin_with_select();
+}
+
 void crow::start_spin_with_select()
 {
 	_thread = std::thread(spin_with_select);
 }
 
+void crow::start_spin_with_select_realtime()
+{
+	_thread = std::thread(spin_with_select_realtime);
+}
+
 void crow::start_spin() { crow::start_spin_with_select(); }
+void crow::start_spin_realtime() { crow::start_spin_with_select_realtime(); }
 
 void crow::start_spin_without_select()
 {

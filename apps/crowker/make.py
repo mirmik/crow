@@ -10,7 +10,8 @@ import os
 application("crowker", 
 	sources = [
 		"main.cpp",
-		"brocker.cpp"
+		"brocker.cpp",
+		"control_node.cpp"
 	],
 	cxx_flags = "-Wextra -Wall",
 	libs = ["pthread", "readline", "nos", "igris", "crow"]

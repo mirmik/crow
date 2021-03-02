@@ -79,7 +79,7 @@ void crow::publish(
 	};
 
 	crow::send_v(addr, iov, 4, CROW_PUBSUB_PROTOCOL,
-	             qos, acktime);
+	             qos, acktime, false);
 }
 
 void crow::publish_v(
@@ -109,7 +109,7 @@ void crow::publish_v(
 	};
 
 	crow::send_vv(addr, iov, 4, vec, vecsz, CROW_PUBSUB_PROTOCOL,
-	             qos, acktime);
+	             qos, acktime, false);
 }
 
 void crow::subscribe(
@@ -132,7 +132,7 @@ void crow::subscribe(
 	{
 		{&subps, sizeof(subps)},
 		{&subps_c, sizeof(subps_c)},
-		theme,
+		{theme.data(), theme.size()},
 	};
 
 	crow::send_v(addr, iov, 3, CROW_PUBSUB_PROTOCOL, qos,

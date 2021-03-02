@@ -31,8 +31,8 @@ namespace crow
 	template <class Dictionary>
 	void crow::cli_node<Dictionary>::incoming_packet(crow::packet *pack)
 	{
-		auto sh = crow::node_protocol_cls::subheader(pack);
-		auto data = crow::node_protocol_cls::node_data(pack);
+		auto sh = crow::node::subheader(pack);
+		auto data = crow::node_data(pack);
 
 		if (debug_mode)
 		{
@@ -75,8 +75,8 @@ namespace crow
 		}
 		
 		if (strlen(buf))
-			node_send(id, sh->sid, pack->addrptr(), pack->addrsize(),
-		    	buf, strlen(buf), 0, 200);
+			node_send(id, sh->sid, {pack->addrptr(), pack->addrsize()},
+		    	{buf, strlen(buf)}, 2, 200);
 
 	__end__:
 		crow::release(pack);
