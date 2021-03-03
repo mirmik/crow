@@ -15,6 +15,7 @@ namespace crow
 
 		virtual void incoming(crow::packet * pack) = 0;
 		virtual void undelivered(crow::packet * pack) { crow::release(pack); }
+		virtual void onestep() {}
 		
 		protocol(int id) : id(id) 
 		{

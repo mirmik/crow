@@ -681,14 +681,17 @@ static inline void crow_onestep_incoming_stage()
 	igris::system_unlock();
 }
 
-/**
-	@todo Переделать очередь пакетов, выстроив их в порядке работы таймеров.
-*/
 void crow::onestep()
 {
 	for (crow::gateway &gate : crow::gateway_list)
 	{
 		gate.nblock_onestep();
+	}
+
+	crow::protocol * it;
+	dlist_for_each_entry(it, &crow::protocols, lnk)
+	{
+		it->onestep();
 	}
 
 	crow_onestep_send_stage();
