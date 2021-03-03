@@ -181,17 +181,13 @@ ENV/
 *.out
 *.app
 
-tools/ctrans/ctrans
-tools/crowker/crowker
-tools/crow_subscribe/crow_subscribe
-tools/crow_publish/crow_publish
 apps/ctrans/ctrans
 apps/crowker/crowker
 apps/crow_subscribe/crow_subscribe
 apps/crow_publish/crow_publish
 apps/crowpulse/crowpulse
-apps/crowpulse/crowcalc
-apps/crowpulse/crowrequest
+apps/crowcalc/crowcalc
+apps/crowrequest/crowrequest
 target
 
 dox/html
@@ -207,8 +203,3 @@ dist
 bindings/python/pycrow/__tunels__/*
 **/__tunels__/*
 
-crowker
-ctrans
-crowpulse
-crowcalc
-crowrequest
