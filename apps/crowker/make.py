@@ -10,7 +10,6 @@ import os
 application("crowker", 
 	sources = [
 		"main.cpp",
-		"brocker.cpp",
 		"control_node.cpp"
 	],
 	cxx_flags = "-Wextra -Wall",

@@ -3,6 +3,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <crow/brocker/crowker.h>
+
 #include <crow/gates/udpgate.h>
 #include <crow/packet_ptr.h>
 #include <crow/tower.h>
@@ -230,7 +232,9 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("get_gateway", &crow::get_gateway);
 
-	m.def("start_resubscribe_thread", &crow::start_resubscribe_thread);
-	m.def("stop_resubscribe_thread", &crow::stop_resubscribe_thread);
-	m.def("join_resubscribe_thread", &crow::join_resubscribe_thread);
+	py::class_<crow::crowker>(m, "crowker")
+		.def("instance", &crow::crowker::instance, py::return_value_policy::reference)
+		.def("publish", &crow::crowker::publish)
+		.def("set_info_mode", &crow::crowker::set_info_mode)
+		;
 }

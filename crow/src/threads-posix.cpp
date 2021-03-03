@@ -16,6 +16,7 @@
 static bool cancel_token = false;
 static std::thread _thread;
 bool _spin_runned = false;
+bool _spin_runned_unbounded = false;
 
 int crow::unselect_pipe[2];
 
@@ -23,18 +24,32 @@ struct sigaction new_action, sigkill_old_action, sigint_old_action;
 
 void signal_sigint_handler(int sig)
 {
-	cancel_token = true;
-	write(crow::unselect_pipe[1], "A", 1);
-	_thread.join();
-	sigint_old_action.sa_handler(sig);
+	if (_spin_runned)
+	{
+		cancel_token = true;
+		write(crow::unselect_pipe[1], "A", 1);
+		if (_spin_runned_unbounded)
+			_thread.join();
+	}
+	if (sigint_old_action.sa_handler)
+		sigint_old_action.sa_handler(sig);
+	else
+		exit(0);
 }
 
 void signal_sigkill_handler(int sig)
 {
-	cancel_token = true;
-	write(crow::unselect_pipe[1], "A", 1);
-	_thread.join();
-	sigkill_old_action.sa_handler(sig);
+	if (_spin_runned)
+	{
+		cancel_token = true;
+		write(crow::unselect_pipe[1], "A", 1);
+		if (_spin_runned_unbounded)
+			_thread.join();
+	}
+	if (sigkill_old_action.sa_handler)
+		sigkill_old_action.sa_handler(sig);
+	else
+		exit(0);
 }
 
 
@@ -101,25 +116,27 @@ void crow::spin_with_select_realtime()
 
 int crow::start_spin_with_select()
 {
-	if (_spin_runned) 
+	if (_spin_runned)
 	{
 		return -1;
 	}
 
 	cancel_token = false;
+	_spin_runned_unbounded = true;
 	_thread = std::thread(spin_with_select);
-	
+
 	return 0;
 }
 
 int crow::start_spin_with_select_realtime()
 {
-	if (_spin_runned) 
+	if (_spin_runned)
 	{
 		return -1;
 	}
 
 	cancel_token = false;
+	_spin_runned_unbounded = true;
 	_thread = std::thread(spin_with_select_realtime);
 
 	return 0;
@@ -137,11 +154,12 @@ int crow::start_spin_realtime()
 
 int crow::start_spin_without_select()
 {
-	if (_spin_runned) 
+	if (_spin_runned)
 	{
 		return -1;
 	}
 
+	_spin_runned_unbounded = true;
 	_thread = std::thread([]()
 	{
 		_spin_runned = true;
@@ -161,7 +179,7 @@ int crow::start_spin_without_select()
 	return 0;
 }
 
-int crow::stop_spin()
+int crow::stop_spin(bool wait)
 {
 	if (!_spin_runned)
 	{
@@ -170,12 +188,14 @@ int crow::stop_spin()
 
 	cancel_token = true;
 	crow::unselect();
-	
-	_thread.join();
+
+	if (wait)
+		_thread.join();
+	_spin_runned_unbounded = false;
 	return 0;
 }
 
-void crow::start_resubscribe_thread(int millis)
+void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
 {
 	std::thread thr([ = ]()
 	{

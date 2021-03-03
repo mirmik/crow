@@ -715,7 +715,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (crow::create_udpgate(CROW_UDPGATE_NO, udpport) == NULL)
+	if (crow::create_udpgate(CROW_UDPGATE_NO, udpport))
 	{
 		perror("udpgate open");
 		exit(-1);
@@ -839,7 +839,7 @@ int main(int argc, char *argv[])
 					break;
 			}
 
-			crow::stop_spin();
+			crow::stop_spin(false);
 			crow::join_spin();
 			exit(0);
 		}
@@ -863,7 +863,7 @@ int main(int argc, char *argv[])
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		}
 
-		crow::stop_spin();
+		crow::stop_spin(false);
 		crow::join_spin();
 		exit(0);
 	}

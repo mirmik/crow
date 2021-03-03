@@ -1,5 +1,5 @@
 #include <crow/proto/rpc.h>
-#include "brocker.h"
+#include <crow/brocker/crowker.h>
 #include <string>
 
 crow::rpc_node rpc;
@@ -13,7 +13,7 @@ std::string get_themes()
 {
 	std::string ret;
 
-	auto& themes = brocker::themes;
+	auto& themes = crow::crowker::instance()->themes;
 
 	for (auto& a : themes) 
 	{

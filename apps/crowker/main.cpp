@@ -16,7 +16,7 @@
 #include <string>
 #include <thread>
 
-#include "brocker.h"
+#include <crow/brocker/crowker.h>
 #include "control_node.h"
 
 #include <nos/print.h>
@@ -30,6 +30,7 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
+bool brocker_info = false;
 int udpport = -1;
 int tcpport = -1;
 bool quite = false;
@@ -42,12 +43,10 @@ void incoming_pubsub_packet(struct crow::packet *pack)
 	{
 		case PUBLISH:
 			{
-				auto theme = std::make_shared<std::string>
-				             (crow::pubsub::get_theme(pack));
-				auto data = std::make_shared<std::string>
-				            (crow::pubsub::get_data(pack));
+				auto theme = std::string(crow::pubsub::get_theme(pack));
+				auto data = std::string(crow::pubsub::get_data(pack));
 
-				brocker::publish(theme, data);
+				crow::crowker::instance()->publish(theme, data);
 			}
 			break;
 
@@ -58,8 +57,10 @@ void incoming_pubsub_packet(struct crow::packet *pack)
 				                  sizeof(crow_subheader_pubsub_control),
 				                  shps->thmsz);
 
-				brocker::crow_subscribe(pack->addrptr(), pack->addrsize(), theme,
-				                        shps_c->qos, shps_c->ackquant);
+				crow::crowker::instance()->crow_subscribe(
+					{pack->addrptr(), pack->addrsize()}, 
+					theme,
+				    shps_c->qos, shps_c->ackquant);
 			}
 			break;
 
@@ -83,7 +84,7 @@ void undelivered_handler(struct crow::packet *pack)
 			                  sizeof(crow_subheader_pubsub_data),
 			                  shps->thmsz);
 
-			brocker::erase_crow_subscriber(
+			crow::crowker::instance()->erase_crow_subscriber(
 			    std::string((char *)pack->addrptr(), pack->header.alen));
 
 			if (brocker_info)
@@ -111,8 +112,8 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 		uint8_t datasize;
 		uint16_t thmsize;
 
-		std::shared_ptr<std::string> theme;
-		std::shared_ptr<std::string> data;
+		std::string theme;
+		std::string data;
 
 		ret = client.recv(buf, 3, MSG_WAITALL);
 
@@ -134,11 +135,11 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 		if (ret <= 0)
 			break;
 
-		theme = std::make_shared<std::string>(buf, thmsize);
+		theme = std::string(buf, thmsize);
 
 		if ( cmd == 's' )
 		{
-			brocker::tcp_subscribe(*theme, &client);
+			crow::crowker::instance()->tcp_subscribe(theme, &client);
 			continue;
 		}
 		else if (cmd == 'p')
@@ -155,9 +156,9 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 			if (ret <= 0)
 				break;
 
-			data = std::make_shared<std::string>(buf, datasize);
+			data = std::string(buf, datasize);
 
-			brocker::publish(theme, data);
+			crow::crowker::instance()->publish(theme, data);
 			continue;
 		}
 
@@ -218,7 +219,6 @@ int main(int argc, char *argv[])
 		{"tcp", required_argument, NULL, 't'},
 		{"debug", no_argument, NULL, 'd'}, // crow transport log
 		{"binfo", no_argument, NULL, 'b'}, // browker log
-		{"logpub", no_argument, NULL, 'p'},
 		{"vdebug", no_argument, NULL, 'v'}, // vital packet log
 		{"netname", required_argument, NULL, 'n'},
 		{NULL, 0, NULL, 0}
@@ -254,10 +254,7 @@ int main(int argc, char *argv[])
 
 			case 'b':
 				brocker_info = true;
-				break;
-
-			case 'p':
-				log_publish = true;
+				crow::crowker::instance()->brocker_info = true;
 				break;
 
 			case 0:
@@ -271,7 +268,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	if (crow::create_udpgate(CROW_UDPGATE_NO, udpport) == NULL)
+	if (crow::create_udpgate(CROW_UDPGATE_NO, udpport))
 	{
 		perror("udpgate open");
 		exit(-1);

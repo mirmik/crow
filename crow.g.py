@@ -61,7 +61,14 @@ licant.modules.module("crow",
 )
 
 licant.module("crow.crowker",
-	#mdepends = ["crow.netkeep_crowker"]
+	srcdir = "crow/brocker",
+	sources= [
+		"crowker.cpp",
+		"theme.cpp",
+		"subscriber.cpp",
+		"crow_subscriber.cpp",
+		"tcp_subscriber.cpp",
+	]
 )
 
 licant.modules.module("crow.minimal",

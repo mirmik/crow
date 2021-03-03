@@ -16,8 +16,10 @@ licant.cxx_objects("crow-objects",
 	mdepends = [
 		"crow",
 		"crow.udpgate",
+		"crow.crowker",
 
 		"nos",
+		"nos.inet",
 		"igris",
 		"igris.syslock",
 		"igris.dprint",
