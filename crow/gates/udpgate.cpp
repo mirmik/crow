@@ -3,6 +3,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <stdio.h>
@@ -95,6 +96,15 @@ int crow::udpgate::open(uint16_t port)
 	return ret;
 }
 
+void crow::udpgate::close() 
+{
+	if (sock > 0) {
+		::shutdown(sock, SHUT_RDWR);
+		::close(sock);
+		sock = -1;
+	}
+}
+
 void crow::udpgate::send(crow::packet *pack)
 {
 	uint32_t *addr = (uint32_t *)(pack->stageptr() + 1);
@@ -114,24 +124,24 @@ void crow::udpgate::send(crow::packet *pack)
 	crow::return_to_tower(pack, CROW_SENDED);
 }
 
-crow::udpgate *crow::create_udpgate(uint8_t id, uint16_t port)
+int crow::create_udpgate(uint8_t id, uint16_t port)
 {
-	crow::udpgate *g = new crow::udpgate;
-	g->open(port); // TODO: should return NULL on error
-	crow::link_gate(g, id);
-	return g;
-}
+	int sts;
 
-crow::udpgate *crow::create_udpgate(uint8_t id)
-{
 	crow::udpgate *g = new crow::udpgate;
-	g->open(0); // TODO: should return NULL on error
-	crow::link_gate(g, id);
-	return g;
+	if ((sts = g->open(port)))
+		return sts;
+	
+	if ((sts = g->bind(id))) 
+	{
+		g->close();
+		return sts;
+	}
+
+	return 0;
 }
 
 void crow::udpgate::finish() 
 {
-	shutdown(sock, SHUT_RDWR);
-	close(sock);
+	close();
 }

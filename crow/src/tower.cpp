@@ -7,10 +7,9 @@
 
 #include <crow/tower.h>
 #include <crow/print.h>
+#include <crow/gateway.h>
 #include <crow/proto/protocol.h>
 
-
-igris::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
 
 bool crow::diagnostic_noack = false;
 uint16_t crow::debug_data_size = 20;
@@ -71,7 +70,7 @@ static crow::gateway *crow_find_target_gateway(crow::packet *pack)
 {
 	uint8_t gidx = *pack->stageptr();
 
-	for (crow::gateway &gate : crow_gateways)
+	for (auto& gate : crow::gateway_list)
 	{
 		if (gate.id == gidx)
 			return &gate;
@@ -687,7 +686,7 @@ static inline void crow_onestep_incoming_stage()
 */
 void crow::onestep()
 {
-	for (crow::gateway &gate : crow_gateways)
+	for (crow::gateway &gate : crow::gateway_list)
 	{
 		gate.nblock_onestep();
 	}
@@ -729,7 +728,7 @@ void crow::print_list_counts()
 
 void crow::finish()
 {
-	for (crow::gateway &gate : crow_gateways)
+	for (crow::gateway &gate : crow::gateway_list)
 	{
 		gate.finish();
 	}

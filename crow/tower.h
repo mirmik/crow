@@ -8,9 +8,6 @@
 #define CROW_SENDED 0
 #define CROW_WRONG_ADDRESS -1
 
-///Список врат.
-extern igris::dlist<crow::gateway, &crow::gateway::lnk> crow_gateways;
-
 namespace crow
 {
 	extern uint16_t debug_data_size;
@@ -69,21 +66,6 @@ namespace crow
 	// Эта функция вызывается вратами после обработки отсылаемого пакета.
 	void return_to_tower(crow::packet *pack, uint8_t sts);
 
-	// Присоеденить врата к башне.
-	static inline int link_gate(crow::gateway *gate, uint8_t id)
-	{
-		gate->id = id;
-
-		for (auto & gate : crow_gateways)
-		{
-			if (gate.id == id)
-				return -1;
-		}
-
-		crow_gateways.add_last(*gate);
-		return 0;
-	}
-
 	// Используется пользовательским кодом для освобождения пакета.
 	void release(crow::packet *pack);
 
@@ -92,17 +74,18 @@ namespace crow
 
 	void onestep();
 	void onestep_travel_only();
+	
 	void spin();
 	void spin_with_select();
 	void spin_with_select_realtime();
 
-	void stop_spin();
-	void start_spin_with_select();
-	void start_spin_with_select_realtime();
-	void start_spin_without_select();
+	int stop_spin();
+	int start_spin_with_select();
+	int start_spin_with_select_realtime();
+	int start_spin_without_select();
 
-	void start_spin();
-	void start_spin_realtime();
+	int start_spin();
+	int start_spin_realtime();
 
 	[[deprecated]]
 	void spin_join();

@@ -29,6 +29,7 @@ namespace crow
 
 		void send(crow::packet *) override;
 		void nblock_onestep() override;
+		void finish() override {}
 
 #if CROW_ENABLE_WITHOUT_FDS
 #else

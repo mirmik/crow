@@ -86,7 +86,7 @@ struct crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
 	}
 
 	g->rpack = NULL;
-	crow::link_gate(g, id);
+	g->bind(id);
 
 	return g;
 }

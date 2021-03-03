@@ -4,7 +4,6 @@
 #include <pybind11/stl.h>
 
 #include <crow/gates/udpgate.h>
-//#include <crow/holders.h>
 #include <crow/packet_ptr.h>
 #include <crow/tower.h>
 #include <crow/proto/pubsub.h>
@@ -12,8 +11,6 @@
 #include <crow/proto/pynode.h>
 #include <crow/proto/msgbox.h>
 #include <crow/address.h>
-
-//#include <igris/print.h>
 
 using namespace crow;
 namespace py = pybind11;
@@ -56,7 +53,7 @@ PYBIND11_MODULE(libcrow, m)
 		return {buf.data(), buf.size()};
 	});
 
-	py::class_<packet_pubsub_ptr>(m, "packet_pubsub_ptr", pack)
+	/*py::class_<packet_pubsub_ptr>(m, "packet_pubsub_ptr", pack)
 	.def(py::init<const packet_ptr&>())
 	.def("theme", [](packet_pubsub_ptr & self) -> py::bytes
 	{
@@ -68,7 +65,7 @@ PYBIND11_MODULE(libcrow, m)
 		auto buf = self.data();
 		return {buf.data(), buf.size()};
 	})
-	;
+	;*/
 
 	/*py::class_<pubsub_packref, packref>(m, "pubsub_packref")
 		.def("theme", [](pubsub_packref &self) -> py::str {
@@ -92,11 +89,17 @@ PYBIND11_MODULE(libcrow, m)
 	.def(py::init<const std::string&>())
 	;
 
-	py::class_<gateway> __gateway__(m, "gateway");
+	auto  __gateway__ = py::class_<gateway>(m, "gateway")
+		.def("bind", &gateway::bind)
+		.def("finish", &gateway::finish)
+	;
+
+
 	py::class_<udpgate>(m, "udpgate", __gateway__)
 	.def(py::init<>())
 	.def(py::init<uint16_t>())
-	.def("bind", &gateway::bind)
+	.def("open", &udpgate::open)
+	.def("close", &udpgate::close)
 	;
 
 	m.def("send", [](
@@ -115,8 +118,7 @@ PYBIND11_MODULE(libcrow, m)
 		       );
 	});
 
-	m.def("create_udpgate", &crow::create_udpgate,
-	      py::return_value_policy::reference);
+	m.def("create_udpgate", &crow::create_udpgate);
 	m.def("onestep", &crow::onestep);
 	m.def("spin", &crow::spin);
 	m.def("start_spin", &crow::start_spin);
@@ -181,6 +183,7 @@ PYBIND11_MODULE(libcrow, m)
 	m.add_object("_cleanup", cleanup);
 
 	m.def("diagnostic_enable", diagnostic_enable);
+	m.def("diagnostic_setup", diagnostic_setup);
 	m.def("finish", finish);
 
 	py::class_<crow::node>(m, "node")
@@ -224,4 +227,10 @@ PYBIND11_MODULE(libcrow, m)
 	m.def("join_spin", &crow::join_spin, py::call_guard<py::gil_scoped_release>());
 	m.def("start_spin", &crow::start_spin);
 	m.def("stop_spin", &crow::stop_spin);
+
+	m.def("get_gateway", &crow::get_gateway);
+
+	m.def("start_resubscribe_thread", &crow::start_resubscribe_thread);
+	m.def("stop_resubscribe_thread", &crow::stop_resubscribe_thread);
+	m.def("join_resubscribe_thread", &crow::join_resubscribe_thread);
 }

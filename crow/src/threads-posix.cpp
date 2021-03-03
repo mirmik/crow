@@ -15,12 +15,13 @@
 
 static bool cancel_token = false;
 static std::thread _thread;
+bool _spin_runned = false;
 
 int crow::unselect_pipe[2];
 
 struct sigaction new_action, sigkill_old_action, sigint_old_action;
 
-void signal_sigint_handler(int sig) 
+void signal_sigint_handler(int sig)
 {
 	cancel_token = true;
 	write(crow::unselect_pipe[1], "A", 1);
@@ -28,7 +29,7 @@ void signal_sigint_handler(int sig)
 	sigint_old_action.sa_handler(sig);
 }
 
-void signal_sigkill_handler(int sig) 
+void signal_sigkill_handler(int sig)
 {
 	cancel_token = true;
 	write(crow::unselect_pipe[1], "A", 1);
@@ -53,6 +54,8 @@ void crow::unselect_init()
 
 void crow::spin_with_select()
 {
+	_spin_runned = true;
+
 	crow::unselect_init();
 	crow::select_collect_fds();
 
@@ -66,7 +69,7 @@ void crow::spin_with_select()
 	{
 		char unselect_read_buffer[512];
 
-		if (cancel_token) 
+		if (cancel_token)
 		{
 			break;
 		}
@@ -76,13 +79,15 @@ void crow::spin_with_select()
 			crow::onestep();
 		}
 		while (crow::has_untravelled_now());
-		
+
 		crow::select();
 		read(unselect_pipe[0], unselect_read_buffer, 512);
 	};
+
+	_spin_runned = false;
 }
 
-void crow::spin_with_select_realtime() 
+void crow::spin_with_select_realtime()
 {
 	int ret;
 	if ((ret = this_thread_set_realtime_priority()))
@@ -94,42 +99,83 @@ void crow::spin_with_select_realtime()
 	crow::spin_with_select();
 }
 
-void crow::start_spin_with_select()
+int crow::start_spin_with_select()
 {
+	if (_spin_runned) 
+	{
+		return -1;
+	}
+
+	cancel_token = false;
 	_thread = std::thread(spin_with_select);
+	
+	return 0;
 }
 
-void crow::start_spin_with_select_realtime()
+int crow::start_spin_with_select_realtime()
 {
+	if (_spin_runned) 
+	{
+		return -1;
+	}
+
+	cancel_token = false;
 	_thread = std::thread(spin_with_select_realtime);
+
+	return 0;
 }
 
-void crow::start_spin() { crow::start_spin_with_select(); }
-void crow::start_spin_realtime() { crow::start_spin_with_select_realtime(); }
-
-void crow::start_spin_without_select()
+int crow::start_spin()
 {
+	return crow::start_spin_with_select();
+}
+
+int crow::start_spin_realtime()
+{
+	return crow::start_spin_with_select_realtime();
+}
+
+int crow::start_spin_without_select()
+{
+	if (_spin_runned) 
+	{
+		return -1;
+	}
+
 	_thread = std::thread([]()
 	{
+		_spin_runned = true;
+
 		while (1)
 		{
 			if (cancel_token)
-				return;
+				break;
 
 			crow::onestep();
 			std::this_thread::sleep_for(std::chrono::microseconds(1));
 		};
+
+		_spin_runned = false;
 	});
+
+	return 0;
 }
 
-void crow::stop_spin()
+int crow::stop_spin()
 {
+	if (!_spin_runned)
+	{
+		return -1;
+	}
+
 	cancel_token = true;
 	crow::unselect();
-	//_thread.join();
+	
+	_thread.join();
+	return 0;
 }
 
-void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
+void crow::start_resubscribe_thread(int millis)
 {
 	std::thread thr([ = ]()
 	{
@@ -142,12 +188,12 @@ void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
 	thr.detach();
 }
 
-void crow::spin_join() 
+void crow::spin_join()
 {
 	_thread.join();
 }
 
-void crow::join_spin() 
+void crow::join_spin()
 {
-	_thread.join(); 
+	_thread.join();
 }

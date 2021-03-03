@@ -5,6 +5,8 @@
 #include <crow/gateway.h>
 #include <iostream>
 
+#include <nos/print.h>
+
 namespace crow
 {
 
@@ -21,11 +23,12 @@ namespace crow
 		void nblock_onestep() override;
 
 		int open(uint16_t port = 0);
+		void close();
 		void finish() override;
 
-		void bind(int gate_no = CROW_UDPGATE_NO) 
+		int bind(int gate_no = CROW_UDPGATE_NO) 
 		{
-			gateway::bind(gate_no);
+			return gateway::bind(gate_no);
 		}
 
 #if CROW_ENABLE_WITHOUT_FDS
@@ -33,10 +36,13 @@ namespace crow
 		int get_fd() override { return sock; }
 #endif
 
+		~udpgate() override 
+		{
+			finish();
+		} 
 	};
 
-	udpgate *create_udpgate(uint8_t id);
-	udpgate *create_udpgate(uint8_t id, uint16_t port);
+	int create_udpgate(uint8_t id, uint16_t port=0);
 }
 
 #endif
