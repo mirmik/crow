@@ -20,7 +20,7 @@ namespace crow
 {
 	crow::packet_ptr node_send(uint16_t sid,
 	                           uint16_t rid,
-	                           const crow::hostaddr & addr,
+	                           const crow::hostaddr_view & addr,
 	                           const igris::buffer data,
 	                           uint8_t qos,
 	                           uint16_t ackquant,
@@ -28,7 +28,7 @@ namespace crow
 
 	crow::packet_ptr node_send_special(uint16_t sid,
 	                                   uint16_t rid,
-	                                   const crow::hostaddr & addr,
+	                                   const crow::hostaddr_view & addr,
 	                                   uint8_t type,
 	                                   const igris::buffer data,
 	                                   uint8_t qos,
@@ -37,7 +37,7 @@ namespace crow
 
 	crow::packet_ptr node_send_v(uint16_t sid,
 	                             uint16_t rid,
-	                             const crow::hostaddr & addr,
+	                             const crow::hostaddr_view & addr,
 	                             const igris::buffer * vec,
 	                             size_t veclen,
 	                             uint8_t qos,
@@ -137,7 +137,7 @@ namespace crow
 		};
 
 		crow::packet_ptr send(uint16_t rid,
-		                      const crow::hostaddr& raddr,
+		                      const crow::hostaddr_view& raddr,
 		                      const igris::buffer data,
 		                      uint8_t qos,
 		                      uint16_t ackquant,
@@ -147,7 +147,7 @@ namespace crow
 		}
 
 		crow::packet_ptr send_special(uint16_t rid,
-		                              const crow::hostaddr& raddr,
+		                              const crow::hostaddr_view& raddr,
 		                              uint8_t type,
 		                              const igris::buffer data,
 		                              uint8_t qos,
@@ -158,7 +158,7 @@ namespace crow
 		}
 
 		crow::packet_ptr send_v(uint16_t rid,
-		                        const crow::hostaddr& raddr,
+		                        const crow::hostaddr_view& raddr,
 		                        const igris::buffer * vdat,
 		                        size_t vlen,
 		                        uint8_t qos,

@@ -4,20 +4,20 @@
 #include <nos/log/logger.h>
 #include <nos/timestamp.h>
 
-#include <crow/proto/pubsub.h>
+#include <crow/pubsub/pubsub.h>
 
 namespace crow 
 {
 	class publish_logger : public nos::log::logger 
 	{
 	public:
-		crow::hostaddr addr;
+		crow::hostaddr_view addr;
 		const char* theme;
 
 		const char * _name = "crowlog";
 
 		void init(
-			crow::hostaddr addr,
+			crow::hostaddr_view addr,
 			const char* theme) 
 		{
 			this -> addr = addr;

@@ -1,0 +1,64 @@
+#include <pybind11/functional.h>
+#include <pybind11/pybind11.h>
+
+#include <crow/pubsub/pubsub.h>
+#include <crow/pubsub/subscriber.h>
+
+#include <string>
+
+namespace py = pybind11;
+
+
+class pybind_subscriber : public crow::subscriber
+{
+	py::function delegate;
+	std::string theme;
+	crow::hostaddr addr;
+	    
+public:
+	pybind_subscriber(py::function foo)
+		: delegate(foo)
+	{}
+
+	void newpack_handler(crow::pubsub_packet_ptr ptr) override
+	{
+		nos::println("newpack_handler");
+		delegate(ptr);
+	}
+
+	void subscribe(
+	    const crow::hostaddr& addr,
+	    const std::string& theme,
+	    uint8_t qos,
+	    uint16_t ackquant,
+	    uint8_t rqos,
+	    uint16_t rackquant
+	)
+	{
+		this->addr = addr;
+		this->theme = theme;
+
+		crow::subscriber::subscribe(
+			this->addr,
+			this->theme.c_str(),
+			qos, 
+			ackquant,
+			rqos,
+			rackquant
+		);
+	}
+};
+
+void register_subscriber_class(py::module & m)
+{
+	py::class_<pybind_subscriber>(m, "subscriber")
+	.def(py::init<py::function>())
+	.def("subscribe", &pybind_subscriber::subscribe,
+	     py::arg("addr"),
+	     py::arg("theme"),
+	     py::arg("ack") = 2,
+	     py::arg("ackquant") = 50,
+	     py::arg("rack") = 2,
+	     py::arg("rackquant") = 50)
+	;
+}

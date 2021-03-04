@@ -1,29 +1,47 @@
-#include <crow/proto/pubsub.h>
-#include <igris/sync/syslock.h>
+#include "pubsub.h"
+#include "subscriber.h"
 
 #include <crow/hexer.h>
+#include <igris/sync/syslock.h>
 
 crow::pubsub_protocol_cls crow::pubsub_protocol;
 
+crow::pubsub_protocol_cls& crow::pubsub_protocol_cls::instance() 
+{
+	return crow::pubsub_protocol;
+}
+
 void crow::pubsub_protocol_cls::incoming(crow::packet * pack)
 {
-	crow::subscriber * sub;
-	igris::buffer theme = crow::pubsub::get_theme(pack);
-
 	if (incoming_handler)
 	{
 		incoming_handler(pack);
 	}
 	else
 	{
-		dlist_for_each_entry(sub, &themes, lnk)
+		crow::subscriber * sub;
+		igris::buffer theme = crow::pubsub::get_theme(pack);
+		
+		dlist_for_each_entry(sub, &subscribers, lnk)
 		{
 			if (theme == sub->theme)
 			{
-				sub->dlg(pack);
+				sub->newpack_handler(pack);
 				return;
 			}
 		}
+		crow::release(pack);
+	}
+}
+
+void crow::pubsub_protocol_cls::undelivered(crow::packet * pack)
+{
+	if (undelivered_handler) 
+	{
+		undelivered_handler(pack);
+	}
+	else 
+	{
 		crow::release(pack);
 	}
 }
@@ -58,7 +76,7 @@ crow::packet* crow::make_publish_packet(
 }
 
 void crow::publish(
-    const crow::hostaddr & addr, 
+    const crow::hostaddr_view & addr, 
     const std::string_view theme, 
     const igris::buffer data,
     uint8_t qos, uint16_t acktime)
@@ -82,8 +100,33 @@ void crow::publish(
 	             qos, acktime, false);
 }
 
+void crow::publish_message(
+    const crow::hostaddr_view & addr, 
+    const std::string_view theme, 
+    const igris::buffer data,
+    uint8_t qos, uint16_t acktime)
+{
+	struct crow_subheader_pubsub subps;
+	struct crow_subheader_pubsub_data subps_d;
+
+	subps.type = MESSAGE;
+	subps.thmsz = theme.size();
+	subps_d.datsz = data.size();
+
+	const igris::buffer iov[4] =
+	{
+		{&subps, sizeof(subps)},
+		{&subps_d, sizeof(subps_d)},
+		{theme.data(), subps.thmsz},
+		data,
+	};
+
+	crow::send_v(addr, iov, 4, CROW_PUBSUB_PROTOCOL,
+	             qos, acktime, false);
+}
+
 void crow::publish_v(
-    const crow::hostaddr & addr, 
+    const crow::hostaddr_view & addr, 
     const std::string_view theme, 
     const igris::buffer * vec,
     int vecsz,
@@ -113,7 +156,7 @@ void crow::publish_v(
 }
 
 void crow::subscribe(
-    const crow::hostaddr & addr, 
+    const crow::hostaddr_view & addr, 
     const std::string_view theme, 
     uint8_t qos, uint16_t acktime,
     uint8_t rqos, uint16_t racktime)
@@ -158,7 +201,7 @@ void crow::pubsub_protocol_cls::resubscribe_all()
 	crow::subscriber * sub;
 
 	system_lock();
-	dlist_for_each_entry(sub, &themes, lnk)
+	dlist_for_each_entry(sub, &subscribers, lnk)
 	{
 		sub->resubscribe();
 	}

@@ -42,7 +42,7 @@ namespace crow
 			return _instance;
 		}
 
-		void crow_subscribe(const crow::hostaddr & addr,
+		void crow_subscribe(const crow::hostaddr_view & addr,
 		                    const std::string& theme,
 		                    uint8_t qos, uint16_t ackquant);
 

@@ -40,28 +40,41 @@ namespace crow
 	class pubsub_protocol_cls : public crow::protocol
 	{
 	public:
-		struct dlist_head themes = DLIST_HEAD_INIT(themes);
-
-		void incoming(crow::packet *pack) override;
+		struct dlist_head subscribers = DLIST_HEAD_INIT(subscribers);
+		void(*incoming_handler)(packet*);
+		void(*undelivered_handler)(packet*);
+		
+	public:
 		pubsub_protocol_cls() : protocol(CROW_PUBSUB_PROTOCOL) {}
 
+		void incoming(crow::packet *pack) override;
+		void undelivered(crow::packet *pack) override;
+
 		static void start_resubscribe_thread(int millis);
-
-		void(*incoming_handler)(packet*);
-
 		void resubscribe_all();
+
+		static void enable_crowker_subsystem();
+		static pubsub_protocol_cls& instance();
 	};
 	extern pubsub_protocol_cls pubsub_protocol;
 
+
 	void publish(
-	    const crow::hostaddr & addr,
+	    const crow::hostaddr_view & addr,
+	    const std::string_view theme,
+	    const igris::buffer data,
+	    uint8_t qos,
+	    uint16_t acktime);
+
+	void publish_message(
+	    const crow::hostaddr_view & addr,
 	    const std::string_view theme,
 	    const igris::buffer data,
 	    uint8_t qos,
 	    uint16_t acktime);
 
 	void publish_v(
-	    const crow::hostaddr & addr,
+	    const crow::hostaddr_view & addr,
 	    const std::string_view theme,
 	    const igris::buffer * vec,
 	    int vecsz,
@@ -77,7 +90,7 @@ namespace crow
 	//               uint8_t qos = 0, uint16_t acktime = DEFAULT_ACKQUANT,
 	//               uint8_t rqos = 0, uint16_t racktime = DEFAULT_ACKQUANT);
 
-	void subscribe(const crow::hostaddr & addr,
+	void subscribe(const crow::hostaddr_view & addr,
 	               std::string_view theme,
 	               uint8_t qo0, uint16_t acktime,
 	               uint8_t rqos, uint16_t racktime);
@@ -163,122 +176,6 @@ namespace crow
 		igris::buffer data() { return pubsub::get_data(pack); }
 		igris::buffer message() { return pubsub::get_data(pack); }
 	};
-
-	class subscriber
-	{
-	public:
-		dlist_head lnk;
-
-	public:
-		crow::hostaddr addr;
-		const char * theme;
-		uint8_t qos;
-		uint16_t ackquant;
-		uint8_t rqos;
-		uint16_t rackquant;
-
-		igris::delegate<void, crow::pubsub_packet_ptr> dlg;
-
-	public:
-		subscriber() = default;
-
-		subscriber(
-		    const crow::hostaddr & addr,
-		    const char * theme,
-		    uint8_t qos,
-		    uint16_t ackquant,
-		    uint8_t rqos,
-		    uint16_t rackquant,
-		    igris::delegate<void, crow::pubsub_packet_ptr> dlg
-		)
-			: addr(addr)
-		{
-			this->theme = theme;
-			this->qos = qos;
-			this->ackquant = ackquant;
-			this->rqos = rqos;
-			this->rackquant = rackquant;
-			this->dlg = dlg;
-
-			system_lock();
-			dlist_add(&lnk, &pubsub_protocol.themes);
-			system_unlock();
-		}
-
-		void subscribe(
-		    const crow::hostaddr & addr,
-		    const char * theme,
-		    uint8_t qos,
-		    uint16_t ackquant,
-		    uint8_t rqos,
-		    uint16_t rackquant,
-		    igris::delegate<void, crow::pubsub_packet_ptr> dlg
-		)
-		{
-			this->addr = addr;
-			this->theme = theme;
-			this->qos = qos;
-			this->ackquant = ackquant;
-			this->rqos = rqos;
-			this->rackquant = rackquant;
-			this->dlg = dlg;
-
-			system_lock();
-			dlist_add(&lnk, &pubsub_protocol.themes);
-			system_unlock();
-
-			resubscribe();
-		}
-
-		void resubscribe()
-		{
-			crow::subscribe(addr, theme, qos, ackquant, rqos, rackquant);
-		}
-	};
-
-	class publisher
-	{
-	private:
-		const char * theme;
-		crow::hostaddr addr;
-		uint8_t qos = 0;
-		uint16_t acktime = 50;
-
-	public:
-		publisher() {}
-
-		publisher(const crow::hostaddr & addr, const char* theme);
-
-		void init(const crow::hostaddr & addr, const char* theme,
-		          uint8_t qos = 0, uint16_t acktime = 50)
-		{
-			this->addr = addr;
-			this->theme = theme;
-			this->qos = qos;
-			this->acktime = acktime;
-		}
-
-		void publish(const igris::buffer data)
-		{
-			crow::publish(addr, theme, data, qos, acktime);
-		}
-
-		void publish(const igris::buffer data, uint8_t qos, uint16_t acktime)
-		{
-			crow::publish(addr, theme, data, qos, acktime);
-		}
-
-		void publish_v(const igris::buffer* vec, int vecsz)
-		{
-			crow::publish_v(addr, theme, vec, vecsz, qos, acktime);
-		}
-
-		void publish_v(const igris::buffer* vec, int vecsz, uint8_t qos, uint16_t acktime)
-		{
-			crow::publish_v(addr, theme, vec, vecsz, qos, acktime);
-		}
-	};
-
 } // namespace crow
 
 #endif

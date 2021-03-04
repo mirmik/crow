@@ -58,7 +58,7 @@ namespace crow
 
 		//std::vector<uint8_t> host;
 		//nodeid_t             nid;
-		//std::unordered_set<crow::hostaddr *>;
+		//std::unordered_set<crow::hostaddr_view *>;
 
 	//public:
 	//	crowker_service_control_node_cls() = default;

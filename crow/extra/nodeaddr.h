@@ -14,7 +14,7 @@ namespace crow
 		nid_t nid;
 	
 	public:
-		crow::hostaddr hostaddr() const
+		crow::hostaddr_view hostaddr() const
 		{
 			return { naddr.data(), naddr.size() };
 		}

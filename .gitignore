@@ -181,14 +181,6 @@ ENV/
 *.out
 *.app
 
-apps/ctrans/ctrans
-apps/crowker/crowker
-apps/crow_subscribe/crow_subscribe
-apps/crow_publish/crow_publish
-apps/crowpulse/crowpulse
-apps/crowcalc/crowcalc
-apps/crowrequest/crowrequest
-target
 
 dox/html
 dox/latex
@@ -203,3 +195,22 @@ dist
 bindings/python/pycrow/__tunels__/*
 **/__tunels__/*
 
+
+apps/ctrans/ctrans
+apps/crowker/crowker
+apps/crowpulse/crowpulse
+apps/crowcalc/crowcalc
+apps/crowrequest/crowrequest
+target
+
+ctrans
+crowker
+crowpulse
+crowcalc
+crowrequest
+
+!apps/ctrans
+!apps/crowker
+!apps/crowpulse
+!apps/crowcalc
+!apps/crowrequest

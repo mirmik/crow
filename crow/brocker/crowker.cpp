@@ -37,7 +37,7 @@ crowker_implementation::theme * crow::crowker::get_theme(const std::string& name
 
 
 
-void crow::crowker::crow_subscribe(const crow::hostaddr & addr,
+void crow::crowker::crow_subscribe(const crow::hostaddr_view & addr,
                              const std::string& theme,
                              uint8_t qos, uint16_t ackquant)
 {

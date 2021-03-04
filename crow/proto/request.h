@@ -42,7 +42,7 @@ namespace crow
 		void (*dlg)(void*, int, crow::packet*), 
 		void * arg,
 		nid_t rid,
-		const crow::hostaddr & addr,
+		const crow::hostaddr_view & addr,
 		igris::buffer data,
 		uint8_t qos,
 		uint16_t ackquant
@@ -66,7 +66,7 @@ namespace crow
 		void (*dlg)(void*, int, crow::packet*), 
 		void * arg,
 		nid_t rid,
-		const crow::hostaddr & addr,
+		const crow::hostaddr_view & addr,
 		igris::buffer * data,
 		int len,
 		uint8_t qos,

@@ -22,6 +22,11 @@ application("crowrequest",
 	cxxstd = "c++17"
 )
 
+licant.install.install_application(
+	tgt="install_crowrequest", 
+	src="crowrequest", 
+	dst="crowrequest")
+
 if __name__ == "__main__":
 	licant.install.install_application(
 		tgt="install", 

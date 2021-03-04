@@ -10,7 +10,7 @@ using namespace std::chrono_literals;
 
 std::string funcname;
 std::string strargs;
-std::vector<uint8_t> address;
+crow::hostaddr address;
 
 void func()
 {

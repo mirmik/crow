@@ -8,7 +8,7 @@
 #include <crow/gates/udpgate.h>
 #include <crow/packet_ptr.h>
 #include <crow/tower.h>
-#include <crow/proto/pubsub.h>
+#include <crow/pubsub/pubsub.h>
 #include <crow/proto/node.h>
 #include <crow/proto/pynode.h>
 #include <crow/proto/msgbox.h>
@@ -17,6 +17,8 @@
 using namespace crow;
 namespace py = pybind11;
 using ungil = py::call_guard<py::gil_scoped_release>;
+
+void register_subscriber_class(py::module & m);
 
 py::function incoming_handler_bind;
 void incoming_handler_bind_invoke(crow::packet *pack)
@@ -82,10 +84,16 @@ PYBIND11_MODULE(libcrow, m)
 		});*/
 
 
-	py::class_<crow::hostaddr>(m, "crow_hostaddr")
+	py::class_<crow::hostaddr>(m, "hostaddr")
+    .def(py::init<const crow::hostaddr_view&>())
 	.def(py::init<const std::vector<uint8_t>&>())
+	.def("view", &crow::hostaddr::view)
 	;
 
+	py::class_<crow::hostaddr_view>(m, "hostaddr_view")
+    .def(py::init<const crow::hostaddr&>())
+	.def(py::init<const std::vector<uint8_t>&>());
+	py::implicitly_convertible<crow::hostaddr, crow::hostaddr_view>();
 
 	py::class_<igris::buffer>(m, "igris_buffer")
 	.def(py::init<const std::string&>())
@@ -237,4 +245,8 @@ PYBIND11_MODULE(libcrow, m)
 		.def("publish", &crow::crowker::publish)
 		.def("set_info_mode", &crow::crowker::set_info_mode)
 		;
+
+
+	register_subscriber_class(m);
+	m.def("enable_crowker_subsystem", &crow::pubsub_protocol_cls::enable_crowker_subsystem);
 }

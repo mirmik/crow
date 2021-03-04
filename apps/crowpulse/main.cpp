@@ -3,7 +3,7 @@
 
 #include <crow/tower.h>
 #include <crow/address.h>
-#include <crow/proto/pubsub.h>
+#include <crow/pubsub/pubsub.h>
 #include <crow/proto/channel.h>
 #include <crow/proto/acceptor.h>
 

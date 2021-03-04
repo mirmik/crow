@@ -19,7 +19,7 @@ namespace crow
 
 	public:
 		crow::node_packet_ptr query(uint16_t rid,
-		                            const crow::hostaddr & addr,
+		                            const crow::hostaddr_view & addr,
 		                            const igris::buffer data,
 		                            uint8_t qos, uint16_t ackquant)
 		{

@@ -1,5 +1,5 @@
 #include <crow/tower.h>
-#include <crow/proto/pubsub.h>
+#include <crow/pubsub/pubsub.h>
 
 #include <thread>
 #include <chrono>

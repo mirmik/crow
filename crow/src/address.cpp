@@ -2,7 +2,7 @@
 
 namespace crow
 {
-	std::vector<uint8_t> address(const std::string& in)
+	hostaddr address(const std::string& in)
 	{
 		std::vector<uint8_t> out;
 		out.resize(in.size());
@@ -16,7 +16,7 @@ namespace crow
 		return out;
 	}
 
-	std::vector<uint8_t> address_warned(const std::string& in)
+	hostaddr address_warned(const std::string& in)
 	{
 		std::vector<uint8_t> out;
 		out.resize(in.size());

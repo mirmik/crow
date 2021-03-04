@@ -1,5 +1,5 @@
 #include <crow/gates/udpgate.h>
-#include <crow/proto/pubsub.h>
+#include <crow/pubsub/pubsub.h>
 #include <crow/tower.h>
 #include <crow/address.h>
 #include <crow/select.h>
@@ -34,68 +34,6 @@ bool brocker_info = false;
 int udpport = -1;
 int tcpport = -1;
 bool quite = false;
-
-void incoming_pubsub_packet(struct crow::packet *pack)
-{
-	struct crow_subheader_pubsub *shps = crow::get_subheader_pubsub(pack);
-
-	switch (shps->type)
-	{
-		case PUBLISH:
-			{
-				auto theme = std::string(crow::pubsub::get_theme(pack));
-				auto data = std::string(crow::pubsub::get_data(pack));
-
-				crow::crowker::instance()->publish(theme, data);
-			}
-			break;
-
-		case SUBSCRIBE:
-			{
-				auto shps_c = get_subheader_pubsub_control(pack);
-				std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
-				                  sizeof(crow_subheader_pubsub_control),
-				                  shps->thmsz);
-
-				crow::crowker::instance()->crow_subscribe(
-					{pack->addrptr(), pack->addrsize()}, 
-					theme,
-				    shps_c->qos, shps_c->ackquant);
-			}
-			break;
-
-		default:
-			{
-				printf("unresolved pubsub frame type %d", (uint8_t)shps->type);
-			}
-			break;
-	}
-}
-
-void undelivered_handler(struct crow::packet *pack)
-{
-	if (pack->header.f.type == CROW_PUBSUB_PROTOCOL)
-	{
-		auto shps = crow::get_subheader_pubsub(pack);
-
-		if (shps->type == PUBLISH)
-		{
-			std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
-			                  sizeof(crow_subheader_pubsub_data),
-			                  shps->thmsz);
-
-			crow::crowker::instance()->erase_crow_subscriber(
-			    std::string((char *)pack->addrptr(), pack->header.alen));
-
-			if (brocker_info)
-				nos::fprintln(
-				    "g3_refuse: t:{}, r:{}", theme,
-				    igris::hexascii_encode(pack->addrptr(), pack->header.alen));
-		}
-	}
-
-	crow::release(pack);
-}
 
 void tcp_client_listener(nos::inet::tcp_socket client)
 {
@@ -209,8 +147,9 @@ void print_help()
 
 int main(int argc, char *argv[])
 {
-	crow::pubsub_protocol.incoming_handler = incoming_pubsub_packet;
-	crow::undelivered_handler = undelivered_handler;
+	//crow::pubsub_protocol.incoming_handler = incoming_pubsub_packet;
+	//crow::undelivered_handler = undelivered_handler;
+	crow::pubsub_protocol.enable_crowker_subsystem();
 
 	const struct option long_options[] =
 	{

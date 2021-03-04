@@ -403,7 +403,7 @@ crow::packet_ptr crow_transport(crow::packet *pack, bool fastsend)
 	}
 }
 
-crow::packet_ptr crow::send(const crow::hostaddr & addr,
+crow::packet_ptr crow::send(const crow::hostaddr_view & addr,
                             const igris::buffer data,
                             uint8_t type,
                             uint8_t qos,
@@ -424,7 +424,7 @@ crow::packet_ptr crow::send(const crow::hostaddr & addr,
 	return crow_transport(pack, fastsend);
 }
 
-crow::packet_ptr crow::send_v(const crow::hostaddr & addr, const igris::buffer *vec,
+crow::packet_ptr crow::send_v(const crow::hostaddr_view & addr, const igris::buffer *vec,
                               size_t veclen, uint8_t type, uint8_t qos, uint16_t ackquant,
                               bool fastsend)
 {
@@ -459,7 +459,7 @@ crow::packet_ptr crow::send_v(const crow::hostaddr & addr, const igris::buffer *
 	return crow_transport(pack, fastsend);
 }
 
-crow::packet_ptr crow::send_vv(const crow::hostaddr & addr,
+crow::packet_ptr crow::send_vv(const crow::hostaddr_view & addr,
                                const igris::buffer* vec, size_t veclen,
                                const igris::buffer* vec2, size_t veclen2,
                                uint8_t type, uint8_t qos, uint16_t ackquant,

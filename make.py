@@ -11,6 +11,8 @@ licant.include("crow", "crow.g.py")
 licant.execute("apps/crowker/make.py")
 licant.execute("apps/ctrans/make.py")
 licant.execute("apps/crowpulse/make.py")
+licant.execute("apps/crowcalc/make.py")
+licant.execute("apps/crowrequest/make.py")
 
 target = "libcrow.so"
 install_include_path = '/usr/local/include/crow' 
@@ -35,17 +37,26 @@ licant.cxx_shared_library(target,
 licant.fileset("apps", targets=[
 	"ctrans",
 	"crowker",
-	"crowpulse"
+	"crowpulse",
+	"crowcalc",
+	"crowrequest"
 ], deps=["libcrow.so"])
 
-licant.install.install_library(tgt="install", libtgt=target, headers="crow", hroot="crow", 
+licant.fileset("all", targets=["apps", target])
+
+licant.install.install_library(tgt="install_library", libtgt=target, headers="crow", hroot="crow", 
 	uninstall="uninstall")
 
 @licant.routine(deps=["apps"])
 def install_apps():
-	pass
 	licant.do(["install_crowker", "makefile"])
 	licant.do(["install_crowpulse", "makefile"])
 	licant.do(["install_ctrans", "makefile"])
+	licant.do(["install_crowcalc", "makefile"])
+	licant.do(["install_crowrequest", "makefile"])
 
-licant.ex(target)
+@licant.routine(deps=["install_apps", "install_library"])
+def install():
+	pass
+
+licant.ex("all")

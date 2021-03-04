@@ -77,7 +77,7 @@ namespace crow
 
 	public:
 		template <class Ret, class ... Args>
-		void remote_request(hostaddr addr, nid_t rid, const char * fname, Args && ... args)
+		void remote_request(crow::hostaddr_view addr, nid_t rid, const char * fname, Args && ... args)
 		{
 			std::string args_data;
 			igris::archive::binary_string_writer writer(args_data);
@@ -95,7 +95,7 @@ namespace crow
 			send(rid, addr, args_data, 2, 50);
 		}
 
-		void remote_request_text_format(hostaddr addr, nid_t rid, const char * fname, const std::string& args)
+		void remote_request_text_format(crow::hostaddr_view addr, nid_t rid, const char * fname, const std::string& args)
 		{
 			std::string args_data;
 			igris::archive::binary_string_writer writer(args_data);
@@ -154,11 +154,11 @@ namespace crow
 
 	class rpc_requestor
 	{
-		crow::hostaddr 	addr;
+		crow::hostaddr_view 	addr;
 		crow::nid_t 	rid;
 
 	public:
-		rpc_requestor(crow::hostaddr addr, crow::nid_t rid = CROW_RPC_NODE_NO)
+		rpc_requestor(crow::hostaddr_view addr, crow::nid_t rid = CROW_RPC_NODE_NO)
 			: addr(addr), rid(rid)
 		{}
 

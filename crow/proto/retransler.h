@@ -9,8 +9,8 @@ namespace crow
 {
 	class service_retransler : public crow::node
 	{
-		crow::hostaddr host_a;
-		crow::hostaddr host_b;
+		crow::hostaddr_view host_a;
+		crow::hostaddr_view host_b;
 
 		uint16_t aid;
 		uint16_t bid;
@@ -18,7 +18,7 @@ namespace crow
 		igris::delegate<void, service_retransler *, crow::packet *> error_handler;
 
 	protected:
-		void init(uint16_t aid, crow::hostaddr host_a, uint16_t bid, crow::hostaddr host_b)
+		void init(uint16_t aid, crow::hostaddr_view host_a, uint16_t bid, crow::hostaddr_view host_b)
 		{
 			this->aid = aid;
 			this->bid = bid;
@@ -28,7 +28,7 @@ namespace crow
 			bind();
 		}
 
-		void opposite_address(crow::packet * pack, nid_t & rid, crow::hostaddr & host) 
+		void opposite_address(crow::packet * pack, nid_t & rid, crow::hostaddr_view & host) 
 		{
 			auto sh = crow::node::subheader(pack);
 
@@ -48,7 +48,7 @@ namespace crow
 		void incoming_packet(crow::packet * pack)
 		{
 			nid_t rid;
-			crow::hostaddr host;
+			crow::hostaddr_view host;
 
 			opposite_address(pack, rid, host);
 			node::send(rid, host, crow::node_data(pack),
@@ -59,7 +59,7 @@ namespace crow
 		void undelivered_packet(crow::packet * pack)
 		{
 			nid_t rid;
-			crow::hostaddr host;
+			crow::hostaddr_view host;
 			
 			opposite_address(pack, rid, host);
 			node::send_special(rid, host, CROW_NODE_SPECIAL_BUS_ERROR, "",

@@ -12,8 +12,13 @@ application("crowker",
 		"main.cpp",
 		"control_node.cpp"
 	],
+	mdepends= [
+		"crow", 
+		"crow.crowker", 
+		"crow.udpgate"
+	],
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline", "nos", "igris", "crow"]
+	libs = ["pthread", "readline", "nos", "igris"]
 )
 
 licant.install.install_application(tgt="install_crowker", src="crowker", dst="crowker")

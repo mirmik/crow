@@ -2,7 +2,7 @@
 #define CROW_CROW_H
 
 #include <crow/gates/udpgate.h>
-#include <crow/proto/pubsub.h>
+#include <crow/pubsub/pubsub.h>
 #include <crow/proto/rpc.h>
 #include <crow/tower.h>
 #include <crow/address.h>

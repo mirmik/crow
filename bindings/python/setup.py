@@ -48,7 +48,10 @@ class bdist_wheel(bdist_wheel_):
 		self.plat_name = platform_name
 
 pycrow_lib = Extension("pycrow.libcrow",
-	sources = ["pywrap.cpp"] + crowopts["sources"],
+	sources = [
+		"subscriber.cpp",
+		"pywrap.cpp",
+	] + crowopts["sources"],
 	extra_compile_args=['-fPIC', '-std=c++17'],
 	extra_link_args=['-Wl,-rpath,$ORIGIN/libs'],
 	include_dirs = crowopts["include_paths"],
