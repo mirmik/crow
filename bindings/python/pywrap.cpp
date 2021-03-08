@@ -57,6 +57,16 @@ PYBIND11_MODULE(libcrow, m)
 		return {buf.data(), buf.size()};
 	});
 
+
+	py::class_<pubsub_packet_ptr>(m, "pubsub_packet_ptr", pack)
+	    //        .def("message",
+	  //               [](node_packet_ptr & self) -> py::bytes
+	//{
+	//	auto buf = self.message();
+	//	return {buf.data(), buf.size()};
+	//})
+	            ;
+
 	/*py::class_<packet_pubsub_ptr>(m, "packet_pubsub_ptr", pack)
 	.def(py::init<const packet_ptr&>())
 	.def("theme", [](packet_pubsub_ptr & self) -> py::bytes

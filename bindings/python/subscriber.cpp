@@ -3,7 +3,9 @@
 
 #include <crow/pubsub/pubsub.h>
 #include <crow/pubsub/subscriber.h>
+#include <pybind11/embed.h>
 
+#include <functional>
 #include <string>
 
 namespace py = pybind11;
@@ -11,19 +13,21 @@ namespace py = pybind11;
 
 class pybind_subscriber : public crow::subscriber
 {
-	py::function delegate;
+	std::function<void(crow::pubsub_packet_ptr)> delegate;
 	std::string theme;
 	crow::hostaddr addr;
 	    
 public:
-	pybind_subscriber(py::function foo)
+	pybind_subscriber(std::function<void(crow::pubsub_packet_ptr)>& foo)
 		: delegate(foo)
 	{}
 
 	void newpack_handler(crow::pubsub_packet_ptr ptr) override
 	{
+		//py::scoped_interpreter python;
 		nos::println("newpack_handler");
 		delegate(ptr);
+		nos::println("newpack_handler...ok");
 	}
 
 	void subscribe(
@@ -52,7 +56,7 @@ public:
 void register_subscriber_class(py::module & m)
 {
 	py::class_<pybind_subscriber>(m, "subscriber")
-	.def(py::init<py::function>())
+	.def(py::init<std::function<void(crow::pubsub_packet_ptr)>&>())
 	.def("subscribe", &pybind_subscriber::subscribe,
 	     py::arg("addr"),
 	     py::arg("theme"),

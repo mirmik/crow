@@ -3,6 +3,9 @@
 import pycrow
 import time
 
+def foo(pack):
+	print("hello_python")
+
 pycrow.create_udpgate(12, 10010)
 pycrow.start_spin()
 
@@ -12,7 +15,7 @@ pycrow.diagnostic_setup(True, False)
 
 addr = pycrow.address("")
 
-sub = pycrow.subscriber(lambda pack: print("hello_python"))
+sub = pycrow.subscriber(foo)
 sub.subscribe(addr, "hello")
 
 crowker = pycrow.crowker.instance()
