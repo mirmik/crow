@@ -43,9 +43,9 @@
 bool infinite = false;
 bool debug_mode = false;
 
-uint8_t* addr = nullptr;
+const uint8_t* addr = nullptr;
 int addrsize;
-std::vector<uint8_t> address;
+crow::hostaddr address;
 
 bool userqos = false;
 uint8_t qos = 0;

@@ -16,9 +16,15 @@ application("ctrans",
 		"binout.cpp",
 		"bincommon.cpp",
 	],
+	mdepends= [
+		"crow", 
+		"crow.crowker", 
+		"crow.udpgate", 
+		"crow.serial_gstuff",
+	],
 	defines = defines,
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline", "igris", "nos", "crow"],
+	libs = ["pthread", "readline", "igris", "nos"],
 	cxxstd = "c++17"
 )
 

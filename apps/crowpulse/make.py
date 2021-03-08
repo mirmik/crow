@@ -13,9 +13,14 @@ application("crowpulse",
 	sources = [
 		"main.cpp"
 	],
+	mdepends= [
+		"crow", 
+		"crow.crowker", 
+		"crow.udpgate"
+	],
 	defines = defines,
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline", "igris", "nos", "crow"],
+	libs = ["pthread", "readline", "igris", "nos"],
 	cxxstd = "c++17"
 )
 
