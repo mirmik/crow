@@ -33,9 +33,12 @@ namespace crow
 			system_lock();
 			while (dlist_empty(&messages))
 			{
+				system_unlock();
 				int sts = waitevent();
 				if (sts == -1)
 					return nullptr;
+				
+				system_lock();
 			}
 
 			crow::packet* pack = dlist_first_entry(&messages, crow::packet, ulnk);

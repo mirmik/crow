@@ -78,6 +78,7 @@ licant.modules.module("crow.minimal",
 		"src/packet.cpp",
 		"src/packet_ptr.cpp",
 		"src/tower.cpp",
+		"src/gateway.cpp",
 		"proto/node.cpp",
 		"proto/node-sync.cpp",
 		"proto/channel.cpp",
@@ -120,7 +121,7 @@ licant.modules.module("crow.serial_gstuff",
 ####################################PROTOCOLS########################################
 
 licant.module("crow.protocol.pubsub",
-	sources = ["crow/proto/pubsub.cpp"]
+	sources = ["crow/pubsub/pubsub.cpp"]
 )
 
 #####################################################################################
