@@ -34,6 +34,7 @@ licant.modules.module("crow",
 		"src/address.cpp",
 		"src/gateway.cpp",
 		"src/retransler.cpp",
+		"src/iter.cpp",
 	
 		"proto/acceptor.cpp",
 		"proto/node.cpp",

@@ -6,7 +6,7 @@
 #include <igris/sync/syslock.h>
 #include <crow/print.h>
 
-igris::dlist<crow::node, &crow::node::lnk> crow::nodes;
+igris::dlist<crow::node, &crow::node::lnk> crow::nodes_list;
 crow::node_protocol_cls crow::node_protocol;
 
 crow::packet_ptr crow::node_send(uint16_t sid,
@@ -91,7 +91,7 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 	crow::node * srv = nullptr;
 
-	for (crow::node &srvs : crow::nodes)
+	for (crow::node &srvs : crow::nodes_list)
 	{
 		if (srvs.id == sh->rid)
 		{
@@ -125,7 +125,7 @@ void crow::node_protocol_cls::undelivered(crow::packet *pack)
 {
 	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
 
-	for (crow::node &srvs : crow::nodes)
+	for (crow::node &srvs : crow::nodes_list)
 	{
 		if (srvs.id == sh->sid)
 		{
@@ -141,7 +141,7 @@ void crow::link_node(crow::node *srv, uint16_t id)
 {
 	srv->id = id;
 	system_lock();
-	nodes.add_last(*srv);
+	nodes_list.add_last(*srv);
 	system_unlock();
 }
 
@@ -151,7 +151,7 @@ crow::node * crow::find_node(int id)
 
 	//TODO: переделать на хештаблицу
 
-	for (crow::node& node : nodes)
+	for (crow::node& node : nodes_list)
 	{
 		protector++;
 
@@ -182,30 +182,6 @@ void crow::bind_node_dynamic(crow::node *srv)
 }
 
 
-
-void crow::system_node_cls::incoming_packet(crow::packet *pack)
-{
-	crow::node_subheader *sh = (crow::node_subheader *) pack->dataptr();
-	auto data = node_data(pack);
-
-	char buf[32];
-
-	if (data == "nodes" || data == "nodes\n")
-	{
-		for (crow::node &srvs : crow::nodes)
-		{
-			sprintf(buf, "%d %s\n", srvs.id, srvs.typestr());
-			node_send(0, sh->sid, {pack->addrptr(), pack->addrsize()}, {buf, strlen(buf)}, 0, 200);
-		}
-	}
-
-	else
-	{
-		sprintf(buf, "Unrecognized command\n");
-		node_send(0, sh->sid, pack->addr(), {buf, strlen(buf)}, 0, 200);
-
-	}
-}
 
 crow::node::~node()
 {

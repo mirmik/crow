@@ -8,6 +8,7 @@
 #include <crow/gates/udpgate.h>
 #include <crow/packet_ptr.h>
 #include <crow/tower.h>
+#include <crow/iter.h>
 #include <crow/pubsub/pubsub.h>
 #include <crow/proto/node.h>
 #include <crow/proto/pynode.h>
@@ -58,41 +59,7 @@ PYBIND11_MODULE(libcrow, m)
 	});
 
 
-	py::class_<pubsub_packet_ptr>(m, "pubsub_packet_ptr", pack)
-	//        .def("message",
-	//               [](node_packet_ptr & self) -> py::bytes
-	//{
-	//	auto buf = self.message();
-	//	return {buf.data(), buf.size()};
-	//})
-	;
-
-	/*py::class_<packet_pubsub_ptr>(m, "packet_pubsub_ptr", pack)
-	.def(py::init<const packet_ptr&>())
-	.def("theme", [](packet_pubsub_ptr & self) -> py::bytes
-	{
-		auto buf = self.theme();
-		return {buf.data(), buf.size()};
-	})
-	.def("data", [](packet_pubsub_ptr & self) -> py::bytes
-	{
-		auto buf = self.data();
-		return {buf.data(), buf.size()};
-	})
-	;*/
-
-	/*py::class_<pubsub_packref, packref>(m, "pubsub_packref")
-		.def("theme", [](pubsub_packref &self) -> py::str {
-			auto buf = self.theme();
-			return {buf.data(), buf.size()};
-		});
-
-	py::class_<pubsub_data_packref, pubsub_packref>(m, "pubsub_data_packref")
-		.def("data", [](pubsub_data_packref &self) -> py::bytes {
-			auto buf = self.data();
-			return {buf.data(), buf.size()};
-		});*/
-
+	py::class_<pubsub_packet_ptr>(m, "pubsub_packet_ptr", pack);
 
 	py::class_<crow::hostaddr>(m, "hostaddr")
 	.def(py::init<const crow::hostaddr_view&>())
@@ -116,7 +83,6 @@ PYBIND11_MODULE(libcrow, m)
 	    .def("bind", &gateway::bind)
 	    .def("finish", &gateway::finish)
 	    ;
-
 
 	py::class_<udpgate>(m, "udpgate", __gateway__)
 	.def(py::init<>())
@@ -204,23 +170,8 @@ PYBIND11_MODULE(libcrow, m)
 	py::class_<crow::node>(m, "node")
 	.def("bind", py::overload_cast<>(&crow::node::bind))
 	.def("bind", py::overload_cast<int>(&crow::node::bind))
-	.def("send", [](
-	         crow::node & self,
-	         uint16_t rid,
-	         const std::vector<uint8_t>& addr,
-	         const std::string & data,
-	         uint8_t qos,
-	         uint16_t ackquant)
-	{
-		return self.send(
-		           rid,
-		           crow::hostaddr(addr),
-		           igris::buffer(data),
-		           qos,
-		           ackquant
-		       );
-	})
-	;
+	.def_readwrite("id", &node::id)
+	.def("send", &node::send);
 
 	py::class_<crow::pynode_delegate, crow::node>(m, "PyNode")
 	.def(py::init <
@@ -254,4 +205,6 @@ PYBIND11_MODULE(libcrow, m)
 
 	register_subscriber_class(m);
 	m.def("enable_crowker_subsystem", &crow::pubsub_protocol_cls::enable_crowker_subsystem);
+	m.def("gates", &crow::gates);
+	m.def("nodes", &crow::nodes);
 }

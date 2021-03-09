@@ -72,10 +72,15 @@ namespace crow
 			system_unlock();
 		}
 
-		~msgbox()
+		~msgbox() override
 		{
 			system_lock();
-			assert(dlist_empty(&messages));
+			while (dlist_empty(&messages))
+			{
+				crow::packet* pack = dlist_first_entry(&messages, crow::packet, ulnk);
+				dlist_del_init(&pack->ulnk);
+				crow::release(pack);
+			}
 			system_unlock();
 		}
 	};

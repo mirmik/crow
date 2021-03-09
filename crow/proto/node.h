@@ -103,8 +103,9 @@ namespace crow
 		           pack->datasize() - sizeof(node_subheader));
 	}
 
-	struct node
+	class node
 	{
+	public:
 		struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
 		struct dlist_head waitlnk = DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
 		uint16_t id = 0;
@@ -197,47 +198,20 @@ namespace crow
 		virtual ~node();
 	};
 
-	class system_node_cls : public node
-	{
-		void incoming_packet(crow::packet *pack) override;
-
-		void undelivered_packet(crow::packet *pack) override
-		{
-			crow::release(pack);
-		}
-	};
-
 	class node_protocol_cls : public crow::protocol
 	{
 	private:
 		void send_node_error(crow::packet *pack, int errcode);
 
 	public:
-		system_node_cls system_node;
-
-	public:
 		void incoming(crow::packet *pack) override;
 		void undelivered(crow::packet *pack) override;
 
 		node_protocol_cls() : protocol(CROW_NODE_PROTOCOL)
-		{
-			link_node(&system_node, 0);
-		}
+		{}
 
 		static auto sid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->sid; }
 		static auto rid(crow::packet *pack) { return ((node_subheader*)(pack->dataptr()))->rid; }
-
-		/*static auto get_name(crow::packet *pack)
-		{
-			node_subheader *sh = (crow::node_subheader *) pack->dataptr();
-
-			if (sh->namerid == 0)
-				return igris::buffer();
-			else
-				return igris::buffer(
-				           pack->dataptr() + sizeof(node_subheader),
-				           sh->rid);
-		}*/
 
 		static auto get_error_code(crow::packet *pack)
 		{
@@ -245,7 +219,7 @@ namespace crow
 		}
 	};
 	extern node_protocol_cls node_protocol;
-	extern igris::dlist<node, &node::lnk> nodes;
+	extern igris::dlist<node, &node::lnk> nodes_list;
 
 	class node_packet_ptr : public packet_ptr
 	{
