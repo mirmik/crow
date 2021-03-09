@@ -254,6 +254,12 @@ namespace crow
 		node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
 		node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}
 
+		int rid() 
+		{
+			auto * h = node::subheader(pack);
+			return h->rid;
+		}
+
 		igris::buffer message()
 		{
 			return node_data(pack);

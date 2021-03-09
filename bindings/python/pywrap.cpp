@@ -50,8 +50,8 @@ PYBIND11_MODULE(libcrow, m)
 	});
 
 	py::class_<node_packet_ptr>(m, "node_packet_ptr", pack)
-	            .def("message",
-	                 [](node_packet_ptr & self) -> py::bytes
+	.def("message",
+	     [](node_packet_ptr & self) -> py::bytes
 	{
 		auto buf = self.message();
 		return {buf.data(), buf.size()};
@@ -59,13 +59,13 @@ PYBIND11_MODULE(libcrow, m)
 
 
 	py::class_<pubsub_packet_ptr>(m, "pubsub_packet_ptr", pack)
-	    //        .def("message",
-	  //               [](node_packet_ptr & self) -> py::bytes
+	//        .def("message",
+	//               [](node_packet_ptr & self) -> py::bytes
 	//{
 	//	auto buf = self.message();
 	//	return {buf.data(), buf.size()};
 	//})
-	            ;
+	;
 
 	/*py::class_<packet_pubsub_ptr>(m, "packet_pubsub_ptr", pack)
 	.def(py::init<const packet_ptr&>())
@@ -95,24 +95,27 @@ PYBIND11_MODULE(libcrow, m)
 
 
 	py::class_<crow::hostaddr>(m, "hostaddr")
-    .def(py::init<const crow::hostaddr_view&>())
+	.def(py::init<const crow::hostaddr_view&>())
 	.def(py::init<const std::vector<uint8_t>&>())
 	.def("view", &crow::hostaddr::view)
 	;
 
 	py::class_<crow::hostaddr_view>(m, "hostaddr_view")
-    .def(py::init<const crow::hostaddr&>())
+	.def(py::init<const crow::hostaddr&>())
 	.def(py::init<const std::vector<uint8_t>&>());
 	py::implicitly_convertible<crow::hostaddr, crow::hostaddr_view>();
 
 	py::class_<igris::buffer>(m, "igris_buffer")
 	.def(py::init<const std::string&>())
 	;
+	py::implicitly_convertible<std::string, igris::buffer>();
+	py::implicitly_convertible<py::str, igris::buffer>();
 
-	auto  __gateway__ = py::class_<gateway>(m, "gateway")
-		.def("bind", &gateway::bind)
-		.def("finish", &gateway::finish)
-	;
+	auto  __gateway__ =
+	    py::class_<gateway>(m, "gateway")
+	    .def("bind", &gateway::bind)
+	    .def("finish", &gateway::finish)
+	    ;
 
 
 	py::class_<udpgate>(m, "udpgate", __gateway__)
@@ -122,21 +125,13 @@ PYBIND11_MODULE(libcrow, m)
 	.def("close", &udpgate::close)
 	;
 
-	m.def("send", [](
-	          const std::vector<uint8_t>& addr,
-	          const std::string & data,
-	          uint8_t type,
-	          uint8_t qos,
-	          uint16_t ackquant)
-	{
-		return crow::send(
-		           crow::hostaddr(addr),
-		           igris::buffer(data),
-		           type,
-		           qos,
-		           ackquant
-		       );
-	});
+	m.def("send", (crow::packet_ptr(*)(
+	                   const crow::hostaddr_view &,
+	                   igris::buffer,
+	                   uint8_t,
+	                   uint8_t,
+	                   uint16_t,
+	                   bool fastsend))&crow::send);
 
 	m.def("create_udpgate", &crow::create_udpgate);
 	m.def("onestep", &crow::onestep);
@@ -234,13 +229,13 @@ PYBIND11_MODULE(libcrow, m)
 	     > ())
 	;
 
-	/*py::class_<crow::msgbox, crow::node>(m, "msgbox")
+	py::class_<crow::msgbox, crow::node>(m, "msgbox")
 		.def(py::init<>())
-		.def("send", py::overload_cast<const std::vector<uint8_t>&, uint16_t, const std::string&, uint8_t, uint16_t>(&crow::msgbox::send))
-		.def("send", py::overload_cast<void*, uint8_t, uint16_t, void*, size_t, uint8_t, uint16_t>(&crow::msgbox::send))
+		.def("send", &crow::msgbox::send, ungil(), py::arg("rid"), py::arg("addr"), py::arg("data"), py::arg("qos")=2, py::arg("ackquant")=50, py::arg("fastsend")=false)
 		.def("query", &crow::msgbox::query, ungil())
 		.def("receive", &crow::msgbox::receive, ungil())
-	; */
+		.def("reply", &crow::msgbox::reply, ungil())
+	;
 
 	m.def("fully_empty", &crow::fully_empty);
 
@@ -251,10 +246,10 @@ PYBIND11_MODULE(libcrow, m)
 	m.def("get_gateway", &crow::get_gateway);
 
 	py::class_<crow::crowker>(m, "crowker")
-		.def("instance", &crow::crowker::instance, py::return_value_policy::reference)
-		.def("publish", &crow::crowker::publish)
-		.def("set_info_mode", &crow::crowker::set_info_mode)
-		;
+	.def("instance", &crow::crowker::instance, py::return_value_policy::reference)
+	.def("publish", &crow::crowker::publish)
+	.def("set_info_mode", &crow::crowker::set_info_mode)
+	;
 
 
 	register_subscriber_class(m);
