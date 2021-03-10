@@ -37,7 +37,6 @@ namespace crow
 				int sts = waitevent();
 				if (sts == -1)
 					return nullptr;
-				
 				system_lock();
 			}
 
