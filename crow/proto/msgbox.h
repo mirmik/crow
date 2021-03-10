@@ -74,7 +74,7 @@ namespace crow
 		~msgbox() override
 		{
 			system_lock();
-			while (dlist_empty(&messages))
+			while (!dlist_empty(&messages))
 			{
 				crow::packet* pack = dlist_first_entry(&messages, crow::packet, ulnk);
 				dlist_del_init(&pack->ulnk);
