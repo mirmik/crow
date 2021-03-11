@@ -27,6 +27,9 @@ void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
 static bool __diagnostic_enabled = false;
 bool __live_diagnostic_enabled = false;
 
+bool _in_incoming_handler = false;
+bool _in_undelivered_handler = false;
+
 void crow::diagnostic_enable()
 {
 	__diagnostic_enabled = true;
@@ -185,17 +188,31 @@ static void crow_travel_error(crow::packet *pack)
 static void crow_incoming_handler(crow::packet *pack)
 {
 	crow::protocol * it;
+
+	if (crow::user_incoming_handler)
+	{
+		_in_incoming_handler = true;
+		crow::user_incoming_handler(pack);
+		_in_incoming_handler = false;
+	}
+
 	dlist_for_each_entry(it, &crow::protocols, lnk)
 	{
 		if (it->id == pack->header.f.type)
 		{
+			_in_incoming_handler = true;
 			it->incoming(pack);
+			_in_incoming_handler = false;
 			return;
 		}
 	}
 
 	if (crow::user_type_handler)
+	{
+		_in_incoming_handler = true;
 		crow::user_type_handler(pack);
+		_in_incoming_handler = false;
+	}
 	else
 	{
 		if (__diagnostic_enabled)
@@ -210,10 +227,10 @@ static void crow_incoming_handler(crow::packet *pack)
 static void crow_send_ack(crow::packet *pack)
 {
 	crow::packet *ack = crow::create_packet(NULL, pack->header.alen, 0);
-	
+
 	assert(pack);
 	assert(ack);
-	
+
 	ack->header.f.type =
 	    pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
 	ack->header.f.ack = 1;
@@ -228,10 +245,10 @@ static void crow_send_ack(crow::packet *pack)
 static void crow_send_ack2(crow::packet *pack)
 {
 	crow::packet *ack = crow::create_packet(NULL, pack->header.alen, 0);
-	
+
 	assert(pack);
 	assert(ack);
-	
+
 	ack->header.f.type = G1_ACK22_TYPE;
 	ack->header.f.ack = 1;
 	ack->header.qos = CROW_WITHOUT_ACK;
@@ -269,21 +286,21 @@ static void crow_do_travel(crow::packet *pack)
 
 			switch (pack->header.f.type)
 			{
-				case G1_ACK_TYPE:
-					utilize_from_outers(pack);
-					break;
+			case G1_ACK_TYPE:
+				utilize_from_outers(pack);
+				break;
 
-				case G1_ACK21_TYPE:
-					utilize_from_outers(pack);
-					crow_send_ack2(pack);
-					break;
+			case G1_ACK21_TYPE:
+				utilize_from_outers(pack);
+				crow_send_ack2(pack);
+				break;
 
-				case G1_ACK22_TYPE:
-					qos_release_from_incoming(pack);
-					break;
+			case G1_ACK22_TYPE:
+				qos_release_from_incoming(pack);
+				break;
 
-				default:
-					break;
+			default:
+				break;
 			}
 
 			crow_utilize(pack);
@@ -339,10 +356,7 @@ static void crow_do_travel(crow::packet *pack)
 		//Решаем, что делать с пришедшим пакетом.
 		if (!pack->header.f.noexec)
 		{
-			if (crow::user_incoming_handler)
-				crow::user_incoming_handler(pack);
-			else
-				crow_incoming_handler(pack);
+			crow_incoming_handler(pack);
 		}
 		else
 			crow::release(pack);
@@ -565,13 +579,19 @@ void crow_undelivered(crow::packet* pack)
 	{
 		if (it->id == pack->header.f.type)
 		{
+			_in_undelivered_handler = true; 
 			it->undelivered(pack);
+			_in_undelivered_handler = false;
 			return;
 		}
 	}
 
-	if (crow::undelivered_handler)
+	if (crow::undelivered_handler) 
+	{
+		_in_undelivered_handler = true;
 		crow::undelivered_handler(pack);
+		_in_undelivered_handler = false;
+	}
 	else
 		crow::release(pack);
 }
