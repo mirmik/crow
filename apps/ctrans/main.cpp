@@ -313,11 +313,8 @@ void send_do(const std::string message)
 			break;
 
 		case protoopt_e::PROTOOPT_PUBLISH:
-			//crow::publish(addr, (uint8_t)addrsize, theme.c_str(),
-			//              message.data(), message.size(),
-			//              qos, ackquant);
 			{
-				crow::packet * pack = crow::make_publish_packet(
+				/*crow::packet * pack = crow::make_publish_packet(
 				                          addr, (uint8_t)addrsize,
 				                          theme.c_str(),
 				                          message.data(), message.size());
@@ -327,7 +324,13 @@ void send_do(const std::string message)
 				if (infinite)
 					pack->set_infinite_ack();
 
-				crow::travel(pack);
+				crow::travel(pack);*/
+
+				crow::publish(
+					{addr, (uint8_t)addrsize}, 
+					theme.c_str(),
+			        message,
+			        qos, ackquant);
 			}
 
 			break;

@@ -5,11 +5,6 @@
 #include <igris/util/bug.h>
 #include <nos/print.h>
 
-void crow::link_channel(crow::channel *ch, uint16_t id)
-{
-	link_node(ch, id);
-}
-
 void crow::channel::incoming_packet(crow::packet *pack)
 {
 	crow::node_subheader *sh_node = (node_subheader *) pack->dataptr();

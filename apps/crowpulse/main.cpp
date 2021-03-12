@@ -26,7 +26,6 @@ int main(int argc, char** argv)
 	int sleeptime = atoi(argv[2]);
 	
 	crow::create_udpgate(12, 0);
-	crow::diagnostic_enable();
 
 	int32_t i = 0; 
 	while(1) 

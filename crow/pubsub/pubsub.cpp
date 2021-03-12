@@ -46,45 +46,16 @@ void crow::pubsub_protocol_cls::undelivered(crow::packet * pack)
 	}
 }
 
-crow::packet* crow::make_publish_packet(
-    const uint8_t * raddr, uint8_t rlen,
-    const char *theme,
-    const void *data, uint16_t dlen)
-{
-	struct crow_subheader_pubsub subps;
-	struct crow_subheader_pubsub_data subps_d;
-
-	subps.type = PUBLISH;
-	subps.thmsz = (uint8_t)strlen(theme);
-	subps_d.datsz = dlen;
-
-	const igris::buffer iov[4] =
-	{
-		{&subps, sizeof(subps)},
-		{&subps_d, sizeof(subps_d)},
-		{(void *)theme, subps.thmsz},
-		{(void *)data, subps_d.datsz},
-	};
-
-	auto pack = crow::make_packet_v(raddr, rlen, iov, 4);
-	if (!pack)
-		return nullptr;
-
-	pack->type(CROW_PUBSUB_PROTOCOL);
-
-	return pack;
-}
-
-void crow::publish(
+crow::packet_ptr crow::publish(
     const crow::hostaddr_view & addr, 
     const std::string_view theme, 
     const igris::buffer data,
-    uint8_t qos, uint16_t acktime)
+    uint8_t qos, uint16_t acktime, uint8_t type)
 {
 	struct crow_subheader_pubsub subps;
 	struct crow_subheader_pubsub_data subps_d;
 
-	subps.type = PUBLISH;
+	subps.type = type;
 	subps.thmsz = theme.size();
 	subps_d.datsz = data.size();
 
@@ -96,36 +67,11 @@ void crow::publish(
 		data,
 	};
 
-	crow::send_v(addr, iov, 4, CROW_PUBSUB_PROTOCOL,
+	return crow::send_v(addr, iov, 4, CROW_PUBSUB_PROTOCOL,
 	             qos, acktime, false);
 }
 
-void crow::publish_message(
-    const crow::hostaddr_view & addr, 
-    const std::string_view theme, 
-    const igris::buffer data,
-    uint8_t qos, uint16_t acktime)
-{
-	struct crow_subheader_pubsub subps;
-	struct crow_subheader_pubsub_data subps_d;
-
-	subps.type = MESSAGE;
-	subps.thmsz = theme.size();
-	subps_d.datsz = data.size();
-
-	const igris::buffer iov[4] =
-	{
-		{&subps, sizeof(subps)},
-		{&subps_d, sizeof(subps_d)},
-		{theme.data(), subps.thmsz},
-		data,
-	};
-
-	crow::send_v(addr, iov, 4, CROW_PUBSUB_PROTOCOL,
-	             qos, acktime, false);
-}
-
-void crow::publish_v(
+crow::packet_ptr crow::publish_v(
     const crow::hostaddr_view & addr, 
     const std::string_view theme, 
     const igris::buffer * vec,
@@ -151,7 +97,7 @@ void crow::publish_v(
 		{theme.data(), subps.thmsz},
 	};
 
-	crow::send_vv(addr, iov, 4, vec, vecsz, CROW_PUBSUB_PROTOCOL,
+	return crow::send_vv(addr, iov, 4, vec, vecsz, CROW_PUBSUB_PROTOCOL,
 	             qos, acktime, false);
 }
 
@@ -182,20 +128,6 @@ void crow::subscribe(
 	             acktime);
 }
 
-std::string crow::envcrowker()
-{
-	uint8_t buf[128];
-	const char *envcr = getenv("CROWKER");
-	auto ss = hexer_s(buf, 128, envcr);
-	return std::string((char *)buf, ss);
-}
-
-std::string crow::environment_crowker()
-{
-	const char *envcr = getenv("CROWKER");
-	return std::string(envcr);
-}
-
 void crow::pubsub_protocol_cls::resubscribe_all()
 {
 	crow::subscriber * sub;
@@ -203,7 +135,9 @@ void crow::pubsub_protocol_cls::resubscribe_all()
 	system_lock();
 	dlist_for_each_entry(sub, &subscribers, lnk)
 	{
+		system_unlock();
 		sub->resubscribe();
+		system_lock();
 	}
 	system_unlock();
 }

@@ -7,7 +7,6 @@ void incoming_crowker_handler(struct crow::packet *pack)
 
 	struct crow_subheader_pubsub *shps = crow::get_subheader_pubsub(pack);
 
-	nos::println("incoming_crowker_handler type:", shps->type);
 	switch (shps->type)
 	{
 		case PUBLISH:
@@ -44,15 +43,11 @@ void incoming_crowker_handler(struct crow::packet *pack)
 				crow::subscriber * sub;
 				igris::buffer theme = crow::pubsub::get_theme(pack);
 				
-				nos::println("SZ:",dlist_size(&crow::pubsub_protocol.subscribers));
 				dlist_for_each_entry(
 				    sub,
 				    &crow::pubsub_protocol.subscribers,
 				    lnk)
 				{
-					nos::println("TH:", theme);
-					nos::println("ST:", sub->theme);
-
 					if (theme == sub->theme)
 					{
 						sub->newpack_handler(pack);

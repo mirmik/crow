@@ -12,7 +12,7 @@ void crow::acceptor::incoming_packet(crow::packet *pack)
 	{
 		auto ch = init_channel();
 		if (ch->id == 0)
-			link_channel(ch, dynport());
+			ch->bind(dynport());
 
 		ch->wait_handshake_request();
 		ch->incoming_packet(pack);

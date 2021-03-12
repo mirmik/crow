@@ -16,11 +16,7 @@ namespace crow
 	extern bool diagnostic_noack;
 
 	extern void (*user_incoming_handler)(crow::packet *pack);
-	//extern void (*pubsub_handler)(crow::packet *pack);
-	//extern void (*node_handler)(crow::packet *pack);
 	extern void (*user_type_handler)(crow::packet *pack);
-//	extern void (*query_tower_handler)(crow::packet *pack);
-//	extern void (*netkeep_tower_handler)(crow::packet *pack);
 	extern void (*undelivered_handler)(crow::packet *pack);
 
 	extern void (*unsleep_handler)();
@@ -30,13 +26,12 @@ namespace crow
 	void nocontrol_travel(crow::packet *pack);
 
 	// Включить трассировку пакетов.
-	void diagnostic_enable();
 	void enable_diagnostic();
 
 	// Включить трассировку аллокации.
-	void live_diagnostic_enable();
 	void enable_live_diagnostic();
 
+	// Включить диагностику прохождения, жизни пакетов
 	void diagnostic_setup(bool en, bool len = false);
 	
 	// Отправить пакет.
@@ -101,6 +96,6 @@ namespace crow
 
 	// Завершить гейты.
 	void finish();
-} // namespace crow
+}
 
 #endif

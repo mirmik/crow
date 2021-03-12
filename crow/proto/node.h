@@ -93,7 +93,7 @@ namespace crow
 
 	struct node;
 	crow::node * find_node(int id);
-	void link_node(node *srvs, uint16_t id);
+	void __link_node(node *srvs, uint16_t id);
 	void bind_node_dynamic(node *srvs);
 
 	static auto node_data(crow::packet *pack)
@@ -127,7 +127,9 @@ namespace crow
 
 		node& bind(int addr)
 		{
-			link_node(this, addr); 
+			system_lock();
+			__link_node(this, addr);
+			system_unlock(); 
 			return *this;
 		};
 
