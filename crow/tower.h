@@ -16,11 +16,7 @@ namespace crow
 	extern bool diagnostic_noack;
 
 	extern void (*user_incoming_handler)(crow::packet *pack);
-	//extern void (*pubsub_handler)(crow::packet *pack);
-	//extern void (*node_handler)(crow::packet *pack);
 	extern void (*user_type_handler)(crow::packet *pack);
-//	extern void (*query_tower_handler)(crow::packet *pack);
-//	extern void (*netkeep_tower_handler)(crow::packet *pack);
 	extern void (*undelivered_handler)(crow::packet *pack);
 
 	extern void (*unsleep_handler)();
