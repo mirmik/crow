@@ -12,11 +12,12 @@ void crowker_implementation::crow_subscriber::publish(
 	crowker_implementation::crow_options * copts = 
 		static_cast<crowker_implementation::crow_options*>(opts);
 
-	::crow::publish_message(
+	::crow::publish(
 		{(uint8_t*)addr.data(), addr.size()}, 
 		theme.c_str(), 
 		{data.data(), data.size()}, 
 		copts->qos, 
-		copts->ackquant);
+		copts->ackquant,
+		MESSAGE);
 }
 

@@ -9,10 +9,11 @@
 #include <crow/print.h>
 #include <crow/gateway.h>
 #include <crow/proto/protocol.h>
+#include <crow/warn.h>
 
 
 bool crow::diagnostic_noack = false;
-uint16_t crow::debug_data_size = 20;
+uint16_t crow::debug_data_size = 28;
 
 struct dlist_head crow::protocols = DLIST_HEAD_INIT(crow::protocols);
 DLIST_HEAD(crow_travelled);
@@ -29,16 +30,6 @@ bool __live_diagnostic_enabled = false;
 
 bool _in_incoming_handler = false;
 bool _in_undelivered_handler = false;
-
-void crow::diagnostic_enable()
-{
-	__diagnostic_enabled = true;
-}
-
-void crow::live_diagnostic_enable()
-{
-	__live_diagnostic_enabled = true;
-}
 
 void crow::enable_diagnostic()
 {
@@ -57,16 +48,14 @@ void crow::diagnostic_setup(bool en, bool len)
 }
 
 
-static void crow_utilize(crow::packet *pack)
+static void __crow_utilize(crow::packet *pack)
 {
 	if (__live_diagnostic_enabled)
 		crow::diagnostic("utilz", pack);
 
-	system_lock();
 	dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
 	dlist_del(&pack->ulnk);
 	crow::deallocate_packet(pack);
-	system_unlock();
 }
 
 static crow::gateway *crow_find_target_gateway(crow::packet *pack)
@@ -87,7 +76,7 @@ void crow::release(crow::packet *pack)
 	system_lock();
 
 	if (pack->f.released_by_tower && pack->refs == 0)
-		crow_utilize(pack);
+		__crow_utilize(pack);
 	else
 		pack->f.released_by_world = true;
 
@@ -103,14 +92,14 @@ static void crow_tower_release(crow::packet *pack)
 	dlist_del_init(&pack->lnk);
 
 	if (pack->f.released_by_world && pack->refs == 0)
-		crow_utilize(pack);
+		__crow_utilize(pack);
 	else
 		pack->f.released_by_tower = true;
 
 	system_unlock();
 }
 
-static void utilize_from_outers(crow::packet *pack)
+static void confirmed_utilize_from_outers(crow::packet *pack)
 {
 	crow::packet *it;
 	dlist_for_each_entry(it, &crow_outters, lnk)
@@ -119,7 +108,7 @@ static void utilize_from_outers(crow::packet *pack)
 		        pack->header.alen == it->header.alen &&
 		        !memcmp(it->addrptr(), pack->addrptr(), pack->header.alen))
 		{
-			pack->f.confirmed = 1;
+			it->f.confirmed = 1;
 			crow_tower_release(it);
 			return;
 		}
@@ -182,7 +171,9 @@ void crow::nocontrol_travel(crow::packet *pack)
 
 static void crow_travel_error(crow::packet *pack)
 {
-	crow_utilize(pack);
+	system_lock();
+	__crow_utilize(pack);
+	system_unlock();
 }
 
 static void crow_incoming_handler(crow::packet *pack)
@@ -286,14 +277,14 @@ static void crow_do_travel(crow::packet *pack)
 
 			switch (pack->header.f.type)
 			{
-			case G1_ACK_TYPE:
-				utilize_from_outers(pack);
-				break;
+				case G1_ACK_TYPE:
+					confirmed_utilize_from_outers(pack);
+					break;
 
-			case G1_ACK21_TYPE:
-				utilize_from_outers(pack);
-				crow_send_ack2(pack);
-				break;
+				case G1_ACK21_TYPE:
+					confirmed_utilize_from_outers(pack);
+					crow_send_ack2(pack);
+					break;
 
 			case G1_ACK22_TYPE:
 				qos_release_from_incoming(pack);
@@ -303,7 +294,9 @@ static void crow_do_travel(crow::packet *pack)
 				break;
 			}
 
-			crow_utilize(pack);
+			system_lock();
+			__crow_utilize(pack);
+			system_unlock();
 
 			return;
 		}
@@ -333,14 +326,17 @@ static void crow_do_travel(crow::packet *pack)
 					        memcmp(inc->addrptr(), pack->addrptr(),
 					               inc->header.alen) == 0)
 					{
-						crow_utilize(pack);
+						system_lock();
+						__crow_utilize(pack);
+						system_unlock();
 
 						return;
 					}
 				}
-				igris::system_lock();
+
+				system_lock();
 				add_to_incoming_list(pack);
-				igris::system_unlock();
+				system_unlock();
 			}
 			else
 			{
@@ -355,9 +351,7 @@ static void crow_do_travel(crow::packet *pack)
 
 		//Решаем, что делать с пришедшим пакетом.
 		if (!pack->header.f.noexec)
-		{
 			crow_incoming_handler(pack);
-		}
 		else
 			crow::release(pack);
 
@@ -365,6 +359,7 @@ static void crow_do_travel(crow::packet *pack)
 	}
 	else
 	{
+
 		//Ветка транзитного пакета. Логика поиска врат и пересылки.
 		crow::gateway *gate = crow_find_target_gateway(pack);
 
@@ -425,8 +420,11 @@ crow::packet_ptr crow::send(const crow::hostaddr_view & addr,
                             bool fastsend)
 {
 	crow::packet *pack = crow::create_packet(NULL, addr.size(), data.size());
-	if (pack == nullptr)
+	if (pack == nullptr) 
+	{
+		crow::warn("cannot create packet");
 		return nullptr;
+	}
 
 	pack->header.f.type = type & 0x1F;
 	pack->header.qos = qos;
@@ -537,13 +535,13 @@ void crow::return_to_tower(crow::packet *pack, uint8_t sts)
 	if (pack->ingate != NULL)
 	{
 		//Пакет был отправлен, и он нездешний. Уничтожить.
-		crow_utilize(pack);
+		__crow_utilize(pack);
 	}
 	else
 	{
 		//Пакет здешний.
 		if (sts != CROW_SENDED || pack->header.qos == CROW_WITHOUT_ACK)
-			crow_utilize(pack);
+			__crow_utilize(pack);
 		else
 			add_to_outters_list(pack);
 	}
@@ -574,6 +572,7 @@ void crow::onestep_travel_only()
 
 void crow_undelivered(crow::packet* pack)
 {
+	pack->f.undelivered = 1;
 	crow::protocol * it;
 	dlist_for_each_entry(it, &crow::protocols, lnk)
 	{
@@ -593,7 +592,7 @@ void crow_undelivered(crow::packet* pack)
 		_in_undelivered_handler = false;
 	}
 	else
-		crow::release(pack);
+		crow_tower_release(pack);
 }
 
 static inline void crow_onestep_send_stage()
@@ -653,11 +652,13 @@ static inline void crow_onestep_outers_stage()
 			}
 			else
 			{
+				system_unlock();
 				crow::travel(pack);
+				system_lock();
 			}
 		}
 	}
-	igris::system_unlock();
+	system_unlock();
 }
 
 static inline void crow_onestep_incoming_stage()
@@ -688,17 +689,19 @@ static inline void crow_onestep_incoming_stage()
 			if (pack->_ackcount == 0)
 			{
 				pack->f.undelivered = 1;
-				crow_utilize(pack);
+				__crow_utilize(pack);
 			}
 			else
 			{
 				dlist_move_sorted(pack, &crow_incoming, lnk, crow_time_comparator);
 				pack->last_request_time = curtime;
+				system_unlock();
 				crow_send_ack(pack);
+				system_lock();
 			}
 		}
 	}
-	igris::system_unlock();
+	system_unlock();
 }
 
 void crow::onestep()
@@ -729,6 +732,8 @@ void crow::spin()
 
 bool crow::has_untravelled()
 {
+	igris::syslock_guard lock;
+
 	return ! (
 	           dlist_empty(&crow_travelled) &&
 	           dlist_empty(&crow_outters) &&
@@ -738,15 +743,8 @@ bool crow::has_untravelled()
 
 bool crow::has_untravelled_now()
 {
+	igris::syslock_guard lock;
 	return !dlist_empty(&crow_travelled);
-}
-
-void crow::print_list_counts()
-{
-	dprln();
-	dprln("crow_travelled:", dlist_size(&crow_travelled));
-	dprln("crow_outters:", dlist_size(&crow_outters));
-	dprln("crow_incoming:", dlist_size(&crow_incoming));
 }
 
 void crow::finish()
@@ -759,8 +757,13 @@ void crow::finish()
 
 bool crow::fully_empty()
 {
-	igris::syslock_guard guard;
-	return dlist_empty(&crow_travelled) && dlist_empty(&crow_incoming) && dlist_empty(&crow_outters);
+	system_lock();
+	int ret =
+		dlist_empty(&crow_travelled) &&
+		dlist_empty(&crow_incoming) &&
+		dlist_empty(&crow_outters);
+	system_unlock();
+	return ret;
 }
 
 int64_t crow::get_minimal_timeout()

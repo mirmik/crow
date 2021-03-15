@@ -35,7 +35,7 @@ namespace crow
 	};
 
 	class channel;
-	void link_channel(crow::channel *srvs, uint16_t id);
+//	void link_channel(crow::channel *srvs, uint16_t id);
 
 	class channel : public crow::node
 	{
@@ -67,7 +67,7 @@ namespace crow
 		void init(int id, incoming_handler_t incoming_handler)
 		{
 			this->incoming_handler = incoming_handler;
-			crow::link_channel(this, id);
+			this->bind(id);
 		}
 
 		void set_addr_buffer(char* buf, size_t sz) 

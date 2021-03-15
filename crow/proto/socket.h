@@ -19,7 +19,7 @@ namespace crow
 	class socket : public socket_base
 	{
 	public:
-		socket(int nodeno) { link_node(this, nodeno); }
+		socket(int nodeno) {this->bind(nodeno); }
 
 		void undelivered_packet(crow::packet *pack) 
 		{

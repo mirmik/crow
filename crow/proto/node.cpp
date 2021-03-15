@@ -137,12 +137,12 @@ void crow::node_protocol_cls::undelivered(crow::packet *pack)
 	crow::release(pack);
 }
 
-void crow::link_node(crow::node *srv, uint16_t id)
+void crow::__link_node(crow::node *srv, uint16_t id)
 {
 	srv->id = id;
-	system_lock();
+	//system_lock();
 	nodes_list.add_last(*srv);
-	system_unlock();
+	//system_unlock();
 }
 
 crow::node * crow::find_node(int id)
@@ -177,7 +177,7 @@ void crow::bind_node_dynamic(crow::node *srv)
 	}
 	while (crow::find_node(counter) != nullptr);
 
-	crow::link_node(srv, counter);
+	__link_node(srv, counter);
 	system_unlock();
 }
 

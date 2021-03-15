@@ -76,19 +76,9 @@ namespace crow
 		struct crow::header header;
 
 		uint8_t *stageptr() { return (uint8_t *)(&header + 1) + header.stg; }
-		// uint8_t& stage() { return *stageptr(); }
 
 		char *endptr() { return (char *)(&header) + header.flen; }
 		uint16_t blocksize() { return header.flen; }
-
-		[[deprecated]] igris::buffer datasect() {
-			return igris::buffer(dataptr(), datasize());
-		}
-
-			[[deprecated]] igris::buffer addrsect()
-		{
-			return igris::buffer(addrptr(), addrsize());
-		}
 
 		igris::buffer rawdata() { return igris::buffer(dataptr(), datasize()); }
 		igris::buffer addr() { return igris::buffer(addrptr(), addrsize()); }
@@ -120,8 +110,6 @@ namespace crow
 
 		void ackcount(uint16_t c) { _ackcount = c; }
 		uint16_t ackcount() { return _ackcount; }
-
-		void set_infinite_ack() { _ackcount = 0xFFFF; }
 	}; //На самом деле, он не должен быть packed.
 	//__attribute__((packed));
 
@@ -149,10 +137,7 @@ namespace crow
 	extern int allocated_count;
 	bool has_allocated();
 
-	crow::packet * make_packet_v(const void *addr, uint8_t asize,
-	    const igris::buffer *vec, size_t veclen);	
-
 	void diagnostic(const char* label, crow::packet* pack);
-} // namespace crow
+}
 
 #endif

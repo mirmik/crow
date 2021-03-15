@@ -26,13 +26,12 @@ namespace crow
 	void nocontrol_travel(crow::packet *pack);
 
 	// Включить трассировку пакетов.
-	void diagnostic_enable();
 	void enable_diagnostic();
 
 	// Включить трассировку аллокации.
-	void live_diagnostic_enable();
 	void enable_live_diagnostic();
 
+	// Включить диагностику прохождения, жизни пакетов
 	void diagnostic_setup(bool en, bool len = false);
 	
 	// Отправить пакет.
@@ -97,6 +96,6 @@ namespace crow
 
 	// Завершить гейты.
 	void finish();
-} // namespace crow
+}
 
 #endif

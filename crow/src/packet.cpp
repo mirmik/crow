@@ -25,9 +25,7 @@ void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
 crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
 								  size_t datasize)
 {
-	system_lock();
 	crow::packet *pack = crow::allocate_packet(addrsize + datasize);
-	system_unlock();
 
 	if (pack == nullptr)
 		return nullptr;
@@ -74,37 +72,3 @@ bool crow::has_allocated()
 {
 	return !!allocated_count;	
 }
-
-crow::packet * crow::make_packet_v(const void *addr, uint8_t asize,
-    const igris::buffer *vec, size_t veclen) 
-{
-	size_t dsize = 0;
-	const igris::buffer *it = vec;
-	const igris::buffer *const eit = vec + veclen;
-
-	for (; it != eit; ++it)
-	{
-		dsize += it->size();
-	}
-
-	crow::packet *pack = crow::create_packet(NULL, asize, dsize);
-	if (pack == nullptr)
-		return nullptr;
-
-	//pack->header.f.type = type & 0x1F;
-	//pack->header.qos = qos;
-	//pack->header.ackquant = ackquant;
-	
-	memcpy(pack->addrptr(), addr, asize);
-
-	it = vec;
-	char *dst = pack->dataptr();
-
-	for (; it != eit; ++it)
-	{
-		memcpy(dst, it->data(), it->size());
-		dst += it->size();
-	}
-
-	return pack;
-}	

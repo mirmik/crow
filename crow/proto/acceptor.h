@@ -19,7 +19,7 @@ namespace crow
 		void init(int id, igris::delegate<crow::channel *> init_channel)
 		{
 			this->init_channel = init_channel;
-			link_node(this, id);
+			bind(id);
 		}
 
 		void incoming_packet(crow::packet *pack) override;
@@ -32,7 +32,7 @@ namespace crow
 	create_acceptor(uint16_t port, igris::delegate<crow::channel *> dlg)
 	{
 		auto asrv = new crow::acceptor(dlg);
-		crow::link_node(asrv, port);
+		asrv->bind(port);
 		return asrv;
 	}
 	
