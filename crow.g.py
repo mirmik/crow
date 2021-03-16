@@ -112,10 +112,6 @@ licant.modules.module("crow.time", "chrono",
 licant.modules.module("crow.udpgate", 
 	sources=["crow/gates/udpgate.cpp"])
 
-licant.modules.module("crow.tcpgate", 
-	sources=[
-	"crow/gates/tcpgate.cpp"])
-
 licant.modules.module("crow.serial_gstuff", 
 	sources=[
 		"crow/gates/serial_gstuff.cpp",
