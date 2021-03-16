@@ -110,7 +110,11 @@ namespace crow
 		struct dlist_head waitlnk = DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
 		uint16_t id = 0;
 
-		virtual void incoming_packet(crow::packet *pack) = 0;
+		virtual void incoming_packet(crow::packet *pack) 
+		{
+			crow::release(pack);
+		}
+
 		virtual void undelivered_packet(crow::packet *pack) 
 		{ 
 			notify_all(-1);
@@ -146,6 +150,7 @@ namespace crow
 		                      uint16_t ackquant,
 		                      bool fastsend = false)
 		{
+			assert(id != 0);
 			return crow::node_send(id, rid, raddr, data, qos, ackquant, fastsend);
 		}
 
@@ -157,6 +162,7 @@ namespace crow
 		                              uint16_t ackquant,
 		                              bool fastsend = false)
 		{
+			assert(id != 0);
 			return crow::node_send_special(id, rid, raddr, type, data, qos, ackquant, fastsend);
 		}
 
@@ -168,6 +174,7 @@ namespace crow
 		                        uint16_t ackquant,
 		                        bool fastsend = false)
 		{
+			assert(id != 0);
 			return crow::node_send_v(id, rid, raddr, vdat, vlen, qos, ackquant, fastsend);
 		}
 

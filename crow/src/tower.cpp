@@ -50,12 +50,19 @@ void crow::diagnostic_setup(bool en, bool len)
 
 static void __crow_utilize(crow::packet *pack)
 {
-	if (__live_diagnostic_enabled)
+	if (__live_diagnostic_enabled) 
+	{
 		crow::diagnostic("utilz", pack);
+	}
 
 	dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
 	dlist_del(&pack->ulnk);
 	crow::deallocate_packet(pack);
+
+	if (__live_diagnostic_enabled) 
+	{
+		nos::println("alive packages total:", crow::allocated_count);
+	}
 }
 
 static crow::gateway *crow_find_target_gateway(crow::packet *pack)

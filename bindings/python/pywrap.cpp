@@ -11,7 +11,7 @@
 #include <crow/iter.h>
 #include <crow/pubsub/pubsub.h>
 #include <crow/proto/node.h>
-#include <crow/proto/pynode.h>
+#include "pynode.h"
 #include <crow/proto/msgbox.h>
 #include <crow/address.h>
 
@@ -105,9 +105,6 @@ PYBIND11_MODULE(libcrow, m)
 	m.def("start_spin", &crow::start_spin);
 	m.def("stop_spin", &crow::stop_spin);
 
-	//m.def("start_alive", (void(*)(const std::vector<uint8_t>&, const char*, uint16_t, uint16_t, uint8_t, uint16_t))&crow::start_alive, py::arg("addr"), py::arg("netname"), py::arg("resend_time"), py::arg("dietime"), py::arg("qos"), py::arg("ackquant"));
-	//m.def("stop_alive", &crow::stop_alive);
-
 	m.def("set_incoming_handler", [](py::function f)
 	{
 		incoming_handler_bind = f;
@@ -120,15 +117,7 @@ PYBIND11_MODULE(libcrow, m)
 		crow::pubsub_protocol.incoming_handler = subscribe_handler_bind_invoke;
 	});
 
-	m.def("compile_address", &address);
 	m.def("address", &address);
-
-	m.def("diagnostic", &diagnostic_enable);
-	m.def("live_diagnostic", &live_diagnostic_enable);
-
-	//m.def("set_crowker", &set_crowker);
-	m.def("envcrowker", &envcrowker);
-	m.def("environment_crowker", &environment_crowker);
 
 	m.def("subscribe",
 	      (void (*)(
@@ -163,7 +152,6 @@ PYBIND11_MODULE(libcrow, m)
 	});
 	m.add_object("_cleanup", cleanup);
 
-	m.def("diagnostic_enable", diagnostic_enable);
 	m.def("diagnostic_setup", diagnostic_setup);
 	m.def("finish", finish);
 

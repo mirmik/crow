@@ -13,11 +13,6 @@
 #include <igris/util/string.h>
 #include <igris/util/dstring.h>
 #include <igris/util/bug.h>
-
-#ifdef WITH_MSGTYPE
-#include <igris/protocols/msgtype.h>
-#endif
-
 #include <nos/fprint.h>
 
 #include <getopt.h>
@@ -32,9 +27,6 @@
 #include <string>
 #include <map>
 #include <thread>
-
-#include "binin.h"
-#include "binout.h"
 
 #include <iostream>
 
@@ -61,9 +53,6 @@ bool gdebug = false;
 bool info = false;
 bool subscribe_mode = false;
 
-bool bin_output_mode = false;
-bool bin_input_mode = false;
-
 int acceptorno = -1;
 int channelno = -1;
 int nodeno = -1;
@@ -73,14 +62,7 @@ crow::channel channel;
 crow::channel * reverse_channel;
 crow::acceptor acceptor;
 
-std::string binout_fmt;
-std::string binin_fmt;
-
-#ifdef WITH_MSGTYPE
-std::string msgtype;
-igris::msgtype_struct msgreader;
-#endif
-
+std::vector<int> listened_nodes;
 std::string pulse;
 std::string theme;
 std::string pipelinecmd;
@@ -103,20 +85,12 @@ enum class input_format
 {
 	INPUT_RAW,
 	INPUT_RAW_ENDLINE,
-	INPUT_BINARY,
-#ifdef WITH_MSGTYPE
-	INPUT_MSGTYPE
-#endif
 };
 
 enum class output_format
 {
 	OUTPUT_RAW,
 	OUTPUT_DSTRING,
-	OUTPUT_BINARY,
-#ifdef WITH_MSGTYPE
-	OUTPUT_MSGTYPE
-#endif
 };
 
 protoopt_e protoopt = protoopt_e::PROTOOPT_BASIC;
@@ -131,13 +105,7 @@ std::string informat_tostr()
 
 		case input_format::INPUT_RAW_ENDLINE: return "INPUT_RAW_ENDLINE";
 
-		case input_format::INPUT_BINARY: return "INPUT_BINARY";
-
-#ifdef WITH_MSGTYPE
-		case input_format::INPUT_MSGTYPE: return "INPUT_MSGTYPE";
-#endif
-
-		default: 
+		default:
 			BUG();
 	}
 
@@ -152,13 +120,7 @@ std::string outformat_tostr()
 
 		case output_format::OUTPUT_DSTRING: return "OUTPUT_DSTRING";
 
-		case output_format::OUTPUT_BINARY: return "OUTPUT_BINARY";
-
-#ifdef WITH_MSGTYPE
-		case output_format::OUTPUT_MSGTYPE: return "OUTPUT_MSGTYPE";
-#endif
-
-		default: 
+		default:
 			BUG();
 	}
 
@@ -167,6 +129,8 @@ std::string outformat_tostr()
 
 void output_do(igris::buffer data, crow::packet* pack)
 {
+	(void) pack;
+
 	if (api)
 	{
 		if (data == "exit\n")
@@ -185,24 +149,6 @@ void output_do(igris::buffer data, crow::packet* pack)
 			bytes_to_dstring(buf, data.data(), data.size());
 			write(DATAOUTPUT_FILENO, buf, strlen(buf));
 			break;
-
-		case output_format::OUTPUT_BINARY:
-			output_binary(data, pack);
-			break;
-
-#ifdef WITH_MSGTYPE
-
-		case output_format::OUTPUT_MSGTYPE:
-			{
-				auto ret = msgreader.tostring(data);
-				//for (unsigned int i = 0; i < ret.size(); ++i)
-				//{
-				//	nos::fprintln("{}: {}", ret[i].first, ret[i].second);
-				//}
-				nos::println(ret);
-			}
-			break;
-#endif
 
 		default:
 			BUG();
@@ -228,17 +174,6 @@ std::pair<std::string, bool> input_do(const std::string& data)
 		case input_format::INPUT_RAW:
 			message = data;
 			return std::make_pair(message, true);
-
-		case input_format::INPUT_BINARY:
-			message = input_binary(std::string(data.data(), data.size()));
-			return std::make_pair(message, true);
-
-#ifdef WITH_MSGTYPE
-
-		case input_format::INPUT_MSGTYPE:
-			message = msgreader.fromstring_as_string(data);
-			return std::make_pair(message, message == "" ? false : true);
-#endif
 
 		default:
 			BUG();
@@ -307,9 +242,9 @@ void send_do(const std::string message)
 	{
 		case protoopt_e::PROTOOPT_BASIC:
 			crow::send(
-				{addr, (uint8_t)addrsize},
-				{message.data(), message.size()}, 
-				type, qos, ackquant);
+			{addr, (uint8_t)addrsize},
+			{message.data(), message.size()},
+			type, qos, ackquant);
 			break;
 
 		case protoopt_e::PROTOOPT_PUBLISH:
@@ -327,10 +262,10 @@ void send_do(const std::string message)
 				crow::travel(pack);*/
 
 				crow::publish(
-					{addr, (uint8_t)addrsize}, 
-					theme.c_str(),
-			        message,
-			        qos, ackquant);
+				{addr, (uint8_t)addrsize},
+				theme.c_str(),
+				message,
+				qos, ackquant);
 			}
 
 			break;
@@ -348,14 +283,10 @@ void send_do(const std::string message)
 
 		case protoopt_e::PROTOOPT_NODE:
 			{
-				/*if (nodename != "")
-					crow::node_send(1, nodename.c_str(), addr, (uint8_t)addrsize,
-					                message.data(), message.size(),
-					                qos, ackquant);*/
-					crow::node_send(1, nodeno, 
-									{addr, (uint8_t)addrsize},
-					                {message.data(), message.size()},
-					                qos, ackquant);
+				crow::node_send(1, nodeno,
+				{addr, (uint8_t)addrsize},
+				{message.data(), message.size()},
+				qos, ackquant);
 			}
 			break;
 
@@ -377,11 +308,11 @@ void incoming_handler(crow::packet *pack)
 	if (echo)
 	{
 		// Переотослать пакет точно повторяющий входящий.
-		crow::send({pack->addrptr(), pack->header.alen}, 
-				   {pack->dataptr(), pack->datasize()}, 
-				   pack->header.f.type, 
-				   pack->header.qos,
-		           pack->header.ackquant);
+		crow::send({pack->addrptr(), pack->header.alen},
+		{pack->dataptr(), pack->datasize()},
+		pack->header.f.type,
+		pack->header.qos,
+		pack->header.ackquant);
 	}
 
 	if (api)
@@ -403,16 +334,23 @@ void incoming_handler(crow::packet *pack)
 			break;
 
 		case CROW_NODE_PROTOCOL:
-			if (((crow::node_subheader *) pack->dataptr())->rid == 1)
 			{
-				output_do(crow::node::message(pack), pack);
+				auto rid = ((crow::node_subheader *) pack->dataptr())->rid;
+			
+				for (auto n : listened_nodes) 
+				{
+					if (rid == n) 
+					{
+						output_do(crow::node::message(pack), pack);
+						crow::release(pack);
+						return;
+					}
+				}
 			}
-
-			else
 			{
-				crow::node_protocol.incoming(pack);
+				crow::node_protocol.incoming(pack); // send error package
+				return;
 			}
-			return;
 
 		default:
 			output_do(pack->rawdata(), pack);
@@ -448,11 +386,6 @@ void *console_listener(void *arg)
 
 	while (1)
 	{
-		//if (std::cin.peek() == std::char_traits<char>::eof())
-		//{
-		//	exit(0);
-		//}
-		//std::getline(std::cin, input);
 		int len = read(DATAINPUT_FILENO, readbuf, 1024);
 
 		input = std::string(readbuf, len);
@@ -460,9 +393,6 @@ void *console_listener(void *arg)
 
 		if (msgpair.second)
 			send_do(msgpair.first);
-
-		//send unselect signal
-		//write(crow::unselect_pipe[1], "a", 1);
 	}
 
 	exit(0);
@@ -472,45 +402,46 @@ uint16_t udpport = 0;
 char *serial_port = NULL;
 char *serial_port_v1 = NULL;
 
-void print_help() 
+void print_help()
 {
 	printf(
-		"Usage: ctrans [OPTION]... ADDRESS\n"
-		"\n"
-		"Common option list:\n"
-		"  -h, --help            print this page\n"
-		"\n"
-		"Gate`s option list:\n"
-		"  -u, --udp             set udp address (gate 12)\n"
-		"  -S, --serial          make gate on serial device\n"
-		"\n"
-		"Package settings option list:\n"
-		"  -q, --qos             set QOS policy mode\n"            
-		"  -A, --ackquant        set time quant (for QOS:1 and QOS:2)\n"
-		"  -t, --type            set package type (if protocol isn't choosen)\n"
-		"\n"
-		"Protocol option list:\n"
-		"      --chlisten        (channel) enable acceptor mode\n"
-		"      --channel         (channel) connect to channel on nid\n"
-		"      --node            (node)    send message to specified node\n"
-		"      --subscribe       (pubsub)  subscribe to crowker theme\n"
-		"      --publish         (pubsub)  publish to crowker theme\n"		
-		"\n"
-		"Info option list:\n"
-		"      --info\n"
-		"      --debug\n"
-		"      --debug-data-size\n"
-		"      --vdebug\n"
-		"      --gdebug\n"
-		"\n"
-		"Control option list:\n"
-		"      --noconsole       disable console input\n"
-		"      --pulse           oneshoot mode. leave after first message\n"
-		"      --echo            echo input packages to sender\n"
-		"      --api             enable incoming console (cmds: 'exit')"
-		"\n"
-		"Crow address reference:\n"
-		"      man crow-protocol\n"
+	    "Usage: ctrans [OPTION]... ADDRESS\n"
+	    "\n"
+	    "Common option list:\n"
+	    "  -h, --help            print this page\n"
+	    "\n"
+	    "Gate`s option list:\n"
+	    "  -u, --udp             set udp address (gate 12)\n"
+	    "  -S, --serial          make gate on serial device\n"
+	    "\n"
+	    "Package settings option list:\n"
+	    "  -q, --qos             set QOS policy mode\n"
+	    "  -A, --ackquant        set time quant (for QOS:1 and QOS:2)\n"
+	    "  -t, --type            set package type (if protocol isn't choosen)\n"
+	    "\n"
+	    "Protocol option list:\n"
+	    "      --chlisten        (channel) enable acceptor mode\n"
+	    "      --channel         (channel) connect to channel on nid\n"
+	    "      --node            (node)    send message to specified node\n"
+	    "      --listen-node     (node)    listen that node ids\n"
+	    "      --subscribe       (pubsub)  subscribe to crowker theme\n"
+	    "      --publish         (pubsub)  publish to crowker theme\n"
+	    "\n"
+	    "Info option list:\n"
+	    "      --info\n"
+	    "      --debug\n"
+	    "      --debug-data-size\n"
+	    "      --vdebug\n"
+	    "      --gdebug\n"
+	    "\n"
+	    "Control option list:\n"
+	    "      --noconsole       disable console input\n"
+	    "      --pulse           oneshoot mode. leave after first message\n"
+	    "      --echo            echo input packages to sender\n"
+	    "      --api             enable incoming console (cmds: 'exit')"
+	    "\n"
+	    "Crow address reference:\n"
+	    "      man crow-protocol\n"
 	);
 }
 
@@ -538,19 +469,17 @@ int main(int argc, char *argv[])
 		{"noconsole", no_argument, NULL, 'n'}, // Отключает создание консоли.
 		{"pulse", required_argument, NULL, 'p'}, // Отключает программу по первой транзакции.
 
-		{"binin", required_argument, NULL, 'b'}, // Форматирует вход согласно бинарного шаблона.
-		{"binout", required_argument, NULL, 'B'}, // Форматирует вывод согласно бинарного шаблона.
 		{"rawout", no_argument, NULL, 'r'},
 		{"dbgout", no_argument, NULL, 'j'},
 
 		{"chlisten", required_argument, NULL, 'w'},
 		{"channel", required_argument, NULL, 'c'},
 		{"node", required_argument, NULL, 'M'},
+		{"listen-node", required_argument, NULL, 'U'},
 		{"pipeline", required_argument, NULL, 'e'},
 
 		{"subscribe", required_argument, NULL, 'l'},
 		{"publish", required_argument, NULL, 'P'},
-		{"msgtype", required_argument, NULL, 'm'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
 		{"debug", no_argument, NULL, 'd'}, // Включает информацию о событиях башни.
@@ -635,6 +564,16 @@ int main(int argc, char *argv[])
 				noconsole = true;
 				break;
 
+			case 'U':
+				{
+					auto lst = igris::split(optarg, ',');
+					for (auto a : lst)
+					{
+						listened_nodes.push_back(atoi(a.data()));
+					}
+				}
+				break;
+
 			case 'g':
 				gdebug = true;
 				break;
@@ -656,29 +595,10 @@ int main(int argc, char *argv[])
 				crow::enable_live_diagnostic();
 				break;
 
-			case 'b':
-				binin_fmt = optarg;
-				bin_input_mode = true;
-				break;
-
-			case 'B':
-				//binary_mode_prepare(optarg);
-				binout_fmt = optarg;
-				bin_output_mode = true;
-				break;
-
 			case 'P':
 				theme = optarg;
 				protoopt = protoopt_e::PROTOOPT_PUBLISH;
 				break;
-#ifdef WITH_MSGTYPE
-
-			case 'm':
-				msgtype = optarg;
-				outformat = output_format::OUTPUT_MSGTYPE;
-				informat = input_format::INPUT_MSGTYPE;
-				break;
-#endif
 
 			case 'l':
 				theme = optarg;
@@ -732,7 +652,7 @@ int main(int argc, char *argv[])
 			exit(-1);
 		}
 	}
-	
+
 	if (serial_port_v1 != NULL)
 	{
 		if (crow::create_serial_gstuff_v1(serial_port_v1, 115200, 42, gdebug) == NULL)
@@ -743,18 +663,6 @@ int main(int argc, char *argv[])
 	}
 // Переопределение стандартного обработчика (Для возможности перехвата и api)
 	crow::user_incoming_handler = incoming_handler;
-
-	if (bin_output_mode == true)
-	{
-		binout_mode_prepare(binout_fmt);
-		outformat = output_format::OUTPUT_BINARY;
-	}
-
-	if (bin_input_mode == true)
-	{
-		binin_mode_prepare(binin_fmt);
-		informat = input_format::INPUT_BINARY;
-	}
 
 	if (noend)
 	{
@@ -793,21 +701,11 @@ int main(int argc, char *argv[])
 
 		if (serial_port != NULL)
 			nos::println("gate is here (TODO)");
-			//printf("\tgate %d: serial port %s\n", 42, serial_port);
+		//printf("\tgate %d: serial port %s\n", 42, serial_port);
 
 		nos::println("informat:", informat_tostr());
 		nos::println("outformat:", outformat_tostr());
 	}
-
-#ifdef WITH_MSGTYPE
-
-	if (outformat == output_format::OUTPUT_MSGTYPE)
-	{
-		msgreader = igris::msgtype_read_type(msgtype,
-		                                     "/home/mirmik/project/crow/apps/ctrans/test.msg");
-	}
-
-#endif
 
 	if (pipelinecmd != "")
 	{
@@ -888,9 +786,9 @@ int main(int argc, char *argv[])
 			while (1)
 			{
 				crow::subscribe(
-					{addr, (size_t)addrsize}, 
-					theme.c_str(), 
-					qos, ackquant, qos, ackquant);
+				{addr, (size_t)addrsize},
+				theme.c_str(),
+				qos, ackquant, qos, ackquant);
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			}
 		}).detach();

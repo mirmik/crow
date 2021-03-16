@@ -11,10 +11,7 @@ defines = ["NOTRACE=1"]
 
 application("ctrans", 
 	sources = [
-		"main.cpp",
-		"binin.cpp",
-		"binout.cpp",
-		"bincommon.cpp",
+		"main.cpp"
 	],
 	mdepends= [
 		"crow", 
