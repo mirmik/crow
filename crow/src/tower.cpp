@@ -185,6 +185,7 @@ static void crow_incoming_handler(crow::packet *pack)
 		_in_incoming_handler = true;
 		crow::user_incoming_handler(pack);
 		_in_incoming_handler = false;
+		return;
 	}
 
 	dlist_for_each_entry(it, &crow::protocols, lnk)
@@ -203,6 +204,7 @@ static void crow_incoming_handler(crow::packet *pack)
 		_in_incoming_handler = true;
 		crow::user_type_handler(pack);
 		_in_incoming_handler = false;
+		return;
 	}
 	else
 	{
@@ -211,8 +213,8 @@ static void crow_incoming_handler(crow::packet *pack)
 			crow::diagnostic("wproto", pack);
 		}
 		crow::release(pack);
+		return;
 	}
-
 }
 
 static void crow_send_ack(crow::packet *pack)
