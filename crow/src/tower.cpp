@@ -583,6 +583,14 @@ void crow_undelivered(crow::packet* pack)
 {
 	pack->f.undelivered = 1;
 	crow::protocol * it;
+
+	if (crow::undelivered_handler) 
+	{
+		_in_undelivered_handler = true;
+		crow::undelivered_handler(pack);
+		_in_undelivered_handler = false;
+	}
+
 	dlist_for_each_entry(it, &crow::protocols, lnk)
 	{
 		if (it->id == pack->header.f.type)
@@ -593,15 +601,6 @@ void crow_undelivered(crow::packet* pack)
 			return;
 		}
 	}
-
-	if (crow::undelivered_handler) 
-	{
-		_in_undelivered_handler = true;
-		crow::undelivered_handler(pack);
-		_in_undelivered_handler = false;
-	}
-	else
-		crow_tower_release(pack);
 }
 
 static inline void crow_onestep_send_stage()
@@ -656,8 +655,8 @@ static inline void crow_onestep_outers_stage()
 
 			if (pack->_ackcount == 0)
 			{
-				crow_tower_release(pack);
 				crow_undelivered(pack);
+				crow_tower_release(pack);
 			}
 			else
 			{
