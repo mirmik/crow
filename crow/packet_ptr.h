@@ -2,6 +2,7 @@
 #define CROW_PACKET_PTR_H
 
 #include <crow/packet.h>
+#include <igris/sync/syslock.h>
 
 namespace crow
 {
@@ -14,17 +15,24 @@ namespace crow
 		packet_ptr(crow::packet *pack_) : pack(pack_)
 		{
 			if (pack == nullptr) return;
+			assert(pack->refs >= 0);
 
+			system_lock();
 			pack->refs++;
+			system_unlock();
 		}
 
 		packet_ptr(const crow::packet_ptr &oth) : pack(oth.pack)
 		{
+			assert(pack->refs >= 0);
+			system_lock();
 			pack->refs++;
+			system_unlock();
 		}
 
 		packet_ptr(crow::packet_ptr &&oth) : pack(oth.pack)
 		{
+			assert(pack->refs >= 0);
 			oth.pack = nullptr;
 		}
 
@@ -38,24 +46,48 @@ namespace crow
 			return pack;
 		}
 
-		crow::packet* operator ->() 
+		crow::packet* operator ->()
 		{
 			return pack;
 		}
 
-		crow::packet& operator *() 
+		crow::packet& operator *()
 		{
 			return *pack;
+		}
+
+		crow::packet_ptr& operator=(const crow::packet_ptr& oth)
+		{
+			clear();
+
+			pack = oth.pack;
+			system_lock();
+			pack->refs++;
+			system_unlock();
+
+			return *this;
+		}
+
+		crow::packet_ptr& operator=(crow::packet_ptr&& oth)
+		{
+			clear();
+
+			pack = oth.pack;
+			oth.pack = nullptr;
+			
+			return *this;
 		}
 
 		~packet_ptr();
 
 		operator bool() { return pack != nullptr; }
 
-		bool operator == (std::nullptr_t) 
+		bool operator == (std::nullptr_t)
 		{
 			return pack == nullptr;
 		}
+
+		void clear();
 	};
 }
 

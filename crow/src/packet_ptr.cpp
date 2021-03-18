@@ -5,6 +5,12 @@
 
 crow::packet_ptr::~packet_ptr()
 {
+	clear();
+}
+
+
+void crow::packet_ptr::clear()
+{
 	if (pack)
 	{
 		pack->refs--;
@@ -12,5 +18,7 @@ crow::packet_ptr::~packet_ptr()
 
 		if (pack->refs == 0)
 			crow::release(pack);
+
+		pack = nullptr;
 	}
 }
