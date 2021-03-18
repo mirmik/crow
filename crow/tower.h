@@ -14,6 +14,7 @@ namespace crow
 
 	extern dlist_head protocols;
 	extern bool diagnostic_noack;
+	extern uint total_travelled;
 
 	extern void (*user_incoming_handler)(crow::packet *pack);
 	extern void (*user_type_handler)(crow::packet *pack);

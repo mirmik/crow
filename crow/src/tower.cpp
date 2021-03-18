@@ -14,6 +14,7 @@
 
 bool crow::diagnostic_noack = false;
 uint16_t crow::debug_data_size = 28;
+unsigned int crow::total_travelled;
 
 struct dlist_head crow::protocols = DLIST_HEAD_INIT(crow::protocols);
 DLIST_HEAD(crow_travelled);
@@ -273,6 +274,8 @@ static void crow_revert_address(crow::packet *pack)
 
 static void crow_do_travel(crow::packet *pack)
 {
+	crow::total_travelled++;
+
 	if (pack->header.stg == pack->header.alen)
 	{
 		//Ветка доставленного пакета.
