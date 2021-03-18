@@ -5,11 +5,11 @@
 #include <thread>
 #include <chrono>
 
-auto waddr = crow::address(".12.127.0.0.1:10998");
-auto addr = crow::address(".12.127.0.0.1:10999");
-auto addr2 = crow::address(".12.127.0.0.1:10999.12.127.0.0.1:10999");
+static auto waddr = crow::address(".12.127.0.0.1:10998");
+static auto addr = crow::address(".12.127.0.0.1:10999");
+static auto addr2 = crow::address(".12.127.0.0.1:10999.12.127.0.0.1:10999");
+static int count = 0;
 
-int count = 0;
 void incoming(crow::packet * ptr)
 {
 	count++;
