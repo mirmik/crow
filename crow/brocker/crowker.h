@@ -2,8 +2,8 @@
 #define CROW_BROCKER_CROWKER_H
 
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
 
 #include "theme.h"
 
@@ -17,55 +17,52 @@ int64_t crowker_eval_timestamp();
 
 namespace crow
 {
-	class crowker
-	{
-	public:
-		std::map<std::string, theme> themes;
-		bool brocker_info = false;
-		bool log_publish = false;
+    class crowker
+    {
+      public:
+        std::map<std::string, theme> themes;
+        bool brocker_info = false;
+        bool log_publish = false;
 
-	public:
-		void set_info_mode(bool en) { brocker_info = en; }
+      public:
+        void set_info_mode(bool en) { brocker_info = en; }
 
-		theme * get_theme(const std::string& name);
+        theme *get_theme(const std::string &name);
 
-		void publish(
-		    const std::string& theme,
-		    const std::string& data);
+        void publish(const std::string &theme, const std::string &data);
 
-		static crowker * instance()
-		{
-			static crowker * _instance = nullptr;
-			if (_instance == nullptr)
-				_instance = new crowker;
+        static crowker *instance()
+        {
+            static crowker *_instance = nullptr;
+            if (_instance == nullptr)
+                _instance = new crowker;
 
-			return _instance;
-		}
+            return _instance;
+        }
 
-		void crow_subscribe(const crow::hostaddr_view & addr,
-		                    const std::string& theme,
-		                    uint8_t qos, uint16_t ackquant);
+        void crow_subscribe(const crow::hostaddr_view &addr,
+                            const std::string &theme, uint8_t qos,
+                            uint16_t ackquant);
 
-		void tcp_subscribe(const std::string& theme, nos::inet::tcp_socket * sock);
+        void tcp_subscribe(const std::string &theme,
+                           nos::inet::tcp_socket *sock);
 
-		void unlink_theme_subscriber(
-		    crowker_implementation::theme* thm,
-		    crowker_implementation::subscriber* sub);
+        void unlink_theme_subscriber(crowker_implementation::theme *thm,
+                                     crowker_implementation::subscriber *sub);
 
+        void erase_crow_subscriber(const std::string &addr)
+        {
+            crowker_implementation::crow_subscriber::allsubs.erase(addr);
+        }
 
-		void erase_crow_subscriber(const std::string & addr)
-		{
-			crowker_implementation::crow_subscriber::allsubs.erase(addr);
-		}
+        void erase_tcp_subscriber(const nos::inet::netaddr &addr)
+        {
+            crowker_implementation::tcp_subscriber::allsubs.erase(addr);
+        }
 
-		void erase_tcp_subscriber(const nos::inet::netaddr & addr)
-		{
-			crowker_implementation::tcp_subscriber::allsubs.erase(addr);
-		}
-
-	private:
-		crowker() = default;
-	};
-}
+      private:
+        crowker() = default;
+    };
+} // namespace crow
 
 #endif

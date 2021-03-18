@@ -1,5 +1,5 @@
 /**
-	@file
+    @file
 */
 
 #ifndef CROW_GATES_SERIAL_GSTUFF_V1_H
@@ -16,30 +16,30 @@
 
 namespace crow
 {
-	struct serial_gstuff_v1 : public crow::gateway
-	{
-		int fd;
+    struct serial_gstuff_v1 : public crow::gateway
+    {
+        int fd;
 
-		struct crow::packet *rpack;
-		bool debug;
+        struct crow::packet *rpack;
+        bool debug;
 
-		struct gstuff_autorecv_v1 recver;
+        struct gstuff_autorecv_v1 recver;
 
-		void newline_handler();
+        void newline_handler();
 
-		void send(crow::packet *) override;
-		void nblock_onestep() override;
-		void finish() override {}
+        void send(crow::packet *) override;
+        void nblock_onestep() override;
+        void finish() override {}
 
 #if CROW_ENABLE_WITHOUT_FDS
 #else
-		virtual int get_fd() override { return fd; }
+        virtual int get_fd() override { return fd; }
 #endif
-	};
+    };
 
-	crow::serial_gstuff_v1 *create_serial_gstuff_v1(const char *path,
-											  uint32_t baudrate, uint8_t id,
-											  bool debug);
+    crow::serial_gstuff_v1 *create_serial_gstuff_v1(const char *path,
+                                                    uint32_t baudrate,
+                                                    uint8_t id, bool debug);
 } // namespace crow
 
 #endif

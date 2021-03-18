@@ -3,6 +3,6 @@
 
 crowker_implementation::subscriber::~subscriber()
 {
-	for (auto& thm : thms)
-		crow::crowker::instance()->unlink_theme_subscriber(thm.first, this);
+    for (auto &thm : thms)
+        crow::crowker::instance()->unlink_theme_subscriber(thm.first, this);
 }

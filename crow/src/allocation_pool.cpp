@@ -7,45 +7,42 @@ extern bool __live_diagnostic_enabled;
 igris::pool _crow_packet_pool;
 int crow::allocated_count = 0;
 
-igris::pool * crow::get_package_pool() 
-{
-	return &_crow_packet_pool;
-}
+igris::pool *crow::get_package_pool() { return &_crow_packet_pool; }
 
 void crow::engage_packet_pool(void *zone, size_t zonesize, size_t elsize)
 {
-	_crow_packet_pool.init(zone, zonesize, elsize);
+    _crow_packet_pool.init(zone, zonesize, elsize);
 }
 
 void crow::deallocate_packet(crow::packet *pack)
 {
-	assert(pack);
+    assert(pack);
 
-	system_lock();
-	
-	if (pack)
-		allocated_count--;
-	
-	_crow_packet_pool.put(pack);
-	system_unlock();
+    system_lock();
+
+    if (pack)
+        allocated_count--;
+
+    _crow_packet_pool.put(pack);
+    system_unlock();
 }
 
 crow::packet *crow::allocate_packet(size_t adlen)
 {
-	system_lock();
-	void *ret = _crow_packet_pool.get();
+    system_lock();
+    void *ret = _crow_packet_pool.get();
 
-	if (ret)
-		allocated_count++;
-	
-	system_unlock();
+    if (ret)
+        allocated_count++;
 
-	if (__live_diagnostic_enabled) 
-	{
-		debug_print("alloc: ");
-		debug_printhex_ptr(ret);
-		debug_print("\r\n");
-	}
+    system_unlock();
 
-	return (crow::packet *)ret;
+    if (__live_diagnostic_enabled)
+    {
+        debug_print("alloc: ");
+        debug_printhex_ptr(ret);
+        debug_print("\r\n");
+    }
+
+    return (crow::packet *)ret;
 }

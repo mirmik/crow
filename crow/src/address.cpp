@@ -2,40 +2,40 @@
 
 namespace crow
 {
-	hostaddr address(const std::string& in)
-	{
-		std::vector<uint8_t> out;
-		out.resize(in.size());
+    hostaddr address(const std::string &in)
+    {
+        std::vector<uint8_t> out;
+        out.resize(in.size());
 
-		int len = hexer_s((uint8_t*)out.data(), in.size(), in.data());
-		
-		if (len < 0)
-			return {};
+        int len = hexer_s((uint8_t *)out.data(), in.size(), in.data());
 
-		out.resize(len);
-		return out;
-	}
+        if (len < 0)
+            return {};
 
-	hostaddr address_warned(const std::string& in)
-	{
-		std::vector<uint8_t> out;
-		out.resize(in.size());
+        out.resize(len);
+        return out;
+    }
 
-		int len = hexer_s((uint8_t*)out.data(), in.size(), in.data());
-		
-		if (len == CROW_HEXER_MORE3_DOT)
-			dprln("crow::hexer: more then three symbols after dot.");
+    hostaddr address_warned(const std::string &in)
+    {
+        std::vector<uint8_t> out;
+        out.resize(in.size());
 
-		if (len == CROW_HEXER_ODD_GRID)
-			dprln("crow::hexer: odd symbols after #");
+        int len = hexer_s((uint8_t *)out.data(), in.size(), in.data());
 
-		if (len == CROW_HEXER_UNDEFINED_SYMBOL)
-			dprln("crow::hexer: undefined symbol");
+        if (len == CROW_HEXER_MORE3_DOT)
+            dprln("crow::hexer: more then three symbols after dot.");
 
-		if (len < 0)
-			return {};
+        if (len == CROW_HEXER_ODD_GRID)
+            dprln("crow::hexer: odd symbols after #");
 
-		out.resize(len);
-		return out;
-	}
-}
+        if (len == CROW_HEXER_UNDEFINED_SYMBOL)
+            dprln("crow::hexer: undefined symbol");
+
+        if (len < 0)
+            return {};
+
+        out.resize(len);
+        return out;
+    }
+} // namespace crow

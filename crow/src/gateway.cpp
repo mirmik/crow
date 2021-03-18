@@ -7,29 +7,29 @@
 
 igris::dlist<crow::gateway, &crow::gateway::lnk> crow::gateway_list;
 
-int crow::gateway::bind(int id) 
+int crow::gateway::bind(int id)
 {
-	gateway * g;
+    gateway *g;
 
-	system_lock();
-	g = get_gateway(id);
-	if (g)
-		return -1;
+    system_lock();
+    g = get_gateway(id);
+    if (g)
+        return -1;
 
-	this->id = id;
-	crow::gateway_list.add_last(*this);
-	system_unlock();
+    this->id = id;
+    crow::gateway_list.add_last(*this);
+    system_unlock();
 
-	return 0;
+    return 0;
 }
 
-crow::gateway * crow::get_gateway(int no) 
+crow::gateway *crow::get_gateway(int no)
 {
-	for (auto & g : crow::gateway_list)
-	{
-		if (g.id == no)
-			return &g;
-	}	
+    for (auto &g : crow::gateway_list)
+    {
+        if (g.id == no)
+            return &g;
+    }
 
-	return nullptr;
+    return nullptr;
 }

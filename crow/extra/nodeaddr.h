@@ -7,25 +7,27 @@
 
 namespace crow
 {
-	class nodeaddr
-	{
-	public:
-		std::vector<uint8_t> naddr;
-		nid_t nid;
-	
-	public:
-		crow::hostaddr_view hostaddr() const
-		{
-			return { naddr.data(), naddr.size() };
-		}
+    class nodeaddr
+    {
+      public:
+        std::vector<uint8_t> naddr;
+        nid_t nid;
 
-		bool operator< (const nodeaddr& oth) const 
-		{
-			if (naddr < oth.naddr) return true;
-			if (nid < oth.nid) return true;
-			return false;
-		}
-	};
-}
+      public:
+        crow::hostaddr_view hostaddr() const
+        {
+            return {naddr.data(), naddr.size()};
+        }
+
+        bool operator<(const nodeaddr &oth) const
+        {
+            if (naddr < oth.naddr)
+                return true;
+            if (nid < oth.nid)
+                return true;
+            return false;
+        }
+    };
+} // namespace crow
 
 #endif
