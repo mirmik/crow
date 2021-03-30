@@ -71,11 +71,20 @@ PYBIND11_MODULE(libcrow, m)
 	.def(py::init<const std::vector<uint8_t>&>());
 	py::implicitly_convertible<crow::hostaddr, crow::hostaddr_view>();
 
-	py::class_<igris::buffer>(m, "igris_buffer")
+	/*py::class_<igris::buffer>(m, "igris_buffer")
 	.def(py::init<const std::string&>())
+	.def("__init__", [](const py::str & s) -> igris::buffer 
+	{
+        char *buffer;
+        ssize_t length;
+
+        PYBIND11_BYTES_AS_STRING_AND_SIZE(s.ptr(), &buffer, &length);
+
+        return {buffer, (size_t) length};
+	})
 	;
 	py::implicitly_convertible<std::string, igris::buffer>();
-	py::implicitly_convertible<py::str, igris::buffer>();
+	py::implicitly_convertible<py::str, igris::buffer>();*/
 
 	auto  __gateway__ =
 	    py::class_<gateway>(m, "gateway")
@@ -90,13 +99,15 @@ PYBIND11_MODULE(libcrow, m)
 	.def("close", &udpgate::close)
 	;
 
-	m.def("send", (crow::packet_ptr(*)(
-	                   const crow::hostaddr_view &,
-	                   igris::buffer,
-	                   uint8_t,
-	                   uint8_t,
-	                   uint16_t,
-	                   bool fastsend))&crow::send);
+	m.def("send", [](const crow::hostaddr_view & addr,
+	               const std::string& data,
+	                   uint8_t type,
+	                   uint8_t qos,
+	                   uint16_t ackquant,
+	                   bool fastsend)
+	{
+		return crow::send(addr, data, type, qos, ackquant, fastsend);
+	});
 
 	m.def("create_udpgate", &crow::create_udpgate);
 	m.def("onestep", &crow::onestep);
@@ -130,11 +141,14 @@ PYBIND11_MODULE(libcrow, m)
 	      py::arg("rack"), py::arg("rackquant"));
 
 	m.def("publish",
-	      (void (*)(
+	      [](
 	           const std::vector<uint8_t> & addr,
 	           const std::string & theme,
 	           const std::string & data,
-	           uint8_t ack, uint16_t ackquant)) & publish,
+	           uint8_t ack, uint16_t ackquant) 
+	      {
+	      	return crow::publish(addr, theme, data, ack, ackquant);
+	      },
 	      py::arg("addr"),
 	      py::arg("theme"),
 	      py::arg("data"),
@@ -158,7 +172,16 @@ PYBIND11_MODULE(libcrow, m)
 	.def("bind", py::overload_cast<>(&crow::node::bind))
 	.def("bind", py::overload_cast<int>(&crow::node::bind))
 	.def_readwrite("id", &node::id)
-	.def("send", &node::send);
+	.def("send", [](crow::node & node, 
+		int rid,
+		const crow::hostaddr_view & addr,
+	    const std::string& data,
+	    uint8_t qos,
+	    uint16_t ackquant,
+	    bool fastsend)
+	{
+		return node.send(rid,addr, data, qos, ackquant, fastsend);
+	}, ungil(), py::arg("rid"), py::arg("addr"), py::arg("data"), py::arg("qos")=2, py::arg("ackquant")=50, py::arg("fastsend")=false);
 
 	py::class_<crow::pynode_delegate, crow::node>(m, "PyNode")
 	.def(py::init <
@@ -169,7 +192,6 @@ PYBIND11_MODULE(libcrow, m)
 
 	py::class_<crow::msgbox, crow::node>(m, "msgbox")
 		.def(py::init<>())
-		.def("send", &crow::msgbox::send, ungil(), py::arg("rid"), py::arg("addr"), py::arg("data"), py::arg("qos")=2, py::arg("ackquant")=50, py::arg("fastsend")=false)
 		.def("query", &crow::msgbox::query, ungil())
 		.def("receive", &crow::msgbox::receive, ungil())
 		.def("reply", &crow::msgbox::reply, ungil())
