@@ -64,5 +64,6 @@ void register_subscriber_class(py::module & m)
 	     py::arg("ackquant") = 50,
 	     py::arg("rack") = 2,
 	     py::arg("rackquant") = 50)
+	.def("resubscribe", &pybind_subscriber::resubscribe)
 	;
 }
