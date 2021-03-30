@@ -45,6 +45,7 @@ int main(int argc, char ** argv)
 {
 	igris::cliopts cliopts;
 	cliopts.add_option("debug", 'd');
+	cliopts.add_integer("udp", 'u', 10020);
 	cliopts.parse(argc, argv);
 	bool debug = cliopts.get_option("debug");
 
@@ -53,8 +54,8 @@ int main(int argc, char ** argv)
 
 	ugate.bind();
 
-	int port = 10020;
-	nos::println("Make udp server, port : 10020");
+	int port = cliopts.get_integer("udp");
+	nos::fprintln("Make udp server, port : {}", port);
 	ugate.open(port);
 
 	nos::println("Use node :", CROW_RPC_NODE_NO);
