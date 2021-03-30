@@ -7,10 +7,11 @@
 
 #include <crow/proto/rpc.h>
 #include <crow/address.h>
-
 #include <crow/crow.h>
 
 #include <nos/fprint.h>
+
+#include <igris/getopt/cliopts.h>
 
 crow::udpgate ugate;
 crow::rpc_node rpcnode;
@@ -40,8 +41,16 @@ double func_div(double a, double b)
 	return a / b;
 }
 
-int main()
+int main(int argc, char ** argv)
 {
+	igris::cliopts cliopts;
+	cliopts.add_option("debug", 'd');
+	cliopts.parse(argc, argv);
+	bool debug = cliopts.get_option("debug");
+
+	if (debug)
+		crow::diagnostic_setup(true, false);
+
 	ugate.bind();
 
 	int port = 10020;
@@ -56,8 +65,6 @@ int main()
 	rpcnode.add_delegate("sub", igris::make_delegate(func_sub));
 	rpcnode.add_delegate("mul", igris::make_delegate(func_mul));
 	rpcnode.add_delegate("div", igris::make_delegate(func_div));
-
-//	crow::diagnostic_enable();
 
 	crow::start_spin();
 	crow::join_spin();

@@ -18,10 +18,10 @@ void func()
 
 	std::string result;
 	int status = requestor.request_text_format(funcname.c_str(), result, strargs);
-
+	
 	switch (status)
 	{
-		case 0: nos::print(result);
+		case 0: nos::println(result);
 			break;
 		case CROW_ERRNO_UNREGISTRED_RID:
 			nos::println("ConnectionError: Unregistred remote node id.");
@@ -56,6 +56,8 @@ void print_help()
 	    "\n"
 	    "Crow address reference:\n"
 	    "      man crow-protocol\n"
+	    "Default RPC node: %d\n", 
+	    CROW_RPC_NODE_NO
 	);
 }
 
@@ -118,9 +120,7 @@ int main(int argc, char** argv)
 	crow::create_udpgate(12, 0);
 
 	std::thread thr(func);
-
 	crow::start_spin();
-	crow::join_spin();
 
 	thr.join();
 }
