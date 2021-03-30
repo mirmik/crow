@@ -10,93 +10,84 @@
 
 namespace crow
 {
-	extern uint16_t debug_data_size;
+    extern uint16_t debug_data_size;
 
-	extern dlist_head protocols;
-	extern bool diagnostic_noack;
-	extern uint total_travelled;
+    extern dlist_head protocols;
+    extern bool diagnostic_noack;
+    extern unsigned int total_travelled;
 
-	extern void (*user_incoming_handler)(crow::packet *pack);
-	extern void (*user_type_handler)(crow::packet *pack);
-	extern void (*undelivered_handler)(crow::packet *pack);
+    extern void (*user_incoming_handler)(crow::packet *pack);
+    extern void (*user_type_handler)(crow::packet *pack);
+    extern void (*undelivered_handler)(crow::packet *pack);
 
-	extern void (*unsleep_handler)();
+    extern void (*unsleep_handler)();
 
-	// Передать пакет в обработку.
-	packet_ptr travel(crow::packet *pack);
-	void nocontrol_travel(crow::packet *pack);
+    // Передать пакет в обработку.
+    packet_ptr travel(crow::packet *pack);
+    void nocontrol_travel(crow::packet *pack);
 
-	// Включить трассировку пакетов.
-	void enable_diagnostic();
+    // Включить трассировку пакетов.
+    void enable_diagnostic();
 
-	// Включить трассировку аллокации.
-	void enable_live_diagnostic();
+    // Включить трассировку аллокации.
+    void enable_live_diagnostic();
 
-	// Включить диагностику прохождения, жизни пакетов
-	void diagnostic_setup(bool en, bool len = false);
-	
-	// Отправить пакет.
-	crow::packet_ptr send(const crow::hostaddr_view & addr,
-	                      igris::buffer data,
-	                      uint8_t type,
-	                      uint8_t qos,
-	                      uint16_t ackquant,
-	                      bool fastsend=false);
+    // Включить диагностику прохождения, жизни пакетов
+    void diagnostic_setup(bool en, bool len = false);
 
-	crow::packet_ptr send_v(const crow::hostaddr_view & addr,
-	                        const igris::buffer* vec,
-	                        size_t veclen,
-	                        uint8_t type,
-	                        uint8_t qos,
-	                        uint16_t ackquant,
-	                        bool fastsend=false);
+    // Отправить пакет.
+    crow::packet_ptr send(const crow::hostaddr_view &addr, igris::buffer data,
+                          uint8_t type, uint8_t qos, uint16_t ackquant,
+                          bool fastsend = false);
 
-	crow::packet_ptr send_vv(const crow::hostaddr_view & addr,
-	                         const igris::buffer* vec, size_t veclen,
-	                         const igris::buffer* vec2, size_t veclen2,
-	                         uint8_t type,
-	                         uint8_t qos,
-	                         uint16_t ackquant,
-	                         bool fastsend=false);
+    crow::packet_ptr send_v(const crow::hostaddr_view &addr,
+                            const igris::buffer *vec, size_t veclen,
+                            uint8_t type, uint8_t qos, uint16_t ackquant,
+                            bool fastsend = false);
 
-	// Эта функция вызывается вратами после обработки отсылаемого пакета.
-	void return_to_tower(crow::packet *pack, uint8_t sts);
+    crow::packet_ptr send_vv(const crow::hostaddr_view &addr,
+                             const igris::buffer *vec, size_t veclen,
+                             const igris::buffer *vec2, size_t veclen2,
+                             uint8_t type, uint8_t qos, uint16_t ackquant,
+                             bool fastsend = false);
 
-	// Используется пользовательским кодом для освобождения пакета.
-	void release(crow::packet *pack);
+    // Эта функция вызывается вратами после обработки отсылаемого пакета.
+    void return_to_tower(crow::packet *pack, uint8_t sts);
 
-	// Взятие отметки времени.
-	uint16_t millis();
+    // Используется пользовательским кодом для освобождения пакета.
+    void release(crow::packet *pack);
 
-	void onestep();
-	void onestep_travel_only();
-	
-	void spin();
-	void spin_with_select();
-	void spin_with_select_realtime();
+    // Взятие отметки времени.
+    uint16_t millis();
 
-	int stop_spin(bool wait=true);
-	int start_spin_with_select();
-	int start_spin_with_select_realtime();
-	int start_spin_without_select();
+    void onestep();
+    void onestep_travel_only();
 
-	int start_spin();
-	int start_spin_realtime();
+    void spin();
+    void spin_with_select();
+    void spin_with_select_realtime();
 
-	[[deprecated]]
-	void spin_join();
-	void join_spin();
+    int stop_spin(bool wait = true);
+    int start_spin_with_select();
+    int start_spin_with_select_realtime();
+    int start_spin_without_select();
 
-	bool has_untravelled();
-	bool has_untravelled_now();
-	void print_list_counts();
+    int start_spin();
+    int start_spin_realtime();
 
-	bool fully_empty();
+    [[deprecated]] void spin_join();
+    void join_spin();
 
-	int64_t get_minimal_timeout();
+    bool has_untravelled();
+    bool has_untravelled_now();
+    void print_list_counts();
 
-	// Завершить гейты.
-	void finish();
+    bool fully_empty();
+
+    int64_t get_minimal_timeout();
+
+    // Завершить гейты.
+    void finish();
 }
 
 #endif

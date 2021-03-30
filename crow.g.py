@@ -45,7 +45,7 @@ licant.modules.module("crow",
 		"proto/msgbox.cpp",
 		"proto/channel-sync.cpp",
 		"pubsub/pubsub.cpp",
-		"proto/service.cpp",
+		#"proto/service.cpp",
 		"proto/rpc.cpp",
 
 		"addons/noslogger.cpp",
@@ -59,7 +59,7 @@ licant.modules.module("crow",
 		"crow.diagnostic",
 		"crow.select",
 
-		"crow.crowker.service_node"
+		#"crow.crowker.service_node"
 	]
 )
 

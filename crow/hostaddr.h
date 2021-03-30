@@ -6,73 +6,86 @@
 
 namespace crow
 {
-	class hostaddr_view;
-	
-	class hostaddr 
-	{
-		std::vector<uint8_t> _addr;
+    class hostaddr_view;
 
-	public:
-		hostaddr() = default;
+    class hostaddr
+    {
+        std::vector<uint8_t> _addr;
 
-		const uint8_t * data() const {return _addr.data();}
-		size_t size() const {return _addr.size();}
+      public:
+        hostaddr() = default;
 
-		hostaddr(const std::vector<uint8_t> & addr) 
-			: _addr(addr)
-		{}
+        const uint8_t *data() const { return _addr.data(); }
+        size_t size() const { return _addr.size(); }
 
-		hostaddr(const hostaddr_view & addr);
+        hostaddr(const std::vector<uint8_t> &addr) : _addr(addr) {}
 
-		hostaddr(std::vector<uint8_t> && addr) 
-			: _addr(std::move(addr))
-		{}
+        hostaddr(const hostaddr_view &addr);
 
-		hostaddr(uint8_t * addr, size_t len) 
-			: _addr(addr, addr+len)
-		{}
+        hostaddr(std::vector<uint8_t> &&addr) : _addr(std::move(addr)) {}
 
-		hostaddr& operator = (std::vector<uint8_t> && addr) 
-		{
-			_addr = std::move(addr);
-			return*this;
-		}
+        hostaddr(uint8_t *addr, size_t len) : _addr(addr, addr + len) {}
 
-		hostaddr& operator = (const std::vector<uint8_t> & addr) 
-		{
-			_addr = addr;
-			return*this;
-		}
+        hostaddr &operator=(std::vector<uint8_t> &&addr)
+        {
+            _addr = std::move(addr);
+            return *this;
+        }
 
-		hostaddr_view view();
+        hostaddr &operator=(const std::vector<uint8_t> &addr)
+        {
+            _addr = addr;
+            return *this;
+        }
 
-		operator hostaddr_view();
-	};
+        hostaddr_view view();
 
-	class hostaddr_view
-	{
-	public:
-		const uint8_t * addr;
-		size_t       alen;
+        operator hostaddr_view();
+    };
 
-		hostaddr_view() = default;
-		hostaddr_view(const hostaddr& h) : addr(h.data()), alen(h.size()) {}
-		hostaddr_view(const igris::buffer & v) : addr((uint8_t*)v.data()), alen(v.size()) {}
-		hostaddr_view(const uint8_t * addr, size_t alen) : addr(addr), alen(alen) {}
-		hostaddr_view(const char * addr, size_t alen) : addr((uint8_t*)addr), alen(alen) {}
-		hostaddr_view(const void * addr, size_t alen) : addr((uint8_t*)addr), alen(alen) {}
+    class hostaddr_view
+    {
+      public:
+        const uint8_t *addr;
+        size_t alen;
 
-		template <class Alloc>
-		hostaddr_view(const std::vector<uint8_t, Alloc> & v) : addr(v.data()), alen(v.size()) {}
+        hostaddr_view() = default;
+        hostaddr_view(const hostaddr &h) : addr(h.data()), alen(h.size()) {}
+        hostaddr_view(const igris::buffer &v)
+            : addr((uint8_t *)v.data()), alen(v.size())
+        {
+        }
+        hostaddr_view(const uint8_t *addr, size_t alen) : addr(addr), alen(alen)
+        {
+        }
+        hostaddr_view(const char *addr, size_t alen)
+            : addr((uint8_t *)addr), alen(alen)
+        {
+        }
+        hostaddr_view(const void *addr, size_t alen)
+            : addr((uint8_t *)addr), alen(alen)
+        {
+        }
 
-		const uint8_t * data() const { return addr; }
-		size_t size() const { return alen; }
+        template <class Alloc>
+        hostaddr_view(const std::vector<uint8_t, Alloc> &v)
+            : addr(v.data()), alen(v.size())
+        {
+        }
 
-		bool operator == (igris::buffer buf) 
-		{
-			return alen == buf.size() && memcmp(addr, buf.data(), alen) == 0;
-		}
-	};
+        const uint8_t *data() const { return addr; }
+        size_t size() const { return alen; }
+
+        bool operator==(igris::buffer buf) const
+        {
+            return alen == buf.size() && memcmp(addr, buf.data(), alen) == 0;
+        }
+
+        bool operator==(const hostaddr_view &buf) const
+        {
+            return alen == buf.size() && memcmp(addr, buf.data(), alen) == 0;
+        }
+    };
 }
 
 #endif

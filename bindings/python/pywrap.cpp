@@ -44,10 +44,9 @@ PYBIND11_MODULE(libcrow, m)
 		auto buf = self->rawdata();
 		return {buf.data(), buf.size()};
 	})
-	.def("addr", [](packet_ptr & self) -> py::bytes
+	.def("addr", [](packet_ptr & self) -> crow::hostaddr
 	{
-		auto buf = self->addr();
-		return {buf.data(), buf.size()};
+		return self->addr();
 	});
 
 	py::class_<node_packet_ptr>(m, "node_packet_ptr", pack)

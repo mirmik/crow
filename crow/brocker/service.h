@@ -69,7 +69,7 @@ namespace crow
             dprln("CONTROL NODE INCOMMING");
 
             auto nodemsg = node::message(pack);
-            igris::buffer saddr = pack->addr();
+            auto saddr = pack->addr();
             auto sid = node::sid(pack);
 
             igris::binreader reader(nodemsg.data());
