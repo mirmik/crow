@@ -114,6 +114,8 @@ PYBIND11_MODULE(libcrow, m)
 	m.def("spin", &crow::spin);
 	m.def("start_spin", &crow::start_spin);
 	m.def("stop_spin", &crow::stop_spin);
+	m.def("start_resubscribe_thread", &crow::start_resubscribe_thread);
+
 
 	m.def("set_incoming_handler", [](py::function f)
 	{
