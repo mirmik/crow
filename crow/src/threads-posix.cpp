@@ -201,7 +201,7 @@ void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
     thr.detach();
 }
 
-int crow::start_resubscribe_thread(int millis) 
+void crow::start_resubscribe_thread(int millis) 
 {
 	crow::pubsub_protocol_cls::start_resubscribe_thread(millis);
 }
