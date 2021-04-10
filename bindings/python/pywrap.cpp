@@ -110,11 +110,6 @@ PYBIND11_MODULE(libcrow, m)
 	});
 
 	m.def("create_udpgate", &crow::create_udpgate);
-	m.def("onestep", &crow::onestep);
-	m.def("spin", &crow::spin);
-	m.def("start_spin", &crow::start_spin);
-	m.def("stop_spin", &crow::stop_spin);
-	m.def("start_resubscribe_thread", &crow::start_resubscribe_thread);
 
 
 	m.def("set_incoming_handler", [](py::function f)
@@ -203,7 +198,10 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("join_spin", &crow::join_spin, py::call_guard<py::gil_scoped_release>());
 	m.def("start_spin", &crow::start_spin);
-	m.def("stop_spin", &crow::stop_spin);
+	m.def("stop_spin", &crow::stop_spin, py::arg("wait")=true);
+	m.def("onestep", &crow::onestep);
+	m.def("spin", &crow::spin);
+	m.def("start_resubscribe_thread", &crow::start_resubscribe_thread);
 
 	m.def("get_gateway", &crow::get_gateway);
 
