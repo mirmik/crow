@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
-#include <igris/dprint.h>
 #include <crow/hostaddr.h>
 #include <crow/hexer.h>
 
