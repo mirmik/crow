@@ -5,9 +5,9 @@
 #include <crow/proto/protocol.h>
 #include <crow/tower.h>
 
-#include <igris/buffer.h>
 #include <igris/event/delegate.h>
 #include <igris/sync/syslock.h>
+#include <string_view>
 
 #include <string_view>
 
@@ -60,13 +60,13 @@ namespace crow
 
     crow::packet_ptr publish(const crow::hostaddr_view &addr,
                              const std::string_view theme,
-                             const igris::buffer data, uint8_t qos,
+                             const std::string_view data, uint8_t qos,
                              uint16_t acktime, uint8_t type = PUBLISH);
 
     crow::packet_ptr publish_v(const crow::hostaddr_view &addr,
                                const std::string_view theme,
-                               const igris::buffer *vec, int vecsz, uint8_t qos,
-                               uint16_t acktime);
+                               const std::string_view *vec, int vecsz,
+                               uint8_t qos, uint16_t acktime);
 
     void subscribe(const crow::hostaddr_view &addr, std::string_view theme,
                    uint8_t qo0, uint16_t acktime, uint8_t rqos,
@@ -108,20 +108,21 @@ namespace crow
 
     namespace pubsub
     {
-        static inline igris::buffer get_theme(crow::packet *pack)
+        static inline std::string_view get_theme(crow::packet *pack)
         {
             struct crow_subheader_pubsub *shps = get_subheader_pubsub(pack);
-            return igris::buffer(crow::packet_pubsub_thmptr(pack), shps->thmsz);
+            return std::string_view(crow::packet_pubsub_thmptr(pack),
+                                    shps->thmsz);
         }
 
-        static inline igris::buffer get_data(crow::packet *pack)
+        static inline std::string_view get_data(crow::packet *pack)
         {
             assert(pack->header.f.type == CROW_PUBSUB_PROTOCOL);
             struct crow_subheader_pubsub_data *shps_d =
                 get_subheader_pubsub_data(pack);
 
-            return igris::buffer(crow::packet_pubsub_datptr(pack),
-                                 shps_d->datsz);
+            return std::string_view(crow::packet_pubsub_datptr(pack),
+                                    shps_d->datsz);
         }
     } // namespace pubsub
 
@@ -134,9 +135,9 @@ namespace crow
         {
         }
 
-        igris::buffer theme() { return pubsub::get_theme(pack); }
-        igris::buffer data() { return pubsub::get_data(pack); }
-        igris::buffer message() { return pubsub::get_data(pack); }
+        std::string_view theme() { return pubsub::get_theme(pack); }
+        std::string_view data() { return pubsub::get_data(pack); }
+        std::string_view message() { return pubsub::get_data(pack); }
     };
 } // namespace crow
 

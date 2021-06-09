@@ -3,9 +3,9 @@
 
 #include <crow/proto/node.h>
 
-#include <igris/buffer.h>
 #include <igris/datastruct/dlist.h>
 #include <igris/event/delegate.h>
+#include <string_view>
 
 #include <string>
 #include <unordered_map>
@@ -39,8 +39,8 @@ namespace crow
     class remote_function_basic
     {
       public:
-        virtual int invoke(igris::buffer data, igris::buffer out) = 0;
-        virtual int invoke_text_format(igris::buffer data,
+        virtual int invoke(std::string_view data, std::string_view out) = 0;
+        virtual int invoke_text_format(std::string_view data,
                                        std::string &out) = 0;
         virtual size_t outsize() = 0;
     };
@@ -53,8 +53,8 @@ namespace crow
       public:
         remote_function(igris::delegate<Ret, Args...> dlg) : dlg(dlg) {}
 
-        int invoke(igris::buffer data, igris::buffer output) override;
-        int invoke_text_format(igris::buffer data,
+        int invoke(std::string_view data, std::string_view output) override;
+        int invoke_text_format(std::string_view data,
                                std::string &output) override;
         size_t outsize() override { return sizeof_helper<Ret>::size; }
     };
@@ -83,7 +83,7 @@ namespace crow
       public:
         template <class Ret, class... Args>
         void remote_request(crow::hostaddr_view addr, nid_t rid,
-                            const char *fname, Args &&... args)
+                            const char *fname, Args &&...args)
         {
             std::string args_data;
             igris::archive::binary_string_writer writer(args_data);
@@ -93,7 +93,7 @@ namespace crow
             writer.dump(format);
 
             // дампим имя функции.
-            writer.dump(igris::buffer(fname, strlen(fname)));
+            writer.dump(std::string_view(fname, strlen(fname)));
 
             // массово запаковываем аргументы c помощью трикса.
             int ___[] = {(writer.dump(args), 0)...};
@@ -113,7 +113,7 @@ namespace crow
             writer.dump(format);
 
             // дампим имя функции.
-            writer.dump(igris::buffer(fname, strlen(fname)));
+            writer.dump(std::string_view(fname, strlen(fname)));
 
             igris::serialize(writer, args);
 
@@ -130,7 +130,7 @@ namespace crow
         {
             int8_t status;
 
-            igris::buffer data = crow::node_data(incpack);
+            std::string_view data = crow::node_data(incpack);
             igris::archive::binary_buffer_reader reader(data);
 
             reader.load(status);
@@ -146,7 +146,7 @@ namespace crow
         {
             int8_t status;
 
-            igris::buffer data = crow::node_data(incpack);
+            std::string_view data = crow::node_data(incpack);
             igris::archive::binary_buffer_reader reader(data);
 
             reader.load(status);
@@ -172,7 +172,7 @@ namespace crow
         }
 
         template <class Ret, class... Args>
-        int request(const char *fname, Ret &out, Args &&... args)
+        int request(const char *fname, Ret &out, Args &&...args)
         {
             rpc_request_node wnode;
             int status;
@@ -214,13 +214,13 @@ namespace crow
 
 template <class Ret, class... Args>
 int crow::remote_function<Ret, Args...>::invoke(
-    /*int8_t format, */ igris::buffer data, igris::buffer out)
+    /*int8_t format, */ std::string_view data, std::string_view out)
 {
     std::tuple<Args...> args = igris::deserialize<std::tuple<Args...>>(data);
 
     Ret ret = std::apply(dlg, args);
 
-    igris::archive::binwriter writer(out.data(), out.size());
+    igris::archive::binwriter writer((char *)out.data(), out.size());
     igris::serialize(writer, ret);
 
     return 0;
@@ -246,12 +246,12 @@ template <class Tuple, size_t... I>
 static void __expand(std::index_sequence<I...>, Tuple &&tpl,
                      const igris::trent &tr)
 {
-    std::apply([&](auto &&... args) { (__bind(args, tr[(int)I]), ...); }, tpl);
+    std::apply([&](auto &&...args) { (__bind(args, tr[(int)I]), ...); }, tpl);
 }
 
 template <class Ret, class... Args>
-int crow::remote_function<Ret, Args...>::invoke_text_format(igris::buffer data,
-                                                            std::string &out)
+int crow::remote_function<Ret, Args...>::invoke_text_format(
+    std::string_view data, std::string &out)
 {
     igris::trent tr;
     std::string strargs = igris::deserialize<std::string>(data);

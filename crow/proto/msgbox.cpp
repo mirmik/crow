@@ -2,7 +2,7 @@
 
 crow::node_packet_ptr crow::msgbox::query(uint16_t rid,
                                           const crow::hostaddr_view &addr,
-                                          const igris::buffer data, uint8_t qos,
+                                          const std::string_view data, uint8_t qos,
                                           uint16_t ackquant)
 {
     assert(dlist_empty(&messages));
@@ -35,7 +35,7 @@ crow::node_packet_ptr crow::msgbox::receive()
 }
 
 crow::packet_ptr crow::msgbox::reply(crow::node_packet_ptr msg,
-                                     igris::buffer data, uint8_t qos,
+                                     std::string_view data, uint8_t qos,
                                      uint16_t ackquant)
 {
     return send(msg.rid(), msg->addr(), data, qos, ackquant);

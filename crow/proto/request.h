@@ -39,7 +39,7 @@ namespace crow
     static inline oneshoot_async_requester *
     async_request(void (*dlg)(void *, int, crow::packet *), void *arg,
                   nid_t rid, const crow::hostaddr_view &addr,
-                  igris::buffer data, uint8_t qos, uint16_t ackquant)
+                  std::string_view data, uint8_t qos, uint16_t ackquant)
     {
         if (qos == 0)
         {
@@ -57,7 +57,7 @@ namespace crow
     static inline oneshoot_async_requester *
     async_request_v(void (*dlg)(void *, int, crow::packet *), void *arg,
                     nid_t rid, const crow::hostaddr_view &addr,
-                    igris::buffer *data, int len, uint8_t qos,
+                    std::string_view *data, int len, uint8_t qos,
                     uint16_t ackquant)
     {
         if (qos == 0)

@@ -16,7 +16,10 @@ namespace crow
       public:
         publisher() {}
 
-        publisher(const crow::hostaddr_view &addr, const char *theme);
+        publisher(const crow::hostaddr_view &addr, const char *theme)
+        {
+            init(addr, theme);
+        }
 
         void init(const crow::hostaddr_view &addr, const char *theme,
                   uint8_t qos = 0, uint16_t acktime = 50)
@@ -27,22 +30,22 @@ namespace crow
             this->acktime = acktime;
         }
 
-        void publish(const igris::buffer data)
+        void publish(const std::string_view data)
         {
             crow::publish(addr, theme, data, qos, acktime);
         }
 
-        void publish(const igris::buffer data, uint8_t qos, uint16_t acktime)
+        void publish(const std::string_view data, uint8_t qos, uint16_t acktime)
         {
             crow::publish(addr, theme, data, qos, acktime);
         }
 
-        void publish_v(const igris::buffer *vec, int vecsz)
+        void publish_v(const std::string_view *vec, int vecsz)
         {
             crow::publish_v(addr, theme, vec, vecsz, qos, acktime);
         }
 
-        void publish_v(const igris::buffer *vec, int vecsz, uint8_t qos,
+        void publish_v(const std::string_view *vec, int vecsz, uint8_t qos,
                        uint16_t acktime)
         {
             crow::publish_v(addr, theme, vec, vecsz, qos, acktime);

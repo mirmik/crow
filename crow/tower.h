@@ -36,18 +36,18 @@ namespace crow
     void diagnostic_setup(bool en, bool len = false);
 
     // Отправить пакет.
-    crow::packet_ptr send(const crow::hostaddr_view &addr, igris::buffer data,
-                          uint8_t type, uint8_t qos, uint16_t ackquant,
-                          bool fastsend = false);
+    crow::packet_ptr send(const crow::hostaddr_view &addr,
+                          std::string_view data, uint8_t type, uint8_t qos,
+                          uint16_t ackquant, bool fastsend = false);
 
     crow::packet_ptr send_v(const crow::hostaddr_view &addr,
-                            const igris::buffer *vec, size_t veclen,
+                            const std::string_view *vec, size_t veclen,
                             uint8_t type, uint8_t qos, uint16_t ackquant,
                             bool fastsend = false);
 
     crow::packet_ptr send_vv(const crow::hostaddr_view &addr,
-                             const igris::buffer *vec, size_t veclen,
-                             const igris::buffer *vec2, size_t veclen2,
+                             const std::string_view *vec, size_t veclen,
+                             const std::string_view *vec2, size_t veclen2,
                              uint8_t type, uint8_t qos, uint16_t ackquant,
                              bool fastsend = false);
 

@@ -28,7 +28,7 @@ namespace crow
         uint16_t ackquant = 50;
 
       public:
-        void send(igris::buffer data, bool fastsend = false)
+        void send(std::string_view data, bool fastsend = false)
         {
             auto time = std::chrono::system_clock::now();
 
@@ -54,7 +54,7 @@ namespace crow
             }
         }
 
-        void send_v(igris::buffer *data, size_t sz, bool fastsend = false)
+        void send_v(std::string_view *data, size_t sz, bool fastsend = false)
         {
 
             auto time = std::chrono::system_clock::now();
@@ -97,12 +97,14 @@ namespace crow
 
     class spam_subscriber : public crow::node
     {
-        igris::delegate<void, igris::buffer> dlg;
+        igris::delegate<void, std::string_view> dlg;
         std::vector<uint8_t> addr;
         int nid;
 
       public:
-        spam_subscriber(igris::delegate<void, igris::buffer> dlg) : dlg(dlg) {}
+        spam_subscriber(igris::delegate<void, std::string_view> dlg) : dlg(dlg)
+        {
+        }
 
         void subscribe(nid_t nid, crow::hostaddr_view host, uint8_t qos = 2,
                        uint16_t ackquant = 200)

@@ -24,10 +24,7 @@ public:
 
 	void newpack_handler(crow::pubsub_packet_ptr ptr) override
 	{
-		//py::scoped_interpreter python;
-		nos::println("newpack_handler");
 		delegate(ptr);
-		nos::println("newpack_handler...ok");
 	}
 
 	void subscribe(

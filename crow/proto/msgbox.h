@@ -22,12 +22,12 @@ namespace crow
       public:
         crow::node_packet_ptr query(uint16_t rid,
                                     const crow::hostaddr_view &addr,
-                                    const igris::buffer data, uint8_t qos,
+                                    const std::string_view data, uint8_t qos,
                                     uint16_t ackquant);
 
         crow::node_packet_ptr receive();
 
-        crow::packet_ptr reply(crow::node_packet_ptr msg, igris::buffer data,
+        crow::packet_ptr reply(crow::node_packet_ptr msg, std::string_view data,
                                uint8_t qos, uint16_t ackquant);
 
         void incoming_packet(crow::packet *pack) override;

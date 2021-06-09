@@ -20,7 +20,7 @@ void crow::pubsub_protocol_cls::incoming(crow::packet *pack)
     else
     {
         crow::subscriber *sub;
-        igris::buffer theme = crow::pubsub::get_theme(pack);
+        std::string_view theme = crow::pubsub::get_theme(pack);
 
         dlist_for_each_entry(sub, &subscribers, lnk)
         {
@@ -48,7 +48,7 @@ void crow::pubsub_protocol_cls::undelivered(crow::packet *pack)
 
 crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
                                const std::string_view theme,
-                               const igris::buffer data, uint8_t qos,
+                               const std::string_view data, uint8_t qos,
                                uint16_t acktime, uint8_t type)
 {
     struct crow_subheader_pubsub subps;
@@ -58,10 +58,10 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
     subps.thmsz = theme.size();
     subps_d.datsz = data.size();
 
-    const igris::buffer iov[4] = {
-        {&subps, sizeof(subps)},
-        {&subps_d, sizeof(subps_d)},
-        {theme.data(), subps.thmsz},
+    const std::string_view iov[4] = {
+        {(char*)&subps, sizeof(subps)},
+        {(char*)&subps_d, sizeof(subps_d)},
+        {(char*)theme.data(), subps.thmsz},
         data,
     };
 
@@ -71,7 +71,7 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
 
 crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
                                  const std::string_view theme,
-                                 const igris::buffer *vec, int vecsz,
+                                 const std::string_view *vec, int vecsz,
                                  uint8_t qos, uint16_t acktime)
 {
     struct crow_subheader_pubsub subps;
@@ -86,10 +86,10 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
         subps_d.datsz += vec[i].size();
     }
 
-    const igris::buffer iov[4] = {
-        {&subps, sizeof(subps)},
-        {&subps_d, sizeof(subps_d)},
-        {theme.data(), subps.thmsz},
+    const std::string_view iov[4] = {
+        {(char*)&subps, sizeof(subps)},
+        {(char*)&subps_d, sizeof(subps_d)},
+        {(char*)theme.data(), subps.thmsz},
     };
 
     return crow::send_vv(addr, iov, 4, vec, vecsz, CROW_PUBSUB_PROTOCOL, qos,
@@ -110,10 +110,10 @@ void crow::subscribe(const crow::hostaddr_view &addr,
     subps_c.qos = rqos;
     subps_c.ackquant = racktime;
 
-    const igris::buffer iov[3] = {
-        {&subps, sizeof(subps)},
-        {&subps_c, sizeof(subps_c)},
-        {theme.data(), theme.size()},
+    const std::string_view iov[3] = {
+        {(char*)&subps, sizeof(subps)},
+        {(char*)&subps_c, sizeof(subps_c)},
+        {(char*)theme.data(), theme.size()},
     };
 
     crow::send_v(addr, iov, 3, CROW_PUBSUB_PROTOCOL, qos, acktime);

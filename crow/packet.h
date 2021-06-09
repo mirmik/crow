@@ -12,9 +12,9 @@
 #include <crow/defs.h>
 #include <crow/hostaddr.h>
 
-#include <igris/buffer.h>
 #include <igris/container/pool.h>
 #include <igris/datastruct/dlist.h>
+#include <string_view>
 
 /// Качество обслуживания.
 #define CROW_WITHOUT_ACK 0
@@ -85,14 +85,17 @@ namespace crow
         char *endptr() { return (char *)(&header) + header.flen; }
         uint16_t blocksize() { return header.flen; }
 
-        igris::buffer rawdata() { return igris::buffer(dataptr(), datasize()); }
+        std::string_view rawdata()
+        {
+            return std::string_view(dataptr(), datasize());
+        }
         crow::hostaddr_view addr()
         {
-            return igris::buffer(addrptr(), addrsize());
+            return std::string_view((char *)addrptr(), addrsize());
         }
 
         void revert_gate(uint8_t gateindex);
-        void revert(igris::buffer *vec, size_t veclen);
+        void revert(std::string_view *vec, size_t veclen);
 
         uint8_t *addrptr() { return (uint8_t *)(&header + 1); }
         uint8_t addrsize() { return header.alen; }

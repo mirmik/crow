@@ -58,7 +58,13 @@ PYBIND11_MODULE(libcrow, m)
 	});
 
 
-	py::class_<pubsub_packet_ptr>(m, "pubsub_packet_ptr", pack);
+	py::class_<pubsub_packet_ptr>(m, "pubsub_packet_ptr", pack)
+	.def("message",
+	     [](pubsub_packet_ptr & self) -> py::bytes
+	{
+		auto buf = self.message();
+		return {buf.data(), buf.size()};
+	});;
 
 	py::class_<crow::hostaddr>(m, "hostaddr")
 	.def(py::init<const crow::hostaddr_view&>())
@@ -128,7 +134,7 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("subscribe",
 	      (void (*)(
-	           const std::vector<uint8_t> & addr,
+	           const crow::hostaddr & addr,
 	           const std::string & theme,
 	           uint8_t ack, uint16_t ackquant,
 	           uint8_t rack, uint16_t rackquant)) &subscribe,
@@ -139,7 +145,7 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("publish",
 	      [](
-	           const std::vector<uint8_t> & addr,
+	           const crow::hostaddr & addr,
 	           const std::string & theme,
 	           const std::string & data,
 	           uint8_t ack, uint16_t ackquant) 

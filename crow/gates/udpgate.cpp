@@ -36,8 +36,10 @@ void crow::udpgate::nblock_onestep()
 
     crow::packet_initialization(block, this);
 
-    igris::buffer vec[3] = {
-        {&id, 1}, {&sender.sin_addr.s_addr, 4}, {&sender.sin_port, 2}};
+    std::string_view vec[3] = {
+        {(char*)&id, 1}, 
+        {(char*)&sender.sin_addr.s_addr, 4}, 
+        {(char*)&sender.sin_port, 2}};
 
     block->revert(vec, 3);
 

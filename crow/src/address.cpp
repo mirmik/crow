@@ -1,4 +1,5 @@
 #include <crow/address.h>
+#include <string>
 
 namespace crow
 {

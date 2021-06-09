@@ -40,7 +40,7 @@ void incoming_crowker_handler(struct crow::packet *pack)
     case MESSAGE:
     {
         crow::subscriber *sub;
-        igris::buffer theme = crow::pubsub::get_theme(pack);
+        std::string_view theme = crow::pubsub::get_theme(pack);
 
         dlist_for_each_entry(sub, &crow::pubsub_protocol.subscribers, lnk)
         {

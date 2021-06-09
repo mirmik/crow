@@ -1,11 +1,11 @@
 #ifndef CROW_WARN_H
 #define CROW_WARN_H
 
-#include <igris/buffer.h>
+#include <string_view>
 
-namespace crow 
+namespace crow
 {
-	void warn(igris::buffer msg);
+    void warn(std::string_view msg);
 }
 
 #endif

@@ -3,9 +3,9 @@
 
 #include <crow/proto/node.h>
 
-#include <igris/buffer.h>
 #include <igris/event/delegate.h>
 #include <igris/sync/syslock.h>
+#include <string_view>
 
 #define CROW_CHANNEL_INIT 0
 #define CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST 1
@@ -99,7 +99,7 @@ namespace crow
 
         int send(const char *data, size_t size);
 
-        static igris::buffer getdata(crow::packet *pack);
+        static std::string_view getdata(crow::packet *pack);
 
         //////////////////SYNC API/////////////////////////
         int connect(const uint8_t *raddr, uint16_t rlen, uint16_t rid,

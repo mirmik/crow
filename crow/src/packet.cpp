@@ -48,10 +48,10 @@ void crow::packet::revert_gate(uint8_t gateindex)
     ++header.stg;
 }
 
-void crow::packet::revert(igris::buffer *vec, size_t veclen)
+void crow::packet::revert(std::string_view *vec, size_t veclen)
 {
-    igris::buffer *it = vec + veclen - 1;
-    igris::buffer *eit = vec - 1;
+    std::string_view *it = vec + veclen - 1;
+    std::string_view *eit = vec - 1;
 
     size_t sz = 0;
     uint8_t *tgt = stageptr();

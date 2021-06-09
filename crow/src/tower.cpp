@@ -417,7 +417,7 @@ crow::packet_ptr crow_transport(crow::packet *pack, bool fastsend)
 }
 
 crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
-                            const igris::buffer data, uint8_t type, uint8_t qos,
+                            const std::string_view data, uint8_t type, uint8_t qos,
                             uint16_t ackquant, bool fastsend)
 {
     crow::packet *pack = crow::create_packet(NULL, addr.size(), data.size());
@@ -438,13 +438,13 @@ crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
-                              const igris::buffer *vec, size_t veclen,
+                              const std::string_view *vec, size_t veclen,
                               uint8_t type, uint8_t qos, uint16_t ackquant,
                               bool fastsend)
 {
     size_t dsize = 0;
-    const igris::buffer *it = vec;
-    const igris::buffer *const eit = vec + veclen;
+    const std::string_view *it = vec;
+    const std::string_view *const eit = vec + veclen;
 
     for (; it != eit; ++it)
     {
@@ -474,14 +474,14 @@ crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
-                               const igris::buffer *vec, size_t veclen,
-                               const igris::buffer *vec2, size_t veclen2,
+                               const std::string_view *vec, size_t veclen,
+                               const std::string_view *vec2, size_t veclen2,
                                uint8_t type, uint8_t qos, uint16_t ackquant,
                                bool fastsend)
 {
     size_t dsize = 0;
-    const igris::buffer *it;
-    const igris::buffer *eit;
+    const std::string_view *it;
+    const std::string_view *eit;
 
     it = vec;
     eit = vec + veclen;

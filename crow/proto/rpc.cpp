@@ -5,9 +5,9 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     int8_t format;
     int8_t status;
 
-    igris::buffer data;
-    igris::buffer outdata;
-    igris::buffer function_name;
+    std::string_view data;
+    std::string_view outdata;
+    std::string_view function_name;
     crow::node_subheader *nsh = crow::node::subheader(pack);
 
     data = crow::node_data(pack);
@@ -17,8 +17,10 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     reader.load(format);
     reader.load_set_buffer(function_name);
 
-    data = igris::buffer{reader.pointer(), (size_t)((char *)reader.end() -
-                                                    (char *)reader.pointer())};
+    data = std::string_view{
+        (char*)reader.pointer(), 
+        (size_t)((char *)reader.end() - (char *)reader.pointer())
+    };
 
     remote_function_basic *procedure =
         rfuncmap[std::string(function_name.data(), function_name.size())];
@@ -26,8 +28,9 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     {
         status = CROW_RPC_ERROR_FUNCTION_NOT_FOUNDED;
 
-        igris::buffer vdata[] = {
-            {&status, 1},
+        std::string_view vdata[] =
+        {
+            {(char*)&status, 1},
         };
 
         crow::node_send_v(nsh->rid, nsh->sid, pack->addr(), vdata, 1, 0, 10);
@@ -40,10 +43,14 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     {
         size_t outsize = procedure->outsize();
         void *outbuf = alloca(outsize);
-        outdata = igris::buffer{outbuf, outsize};
+        outdata = std::string_view{(char*)outbuf, outsize};
         status = procedure->invoke(data, outdata);
 
-        igris::buffer vdata[] = {{&status, 1}, outdata};
+        std::string_view vdata[] =
+        {
+            {(char*)&status, 1},
+            outdata
+        };
 
         crow::node_send_v(nsh->rid, nsh->sid, pack->addr(), vdata, 2, 0, 10);
     }
@@ -66,8 +73,9 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     {
         status = CROW_RPC_ERROR_UNRESOLVED_FORMAT;
 
-        igris::buffer vdata[] = {
-            {&status, 1},
+        std::string_view vdata[] =
+        {
+            {(char*)&status, 1},
         };
 
         crow::node_send_v(nsh->rid, nsh->sid, pack->addr(), vdata, 1, 0, 10);

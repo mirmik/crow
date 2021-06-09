@@ -1,7 +1,8 @@
 #ifndef CROW_HOSTADDR_H
 #define CROW_HOSTADDR_H
 
-#include <igris/buffer.h>
+#include <cstring>
+#include <string_view>
 #include <vector>
 
 namespace crow
@@ -51,7 +52,7 @@ namespace crow
 
         hostaddr_view() = default;
         hostaddr_view(const hostaddr &h) : addr(h.data()), alen(h.size()) {}
-        hostaddr_view(const igris::buffer &v)
+        hostaddr_view(const std::string_view &v)
             : addr((uint8_t *)v.data()), alen(v.size())
         {
         }
@@ -76,7 +77,7 @@ namespace crow
         const uint8_t *data() const { return addr; }
         size_t size() const { return alen; }
 
-        bool operator==(igris::buffer buf) const
+        bool operator==(std::string_view buf) const
         {
             return alen == buf.size() && memcmp(addr, buf.data(), alen) == 0;
         }

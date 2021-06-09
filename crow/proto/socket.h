@@ -20,10 +20,10 @@ namespace crow
 
         void undelivered_packet(crow::packet *pack) { crow::release(pack); }
 
-        crow::packet_ptr send(int rid, igris::buffer addr, const char *data,
+        crow::packet_ptr send(int rid, std::string_view addr, const char *data,
                               size_t len, uint8_t qos, uint16_t ackquant)
         {
-            return node_send(id, rid, addr, igris::buffer(data, len), qos,
+            return node_send(id, rid, addr, std::string_view(data, len), qos,
                              ackquant);
         }
 

@@ -20,18 +20,19 @@ namespace crow
 {
     crow::packet_ptr node_send(uint16_t sid, uint16_t rid,
                                const crow::hostaddr_view &addr,
-                               const igris::buffer data, uint8_t qos,
+                               const std::string_view data, uint8_t qos,
                                uint16_t ackquant, bool fastsend = false);
 
     crow::packet_ptr node_send_special(uint16_t sid, uint16_t rid,
                                        const crow::hostaddr_view &addr,
-                                       uint8_t type, const igris::buffer data,
-                                       uint8_t qos, uint16_t ackquant,
+                                       uint8_t type,
+                                       const std::string_view data, uint8_t qos,
+                                       uint16_t ackquant,
                                        bool fastsend = false);
 
     crow::packet_ptr node_send_v(uint16_t sid, uint16_t rid,
                                  const crow::hostaddr_view &addr,
-                                 const igris::buffer *vec, size_t veclen,
+                                 const std::string_view *vec, size_t veclen,
                                  uint8_t qos, uint16_t ackquant,
                                  bool fastsend = false);
 
@@ -67,7 +68,7 @@ namespace crow
             };
         };
 
-        int parse(igris::buffer data)
+        int parse(std::string_view data)
         {
             igris::binreader reader(data.data());
 
@@ -89,8 +90,8 @@ namespace crow
 
     static auto node_data(crow::packet *pack)
     {
-        return igris::buffer(pack->dataptr() + sizeof(node_subheader),
-                             pack->datasize() - sizeof(node_subheader));
+        return std::string_view(pack->dataptr() + sizeof(node_subheader),
+                                pack->datasize() - sizeof(node_subheader));
     }
 
     class node
@@ -132,7 +133,7 @@ namespace crow
         };
 
         crow::packet_ptr send(uint16_t rid, const crow::hostaddr_view &raddr,
-                              const igris::buffer data, uint8_t qos,
+                              const std::string_view data, uint8_t qos,
                               uint16_t ackquant, bool fastsend = false)
         {
             assert(id != 0);
@@ -142,7 +143,7 @@ namespace crow
 
         crow::packet_ptr send_special(uint16_t rid,
                                       const crow::hostaddr_view &raddr,
-                                      uint8_t type, const igris::buffer data,
+                                      uint8_t type, const std::string_view data,
                                       uint8_t qos, uint16_t ackquant,
                                       bool fastsend = false)
         {
@@ -152,7 +153,7 @@ namespace crow
         }
 
         crow::packet_ptr send_v(uint16_t rid, const crow::hostaddr_view &raddr,
-                                const igris::buffer *vdat, size_t vlen,
+                                const std::string_view *vdat, size_t vlen,
                                 uint8_t qos, uint16_t ackquant,
                                 bool fastsend = false)
         {
@@ -161,7 +162,7 @@ namespace crow
                                      fastsend);
         }
 
-        static igris::buffer message(crow::packet *pack)
+        static std::string_view message(crow::packet *pack)
         {
             return node_data(pack);
         }
@@ -224,7 +225,7 @@ namespace crow
             return h->rid;
         }
 
-        igris::buffer message() { return node_data(pack); }
+        std::string_view message() { return node_data(pack); }
     };
 } // namespace crow
 
