@@ -100,13 +100,15 @@ void crow::spin_with_select()
     _spin_runned = false;
 }
 
-void crow::spin_with_select_realtime()
+void crow::spin_with_select_realtime(int abort_on_fault)
 {
     int ret;
     if ((ret = this_thread_set_realtime_priority()))
     {
         dprln("Error on set_realtime_priority", ret);
-        abort();
+
+        if (abort_on_fault)
+            abort();
     }
 
     crow::spin_with_select();
@@ -126,7 +128,7 @@ int crow::start_spin_with_select()
     return 0;
 }
 
-int crow::start_spin_with_select_realtime()
+int crow::start_spin_with_select_realtime(int abort_on_fault)
 {
     if (_spin_runned)
     {
@@ -135,16 +137,16 @@ int crow::start_spin_with_select_realtime()
 
     cancel_token = false;
     _spin_runned_unbounded = true;
-    _thread = std::thread(spin_with_select_realtime);
+    _thread = std::thread(spin_with_select_realtime, abort_on_fault);
 
     return 0;
 }
 
 int crow::start_spin() { return crow::start_spin_with_select(); }
 
-int crow::start_spin_realtime()
+int crow::start_spin_realtime(int abort_on_fault)
 {
-    return crow::start_spin_with_select_realtime();
+    return crow::start_spin_with_select_realtime(abort_on_fault);
 }
 
 int crow::start_spin_without_select()

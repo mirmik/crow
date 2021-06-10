@@ -65,15 +65,15 @@ namespace crow
 
     void spin();
     void spin_with_select();
-    void spin_with_select_realtime();
+    void spin_with_select_realtime(int abort_on_fault);
 
     int stop_spin(bool wait = true);
     int start_spin_with_select();
-    int start_spin_with_select_realtime();
+    int start_spin_with_select_realtime(int abort_on_fault);
     int start_spin_without_select();
 
     int start_spin();
-    int start_spin_realtime();
+    int start_spin_realtime(int abort_on_fault);
 
     void start_resubscribe_thread(int millis);
 
