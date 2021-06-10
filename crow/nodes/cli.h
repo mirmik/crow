@@ -33,13 +33,6 @@ namespace crow
         auto sh = crow::node::subheader(pack);
         auto data = crow::node_data(pack);
 
-        if (debug_mode)
-        {
-            dpr("clidata: ");
-            debug_write(data.data(), data.size());
-            dprln();
-        }
-
         char buf[32];
         memset(buf, 0, 32);
         typename Dictionary::iterator it;
@@ -53,13 +46,13 @@ namespace crow
         int argc;
 
         if (data.data()[data.size() - 1] == '\n')
-            data.data()[data.size() - 1] = 0;
+            ((char*)data.data())[data.size() - 1] = 0;
         else
         {
-            data.data()[data.size()] = 0;
+            ((char*)data.data())[data.size()] = 0;
         }
 
-        argc = argvc_internal_split_n(data.data(), data.size(), argv, 10);
+        argc = argvc_internal_split_n((char*)data.data(), data.size(), argv, 10);
 
         if (argc == 0)
             goto __end__;
