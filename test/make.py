@@ -16,7 +16,9 @@ application("runtests",
 	sources = [
 		"main.cpp",
 		"test0.cpp",
-		"node.cpp"
+		"node.cpp",
+		"cli.cpp",
+		"rpc.cpp"
 	],
 	mdepends=["crow", "crow.udpgate"],
 

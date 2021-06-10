@@ -77,9 +77,9 @@ PYBIND11_MODULE(libcrow, m)
 	.def(py::init<const std::vector<uint8_t>&>());
 	py::implicitly_convertible<crow::hostaddr, crow::hostaddr_view>();
 
-	/*py::class_<igris::buffer>(m, "igris_buffer")
+	/*py::class_<std::string_view>(m, "igris_buffer")
 	.def(py::init<const std::string&>())
-	.def("__init__", [](const py::str & s) -> igris::buffer 
+	.def("__init__", [](const py::str & s) -> std::string_view 
 	{
         char *buffer;
         ssize_t length;
@@ -89,8 +89,8 @@ PYBIND11_MODULE(libcrow, m)
         return {buffer, (size_t) length};
 	})
 	;
-	py::implicitly_convertible<std::string, igris::buffer>();
-	py::implicitly_convertible<py::str, igris::buffer>();*/
+	py::implicitly_convertible<std::string, std::string_view>();
+	py::implicitly_convertible<py::str, std::string_view>();*/
 
 	auto  __gateway__ =
 	    py::class_<gateway>(m, "gateway")

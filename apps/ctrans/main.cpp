@@ -127,7 +127,7 @@ std::string outformat_tostr()
 	return std::string();
 }
 
-void output_do(igris::buffer data, crow::packet* pack)
+void output_do(std::string_view data, crow::packet* pack)
 {
 	(void) pack;
 

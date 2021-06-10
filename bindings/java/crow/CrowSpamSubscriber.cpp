@@ -15,7 +15,7 @@ JavaVM * g_vm;
 
 void spam_subscriber_helper(
     void * privarg,
-    igris::buffer data)
+    std::string_view data)
 {
 	JNIEnv * env;
 	int getEnvStat = g_vm->GetEnv((void **)&env, JNI_VERSION_1_6);
