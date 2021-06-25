@@ -54,7 +54,8 @@ static void __crow_utilize(crow::packet *pack)
 
     if (__live_diagnostic_enabled)
     {
-        nos::println("alive packages total:", crow::allocated_count);
+        //nos::println("alive packages total:", crow::allocated_count);
+        // TODO : crow print function
     }
 }
 

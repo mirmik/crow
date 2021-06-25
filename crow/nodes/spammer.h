@@ -1,3 +1,7 @@
+/**
+    @file
+*/
+
 #ifndef CROW_NODE_SPAMMER_H
 #define CROW_NODE_SPAMMER_H
 
@@ -7,8 +11,6 @@
 #include <map>
 
 #include <igris/event/delegate.h>
-
-#include <nos/print.h>
 
 using namespace std::literals::chrono_literals;
 
@@ -126,6 +128,6 @@ namespace crow
             crow::release(pack);
         }
     };
-} // namespace crow
+}
 
 #endif

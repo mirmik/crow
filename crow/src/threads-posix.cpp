@@ -8,7 +8,6 @@
 
 #include <igris/osutil/fd.h>
 #include <igris/osutil/realtime.h>
-#include <nos/print.h>
 #include <unistd.h>
 
 #include <signal.h>

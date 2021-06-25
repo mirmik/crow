@@ -115,7 +115,8 @@ PYBIND11_MODULE(libcrow, m)
 		return crow::send(addr, data, type, qos, ackquant, fastsend);
 	});
 
-	m.def("create_udpgate", &crow::create_udpgate);
+	m.def("create_udpgate", &crow::create_udpgate, py::arg("id")=CROW_UDPGATE_NO, py::arg("port")=0);
+	m.def("crowker_address", &crow::crowker_address);
 
 
 	m.def("set_incoming_handler", [](py::function f)
@@ -140,8 +141,8 @@ PYBIND11_MODULE(libcrow, m)
 	           uint8_t rack, uint16_t rackquant)) &subscribe,
 	      py::arg("addr"),
 	      py::arg("theme"),
-	      py::arg("ack"), py::arg("ackquant"),
-	      py::arg("rack"), py::arg("rackquant"));
+	      py::arg("ack")=2, py::arg("ackquant")=50,
+	      py::arg("rack")=2, py::arg("rackquant")=50);
 
 	m.def("publish",
 	      [](
@@ -155,7 +156,8 @@ PYBIND11_MODULE(libcrow, m)
 	      py::arg("addr"),
 	      py::arg("theme"),
 	      py::arg("data"),
-	      py::arg("ack"), py::arg("ackquant"));
+	      py::arg("ack")=2, 
+	      py::arg("ackquant")=50);
 
 	static int unused; // the capsule needs something to reference
 	py::capsule cleanup(&unused, [](void *)

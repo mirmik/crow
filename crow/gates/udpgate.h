@@ -5,8 +5,6 @@
 #include <crow/gateway.h>
 #include <iostream>
 
-#include <nos/print.h>
-
 namespace crow
 {
 
@@ -39,7 +37,7 @@ namespace crow
         ~udpgate() override { finish(); }
     };
 
-    int create_udpgate(uint8_t id, uint16_t port = 0);
+    int create_udpgate(uint8_t id = CROW_UDPGATE_NO, uint16_t port = 0);
 } // namespace crow
 
 #endif

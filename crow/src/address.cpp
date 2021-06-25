@@ -40,3 +40,9 @@ namespace crow
         return out;
     }
 } // namespace crow
+
+
+crow::hostaddr crow::crowker_address() 
+{
+    return crow::address(getenv("CROWKER"));
+}

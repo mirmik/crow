@@ -4,8 +4,6 @@
 #include <igris/math.h>
 #include <sys/select.h>
 
-#include <nos/print.h>
-
 static std::vector<int> fds;
 bool crow::add_unselect_to_fds = false;
 

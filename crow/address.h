@@ -5,15 +5,16 @@
 #include <stdlib.h>
 #include <sys/cdefs.h>
 
-#include <crow/hostaddr.h>
 #include <crow/hexer.h>
+#include <crow/hostaddr.h>
 
 #include <vector>
 
 namespace crow
 {
-	hostaddr address(const std::string& in);
-	hostaddr address_warned(const std::string& in);
+    hostaddr crowker_address();
+    hostaddr address(const std::string &in);
+    hostaddr address_warned(const std::string &in);
 }
 
 #endif
