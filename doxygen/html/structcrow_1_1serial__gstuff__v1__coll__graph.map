@@ -1,6 +1,0 @@
-<map id="crow::serial_gstuff_v1" name="crow::serial_gstuff_v1">
-<area shape="rect" id="node1" title=" " alt="" coords="5,184,171,211"/>
-<area shape="rect" id="node2" href="$classcrow_1_1gateway.html" title=" " alt="" coords="8,5,125,32"/>
-<area shape="rect" id="node3" href="$structcrow_1_1packet.html" title=" " alt="" coords="104,95,208,121"/>
-<area shape="rect" id="node4" href="$structcrow_1_1header.html" title="Структура заголовок пакета." alt="" coords="149,5,256,32"/>
-</map>

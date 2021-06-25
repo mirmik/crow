@@ -1,7 +1,0 @@
-<map id="crow::rpc_request_node" name="crow::rpc_request_node">
-<area shape="rect" id="node1" title=" " alt="" coords="5,184,181,211"/>
-<area shape="rect" id="node2" href="$classcrow_1_1node.html" title=" " alt="" coords="5,95,99,121"/>
-<area shape="rect" id="node3" href="$structcrow_1_1packet.html" title=" " alt="" coords="123,95,227,121"/>
-<area shape="rect" id="node4" href="$structcrow_1_1header.html" title="Структура заголовок пакета." alt="" coords="53,5,160,32"/>
-<area shape="rect" id="node5" href="$classcrow_1_1gateway.html" title=" " alt="" coords="184,5,301,32"/>
-</map>
