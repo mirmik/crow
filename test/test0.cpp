@@ -24,17 +24,14 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("0")
 	{
-		crow::diagnostic_setup(true, false);
 		crow::send(addr, "data", 0, 0, 20);
-
+		
 		while (count != 1);
-
+		
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::total_travelled, 2);
 		CHECK_EQ(crow::has_untravelled(), false);
 		CHECK_EQ(crow::allocated_count, 0);
-
-		crow::diagnostic_setup(false, false);
 	}
 
 	SUBCASE("1")

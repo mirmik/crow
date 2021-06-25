@@ -23,5 +23,4 @@ static void undel(crow::node_packet_ptr)
 
 TEST_CASE("cli" * doctest::timeout(0.5))
 {
-
 }

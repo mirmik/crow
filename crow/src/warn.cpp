@@ -3,7 +3,7 @@
 
 void crow::warn(std::string_view msg)
 {
-    dpr("warn: ");
+    dpr("WARN: ");
     debug_write(msg.data(), msg.size());
     dln();
 }

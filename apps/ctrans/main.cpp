@@ -439,6 +439,7 @@ void print_help()
 	    "      --pulse           oneshoot mode. leave after first message\n"
 	    "      --echo            echo input packages to sender\n"
 	    "      --api             enable incoming console (cmds: 'exit')"
+	    "      --retransler      enable retransling option"
 	    "\n"
 	    "Crow address reference:\n"
 	    "      man crow-protocol\n"
@@ -480,6 +481,7 @@ int main(int argc, char *argv[])
 
 		{"subscribe", required_argument, NULL, 'l'},
 		{"publish", required_argument, NULL, 'P'},
+		{"retransler", no_argument, NULL, 'R'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
 		{"debug", no_argument, NULL, 'd'}, // Включает информацию о событиях башни.
@@ -550,6 +552,10 @@ int main(int argc, char *argv[])
 
 			case 'i':
 				info = true;
+				break;
+
+			case 'R':
+				crow::retransling_allowed = true;
 				break;
 
 			case 'r':

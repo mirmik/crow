@@ -15,6 +15,8 @@ bool crow::diagnostic_noack = false;
 uint16_t crow::debug_data_size = 28;
 unsigned int crow::total_travelled;
 
+bool crow::retransling_allowed = false;
+
 struct dlist_head crow::protocols = DLIST_HEAD_INIT(crow::protocols);
 DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
@@ -359,6 +361,24 @@ static void crow_do_travel(crow::packet *pack)
     {
 
         //Ветка транзитного пакета. Логика поиска врат и пересылки.
+        if (pack->ingate && crow::retransling_allowed == false) 
+        {
+            static int warned = 0;
+            if (warned == 0) 
+            {
+                warned = 1;
+                crow::warn(
+                    "Crow get retransling request but retransling is not allowed.\n"
+                    "Set crow::retransling_allowed option for enable retransling\n"
+                    "Or use --retransler option if utility allowed it.\n" 
+                    "Default retransling will be disabled in future releases.\n"
+                );
+            }
+
+            //crow_travel_error(pack);
+            //return;
+        }
+
         crow::gateway *gate = crow_find_target_gateway(pack);
 
         if (gate == NULL)

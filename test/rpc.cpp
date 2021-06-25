@@ -28,6 +28,7 @@ int add(int a, int b)
 
 TEST_CASE("rpc" * doctest::timeout(0.5))
 {
+	crow::total_travelled = 0;
 	crow::rpc_node rpc;
 	crow::rpc_requestor requestor(addr, 77);
 
@@ -39,4 +40,6 @@ TEST_CASE("rpc" * doctest::timeout(0.5))
 
 	CHECK_EQ(sts, 0);
 	CHECK_EQ(ret, 3);
+
+	while (crow::total_travelled != 8);
 }
