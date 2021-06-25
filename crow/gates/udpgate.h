@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROW_GATES_UDPGATE_H
 #define CROW_GATES_UDPGATE_H
 
