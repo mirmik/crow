@@ -21,20 +21,21 @@ namespace crow
     crow::packet_ptr node_send(uint16_t sid, uint16_t rid,
                                const crow::hostaddr_view &addr,
                                const std::string_view data, uint8_t qos,
-                               uint16_t ackquant, bool fastsend = false);
+                               uint16_t ackquant,
+                               bool fastsend = CROW_FASTSEND_DEFAULT);
 
     crow::packet_ptr node_send_special(uint16_t sid, uint16_t rid,
                                        const crow::hostaddr_view &addr,
                                        uint8_t type,
                                        const std::string_view data, uint8_t qos,
                                        uint16_t ackquant,
-                                       bool fastsend = false);
+                                       bool fastsend = CROW_FASTSEND_DEFAULT);
 
     crow::packet_ptr node_send_v(uint16_t sid, uint16_t rid,
                                  const crow::hostaddr_view &addr,
                                  const std::string_view *vec, size_t veclen,
                                  uint8_t qos, uint16_t ackquant,
-                                 bool fastsend = false);
+                                 bool fastsend = CROW_FASTSEND_DEFAULT);
 
     // TODO: replace with annotation
     struct node_subheader
@@ -134,7 +135,8 @@ namespace crow
 
         crow::packet_ptr send(uint16_t rid, const crow::hostaddr_view &raddr,
                               const std::string_view data, uint8_t qos,
-                              uint16_t ackquant, bool fastsend = false)
+                              uint16_t ackquant,
+                              bool fastsend = CROW_FASTSEND_DEFAULT)
         {
             assert(id != 0);
             return crow::node_send(id, rid, raddr, data, qos, ackquant,
@@ -145,7 +147,7 @@ namespace crow
                                       const crow::hostaddr_view &raddr,
                                       uint8_t type, const std::string_view data,
                                       uint8_t qos, uint16_t ackquant,
-                                      bool fastsend = false)
+                                      bool fastsend = CROW_FASTSEND_DEFAULT)
         {
             assert(id != 0);
             return crow::node_send_special(id, rid, raddr, type, data, qos,
@@ -155,7 +157,7 @@ namespace crow
         crow::packet_ptr send_v(uint16_t rid, const crow::hostaddr_view &raddr,
                                 const std::string_view *vdat, size_t vlen,
                                 uint8_t qos, uint16_t ackquant,
-                                bool fastsend = false)
+                                bool fastsend = CROW_FASTSEND_DEFAULT)
         {
             assert(id != 0);
             return crow::node_send_v(id, rid, raddr, vdat, vlen, qos, ackquant,

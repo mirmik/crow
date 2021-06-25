@@ -163,13 +163,6 @@ crow::packet_ptr crow::travel(crow::packet *pack)
     return crow::packet_ptr(pack);
 }
 
-void crow::nocontrol_travel(crow::packet *pack)
-{
-    system_lock();
-    dlist_add_tail(&pack->lnk, &crow_travelled);
-    system_unlock();
-}
-
 static void crow_travel_error(crow::packet *pack)
 {
     system_lock();
@@ -398,7 +391,6 @@ static void crow_do_travel(crow::packet *pack)
 }
 
 uint16_t __seqcounter = 0;
-crow::packet_ptr crow_transport(crow::packet *pack, bool fastsend = false);
 crow::packet_ptr crow_transport(crow::packet *pack, bool fastsend)
 {
     pack->header.stg = 0;
@@ -416,6 +408,20 @@ crow::packet_ptr crow_transport(crow::packet *pack, bool fastsend)
         return ptr;
     }
 }
+
+void crow::nocontrol_travel(crow::packet *pack, bool fastsend)
+{
+    if (fastsend) 
+    {
+        crow_do_travel(pack);
+        return;
+    }
+
+    system_lock();
+    dlist_add_tail(&pack->lnk, &crow_travelled);
+    system_unlock();
+}
+
 
 crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
                             const std::string_view data, uint8_t type, uint8_t qos,

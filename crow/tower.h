@@ -1,6 +1,7 @@
 #ifndef CROW_TOWER_H
 #define CROW_TOWER_H
 
+#include <crow/defs.h>
 #include <crow/gateway.h>
 #include <crow/packet_ptr.h>
 #include <igris/container/dlist.h>
@@ -24,7 +25,7 @@ namespace crow
 
     // Передать пакет в обработку.
     packet_ptr travel(crow::packet *pack);
-    void nocontrol_travel(crow::packet *pack);
+    void nocontrol_travel(crow::packet *pack, bool fastsend);
 
     // Включить трассировку пакетов.
     void enable_diagnostic();
@@ -38,18 +39,19 @@ namespace crow
     // Отправить пакет.
     crow::packet_ptr send(const crow::hostaddr_view &addr,
                           std::string_view data, uint8_t type, uint8_t qos,
-                          uint16_t ackquant, bool fastsend = false);
+                          uint16_t ackquant,
+                          bool fastsend = CROW_FASTSEND_DEFAULT);
 
     crow::packet_ptr send_v(const crow::hostaddr_view &addr,
                             const std::string_view *vec, size_t veclen,
                             uint8_t type, uint8_t qos, uint16_t ackquant,
-                            bool fastsend = false);
+                            bool fastsend = CROW_FASTSEND_DEFAULT);
 
     crow::packet_ptr send_vv(const crow::hostaddr_view &addr,
                              const std::string_view *vec, size_t veclen,
                              const std::string_view *vec2, size_t veclen2,
                              uint8_t type, uint8_t qos, uint16_t ackquant,
-                             bool fastsend = false);
+                             bool fastsend = CROW_FASTSEND_DEFAULT);
 
     // Эта функция вызывается вратами после обработки отсылаемого пакета.
     void return_to_tower(crow::packet *pack, uint8_t sts);

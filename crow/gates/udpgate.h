@@ -12,6 +12,7 @@ namespace crow
     {
         int sock = 0;
         crow::packet *block = nullptr;
+        bool fastsend = CROW_FASTSEND_DEFAULT;
 
       public:
         udpgate() {}
@@ -23,6 +24,7 @@ namespace crow
         int open(uint16_t port = 0);
         void close();
         void finish() override;
+        void set_fastsend_policy(bool en) { fastsend = en; }
 
         int bind(int gate_no = CROW_UDPGATE_NO)
         {

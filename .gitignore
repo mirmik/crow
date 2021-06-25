@@ -214,3 +214,5 @@ crowrequest
 !apps/crowpulse
 !apps/crowcalc
 !apps/crowrequest
+
+test/runtests

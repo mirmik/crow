@@ -30,7 +30,7 @@ namespace crow
         uint16_t ackquant = 50;
 
       public:
-        void send(std::string_view data, bool fastsend = false)
+        void send(std::string_view data, bool fastsend = CROW_FASTSEND_DEFAULT)
         {
             auto time = std::chrono::system_clock::now();
 
@@ -56,7 +56,8 @@ namespace crow
             }
         }
 
-        void send_v(std::string_view *data, size_t sz, bool fastsend = false)
+        void send_v(std::string_view *data, size_t sz,
+                    bool fastsend = CROW_FASTSEND_DEFAULT)
         {
 
             auto time = std::chrono::system_clock::now();

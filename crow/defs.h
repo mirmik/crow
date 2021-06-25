@@ -1,5 +1,5 @@
 /**
-	@file
+    @file
 */
 
 #ifndef CROW_DEFS_H
@@ -19,5 +19,6 @@
 #define CROW_RPC_NODE_NO 2
 
 #define CROWKER_CONTROL_SERVICE_NID 6
+#define CROW_FASTSEND_DEFAULT false
 
 #endif

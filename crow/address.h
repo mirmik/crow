@@ -8,13 +8,13 @@
 #include <crow/hexer.h>
 #include <crow/hostaddr.h>
 
-#include <vector>
+#include <string_view>
 
 namespace crow
 {
     hostaddr crowker_address();
-    hostaddr address(const std::string &in);
-    hostaddr address_warned(const std::string &in);
+    hostaddr address(const std::string_view &in);
+    hostaddr address_warned(const std::string_view &in);
 }
 
 #endif
