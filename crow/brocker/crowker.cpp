@@ -1,3 +1,6 @@
+/** @file */
+
+#include <crow/hostaddr_view.h>
 #include <crow/brocker/crowker.h>
 
 #include <igris/util/dstring.h>

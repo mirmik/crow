@@ -1,4 +1,5 @@
 #include <crow/hostaddr.h>
+#include <crow/hostaddr_view.h>
 
 crow::hostaddr_view crow::hostaddr::view()
 {

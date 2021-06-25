@@ -1,3 +1,5 @@
+/** @file */
+
 #include "pubsub.h"
 #include "subscriber.h"
 

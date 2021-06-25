@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROWKER_THEME_H
 #define CROWKER_THEME_H
 

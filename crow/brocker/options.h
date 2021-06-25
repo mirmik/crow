@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROWKER_OPTIONS_H
 #define CROWKER_OPTIONS_H
 

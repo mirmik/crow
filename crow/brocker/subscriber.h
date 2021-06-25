@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROWKER_SUBSCRIBER_H
 #define CROWKER_SUBSCRIBER_H
 

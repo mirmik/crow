@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROW_BROCKER_CROW_SUBSCRIBER_H
 #define CROW_BROCKER_CROW_SUBSCRIBER_H
 

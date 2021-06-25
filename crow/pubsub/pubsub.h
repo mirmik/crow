@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROW_PUBSUB_H
 #define CROW_PUBSUB_H
 

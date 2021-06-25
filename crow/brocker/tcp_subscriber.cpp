@@ -1,3 +1,5 @@
+/** @file */
+
 #include "tcp_subscriber.h"
 
 std::map<nos::inet::netaddr, crowker_implementation::tcp_subscriber>

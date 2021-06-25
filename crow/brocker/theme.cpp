@@ -1,3 +1,5 @@
+/** @file */
+
 #include "theme.h"
 #include "subscriber.h"
 

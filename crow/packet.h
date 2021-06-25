@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #include <crow/defs.h>
-#include <crow/hostaddr.h>
+#include <crow/hostaddr_view.h>
 
 #include <igris/container/pool.h>
 #include <igris/datastruct/dlist.h>
