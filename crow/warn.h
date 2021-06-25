@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROW_WARN_H
 #define CROW_WARN_H
 

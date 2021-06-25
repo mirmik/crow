@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROW_ITER_H
 #define CROW_ITER_H
 
@@ -8,8 +10,8 @@
 
 namespace crow
 {
-	std::vector<crow::gateway*> gates();
-	std::vector<crow::node*> nodes();
+    std::vector<crow::gateway *> gates();
+    std::vector<crow::node *> nodes();
 }
 
 #endif

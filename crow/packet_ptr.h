@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROW_PACKET_PTR_H
 #define CROW_PACKET_PTR_H
 
@@ -6,89 +8,75 @@
 
 namespace crow
 {
-	class packet_ptr
-	{
-	protected:
-		crow::packet *pack;
+    class packet_ptr
+    {
+      protected:
+        crow::packet *pack;
 
-	public:
-		packet_ptr(crow::packet *pack_) : pack(pack_)
-		{
-			if (pack == nullptr) return;
-			assert(pack->refs >= 0);
+      public:
+        packet_ptr(crow::packet *pack_) : pack(pack_)
+        {
+            if (pack == nullptr)
+                return;
+            assert(pack->refs >= 0);
 
-			system_lock();
-			pack->refs++;
-			system_unlock();
-		}
+            system_lock();
+            pack->refs++;
+            system_unlock();
+        }
 
-		packet_ptr(const crow::packet_ptr &oth) : pack(oth.pack)
-		{
-			assert(pack->refs >= 0);
-			system_lock();
-			pack->refs++;
-			system_unlock();
-		}
+        packet_ptr(const crow::packet_ptr &oth) : pack(oth.pack)
+        {
+            assert(pack->refs >= 0);
+            system_lock();
+            pack->refs++;
+            system_unlock();
+        }
 
-		packet_ptr(crow::packet_ptr &&oth) : pack(oth.pack)
-		{
-			assert(pack->refs >= 0);
-			oth.pack = nullptr;
-		}
+        packet_ptr(crow::packet_ptr &&oth) : pack(oth.pack)
+        {
+            assert(pack->refs >= 0);
+            oth.pack = nullptr;
+        }
 
-		crow::packet* get()
-		{
-			return pack;
-		}
+        crow::packet *get() { return pack; }
 
-		crow::packet* get() const
-		{
-			return pack;
-		}
+        crow::packet *get() const { return pack; }
 
-		crow::packet* operator ->()
-		{
-			return pack;
-		}
+        crow::packet *operator->() { return pack; }
 
-		crow::packet& operator *()
-		{
-			return *pack;
-		}
+        crow::packet &operator*() { return *pack; }
 
-		crow::packet_ptr& operator=(const crow::packet_ptr& oth)
-		{
-			clear();
+        crow::packet_ptr &operator=(const crow::packet_ptr &oth)
+        {
+            clear();
 
-			pack = oth.pack;
-			system_lock();
-			pack->refs++;
-			system_unlock();
+            pack = oth.pack;
+            system_lock();
+            pack->refs++;
+            system_unlock();
 
-			return *this;
-		}
+            return *this;
+        }
 
-		crow::packet_ptr& operator=(crow::packet_ptr&& oth)
-		{
-			clear();
+        crow::packet_ptr &operator=(crow::packet_ptr &&oth)
+        {
+            clear();
 
-			pack = oth.pack;
-			oth.pack = nullptr;
-			
-			return *this;
-		}
+            pack = oth.pack;
+            oth.pack = nullptr;
 
-		~packet_ptr();
+            return *this;
+        }
 
-		operator bool() { return pack != nullptr; }
+        ~packet_ptr();
 
-		bool operator == (std::nullptr_t)
-		{
-			return pack == nullptr;
-		}
+        operator bool() { return pack != nullptr; }
 
-		void clear();
-	};
+        bool operator==(std::nullptr_t) { return pack == nullptr; }
+
+        void clear();
+    };
 }
 
 #endif

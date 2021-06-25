@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROW_HEXER_H
 #define CROW_HEXER_H
 

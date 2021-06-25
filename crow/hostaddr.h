@@ -1,3 +1,5 @@
+/** @file */
+
 #ifndef CROW_HOSTADDR_H
 #define CROW_HOSTADDR_H
 
