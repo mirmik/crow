@@ -1,0 +1,160 @@
+\hypertarget{tower_8h}{}\doxysection{/home/mirmik/project/crow/crow/tower.h File Reference}
+\label{tower_8h}\index{/home/mirmik/project/crow/crow/tower.h@{/home/mirmik/project/crow/crow/tower.h}}
+{\ttfamily \#include $<$crow/defs.\+h$>$}\newline
+{\ttfamily \#include $<$crow/gateway.\+h$>$}\newline
+{\ttfamily \#include $<$crow/packet\+\_\+ptr.\+h$>$}\newline
+{\ttfamily \#include $<$igris/container/dlist.\+h$>$}\newline
+Include dependency graph for tower.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{tower_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{tower_8h__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \mbox{\hyperlink{namespacecrow}{crow}}
+\begin{DoxyCompactList}\small\item\em Абстрактный класс врат. Врата отвечают за пересылку пакетов между башнями. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{tower_8h_a8cbff7e367719eacd262cbb0a04a20fb}\label{tower_8h_a8cbff7e367719eacd262cbb0a04a20fb}} 
+\#define {\bfseries C\+R\+O\+W\+\_\+\+S\+E\+N\+D\+ED}~0
+\item 
+\mbox{\Hypertarget{tower_8h_a4e996d943d15e6d0e4979b62a0baa1f0}\label{tower_8h_a4e996d943d15e6d0e4979b62a0baa1f0}} 
+\#define {\bfseries C\+R\+O\+W\+\_\+\+W\+R\+O\+N\+G\+\_\+\+A\+D\+D\+R\+E\+SS}~-\/1
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespacecrow_a3c3bbeba11581240ea40340a3e87e458}\label{namespacecrow_a3c3bbeba11581240ea40340a3e87e458}} 
+packet\+\_\+ptr {\bfseries crow\+::travel} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack)
+\item 
+\mbox{\Hypertarget{namespacecrow_a491dda4a2af3ecac474f41d1f0527e7b}\label{namespacecrow_a491dda4a2af3ecac474f41d1f0527e7b}} 
+void {\bfseries crow\+::nocontrol\+\_\+travel} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack, bool fastsend)
+\item 
+\mbox{\Hypertarget{namespacecrow_adc73ff065d295683b4f2eb1e13c773e1}\label{namespacecrow_adc73ff065d295683b4f2eb1e13c773e1}} 
+void {\bfseries crow\+::enable\+\_\+diagnostic} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_ae78e4c93b92edce9ef49cb53e5fbb312}\label{namespacecrow_ae78e4c93b92edce9ef49cb53e5fbb312}} 
+void {\bfseries crow\+::enable\+\_\+live\+\_\+diagnostic} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a4a5f8f60d8ec8934ffe87a9271c65d19}\label{namespacecrow_a4a5f8f60d8ec8934ffe87a9271c65d19}} 
+void {\bfseries crow\+::diagnostic\+\_\+setup} (bool en, bool len=false)
+\item 
+\mbox{\Hypertarget{namespacecrow_a600686ca2cf7e61d2dce059a1eec57b4}\label{namespacecrow_a600686ca2cf7e61d2dce059a1eec57b4}} 
+\mbox{\hyperlink{classcrow_1_1packet__ptr}{crow\+::packet\+\_\+ptr}} {\bfseries crow\+::send} (const \mbox{\hyperlink{classcrow_1_1hostaddr__view}{crow\+::hostaddr\+\_\+view}} \&addr, std\+::string\+\_\+view data, uint8\+\_\+t \mbox{\hyperlink{packet_8h_a1d127017fb298b889f4ba24752d08b8e}{type}}, uint8\+\_\+t \mbox{\hyperlink{packet_8h_a65ee2b4b16f25052c441ff9959dcc7e7}{qos}}, uint16\+\_\+t \mbox{\hyperlink{packet_8h_ae3cd29bdc0b37cdc21a92911b61c9b59}{ackquant}}, bool fastsend=C\+R\+O\+W\+\_\+\+F\+A\+S\+T\+S\+E\+N\+D\+\_\+\+D\+E\+F\+A\+U\+LT)
+\item 
+\mbox{\Hypertarget{namespacecrow_aaade941ac6ff4d10be46305344db931f}\label{namespacecrow_aaade941ac6ff4d10be46305344db931f}} 
+\mbox{\hyperlink{classcrow_1_1packet__ptr}{crow\+::packet\+\_\+ptr}} {\bfseries crow\+::send\+\_\+v} (const \mbox{\hyperlink{classcrow_1_1hostaddr__view}{crow\+::hostaddr\+\_\+view}} \&addr, const std\+::string\+\_\+view $\ast$vec, size\+\_\+t veclen, uint8\+\_\+t \mbox{\hyperlink{packet_8h_a1d127017fb298b889f4ba24752d08b8e}{type}}, uint8\+\_\+t \mbox{\hyperlink{packet_8h_a65ee2b4b16f25052c441ff9959dcc7e7}{qos}}, uint16\+\_\+t \mbox{\hyperlink{packet_8h_ae3cd29bdc0b37cdc21a92911b61c9b59}{ackquant}}, bool fastsend=C\+R\+O\+W\+\_\+\+F\+A\+S\+T\+S\+E\+N\+D\+\_\+\+D\+E\+F\+A\+U\+LT)
+\item 
+\mbox{\Hypertarget{namespacecrow_aba26fff4fd0d5105bcd3d3b606368fb5}\label{namespacecrow_aba26fff4fd0d5105bcd3d3b606368fb5}} 
+\mbox{\hyperlink{classcrow_1_1packet__ptr}{crow\+::packet\+\_\+ptr}} {\bfseries crow\+::send\+\_\+vv} (const \mbox{\hyperlink{classcrow_1_1hostaddr__view}{crow\+::hostaddr\+\_\+view}} \&addr, const std\+::string\+\_\+view $\ast$vec, size\+\_\+t veclen, const std\+::string\+\_\+view $\ast$vec2, size\+\_\+t veclen2, uint8\+\_\+t \mbox{\hyperlink{packet_8h_a1d127017fb298b889f4ba24752d08b8e}{type}}, uint8\+\_\+t \mbox{\hyperlink{packet_8h_a65ee2b4b16f25052c441ff9959dcc7e7}{qos}}, uint16\+\_\+t \mbox{\hyperlink{packet_8h_ae3cd29bdc0b37cdc21a92911b61c9b59}{ackquant}}, bool fastsend=C\+R\+O\+W\+\_\+\+F\+A\+S\+T\+S\+E\+N\+D\+\_\+\+D\+E\+F\+A\+U\+LT)
+\item 
+\mbox{\Hypertarget{namespacecrow_a04fd13156cc9438f135621cebb89c610}\label{namespacecrow_a04fd13156cc9438f135621cebb89c610}} 
+void {\bfseries crow\+::return\+\_\+to\+\_\+tower} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack, uint8\+\_\+t sts)
+\item 
+\mbox{\Hypertarget{namespacecrow_aef22ff282d98229eb9eb6e834f67a0e3}\label{namespacecrow_aef22ff282d98229eb9eb6e834f67a0e3}} 
+void {\bfseries crow\+::release} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack)
+\item 
+\mbox{\Hypertarget{namespacecrow_a2685686905310f61d08294927ac0837e}\label{namespacecrow_a2685686905310f61d08294927ac0837e}} 
+uint16\+\_\+t {\bfseries crow\+::millis} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_adff595344c299fce4708c4fd9457e953}\label{namespacecrow_adff595344c299fce4708c4fd9457e953}} 
+void {\bfseries crow\+::onestep} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a67af44d5fd79d07df421763b6389808a}\label{namespacecrow_a67af44d5fd79d07df421763b6389808a}} 
+void {\bfseries crow\+::onestep\+\_\+travel\+\_\+only} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_ab2e03f42f0952c3fe74cc33106e1a308}\label{namespacecrow_ab2e03f42f0952c3fe74cc33106e1a308}} 
+void {\bfseries crow\+::spin} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a06dad0b8b6585ad6ff4139860111ae68}\label{namespacecrow_a06dad0b8b6585ad6ff4139860111ae68}} 
+void {\bfseries crow\+::spin\+\_\+with\+\_\+select} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a932f3199daaa9227e3a6ca5cc89540ca}\label{namespacecrow_a932f3199daaa9227e3a6ca5cc89540ca}} 
+void {\bfseries crow\+::spin\+\_\+with\+\_\+select\+\_\+realtime} (int abort\+\_\+on\+\_\+fault)
+\item 
+\mbox{\Hypertarget{namespacecrow_a337f7290f936e899f76b861ba0ce47eb}\label{namespacecrow_a337f7290f936e899f76b861ba0ce47eb}} 
+int {\bfseries crow\+::stop\+\_\+spin} (bool wait=true)
+\item 
+\mbox{\Hypertarget{namespacecrow_a583e08f768b6ac185a26bd4f21f72ed0}\label{namespacecrow_a583e08f768b6ac185a26bd4f21f72ed0}} 
+int {\bfseries crow\+::start\+\_\+spin\+\_\+with\+\_\+select} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_abfb646d02177d5e0a9c14bf27a52539d}\label{namespacecrow_abfb646d02177d5e0a9c14bf27a52539d}} 
+int {\bfseries crow\+::start\+\_\+spin\+\_\+with\+\_\+select\+\_\+realtime} (int abort\+\_\+on\+\_\+fault)
+\item 
+\mbox{\Hypertarget{namespacecrow_a95b62101e9d2c961ab0a4d36e6cbf709}\label{namespacecrow_a95b62101e9d2c961ab0a4d36e6cbf709}} 
+int {\bfseries crow\+::start\+\_\+spin\+\_\+without\+\_\+select} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a1d95704f2a5edb2e68018ff86b5d23e7}\label{namespacecrow_a1d95704f2a5edb2e68018ff86b5d23e7}} 
+int {\bfseries crow\+::start\+\_\+spin} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a7e337834c7d2153c642a7c57d7f6a4be}\label{namespacecrow_a7e337834c7d2153c642a7c57d7f6a4be}} 
+int {\bfseries crow\+::start\+\_\+spin\+\_\+realtime} (int abort\+\_\+on\+\_\+fault)
+\item 
+\mbox{\Hypertarget{namespacecrow_a9f7e06bc5b55321bd21bbf647758b6be}\label{namespacecrow_a9f7e06bc5b55321bd21bbf647758b6be}} 
+void {\bfseries crow\+::start\+\_\+resubscribe\+\_\+thread} (int millis)
+\item 
+\mbox{\Hypertarget{namespacecrow_a43e53f1b5c0099fc76a989e58692c18b}\label{namespacecrow_a43e53f1b5c0099fc76a989e58692c18b}} 
+void {\bfseries crow\+::spin\+\_\+join} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a6509de78444ad3726294e98383e16dbb}\label{namespacecrow_a6509de78444ad3726294e98383e16dbb}} 
+void {\bfseries crow\+::join\+\_\+spin} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a21ca12f1d0ae6904feee6c6f637e57a0}\label{namespacecrow_a21ca12f1d0ae6904feee6c6f637e57a0}} 
+bool {\bfseries crow\+::has\+\_\+untravelled} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a8d05dc5789ebc909f1f1d2112ecc6718}\label{namespacecrow_a8d05dc5789ebc909f1f1d2112ecc6718}} 
+bool {\bfseries crow\+::has\+\_\+untravelled\+\_\+now} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a7915a7cd6379eaffcff8402b6174c27e}\label{namespacecrow_a7915a7cd6379eaffcff8402b6174c27e}} 
+void {\bfseries crow\+::print\+\_\+list\+\_\+counts} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a2108cd8089ae0f1401196baf6c53aa31}\label{namespacecrow_a2108cd8089ae0f1401196baf6c53aa31}} 
+bool {\bfseries crow\+::fully\+\_\+empty} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_ad84a954ac60d7bf115b5c1ac594a498d}\label{namespacecrow_ad84a954ac60d7bf115b5c1ac594a498d}} 
+int64\+\_\+t {\bfseries crow\+::get\+\_\+minimal\+\_\+timeout} ()
+\item 
+\mbox{\Hypertarget{namespacecrow_a7dd4132287bbe302001135fd2f01fb95}\label{namespacecrow_a7dd4132287bbe302001135fd2f01fb95}} 
+void {\bfseries crow\+::finish} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{namespacecrow_afb30c6a228c475a6a9d59fa67db8f489}\label{namespacecrow_afb30c6a228c475a6a9d59fa67db8f489}} 
+uint16\+\_\+t {\bfseries crow\+::debug\+\_\+data\+\_\+size} = 28
+\item 
+\mbox{\Hypertarget{namespacecrow_ab7c785b3d02328ab8bedf55c291f72f4}\label{namespacecrow_ab7c785b3d02328ab8bedf55c291f72f4}} 
+dlist\+\_\+head {\bfseries crow\+::protocols}
+\item 
+\mbox{\Hypertarget{namespacecrow_a1fefa94500c2d3dd9a55986ffed5e2a8}\label{namespacecrow_a1fefa94500c2d3dd9a55986ffed5e2a8}} 
+bool {\bfseries crow\+::diagnostic\+\_\+noack} = false
+\item 
+\mbox{\Hypertarget{namespacecrow_a14df20ec64b09fde29e6fb7e969e1d91}\label{namespacecrow_a14df20ec64b09fde29e6fb7e969e1d91}} 
+unsigned int {\bfseries crow\+::total\+\_\+travelled}
+\item 
+\mbox{\Hypertarget{namespacecrow_ab94318d537bdeba015e3577ed0fdd842}\label{namespacecrow_ab94318d537bdeba015e3577ed0fdd842}} 
+void($\ast$ {\bfseries crow\+::user\+\_\+incoming\+\_\+handler} )(\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack) = nullptr
+\item 
+\mbox{\Hypertarget{namespacecrow_aaac7ee39bd7e88547c02db17f24bd26c}\label{namespacecrow_aaac7ee39bd7e88547c02db17f24bd26c}} 
+void($\ast$ {\bfseries crow\+::user\+\_\+type\+\_\+handler} )(\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack) = nullptr
+\item 
+\mbox{\Hypertarget{namespacecrow_a4fcc5ed172dd27b7246583ab76c0b89e}\label{namespacecrow_a4fcc5ed172dd27b7246583ab76c0b89e}} 
+void($\ast$ {\bfseries crow\+::undelivered\+\_\+handler} )(\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack) = nullptr
+\item 
+\mbox{\Hypertarget{namespacecrow_ab13104d58de22130bd5764340d2a1a8f}\label{namespacecrow_ab13104d58de22130bd5764340d2a1a8f}} 
+void($\ast$ {\bfseries crow\+::unsleep\+\_\+handler} )() = nullptr
+\item 
+\mbox{\Hypertarget{namespacecrow_a72a23b49b65d50d82b504060ada8e7f9}\label{namespacecrow_a72a23b49b65d50d82b504060ada8e7f9}} 
+bool {\bfseries crow\+::retransling\+\_\+allowed} = false
+\end{DoxyCompactItemize}

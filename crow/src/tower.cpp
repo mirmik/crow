@@ -1,8 +1,9 @@
+/** @file */
+
 #include <assert.h>
 #include <stdbool.h>
 #include <string.h>
 
-#include <igris/math/defs.h>
 #include <igris/sync/syslock.h>
 
 #include <crow/gateway.h>
@@ -815,7 +816,7 @@ int64_t crow::get_minimal_timeout()
     }
 
     if (i_finish > 0 && o_finish > 0)
-        result = __MIN__(i_finish, o_finish) - curtime;
+        result = (i_finish < o_finish ? i_finish : o_finish) - curtime;
 
     else if (o_finish > 0)
         result = o_finish - curtime;

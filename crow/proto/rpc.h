@@ -15,8 +15,8 @@
 #include <igris/serialize/stdtypes.h>
 #include <igris/trent/json.h>
 
-#include <nos/io/string_writer.h>
-#include <nos/print.h>
+#include <crow/warn.h>
+#include <sstream>
 
 #define CROW_RPC_BINARY_FORMAT 0
 #define CROW_RPC_TEXT_FORMAT 1
@@ -83,7 +83,7 @@ namespace crow
       public:
         template <class Ret, class... Args>
         void remote_request(crow::hostaddr_view addr, nid_t rid,
-                            const char *fname, Args &&...args)
+                            const char *fname, Args &&... args)
         {
             std::string args_data;
             igris::archive::binary_string_writer writer(args_data);
@@ -172,7 +172,7 @@ namespace crow
         }
 
         template <class Ret, class... Args>
-        int request(const char *fname, Ret &out, Args &&...args)
+        int request(const char *fname, Ret &out, Args &&... args)
         {
             rpc_request_node wnode;
             int status;
@@ -246,7 +246,7 @@ template <class Tuple, size_t... I>
 static void __expand(std::index_sequence<I...>, Tuple &&tpl,
                      const igris::trent &tr)
 {
-    std::apply([&](auto &&...args) { (__bind(args, tr[(int)I]), ...); }, tpl);
+    std::apply([&](auto &&... args) { (__bind(args, tr[(int)I]), ...); }, tpl);
 }
 
 template <class Ret, class... Args>
@@ -262,7 +262,7 @@ int crow::remote_function<Ret, Args...>::invoke_text_format(
     }
     catch (const std::exception &ex)
     {
-        nos::println(ex.what());
+        crow::warn(ex.what());
         return CROW_RPC_ERROR_UNRESOLVED_FORMAT;
     }
 
@@ -276,14 +276,14 @@ int crow::remote_function<Ret, Args...>::invoke_text_format(
     }
     catch (const std::exception &ex)
     {
-        nos::println(ex.what());
+        crow::warn(ex.what());
         return CROW_RPC_ERROR_UNRESOLVED_FORMAT;
     }
 
     Ret ret = std::apply(dlg, args);
-    nos::string_writer writer(out);
 
-    nos::print_to(writer, ret);
+    std::stringstream sstr(out);
+    sstr << ret;
 
     return 0;
 }

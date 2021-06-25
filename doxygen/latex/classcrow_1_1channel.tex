@@ -1,0 +1,128 @@
+\hypertarget{classcrow_1_1channel}{}\doxysection{crow\+::channel Class Reference}
+\label{classcrow_1_1channel}\index{crow::channel@{crow::channel}}
+
+
+Inheritance diagram for crow\+::channel\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=164pt]{classcrow_1_1channel__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for crow\+::channel\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=273pt]{classcrow_1_1channel__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a3f84517b77ccecfdc1120c2e357fe421}\label{classcrow_1_1channel_a3f84517b77ccecfdc1120c2e357fe421}} 
+using {\bfseries incoming\+\_\+handler\+\_\+t} = void($\ast$)(\mbox{\hyperlink{classcrow_1_1channel}{crow\+::channel}} $\ast$, \mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a4377f2a2b43b160414ac01ca318ad5a9}\label{classcrow_1_1channel_a4377f2a2b43b160414ac01ca318ad5a9}} 
+{\bfseries channel} (incoming\+\_\+handler\+\_\+t incoming\+\_\+handler)
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_ac18dc6d4ef783a2436b92f01a5d31a3d}\label{classcrow_1_1channel_ac18dc6d4ef783a2436b92f01a5d31a3d}} 
+void {\bfseries init} (int id, incoming\+\_\+handler\+\_\+t incoming\+\_\+handler)
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_aac6fd2a88b0846d257bfb27255c639f8}\label{classcrow_1_1channel_aac6fd2a88b0846d257bfb27255c639f8}} 
+void {\bfseries set\+\_\+addr\+\_\+buffer} (char $\ast$buf, size\+\_\+t sz)
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a4c02e1646eccdbc57a5fed3f56ab7c1c}\label{classcrow_1_1channel_a4c02e1646eccdbc57a5fed3f56ab7c1c}} 
+void {\bfseries naive\+\_\+listener\+\_\+mode} (bool en)
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_ac762d60cc6aa624a8c2a43f5cf1059cf}\label{classcrow_1_1channel_ac762d60cc6aa624a8c2a43f5cf1059cf}} 
+uint8\+\_\+t {\bfseries state} ()
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_abdcc234060ee6fd1440951c4561ce5c7}\label{classcrow_1_1channel_abdcc234060ee6fd1440951c4561ce5c7}} 
+void {\bfseries incoming\+\_\+packet} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack) override
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_aa4cb8d751462e2de85fa4342e9d5b7d9}\label{classcrow_1_1channel_aa4cb8d751462e2de85fa4342e9d5b7d9}} 
+void {\bfseries incoming\+\_\+data\+\_\+packet} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack)
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a81199156fd1843628e9c8b33c6282241}\label{classcrow_1_1channel_a81199156fd1843628e9c8b33c6282241}} 
+void {\bfseries undelivered\+\_\+packet} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack) override
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a1ad77f5c4473fa15b133975d52d3b60a}\label{classcrow_1_1channel_a1ad77f5c4473fa15b133975d52d3b60a}} 
+void {\bfseries handshake} (const uint8\+\_\+t $\ast$raddr, uint16\+\_\+t rlen, uint16\+\_\+t rid, uint8\+\_\+t qos=2, uint16\+\_\+t ackquant=200)
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a56602b3d5b9ac1bef9fce3da53653d6d}\label{classcrow_1_1channel_a56602b3d5b9ac1bef9fce3da53653d6d}} 
+void {\bfseries send\+\_\+handshake\+\_\+answer} ()
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a1b53be2dca977966eca3ff69bc2bdcbf}\label{classcrow_1_1channel_a1b53be2dca977966eca3ff69bc2bdcbf}} 
+void {\bfseries wait\+\_\+handshake\+\_\+request} ()
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a642e082f941d1ecf88ce0a04bc495341}\label{classcrow_1_1channel_a642e082f941d1ecf88ce0a04bc495341}} 
+int {\bfseries send} (const char $\ast$data, size\+\_\+t size)
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_ab81913971fba29b7f8141a5dbddd0a3f}\label{classcrow_1_1channel_ab81913971fba29b7f8141a5dbddd0a3f}} 
+int {\bfseries connect} (const uint8\+\_\+t $\ast$raddr, uint16\+\_\+t rlen, uint16\+\_\+t rid, uint8\+\_\+t qos=2, uint16\+\_\+t ackquant=200)
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a05b785a3d0cc67f8d032b6bd8b2a6309}\label{classcrow_1_1channel_a05b785a3d0cc67f8d032b6bd8b2a6309}} 
+int {\bfseries syncrecv} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$$\ast$ppack)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a1112241ebbe3ec859053979d994e62c3}\label{classcrow_1_1channel_a1112241ebbe3ec859053979d994e62c3}} 
+static std\+::string\+\_\+view {\bfseries getdata} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a26531d1efa0a4daf38466cbe5626108d}\label{classcrow_1_1channel_a26531d1efa0a4daf38466cbe5626108d}} 
+dlist\+\_\+head {\bfseries lnk}
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_aab838f60e80d5f4536d1a695bcdf8c66}\label{classcrow_1_1channel_aab838f60e80d5f4536d1a695bcdf8c66}} 
+uint16\+\_\+t {\bfseries rid}
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_ac02148783f206e1623eddbb148d8901e}\label{classcrow_1_1channel_ac02148783f206e1623eddbb148d8901e}} 
+void $\ast$ {\bfseries raddr\+\_\+ptr} = nullptr
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a0892e2f78171083814481d1ba41800f5}\label{classcrow_1_1channel_a0892e2f78171083814481d1ba41800f5}} 
+size\+\_\+t {\bfseries raddr\+\_\+len} = 0
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a05895d6c07063d035c351aae15334c36}\label{classcrow_1_1channel_a05895d6c07063d035c351aae15334c36}} 
+size\+\_\+t {\bfseries raddr\+\_\+cap} = 0
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_ac81e61835ed450a829409334ed34b00e}\label{classcrow_1_1channel_ac81e61835ed450a829409334ed34b00e}} 
+uint8\+\_\+t {\bfseries qos}
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_aa463f5192fa9ea9b62e700a947dd1b8d}\label{classcrow_1_1channel_aa463f5192fa9ea9b62e700a947dd1b8d}} 
+uint16\+\_\+t {\bfseries ackquant}
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a7aaa2ea60adcf15a07e5e36f8e885713}\label{classcrow_1_1channel_a7aaa2ea60adcf15a07e5e36f8e885713}} 
+uint16\+\_\+t {\bfseries fid} = 0
+\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a9304eb0e8946a5aad1c1e8242e36d8c7}\label{classcrow_1_1channel_a9304eb0e8946a5aad1c1e8242e36d8c7}} 
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+union \{\\
+\>uint8\_t {\bfseries flags} = 0\\
+\mbox{\Hypertarget{unioncrow_1_1channel_1_1_0d9_a2e662f4c234c96ff4fa767646726c0a4}\label{unioncrow_1_1channel_1_1_0d9_a2e662f4c234c96ff4fa767646726c0a4}} 
+\>struct \{\\
+\>\>uint8\_t {\bfseries \_state}: 4\\
+\>\>uint8\_t {\bfseries dynamic\_addr}: 1\\
+\>\>uint8\_t {\bfseries naive\_listener}: 1\\
+\>\} \\
+\} {\bfseries \_\_attribute\_\_}\\
+
+\end{tabbing}\item 
+\mbox{\Hypertarget{classcrow_1_1channel_a1afe7da2b0149440c511234a13b1d4a7}\label{classcrow_1_1channel_a1afe7da2b0149440c511234a13b1d4a7}} 
+incoming\+\_\+handler\+\_\+t {\bfseries incoming\+\_\+handler}
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/mirmik/project/crow/crow/proto/channel.\+h\item 
+/home/mirmik/project/crow/crow/proto/channel-\/sync.\+cpp\item 
+/home/mirmik/project/crow/crow/proto/channel.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,55 @@
+\hypertarget{tower_8cpp}{}\doxysection{/home/mirmik/project/crow/crow/src/tower.cpp File Reference}
+\label{tower_8cpp}\index{/home/mirmik/project/crow/crow/src/tower.cpp@{/home/mirmik/project/crow/crow/src/tower.cpp}}
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$igris/sync/syslock.\+h$>$}\newline
+{\ttfamily \#include $<$crow/gateway.\+h$>$}\newline
+{\ttfamily \#include $<$crow/print.\+h$>$}\newline
+{\ttfamily \#include $<$crow/proto/protocol.\+h$>$}\newline
+{\ttfamily \#include $<$crow/tower.\+h$>$}\newline
+{\ttfamily \#include $<$crow/warn.\+h$>$}\newline
+Include dependency graph for tower.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{tower_8cpp__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{tower_8cpp_ad70c972d101ee4f785e2f38f355b7a49}\label{tower_8cpp_ad70c972d101ee4f785e2f38f355b7a49}} 
+{\bfseries D\+L\+I\+S\+T\+\_\+\+H\+E\+AD} (crow\+\_\+travelled)
+\item 
+\mbox{\Hypertarget{tower_8cpp_a627746ed6499c32621604e6343823b29}\label{tower_8cpp_a627746ed6499c32621604e6343823b29}} 
+{\bfseries D\+L\+I\+S\+T\+\_\+\+H\+E\+AD} (crow\+\_\+incoming)
+\item 
+\mbox{\Hypertarget{tower_8cpp_abca044e7faf56ca15e4887b2be3423fe}\label{tower_8cpp_abca044e7faf56ca15e4887b2be3423fe}} 
+{\bfseries D\+L\+I\+S\+T\+\_\+\+H\+E\+AD} (crow\+\_\+outters)
+\item 
+\mbox{\Hypertarget{tower_8cpp_a9ea8d6a8106f2048d7d693708f028e8e}\label{tower_8cpp_a9ea8d6a8106f2048d7d693708f028e8e}} 
+bool {\bfseries crow\+\_\+time\+\_\+comparator} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$a, \mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$b)
+\item 
+\mbox{\Hypertarget{tower_8cpp_a9af7757da041c39647545f0ef7b0c6b1}\label{tower_8cpp_a9af7757da041c39647545f0ef7b0c6b1}} 
+\mbox{\hyperlink{classcrow_1_1packet__ptr}{crow\+::packet\+\_\+ptr}} {\bfseries crow\+\_\+transport} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack, bool fastsend)
+\item 
+\mbox{\Hypertarget{tower_8cpp_ab127325da121d7f79d1137dcf2d2f454}\label{tower_8cpp_ab127325da121d7f79d1137dcf2d2f454}} 
+void {\bfseries crow\+\_\+undelivered} (\mbox{\hyperlink{structcrow_1_1packet}{crow\+::packet}} $\ast$pack)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{tower_8cpp_a5a49852ddc73ae4f1c679d8ac35d1d20}\label{tower_8cpp_a5a49852ddc73ae4f1c679d8ac35d1d20}} 
+bool {\bfseries \+\_\+\+\_\+live\+\_\+diagnostic\+\_\+enabled} = false
+\item 
+\mbox{\Hypertarget{tower_8cpp_a9cd072d1457790bd266dae70243b9916}\label{tower_8cpp_a9cd072d1457790bd266dae70243b9916}} 
+bool {\bfseries \+\_\+in\+\_\+incoming\+\_\+handler} = false
+\item 
+\mbox{\Hypertarget{tower_8cpp_a483f036235ad93e80eaae0765e180b86}\label{tower_8cpp_a483f036235ad93e80eaae0765e180b86}} 
+bool {\bfseries \+\_\+in\+\_\+undelivered\+\_\+handler} = false
+\item 
+\mbox{\Hypertarget{tower_8cpp_ad5b1642de69d788509c971b29596b299}\label{tower_8cpp_ad5b1642de69d788509c971b29596b299}} 
+uint16\+\_\+t {\bfseries \+\_\+\+\_\+seqcounter} = 0
+\end{DoxyCompactItemize}

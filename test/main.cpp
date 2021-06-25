@@ -5,6 +5,7 @@
 
 int main(int argc, char** argv)
 {
+	crow::retransling_allowed = true;
 	crow::create_udpgate(12, 10999);
 	crow::start_spin();
 	//crow::diagnostic_setup(true, true);
