@@ -6,6 +6,8 @@
 #include <nos/fprint.h>
 #include <getopt.h>
 
+#include <crow/proto/rpc.h>
+
 using namespace std::chrono_literals;
 
 std::string funcname;
