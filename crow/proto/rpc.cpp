@@ -7,7 +7,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
 
     std::string_view data;
     std::string_view outdata;
-    std::string_view function_name;
+    igris::buffer function_name;
     crow::node_subheader *nsh = crow::node::subheader(pack);
 
     data = crow::node_data(pack);

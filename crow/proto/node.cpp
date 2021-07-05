@@ -17,7 +17,7 @@ crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid,
     crow::node_subheader sh;
     sh.sid = sid;
     sh.rid = rid;
-    sh.type = CROW_NODEPACK_COMMON;
+    sh.f.type = CROW_NODEPACK_COMMON;
 
     const std::string_view iov[2] = {
         {(char*)&sh, sizeof(sh)},
@@ -37,7 +37,7 @@ crow::packet_ptr crow::node_send_special(uint16_t sid, uint16_t rid,
     crow::node_subheader sh;
     sh.sid = sid;
     sh.rid = rid;
-    sh.type = type;
+    sh.f.type = type;
 
     const std::string_view iov[2] = {
         {(char*)&sh, sizeof(sh)},
@@ -57,7 +57,7 @@ crow::packet_ptr crow::node_send_v(uint16_t sid, uint16_t rid,
     crow::node_subheader sh;
     sh.sid = sid;
     sh.rid = rid;
-    sh.type = CROW_NODEPACK_COMMON;
+    sh.f.type = CROW_NODEPACK_COMMON;
 
     const std::string_view iov[1] =
     {
@@ -74,7 +74,7 @@ void crow::node_protocol_cls::send_node_error(crow::packet *pack, int errcode)
 
     sh.sid = crow::node_protocol.rid(pack);
     sh.rid = crow::node_protocol.sid(pack);
-    sh.type = CROW_NODEPACK_ERROR;
+    sh.f.type = CROW_NODEPACK_ERROR;
 
     const std::string_view iov[2] =
     {
@@ -106,7 +106,7 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
         return;
     }
 
-    switch (sh->type)
+    switch (sh->f.type)
     {
     case CROW_NODEPACK_COMMON:
         srv->incoming_packet(pack);

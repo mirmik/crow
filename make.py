@@ -29,8 +29,8 @@ licant.cxx_shared_library(target,
 		"crow.serial_gstuff"
 	],
 
-	cxx_flags = '-fPIC -Wall',
-	cc_flags = '-fPIC -Wall',
+	cxx_flags = '-fPIC -Wall -pedantic',
+	cc_flags = '-fPIC -Wall -pedantic',
 	libs=["igris", "nos"]
 )
 

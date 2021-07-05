@@ -6,7 +6,7 @@ import licant
 #)
 
 licant.module("crow.select", "impl",
-	sources=["crow/select.cpp"],
+	sources=["crow/src/select.cpp"],
 	defines = ["CROW_WITHOUT_SELECT_FDS=0"], default=True
 )
 
@@ -15,7 +15,7 @@ licant.module("crow.select", "stub",
 )
 
 licant.module("crow.diagnostic", "nos",
-	sources=["crow/src/print.cpp"],
+	sources=["crow/src/variants/print.cpp"],
 	default = True
 )
 
@@ -28,7 +28,7 @@ licant.modules.module("crow",
 	sources = [
 		"src/tower.cpp",
 		"src/packet.cpp",
-		"src/warn.cpp",
+		"src/variants/warn.cpp",
 		"src/packet_ptr.cpp",
 		"src/hostaddr.cpp",
 		"src/hostaddr_view.cpp",
@@ -80,7 +80,7 @@ licant.modules.module("crow.minimal",
 	srcdir = "crow",
 	sources = [
 		"src/packet.cpp",
-		"src/warn.cpp",
+		"src/variants/warn.cpp",
 		"src/packet_ptr.cpp",
 		"src/tower.cpp",
 		"src/gateway.cpp",
@@ -93,17 +93,17 @@ licant.modules.module("crow.minimal",
 )
 
 licant.modules.module("crow.diagnostic", "debug",
-	sources=["crow/src/print-debug.cpp"]
+	sources=["crow/src/variants/print-debug.cpp"]
 )
 
 licant.modules.module("crow.include", 
 	include_paths=["."])
 
 licant.modules.module("crow.allocator", "malloc", 
-	sources=[ "crow/src/allocation_malloc.cpp"], default=True)
+	sources=[ "crow/src/variants/allocation_malloc.cpp"], default=True)
 
 licant.modules.module("crow.allocator", "pool", 
-	sources=["crow/src/allocation_pool.cpp"])
+	sources=["crow/src/variants/allocation_pool.cpp"])
 
 licant.modules.module("crow.time", "chrono", 
 	sources=["crow/src/stdtime.cpp"], default=True)

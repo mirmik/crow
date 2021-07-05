@@ -50,7 +50,7 @@ namespace crow
             {
                 uint8_t reserved : 4;
                 uint8_t type : 4;
-            };
+            } f;
         };
     } __attribute__((packed));
 
@@ -66,7 +66,7 @@ namespace crow
             {
                 uint8_t reserved : 4;
                 uint8_t type : 4;
-            };
+            } f;
         };
 
         int parse(std::string_view data)

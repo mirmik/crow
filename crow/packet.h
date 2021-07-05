@@ -57,8 +57,8 @@ namespace crow
 
     struct packet
     {
-        struct dlist_head lnk = DLIST_HEAD_INIT(lnk);
-        ; ///< Для подключения в списки башни crow.
+        struct dlist_head lnk =
+            DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
         struct dlist_head ulnk =
             DLIST_HEAD_INIT(ulnk); ///< Для подключения в список пользователя и
                                    ///< зависимых протоколов.

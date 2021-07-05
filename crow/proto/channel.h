@@ -133,6 +133,6 @@ namespace crow
                                        sizeof(crow::node_subheader) +
                                        sizeof(crow::subheader_channel));
     }
-}; // namespace crow
+} // namespace crow
 
 #endif
