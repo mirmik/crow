@@ -19,6 +19,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+   - name: Check out my other repo
+      uses: actions/checkout@master
+      with:
+        repository: mirmik/igris
+
     - uses: actions/checkout@v2
 
     - name: Configure CMake
