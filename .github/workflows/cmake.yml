@@ -25,10 +25,19 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - name: Install libraries
+    - name: Install igris library
       run: |
         git clone https://github.com/mirmik/igris
         cd igris
+        cmake .
+        cmake --build .
+        sudo cmake --install .
+        cd ..
+
+    - name: Install nos library
+      run: |
+        git clone https://github.com/mirmik/nos
+        cd nos
         cmake .
         cmake --build .
         sudo cmake --install .
