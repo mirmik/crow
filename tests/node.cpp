@@ -2,6 +2,7 @@
 #include <crow/tower.h>
 #include <crow/address.h>
 #include <crow/nodes/node_delegate.h>
+#include <nos/print.h>
 
 #include <thread>
 #include <chrono>
@@ -23,6 +24,7 @@ void undel(crow::node_packet_ptr)
 
 TEST_CASE("node0" * doctest::timeout(0.5))
 {
+	nos::println("node0 test");
 	count = ucount = 0;
 	crow::total_travelled = 0;
 	crow::user_incoming_handler = nullptr;

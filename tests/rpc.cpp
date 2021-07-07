@@ -2,6 +2,7 @@
 #include <crow/tower.h>
 #include <crow/address.h>
 #include <crow/proto/rpc.h>
+#include <nos/print.h>
 
 #include <thread>
 #include <chrono>
@@ -28,6 +29,8 @@ int add(int a, int b)
 
 TEST_CASE("rpc" * doctest::timeout(0.5))
 {
+	nos::println("rpc test");
+
 	crow::total_travelled = 0;
 	crow::rpc_node rpc;
 	crow::rpc_requestor requestor(addr, 77);

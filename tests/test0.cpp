@@ -1,6 +1,7 @@
 #include <doctest/doctest.h>
 #include <crow/tower.h>
 #include <crow/address.h>
+#include <nos/print.h>
 
 #include <thread>
 #include <chrono>
@@ -18,6 +19,8 @@ void incoming(crow::packet * ptr)
 
 TEST_CASE("test0" * doctest::timeout(0.5))
 {
+	nos::println("test0 test");
+
 	count = 0;
 	crow::total_travelled = 0;
 	crow::user_incoming_handler = incoming;
