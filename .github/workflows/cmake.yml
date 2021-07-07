@@ -30,6 +30,7 @@ jobs:
         git clone https://github.com/mirmik/igris
         cd igris
         cmake .
+        cmake --build .
         cmake --install .
         cd ..
 
