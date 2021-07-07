@@ -27,9 +27,9 @@ jobs:
 
     - name: Install libraries
       run: |
-        git clone https://github.com/mirmik/igris \
-        cd igris \
-        cmake --install . \ 
+        git clone https://github.com/mirmik/igris
+        cd igris
+        cmake --install .
         cd ..
 
     - name: Configure CMake
