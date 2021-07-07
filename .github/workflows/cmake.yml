@@ -29,6 +29,7 @@ jobs:
       run: |
         git clone https://github.com/mirmik/igris
         cd igris
+        cmake .
         cmake --install .
         cd ..
 
