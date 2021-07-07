@@ -2,6 +2,7 @@
 #include <crow/tower.h>
 #include <crow/address.h>
 #include <crow/nodes/cli.h>
+#include <nos/print.h>
 
 #include <thread>
 #include <chrono>
@@ -23,4 +24,5 @@ static void undel(crow::node_packet_ptr)
 
 TEST_CASE("cli" * doctest::timeout(0.5))
 {
+	nos::println("cli test");
 }
