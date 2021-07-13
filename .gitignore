@@ -216,6 +216,7 @@ crowrequest
 !apps/crowrequest
 
 test/runtests
+crow_test
 
 doxygen/html
 doxygen/latex
