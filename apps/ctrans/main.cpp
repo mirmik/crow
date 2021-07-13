@@ -1,6 +1,7 @@
 #include <crow/gates/serial_gstuff.h>
 #include <crow/gates/serial_gstuff_v1.h>
 #include <crow/gates/chardev_gateway.h>
+#include <crow/gates/chardev/serial_port_driver.h>
 #include <crow/gates/udpgate.h>
 
 #include <crow/tower.h>
@@ -394,13 +395,31 @@ void chardev_gateway_constructor(char * instruction)
 	auto drvargs = igris::split(parts[0], ',');
 	if (drvargs[0] == "serial") 
 	{
-		nos::println("construct serial driver");
+		if (drvargs.size() != 6) 
+		{
+			nos::println("Usage: serial,PATH,BAUD,PARITY,DATABITS,STOPBITS:...");
+			exit(0);
+		}
+
+		auto * port_driver = new crow::serial_port_driver;
+
+		auto path = drvargs[1].c_str();
+		auto baud = std::stoi(drvargs[2]);
+		auto parity = drvargs[3][0];
+		auto databits = std::stoi(drvargs[4]);
+		auto stopbits = std::stoi(drvargs[5]);
+
+		int sts = port_driver->open(path, baud, parity, databits, stopbits);		
+		nos::println(sts);
+
+		driver = port_driver;
 	}
 	else 
 	{
 		nos::println("unresolved driver", drvargs[0]);
 		exit(0);
 	}
+
 	auto protoargs = igris::split(parts[1], ',');
 	if (protoargs[0] == "gstuff") 
 	{

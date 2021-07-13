@@ -41,11 +41,11 @@ namespace crow
         // virtual void send(const char *data, unsigned int size) = 0;
 
         // bool ready_to_send();
-        virtual bool ready_for_recv() = 0;
+        // virtual bool ready_for_recv() = 0;
         virtual void start_send() = 0;
 
         virtual void read(char *data, int size) = 0;
-        // virtual void nonblock_tryread() = 0;
+        virtual void nonblock_tryread() = 0;
     };
 
     class chardev_gateway : public crow::gateway

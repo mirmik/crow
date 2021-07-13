@@ -11,6 +11,20 @@ namespace crow
         nos::serial_port port;
 
       public:
+        int open(const char *path, uint32_t baud, char parity, uint8_t databits,
+                 uint8_t stopbits)
+        {
+            int sts = port.open(path, baud, parity, databits, stopbits);
+            if (sts < 0)
+                return sts;
+
+            sts = port.nonblock(true);
+            if (sts < 0)
+                return sts;
+        }
+
+        void read(char *data, int size) { port.read(data, size); }
+
         void start_send()
         {
             char buf[512];
@@ -35,6 +49,8 @@ namespace crow
             if (len == 1)
                 gateway->newdata(c);
         };
+
+        void ready_for_recv() {}
     };
 }
 

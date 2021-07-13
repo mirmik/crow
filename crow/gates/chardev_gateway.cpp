@@ -55,7 +55,9 @@ void crow::chardev_gateway::nblock_onestep()
 	if (rpack == nullptr)
 		init_recv();
 
-	while (driver->ready_for_recv())
+	driver->nonblock_tryread();
+
+	/*while (driver->ready_for_recv())
 	{
 		char c;
 		driver->read(&c, 1);
@@ -66,7 +68,7 @@ void crow::chardev_gateway::nblock_onestep()
 		//{
 		//nos::println("newpack");
 		//}
-	}
+	}*/
 }
 
 void crow::chardev_gateway::newline_handler()
