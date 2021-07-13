@@ -126,7 +126,8 @@ licant.modules.module("crow.serial_gstuff",
 
 licant.module("crow.chardev_gateway", 
 	sources = [
-		"crow/gates/chardev_gateway.cpp"
+		"crow/gates/chardev_gateway.cpp",
+		"crow/gates/chardev/chardev_protocol.cpp",
 	]
 )
 

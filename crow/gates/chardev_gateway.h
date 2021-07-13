@@ -27,12 +27,11 @@ namespace crow
         char *cursor;
         char *endptr;
 
-        virtual void encode_and_send(char c) = 0;
-
+      public:
         void send(crow::packet *pack);
         void newdata(const char *data, unsigned int size);
 
-        void onestep();
+        void serve();
     };
 
     class chardev_driver
@@ -43,7 +42,7 @@ namespace crow
         virtual int room() = 0; // количество символов, которые устройство может
                                 // принять. на передачу
         virtual void send(const char *data, unsigned int size) = 0;
-        virtual void serve() = 0;
+        virtual void nonblock_tryread() = 0;
     };
 
     class chardev_gateway : public crow::gateway
@@ -57,6 +56,9 @@ namespace crow
         void send(crow::packet *) override;
         void nblock_onestep() override;
         void finish() override;
+
+      public: // driver callback
+        void newdata(char c);
     };
 }
 

@@ -17,15 +17,6 @@
 
 namespace crow
 {
-    //	enum class State : uint8_t
-    //	{
-    //		INIT = CROW_CHANNEL_INIT,
-    //		WAIT_HANDSHAKE_REQUEST = CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST,
-    //		WAIT_HANDSHAKE_ANSWER = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER,
-    //		CONNECTED = CROW_CHANNEL_CONNECTED,
-    //		DISCONNECTED = CROW_CHANNEL_DISCONNECTED,
-    //	};
-
     enum class Frame : uint8_t
     {
         HANDSHAKE_REQUEST = 0,
@@ -35,7 +26,6 @@ namespace crow
     };
 
     class channel;
-    //	void link_channel(crow::channel *srvs, uint16_t id);
 
     class channel : public crow::node
     {
@@ -58,7 +48,7 @@ namespace crow
                 uint8_t _state : 4;
                 uint8_t dynamic_addr : 1;
                 uint8_t naive_listener : 1;
-            };
+            } f;
         };
         incoming_handler_t incoming_handler;
 
@@ -80,8 +70,8 @@ namespace crow
             raddr_cap = sz;
         }
 
-        void naive_listener_mode(bool en) { naive_listener = en; }
-        uint8_t state() { return (uint8_t)_state; }
+        void naive_listener_mode(bool en) { f.naive_listener = en; }
+        uint8_t state() { return (uint8_t)f._state; }
 
         void incoming_packet(crow::packet *pack) override;
         void incoming_data_packet(crow::packet *pack);
@@ -94,7 +84,7 @@ namespace crow
 
         void wait_handshake_request()
         {
-            _state = CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST;
+            f._state = CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST;
         }
 
         int send(const char *data, size_t size);

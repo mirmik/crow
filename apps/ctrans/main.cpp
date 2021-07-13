@@ -1,5 +1,6 @@
 #include <crow/gates/serial_gstuff.h>
 #include <crow/gates/serial_gstuff_v1.h>
+#include <crow/gates/chardev_gateway.h>
 #include <crow/gates/udpgate.h>
 
 #include <crow/tower.h>
@@ -377,6 +378,45 @@ crow::channel* acceptor_create_channel()
 	return ch;
 }
 
+void chardev_gateway_constructor(char * instruction) 
+{
+	crow::chardev_protocol * protocol;
+	crow::chardev_driver *   driver;
+
+	auto parts = igris::split(instruction, ':');
+
+	if (parts.size() != 2) 
+	{
+		nos::println("Usage: --cdev DRIVER[,DRVOPTS]:PROTOCOL[,PROTOOPT]");
+		exit(0);
+	}
+
+	auto drvargs = igris::split(parts[0], ',');
+	if (drvargs[0] == "serial") 
+	{
+		nos::println("construct serial driver");
+	}
+	else 
+	{
+		nos::println("unresolved driver", drvargs[0]);
+		exit(0);
+	}
+	auto protoargs = igris::split(parts[1], ',');
+	if (protoargs[0] == "gstuff") 
+	{
+		nos::println("construct gstuff protocol");
+	}
+	else 
+	{
+		nos::println("unresolved protocol", protoargs[0]);
+		exit(0);
+	}
+
+	(void) protocol;
+	(void) driver;
+	//cdev_gates.emplace_back(driver, protocol, FULL_MESSAGE_SEND_STRATEGY);
+}
+
 void *console_listener(void *arg)
 {
 	(void)arg;
@@ -401,6 +441,8 @@ void *console_listener(void *arg)
 uint16_t udpport = 0;
 char *serial_port = NULL;
 char *serial_port_v1 = NULL;
+
+std::vector<crow::chardev_gateway *> cdev_gates;
 
 void print_help()
 {
@@ -455,6 +497,7 @@ int main(int argc, char *argv[])
 		{"help", no_argument, NULL, 'h'},
 
 		{"udp", required_argument, NULL, 'u'}, // udp порт для 12-ого гейта.
+		{"cdev", required_argument, NULL, 'c'}, // serial...
 		{"serial", required_argument, NULL, 'S'}, // serial...
 		{"serial_v1", required_argument, NULL, 'C'}, // serial...
 
@@ -474,7 +517,7 @@ int main(int argc, char *argv[])
 		{"dbgout", no_argument, NULL, 'j'},
 
 		{"chlisten", required_argument, NULL, 'w'},
-		{"channel", required_argument, NULL, 'c'},
+		{"channel", required_argument, NULL, 'H'},
 		{"node", required_argument, NULL, 'M'},
 		{"listen-node", required_argument, NULL, 'U'},
 		{"pipeline", required_argument, NULL, 'e'},
@@ -616,7 +659,7 @@ int main(int argc, char *argv[])
 				protoopt = protoopt_e::PROTOOPT_REVERSE_CHANNEL;
 				break;
 
-			case 'c':
+			case 'H':
 				channelno = atoi(optarg);
 				protoopt = protoopt_e::PROTOOPT_CHANNEL;
 				break;
@@ -632,6 +675,10 @@ int main(int argc, char *argv[])
 
 			case 'e':
 				pipelinecmd = optarg;
+				break;
+
+			case 'c':
+				chardev_gateway_constructor(optarg);
 				break;
 
 			case '?':
