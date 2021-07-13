@@ -21,9 +21,9 @@ void crow::chardev_gateway::send(struct crow::packet *pack)
 	system_unlock();
 }
 
-void crow::chardev_gateway::dosend(struct crow::packet *pack) 
+void crow::chardev_gateway::dosend(struct crow::packet *pack)
 {
-	insend = pack;	
+	insend = pack;
 	protocol->send_automate_reset(insend);
 	driver->start_send();
 }
@@ -64,11 +64,21 @@ void crow::chardev_gateway::nblock_onestep()
 
 		//if (sts == CROW_NEWPACK)
 		//{
-			//nos::println("newpack");
+		//nos::println("newpack");
 		//}
 	}
 }
 
+void crow::chardev_gateway::newline_handler()
+{
+	struct crow::packet *block = rpack;
+	rpack = NULL;
+
+	block->revert_gate(id);
+
+	crow::packet_initialization(block, this);
+	crow::nocontrol_travel(block, false);
+}
 crow::chardev_gateway::chardev_gateway(
     crow::chardev_driver * driver,
     crow::chardev_protocol * protocol)

@@ -23,6 +23,7 @@ namespace crow
 
       public:
         virtual void send_automate_reset(crow::packet *pack) = 0;
+        virtual int send_automate_getdata(char *buf, int maxlen) = 0;
 
         virtual int receive_automate_newdata(char c) = 0;
         virtual void receive_automate_reset() = 0;
@@ -32,7 +33,7 @@ namespace crow
     class chardev_driver
     {
       public:
-        chardev_gateway *gate;
+        chardev_gateway *gateway;
 
         // virtual int room() = 0; // количество символов, которые устройство
         // может
@@ -49,6 +50,7 @@ namespace crow
 
     class chardev_gateway : public crow::gateway
     {
+      public:
         chardev_driver *driver;
         chardev_protocol *protocol;
 
@@ -57,13 +59,13 @@ namespace crow
         crow::packet *insend;
         crow::packet *rpack;
 
-        bool send_by_symbol_mode = false;
-        bool recv_by_symbol_mode = false;
-        bool self_driven_receive = false;
+        // bool send_by_symbol_mode = false;
+        // bool recv_by_symbol_mode = false;
+        // bool self_driven_receive = false;
 
       public:
-        void set_send_symbol_mode(bool en) { send_by_symbol_mode = en; }
-        void set_recv_symbol_mode(bool en) { recv_by_symbol_mode = en; }
+        // void set_send_symbol_mode(bool en) { send_by_symbol_mode = en; }
+        // void set_recv_symbol_mode(bool en) { recv_by_symbol_mode = en; }
 
         chardev_gateway(chardev_driver *driver, chardev_protocol *protocol);
 
@@ -73,6 +75,9 @@ namespace crow
         void send(crow::packet *) override;
         void nblock_onestep() override;
         void finish() override;
+
+        void newline_handler();
+        void packet_sended_handler();
 
       public: // driver callback
         void newdata(char c);
