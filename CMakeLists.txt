@@ -26,6 +26,7 @@ file(GLOB SOURCES
 	crow/nodes/*.cpp
 	crow/proto/*.cpp
 	crow/gates/*.cpp
+	crow/gates/chardev/*.cpp
 	crow/brocker/*.cpp
 )
 
