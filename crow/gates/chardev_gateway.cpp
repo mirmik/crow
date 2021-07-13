@@ -88,3 +88,12 @@ crow::chardev_gateway::chardev_gateway(
 	this->driver = driver;
 	this->protocol = protocol;
 }
+
+void crow::chardev_gateway::newdata(char c)
+{
+	protocol->receive_automate_newdata(c);
+}
+
+
+void crow::chardev_gateway::packet_sended_handler()
+{}
