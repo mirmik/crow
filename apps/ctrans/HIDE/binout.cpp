@@ -80,7 +80,7 @@ void binout_mode_prepare(const std::string& fmt)
 	}
 }
 
-void output_binary(std::string_view data, crow::packet* pack)
+void output_binary(igris::buffer data, crow::packet* pack)
 {
 	igris::strvec result;
 

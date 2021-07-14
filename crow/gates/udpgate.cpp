@@ -38,7 +38,7 @@ void crow::udpgate::nblock_onestep()
 
     crow::packet_initialization(block, this);
 
-    std::string_view vec[3] = {
+    igris::buffer vec[3] = {
         {(char*)&id, 1}, 
         {(char*)&sender.sin_addr.s_addr, 4}, 
         {(char*)&sender.sin_port, 2}};

@@ -13,9 +13,10 @@ bool crow::add_unselect_to_fds = false;
 
 void crow::select_collect_fds() 
 {
-	for (auto& gate : crow::gateway_list) 
+	crow::gateway * gate;
+	dlist_for_each_entry(gate, &crow::gateway_list, lnk) 
 	{
-		int i = gate.get_fd();
+		int i = gate->get_fd();
 		if (i >= 0) 
 		{
 			fds.push_back(i);

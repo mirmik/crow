@@ -6,7 +6,7 @@ crow::hostaddr_view::hostaddr_view(const hostaddr &h) : addr(h.data()), alen(h.s
 {
 }
 
-crow::hostaddr_view::hostaddr_view(const std::string_view &v)
+crow::hostaddr_view::hostaddr_view(const igris::buffer &v)
 	: addr((uint8_t *)v.data()), alen(v.size())
 {
 }
@@ -35,7 +35,7 @@ size_t crow::hostaddr_view::size() const
 	return alen;
 }
 
-bool crow::hostaddr_view::operator==(std::string_view buf) const
+bool crow::hostaddr_view::operator==(igris::buffer buf) const
 {
 	return alen == buf.size() && memcmp(addr, buf.data(), alen) == 0;
 }

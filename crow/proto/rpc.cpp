@@ -5,8 +5,8 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     int8_t format;
     int8_t status;
 
-    std::string_view data;
-    std::string_view outdata;
+    igris::buffer data;
+    igris::buffer outdata;
     igris::buffer function_name;
     crow::node_subheader *nsh = crow::node::subheader(pack);
 
@@ -17,7 +17,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     reader.load(format);
     reader.load_set_buffer(function_name);
 
-    data = std::string_view{
+    data = igris::buffer{
         (char*)reader.pointer(), 
         (size_t)((char *)reader.end() - (char *)reader.pointer())
     };
@@ -28,7 +28,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     {
         status = CROW_RPC_ERROR_FUNCTION_NOT_FOUNDED;
 
-        std::string_view vdata[] =
+        igris::buffer vdata[] =
         {
             {(char*)&status, 1},
         };
@@ -43,10 +43,10 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     {
         size_t outsize = procedure->outsize();
         void *outbuf = alloca(outsize);
-        outdata = std::string_view{(char*)outbuf, outsize};
+        outdata = igris::buffer{(char*)outbuf, outsize};
         status = procedure->invoke(data, outdata);
 
-        std::string_view vdata[] =
+        igris::buffer vdata[] =
         {
             {(char*)&status, 1},
             outdata
@@ -73,7 +73,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
     {
         status = CROW_RPC_ERROR_UNRESOLVED_FORMAT;
 
-        std::string_view vdata[] =
+        igris::buffer vdata[] =
         {
             {(char*)&status, 1},
         };

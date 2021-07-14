@@ -6,12 +6,12 @@
 #include <igris/sync/syslock.h>
 #include <igris/util/numconvert.h>
 
-igris::dlist<crow::node, &crow::node::lnk> crow::nodes_list;
+DLIST_HEAD(crow::nodes_list);
 crow::node_protocol_cls crow::node_protocol;
 
 crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid,
                                  const crow::hostaddr_view &addr,
-                                 const std::string_view data, uint8_t qos,
+                                 const igris::buffer data, uint8_t qos,
                                  uint16_t ackquant, bool fastsend)
 {
     crow::node_subheader sh;
@@ -19,7 +19,8 @@ crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid,
     sh.rid = rid;
     sh.f.type = CROW_NODEPACK_COMMON;
 
-    const std::string_view iov[2] = {
+    const igris::buffer iov[2] =
+    {
         {(char*)&sh, sizeof(sh)},
         {(char*)data.data(), data.size()}
     };
@@ -30,7 +31,7 @@ crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid,
 
 crow::packet_ptr crow::node_send_special(uint16_t sid, uint16_t rid,
         const crow::hostaddr_view &addr,
-        uint8_t type, const std::string_view data,
+        uint8_t type, const igris::buffer data,
         uint8_t qos, uint16_t ackquant,
         bool fastsend)
 {
@@ -39,7 +40,8 @@ crow::packet_ptr crow::node_send_special(uint16_t sid, uint16_t rid,
     sh.rid = rid;
     sh.f.type = type;
 
-    const std::string_view iov[2] = {
+    const igris::buffer iov[2] =
+    {
         {(char*)&sh, sizeof(sh)},
         {(char*)data.data(), data.size()}
     };
@@ -50,7 +52,7 @@ crow::packet_ptr crow::node_send_special(uint16_t sid, uint16_t rid,
 
 crow::packet_ptr crow::node_send_v(uint16_t sid, uint16_t rid,
                                    const crow::hostaddr_view &addr,
-                                   const std::string_view *vec, size_t veclen,
+                                   const igris::buffer *vec, size_t veclen,
                                    uint8_t qos, uint16_t ackquant,
                                    bool fastsend)
 {
@@ -59,7 +61,7 @@ crow::packet_ptr crow::node_send_v(uint16_t sid, uint16_t rid,
     sh.rid = rid;
     sh.f.type = CROW_NODEPACK_COMMON;
 
-    const std::string_view iov[1] =
+    const igris::buffer iov[1] =
     {
         {(char*)&sh, sizeof(sh)}
     };
@@ -76,7 +78,7 @@ void crow::node_protocol_cls::send_node_error(crow::packet *pack, int errcode)
     sh.rid = crow::node_protocol.sid(pack);
     sh.f.type = CROW_NODEPACK_ERROR;
 
-    const std::string_view iov[2] =
+    const igris::buffer iov[2] =
     {
         {(char*)&sh, sizeof(sh)},
         {(char*)&errcode, sizeof(errcode)}
@@ -90,11 +92,12 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
     crow::node_subheader *sh = (crow::node_subheader *)pack->dataptr();
     crow::node *srv = nullptr;
 
-    for (crow::node &srvs : crow::nodes_list)
+    crow::node * srvs;
+    dlist_for_each_entry (srvs, &crow::nodes_list, lnk)
     {
-        if (srvs.id == sh->rid)
+        if (srvs->id == sh->rid)
         {
-            srv = &srvs;
+            srv = srvs;
             break;
         }
     }
@@ -108,14 +111,14 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 
     switch (sh->f.type)
     {
-    case CROW_NODEPACK_COMMON:
-        srv->incoming_packet(pack);
-        break;
+        case CROW_NODEPACK_COMMON:
+            srv->incoming_packet(pack);
+            break;
 
-    case CROW_NODEPACK_ERROR:
-        srv->notify_one(get_error_code(pack));
-        crow::release(pack);
-        break;
+        case CROW_NODEPACK_ERROR:
+            srv->notify_one(get_error_code(pack));
+            crow::release(pack);
+            break;
     }
     return;
 }
@@ -124,11 +127,12 @@ void crow::node_protocol_cls::undelivered(crow::packet *pack)
 {
     crow::node_subheader *sh = (crow::node_subheader *)pack->dataptr();
 
-    for (crow::node &srvs : crow::nodes_list)
+    crow::node * srvs;
+    dlist_for_each_entry ( srvs, &crow::nodes_list, lnk)
     {
-        if (srvs.id == sh->sid)
+        if (srvs->id == sh->sid)
         {
-            srvs.undelivered_packet(pack);
+            srvs->undelivered_packet(pack);
             return;
         }
     }
@@ -140,7 +144,7 @@ void crow::__link_node(crow::node *srv, uint16_t id)
 {
     srv->id = id;
     // system_lock();
-    nodes_list.add_last(*srv);
+    dlist_add_tail(&srv->lnk, &nodes_list);
     // system_unlock();
 }
 
@@ -150,12 +154,13 @@ crow::node *crow::find_node(int id)
 
     // TODO: переделать на хештаблицу
 
-    for (crow::node &node : nodes_list)
+    crow::node * node;
+    dlist_for_each_entry (node, &nodes_list, lnk)
     {
         protector++;
 
-        if (node.id == id)
-            return &node;
+        if (node->id == id)
+            return node;
 
         assert(protector < 512);
     }

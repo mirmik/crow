@@ -116,7 +116,7 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len,
     sh_handshake.qos = this->qos = qos;
     sh_handshake.ackquant = this->ackquant = ackquant;
 
-    std::string_view vec[] =
+    igris::buffer vec[] =
     {
         {(char*)&sh_node, sizeof(sh_node)},
         {(char*)&sh_channel, sizeof(sh_channel)},
@@ -127,7 +127,7 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len,
 
     //_state = crow::State::CONNECTED;
     crow::send_v({raddr_ptr, raddr_len}, vec,
-                 sizeof(vec) / sizeof(std::string_view), CROW_NODE_PROTOCOL, 2,
+                 sizeof(vec) / sizeof(igris::buffer), CROW_NODE_PROTOCOL, 2,
                  ackquant);
 }
 
@@ -147,7 +147,7 @@ void crow::channel::send_handshake_answer()
     sh_handshake.qos = this->qos;
     sh_handshake.ackquant = this->ackquant;
 
-    std::string_view vec[] =
+    igris::buffer vec[] =
     {
         {(char*)&sh_node, sizeof(sh_node)},
         {(char*)&sh_channel, sizeof(sh_channel)},
@@ -156,7 +156,7 @@ void crow::channel::send_handshake_answer()
 
     //_state = crow::State::CONNECTED;
     crow::send_v({raddr_ptr, raddr_len}, vec,
-                 sizeof(vec) / sizeof(std::string_view), CROW_NODE_PROTOCOL, 2,
+                 sizeof(vec) / sizeof(igris::buffer), CROW_NODE_PROTOCOL, 2,
                  ackquant);
 }
 
@@ -177,7 +177,7 @@ int crow::channel::send(const char *data, size_t size)
     sh_channel.frame_id = this->fid++;
     sh_channel.ftype = crow::Frame::DATA;
 
-    std::string_view vec[] =
+    igris::buffer vec[] =
     {
         {(char*)&sh_node, sizeof(sh_node)},
         {(char*)&sh_channel, sizeof(sh_channel)},
@@ -185,15 +185,15 @@ int crow::channel::send(const char *data, size_t size)
     };
 
     crow::send_v({this->raddr_ptr, this->raddr_len}, vec,
-                 sizeof(vec) / sizeof(std::string_view), CROW_NODE_PROTOCOL,
+                 sizeof(vec) / sizeof(igris::buffer), CROW_NODE_PROTOCOL,
                  this->qos, this->ackquant);
 
     return 0;
 }
 
-std::string_view crow::channel::getdata(crow::packet *pack)
+igris::buffer crow::channel::getdata(crow::packet *pack)
 {
-    return std::string_view(pack->dataptr() + sizeof(crow::node_subheader) +
+    return igris::buffer(pack->dataptr() + sizeof(crow::node_subheader) +
                             sizeof(crow::subheader_channel),
                             pack->datasize() - sizeof(crow::node_subheader) -
                             sizeof(crow::subheader_channel));

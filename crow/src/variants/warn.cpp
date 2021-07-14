@@ -1,7 +1,7 @@
 #include <crow/warn.h>
 #include <igris/dprint.h>
 
-void crow::warn(std::string_view msg)
+void crow::warn(igris::buffer msg)
 {
     dpr("WARN: ");
     debug_write(msg.data(), msg.size());
