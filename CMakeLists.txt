@@ -22,6 +22,7 @@ file(GLOB SOURCES
 	crow/src/variants/allocation_malloc.cpp
 	crow/src/variants/print.cpp
 	crow/src/variants/warn.cpp
+	crow/src/variants/stdtime.cpp
 	crow/pubsub/*.cpp
 	crow/nodes/*.cpp
 	crow/proto/*.cpp
