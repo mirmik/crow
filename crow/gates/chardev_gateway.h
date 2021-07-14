@@ -59,14 +59,7 @@ namespace crow
         crow::packet *insend;
         crow::packet *rpack;
 
-        // bool send_by_symbol_mode = false;
-        // bool recv_by_symbol_mode = false;
-        // bool self_driven_receive = false;
-
       public:
-        // void set_send_symbol_mode(bool en) { send_by_symbol_mode = en; }
-        // void set_recv_symbol_mode(bool en) { recv_by_symbol_mode = en; }
-
         chardev_gateway(chardev_driver *driver, chardev_protocol *protocol);
 
         void dosend(struct crow::packet *pack);
