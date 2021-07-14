@@ -108,7 +108,7 @@ licant.modules.module("crow.allocator", "pool",
 	sources=["crow/src/variants/allocation_pool.cpp"])
 
 licant.modules.module("crow.time", "chrono", 
-	sources=["crow/src/stdtime.cpp"], default=True)
+	sources=["crow/src/variants/stdtime.cpp"], default=True)
 
 #######################################GATES#########################################
 

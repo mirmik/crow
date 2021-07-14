@@ -246,7 +246,7 @@ void send_do(const std::string message)
 			crow::send(
 			{addr, (uint8_t)addrsize},
 			{message.data(), message.size()},
-			type, qos, ackquant);
+			type, qos, ackquant, false);
 			break;
 
 		case protoopt_e::PROTOOPT_PUBLISH:
