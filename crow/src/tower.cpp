@@ -88,7 +88,7 @@ void crow::release(crow::packet *pack)
     system_unlock();
 }
 
-static void crow_tower_release(crow::packet *pack)
+void crow_tower_release(crow::packet *pack)
 {
     system_lock();
 
