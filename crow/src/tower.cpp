@@ -788,11 +788,11 @@ bool crow::has_untravelled_now()
 
 void crow::finish()
 {
-    //crow::gateway * gate;
-    //dlist_for_each_entry(gate, &crow::gateway_list, lnk)
-    //{
-    //    gate->finish();
-    //}
+    crow::gateway * gate;
+    dlist_for_each_entry(gate, &crow::gateway_list, lnk)
+    {
+        gate->finish();
+    }
 }
 
 bool crow::fully_empty()
