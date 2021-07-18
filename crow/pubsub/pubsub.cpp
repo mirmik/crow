@@ -67,8 +67,7 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
         data,
     };
 
-    return crow::send_v(addr, iov, 4, CROW_PUBSUB_PROTOCOL, qos, acktime,
-                        false);
+    return crow::send_v(addr, iov, 4, CROW_PUBSUB_PROTOCOL, qos, acktime);
 }
 
 crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
@@ -95,7 +94,7 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
     };
 
     return crow::send_vv(addr, iov, 4, vec, vecsz, CROW_PUBSUB_PROTOCOL, qos,
-                         acktime, false);
+                         acktime);
 }
 
 void crow::subscribe(const crow::hostaddr_view &addr,

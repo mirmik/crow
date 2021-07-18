@@ -134,7 +134,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		node0.bind(10);
 		node1.bind(11);
 
-		node0.send(9, addr, "data", 0, 2, false);
+		node0.send(9, addr, "data", 0, 2);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();
@@ -171,7 +171,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		node0.bind(10);
 		node1.bind(11);
 
-		node0.send(9, addr, "data", 1, 2, false);
+		node0.send(9, addr, "data", 1, 2);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();
@@ -208,7 +208,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		node0.bind(10);
 		node1.bind(11);
 
-		node0.send(9, addr, "data", 2, 2, false);
+		node0.send(9, addr, "data", 2, 2);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();
@@ -250,7 +250,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		node0.bind(10);
 		node1.bind(11);
 
-		node0.send(11, waddr, "data", 0, 2, false);
+		node0.send(11, waddr, "data", 0, 2);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();
@@ -287,7 +287,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		node0.bind(10);
 		node1.bind(11);
 
-		auto ptr = node0.send(11, waddr, "data", 1, 2, false);
+		auto ptr = node0.send(11, waddr, "data", 1, 2);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();
@@ -324,7 +324,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		node0.bind(10);
 		node1.bind(11);
 
-		node0.send(11, waddr, "data", 2, 2, false);
+		node0.send(11, waddr, "data", 2, 2);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();

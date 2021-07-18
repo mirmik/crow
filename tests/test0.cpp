@@ -37,7 +37,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("2_safe")
 	{
-		auto packptr = crow::send(addr, "data", 0, 0, 20, false);
+		auto packptr = crow::send(addr, "data", 0, 0, 20);
 		CHECK_EQ(packptr->refs, 1);
 	
 		crow::onestep();
@@ -50,9 +50,9 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("3_safe")
 	{
-		auto packptr = crow::send(addr, "data0", 0, 0, 20, false);
-		packptr = crow::send(addr, "data1", 0, 0, 20, false);
-		packptr = crow::send(addr, "data2", 0, 0, 20, false);
+		auto packptr = crow::send(addr, "data0", 0, 0, 20);
+		packptr = crow::send(addr, "data1", 0, 0, 20);
+		packptr = crow::send(addr, "data2", 0, 0, 20);
 		CHECK_EQ(packptr->refs, 1);
 	
 		crow::onestep();
@@ -65,7 +65,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("addr2")
 	{
-		crow::send(addr2, "data", 0, 0, 20, false);
+		crow::send(addr2, "data", 0, 0, 20);
 
 		crow::onestep();
 
@@ -77,7 +77,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("qos1")
 	{
-		crow::send(addr, "data", 0, 1, 20, false);
+		crow::send(addr, "data", 0, 1, 20);
 
 		crow::onestep();
 
@@ -89,7 +89,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("qos2")
 	{
-		crow::send(addr, "data", 0, 2, 20, false);
+		crow::send(addr, "data", 0, 2, 20);
 
 		crow::onestep();
 
@@ -101,7 +101,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("undelivered_0")
 	{
-		crow::send(waddr, "data", 0, 0, 2, false);
+		crow::send(waddr, "data", 0, 0, 2);
 
 		crow::onestep();
 
@@ -113,7 +113,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("undelivered_1")
 	{
-		crow::send(waddr, "data", 0, 1, 2, false);
+		crow::send(waddr, "data", 0, 1, 2);
 
 		CHECK_EQ(crow::incomming_stage_count(), 0);
 		CHECK_EQ(crow::outers_stage_count(), 1);
@@ -149,7 +149,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("undelivered_2")
 	{
-		crow::send(waddr, "data", 0, 2, 2, false);
+		crow::send(waddr, "data", 0, 2, 2);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();

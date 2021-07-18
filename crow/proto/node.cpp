@@ -6,13 +6,15 @@
 #include <igris/sync/syslock.h>
 #include <igris/util/numconvert.h>
 
+#include <nos/print.h>
+
 DLIST_HEAD(crow::nodes_list);
 crow::node_protocol_cls crow::node_protocol;
 
 crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid,
                                  const crow::hostaddr_view &addr,
                                  const igris::buffer data, uint8_t qos,
-                                 uint16_t ackquant, bool fastsend)
+                                 uint16_t ackquant)
 {
     crow::node_subheader sh;
     sh.sid = sid;
@@ -25,15 +27,13 @@ crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid,
         {(char*)data.data(), data.size()}
     };
 
-    return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant,
-                        fastsend);
+    return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
 crow::packet_ptr crow::node_send_special(uint16_t sid, uint16_t rid,
         const crow::hostaddr_view &addr,
         uint8_t type, const igris::buffer data,
-        uint8_t qos, uint16_t ackquant,
-        bool fastsend)
+        uint8_t qos, uint16_t ackquant)
 {
     crow::node_subheader sh;
     sh.sid = sid;
@@ -46,15 +46,13 @@ crow::packet_ptr crow::node_send_special(uint16_t sid, uint16_t rid,
         {(char*)data.data(), data.size()}
     };
 
-    return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant,
-                        fastsend);
+    return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
 crow::packet_ptr crow::node_send_v(uint16_t sid, uint16_t rid,
                                    const crow::hostaddr_view &addr,
                                    const igris::buffer *vec, size_t veclen,
-                                   uint8_t qos, uint16_t ackquant,
-                                   bool fastsend)
+                                   uint8_t qos, uint16_t ackquant)
 {
     crow::node_subheader sh;
     sh.sid = sid;
@@ -67,7 +65,7 @@ crow::packet_ptr crow::node_send_v(uint16_t sid, uint16_t rid,
     };
 
     return crow::send_vv(addr, iov, 1, vec, veclen, CROW_NODE_PROTOCOL, qos,
-                         ackquant, fastsend);
+                         ackquant);
 }
 
 void crow::node_protocol_cls::send_node_error(struct crow_packet *pack, int errcode)

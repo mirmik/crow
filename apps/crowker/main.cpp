@@ -3,9 +3,7 @@
 #include <crow/tower.h>
 #include <crow/address.h>
 #include <crow/select.h>
-//#include <crow/brocker/service.h>
 #include <crow/nodes/cli.h>
-#include <crow/netkeep.h>
 
 #include <getopt.h>
 #include <stdbool.h>

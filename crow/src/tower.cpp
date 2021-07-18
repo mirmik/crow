@@ -12,6 +12,8 @@
 #include <crow/tower.h>
 #include <crow/warn.h>
 
+#include <nos/print.h>
+
 bool crow::diagnostic_noack = false;
 uint16_t crow::debug_data_size = 28;
 unsigned int crow::total_travelled;
@@ -419,7 +421,7 @@ static void crow_do_travel(crow_packet *pack)
 }
 
 uint16_t __seqcounter = 0;
-crow::packet_ptr crow_transport(crow_packet *pack, bool fastsend)
+crow::packet_ptr crow_transport(crow_packet *pack)
 {
     pack->header.stg = 0;
     pack->header.f.ack = 0;
@@ -435,7 +437,7 @@ crow::packet_ptr crow_transport(crow_packet *pack, bool fastsend)
     crow_do_travel(pack);
 
     // Делаем unsleep, чтобы перерасчитать таймауты.
-    if (crow::unsleep_handler || pack->header.qos != 0)
+    if (crow::unsleep_handler && pack->header.qos != 0)
         crow::unsleep_handler();
 
     return ptr;
@@ -458,7 +460,7 @@ void crow::nocontrol_travel(crow_packet *pack, bool fastsend)
 
 crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
                             const igris::buffer data, uint8_t type, uint8_t qos,
-                            uint16_t ackquant, bool fastsend)
+                            uint16_t ackquant)
 {
     crow_packet *pack = crow_create_packet(NULL, addr.size(), data.size());
     if (pack == nullptr)
@@ -474,13 +476,12 @@ crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
     memcpy(crow_packet_addrptr(pack), addr.data(), addr.size());
     memcpy(crow_packet_dataptr(pack), data.data(), data.size());
 
-    return crow_transport(pack, fastsend);
+    return crow_transport(pack);
 }
 
 crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
                               const igris::buffer *vec, size_t veclen,
-                              uint8_t type, uint8_t qos, uint16_t ackquant,
-                              bool fastsend)
+                              uint8_t type, uint8_t qos, uint16_t ackquant)
 {
     size_t dsize = 0;
     const igris::buffer *it = vec;
@@ -510,14 +511,13 @@ crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
         dst += it->size();
     }
 
-    return crow_transport(pack, fastsend);
+    return crow_transport(pack);
 }
 
 crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
                                const igris::buffer *vec, size_t veclen,
                                const igris::buffer *vec2, size_t veclen2,
-                               uint8_t type, uint8_t qos, uint16_t ackquant,
-                               bool fastsend)
+                               uint8_t type, uint8_t qos, uint16_t ackquant)
 {
     size_t dsize = 0;
     const igris::buffer *it;
@@ -564,7 +564,7 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
         dst += it->size();
     }
 
-    return crow_transport(pack, fastsend);
+    return crow_transport(pack);
 }
 
 void crow::return_to_tower(crow_packet *pack, uint8_t sts)
