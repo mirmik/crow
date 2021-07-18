@@ -5,6 +5,7 @@
 
 #include <igris/math.h>
 #include <sys/select.h>
+#include <nos/print.h>
 
 #include <vector>
 

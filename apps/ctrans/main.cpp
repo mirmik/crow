@@ -246,7 +246,7 @@ void send_do(const std::string message)
 			crow::send(
 			{addr, (uint8_t)addrsize},
 			{message.data(), message.size()},
-			type, qos, ackquant, false);
+			type, qos, ackquant);
 			break;
 
 		case protoopt_e::PROTOOPT_PUBLISH:
@@ -787,9 +787,7 @@ int main(int argc, char *argv[])
 	}
 
 	//START CROW
-	crow::unselect_init();
-	crow::select_collect_fds();
-	crow::start_spin_with_select();
+	crow::start_spin();
 
 	if (channelno >= 0)
 	{

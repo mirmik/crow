@@ -35,7 +35,6 @@ licant.modules.module("crow",
 		"src/hexer.c",
 		"src/address.cpp",
 		"src/gateway.cpp",
-		"src/retransler.cpp",
 		"src/iter.cpp",
 	
 		"proto/acceptor.cpp",

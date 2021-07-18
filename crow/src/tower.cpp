@@ -433,6 +433,11 @@ crow::packet_ptr crow_transport(crow_packet *pack, bool fastsend)
     //{
     crow::packet_ptr ptr(pack);
     crow_do_travel(pack);
+
+    // Делаем unsleep, чтобы перерасчитать таймауты.
+    if (crow::unsleep_handler || pack->header.qos != 0)
+        crow::unsleep_handler();
+
     return ptr;
     //}
 }
