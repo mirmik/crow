@@ -72,7 +72,7 @@ void crow::utilize(crow_packet *pack)
 
 static crow::gateway *crow_find_target_gateway(crow_packet *pack)
 {
-    uint8_t gidx = *pack->stageptr();
+    uint8_t gidx = *crow_packet_stageptr(pack);
 
     crow::gateway * gate;
     dlist_for_each_entry(gate, &crow::gateway_list, lnk)

@@ -43,7 +43,7 @@ void crow::udpgate::nblock_onestep()
         {(char*)&sender.sin_addr.s_addr, 4}, 
         {(char*)&sender.sin_port, 2}};
 
-    block->revert(vec, 3);
+    crow_packet_revert(block, vec, 3);
 
     crow_packet *pack = block;
     block = NULL;
@@ -110,8 +110,8 @@ void crow::udpgate::close()
 
 void crow::udpgate::send(crow_packet *pack)
 {
-    uint32_t *addr = (uint32_t *)(pack->stageptr() + 1);
-    uint16_t *port = (uint16_t *)(pack->stageptr() + 5);
+    uint32_t *addr = (uint32_t *)(crow_packet_stageptr(pack)  + 1);
+    uint16_t *port = (uint16_t *)(crow_packet_stageptr(pack) + 5);
 
     struct sockaddr_in ipaddr;
     socklen_t iplen = sizeof(struct sockaddr_in);

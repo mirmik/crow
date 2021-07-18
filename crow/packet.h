@@ -80,21 +80,25 @@ struct crow_packet
     };
     struct crow_header header;
 
-    uint8_t *stageptr() { return (uint8_t *)(&header + 1) + header.stg; }
-
     char *endptr() { return (char *)(&header) + header.flen; }
     uint16_t blocksize() { return header.flen; }
 
     // igris::buffer rawdata();
     // crow::hostaddr_view addr();
 
-    void revert_gate(uint8_t gateindex);
-    void revert(igris::buffer *vec, size_t veclen);
-
     size_t fullsize() { return header.flen; };
 };
 
 __BEGIN_DECLS
+
+static inline uint8_t *crow_packet_stageptr(struct crow_packet *pack)
+{
+    return (uint8_t *)(&pack->header + 1) + pack->header.stg;
+}
+
+void crow_packet_revert_gate(struct crow_packet *pack, uint8_t gateindex);
+void crow_packet_revert(struct crow_packet *pack, igris::buffer *vec,
+                        size_t veclen);
 
 uint8_t *crow_packet_addrptr(struct crow_packet *pack);
 uint8_t crow_packet_addrsize(struct crow_packet *pack);

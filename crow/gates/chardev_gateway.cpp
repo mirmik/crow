@@ -72,7 +72,7 @@ void crow::chardev_gateway::newline_handler()
 	struct crow_packet *block = rpack;
 	rpack = NULL;
 
-	block->revert_gate(id);
+	crow_packet_revert_gate(block, id);
 
 	crow_packet_initialization(block, this);
 	crow::nocontrol_travel(block, false);

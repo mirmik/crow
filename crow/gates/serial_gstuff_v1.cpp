@@ -16,7 +16,7 @@ void crow::serial_gstuff_v1::newline_handler()
     struct crow_packet *block = rpack;
     rpack = NULL;
 
-    block->revert_gate(id);
+    crow_packet_revert_gate(block, id);
 
     crow_packet_initialization(block, this);
     crow::nocontrol_travel(block, false);
