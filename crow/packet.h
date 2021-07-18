@@ -106,6 +106,12 @@ void crow_packet_initialization(struct crow_packet *pack,
 struct crow_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
                                        size_t datasize);
 
+/**
+ * Выделить память для пакета.
+ *
+ * Выделяет adlen + sizeof(crow_packet) байт
+ * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
+ */
 struct crow_packet *crow_allocate_packet(size_t adlen);
 
 ///Вернуть память выделенную для пакета pack
@@ -115,12 +121,6 @@ __END_DECLS
 
 namespace crow
 {
-    /**
-     * Выделить память для пакета.
-     *
-     * Выделяет adlen + sizeof(crow_packet) байт
-     * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
-     */
     // Только для аллокации через pool.
     void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
     igris::pool *get_package_pool();
