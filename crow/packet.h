@@ -23,7 +23,7 @@
 
 namespace crow
 {
-    struct gateway;
+    class gateway;
 
     /**
         @brief Структура заголовок пакета.
@@ -62,7 +62,7 @@ namespace crow
         struct dlist_head ulnk =
             DLIST_HEAD_INIT(ulnk); ///< Для подключения в список пользователя и
                                    ///< зависимых протоколов.
-        struct crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
+        crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
         uint16_t last_request_time; ///< время последней отправки
         uint16_t _ackcount; ///< счетчик количества попыток отправки
         int8_t refs;
@@ -129,11 +129,11 @@ namespace crow
     ///Вернуть память выделенную для пакета pack
     void deallocate_packet(crow::packet *pack);
 
-    packet *create_packet(struct crow::gateway *ingate, uint8_t addrsize,
+    packet *create_packet(crow::gateway *ingate, uint8_t addrsize,
                           size_t datasize);
 
     void packet_initialization(struct crow::packet *pack,
-                               struct crow::gateway *ingate);
+                                crow::gateway *ingate);
 
     // Только для аллокации через pool.
     void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);

@@ -5,10 +5,14 @@
 
 #include <igris/buffer.h>
 
+#if __has_include(<vector>)
+#include <vector>
+#else
 namespace std
 {
     template <class T, class Alloc> class vector;
 }
+#endif
 
 namespace crow
 {
