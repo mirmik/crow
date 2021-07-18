@@ -62,6 +62,12 @@ static void __crow_utilize(crow::packet *pack)
     }
 }
 
+void crow::utilize(crow::packet *pack) 
+{
+    __crow_utilize(pack);
+}
+
+
 static crow::gateway *crow_find_target_gateway(crow::packet *pack)
 {
     uint8_t gidx = *pack->stageptr();
@@ -782,11 +788,11 @@ bool crow::has_untravelled_now()
 
 void crow::finish()
 {
-    crow::gateway * gate;
-    dlist_for_each_entry(gate, &crow::gateway_list, lnk)
-    {
-        gate->finish();
-    }
+    //crow::gateway * gate;
+    //dlist_for_each_entry(gate, &crow::gateway_list, lnk)
+    //{
+    //    gate->finish();
+    //}
 }
 
 bool crow::fully_empty()

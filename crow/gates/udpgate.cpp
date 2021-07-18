@@ -143,5 +143,3 @@ int crow::create_udpgate(uint8_t id, uint16_t port)
 
     return 0;
 }
-
-void crow::udpgate::finish() { close(); }

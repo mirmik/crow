@@ -60,6 +60,7 @@ namespace crow
 
     // Используется пользовательским кодом для освобождения пакета.
     void release(crow::packet *pack);
+    void utilize(crow::packet *pack);
 
     // Взятие отметки времени.
     uint16_t millis();

@@ -67,7 +67,6 @@ namespace crow
 
         void send(crow::packet *) override;
         void nblock_onestep() override;
-        void finish() override;
 
         void newline_handler();
         void packet_sended_handler();

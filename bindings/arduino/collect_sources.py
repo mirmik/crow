@@ -13,7 +13,7 @@ SOURCES = [
 	"src/packet_ptr.cpp",
 	"src/tower.cpp",
 	"src/gateway.cpp",
-	"src/systime.cpp",
+	"src/variants/systime.cpp",
 	"src/variants/allocation_malloc.cpp",
 	"src/variants/warn-stub.cpp",
 ]

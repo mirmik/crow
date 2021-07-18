@@ -96,4 +96,6 @@ namespace crow
     void finish();
 }
 
+void crow_tower_release(crow::packet *pack);
+
 #endif

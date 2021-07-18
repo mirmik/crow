@@ -22,7 +22,6 @@ namespace crow
 
         virtual void send(crow::packet *) = 0;
         virtual void nblock_onestep() = 0;
-        virtual void finish() = 0;
 
         int bind(int gateno);
 #if !CROW_ENABLE_WITHOUT_FDS

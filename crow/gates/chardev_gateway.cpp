@@ -28,10 +28,6 @@ void crow::chardev_gateway::dosend(struct crow::packet *pack)
 	driver->start_send();
 }
 
-void crow::chardev_gateway::finish()
-{
-}
-
 void crow::chardev_gateway::init_recv()
 {
 	system_lock();

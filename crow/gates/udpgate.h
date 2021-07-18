@@ -25,7 +25,6 @@ namespace crow
 
         int open(uint16_t port = 0);
         void close();
-        void finish() override;
         void set_fastsend_policy(bool en) { fastsend = en; }
 
         int bind(int gate_no = CROW_UDPGATE_NO)
@@ -38,7 +37,7 @@ namespace crow
         int get_fd() override { return sock; }
 #endif
 
-        ~udpgate() override { finish(); }
+        ~udpgate() override { close(); }
     };
 
     int create_udpgate(uint8_t id = CROW_UDPGATE_NO, uint16_t port = 0);
