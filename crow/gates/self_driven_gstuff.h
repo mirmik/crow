@@ -17,8 +17,8 @@ namespace crow
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
         crow::packet *insend = nullptr;
         char *send_buffer = nullptr;
-        char *send_it;
-        char *send_eit;
+        char *send_it = nullptr;
+        char *send_eit = nullptr;
 
         int received_maxpack_size = 48;
         crow::packet *recvpack = nullptr;
@@ -35,6 +35,7 @@ namespace crow
         {
             this->send_buffer = send_buffer;
             init_receiver();
+            invalidate_sender();
 
             this->write_callback = write_callback;
             this->write_privdata = write_privdata;
@@ -59,7 +60,6 @@ namespace crow
 
         void newline_handler()
         {
-            nos::println("newline_handler!!!!!!!!!!!!!!");
             struct crow::packet *pack = recvpack;
             recvpack = NULL;
 
@@ -67,16 +67,13 @@ namespace crow
 
             crow::packet_initialization(pack, this);
 
-            nos::println("nocontrol_travel!!!!!!!!!!!!!!");
             crow::nocontrol_travel(pack, false);
-            nos::println("nocontrol_travel ... ok!!!!!!!!!!!!!!");
 
             init_receiver();
         }
 
         void init_receiver()
         {
-            nos::println("init_recver!!!!!!!!!!!!!!");
             recvpack = crow::allocate_packet(received_maxpack_size);
             gstuff_autorecv_setbuf(&recver, (char *)&recvpack->header,
                                    received_maxpack_size);
