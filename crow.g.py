@@ -68,14 +68,14 @@ licant.modules.module("crow",
 )
 
 licant.module("crow.crowker",
-	srcdir = "crow/brocker",
+	srcdir = "crow",
 	sources= [
-		"../pubsub/crowker_support.cpp",
-		"crowker.cpp",
-		"theme.cpp",
-		"subscriber.cpp",
-		"crow_subscriber.cpp",
-		"tcp_subscriber.cpp",
+		"pubsub/crowker_support.cpp",
+		"brocker/crowker.cpp",
+		"brocker/theme.cpp",
+		"brocker/subscriber.cpp",
+		"brocker/crow_subscriber.cpp",
+		"brocker/tcp_subscriber.cpp",
 	]
 )
 

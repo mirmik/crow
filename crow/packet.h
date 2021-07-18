@@ -79,14 +79,6 @@ struct crow_packet
         } f;
     };
     struct crow_header header;
-
-    char *endptr() { return (char *)(&header) + header.flen; }
-    uint16_t blocksize() { return header.flen; }
-
-    // igris::buffer rawdata();
-    // crow::hostaddr_view addr();
-
-    size_t fullsize() { return header.flen; };
 };
 
 __BEGIN_DECLS
