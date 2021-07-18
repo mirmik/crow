@@ -9,8 +9,8 @@
 
 static int count = 0;
 static int ucount = 0;
-static auto addr = crow::address(".12.127.0.0.1:10999");
-static auto waddr = crow::address(".12.127.0.0.1:10998");
+//static auto addr = crow::address(".12.127.0.0.1:10999");
+//static auto waddr = crow::address(".12.127.0.0.1:10998");
 
 static void incom(crow::node_packet_ptr) 
 {
@@ -24,5 +24,5 @@ static void undel(crow::node_packet_ptr)
 
 TEST_CASE("cli" * doctest::timeout(0.5))
 {
-	nos::println("cli test");
+	nos::println("cli test TODO");
 }

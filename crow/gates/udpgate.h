@@ -5,7 +5,6 @@
 
 #include <crow/defs.h>
 #include <crow/gateway.h>
-#include <iostream>
 
 namespace crow
 {
@@ -25,7 +24,7 @@ namespace crow
 
         int open(uint16_t port = 0);
         void close();
-        void finish() override {close();}
+        void finish() override { close(); }
         void set_fastsend_policy(bool en) { fastsend = en; }
 
         int bind(int gate_no = CROW_UDPGATE_NO)

@@ -95,6 +95,9 @@ namespace crow
 
     // Завершить гейты.
     void finish();
+
+    int incomming_stage_count();
+    int outers_stage_count();
 }
 
 void crow_tower_release(crow::packet *pack);

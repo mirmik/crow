@@ -6,9 +6,9 @@
 #include <thread>
 #include <chrono>
 
-static auto waddr = crow::address(".12.127.0.0.1:10998");
-static auto addr = crow::address(".12.127.0.0.1:10999");
-static auto addr2 = crow::address(".12.127.0.0.1:10999.12.127.0.0.1:10999");
+static auto waddr = crow::address(".12.127.0.0.1:10098");
+static auto addr = crow::address(".99");
+static auto addr2 = crow::address(".99.99");
 static int count = 0;
 
 void incoming(crow::packet * ptr)
@@ -29,21 +29,10 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 	{
 		crow::send(addr, "data", 0, 0, 20);
 		
-		while (count != 1);
+		crow::onestep();
 		
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::total_travelled, 2);
-		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
-	}
-
-	SUBCASE("1")
-	{
-		crow::send(addr, "data", 0, 0, 20);
-
-		while (count != 1);
-
-		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::has_untravelled(), false);
 		CHECK_EQ(crow::allocated_count, 0);
 	}
@@ -53,7 +42,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		auto packptr = crow::send(addr, "data", 0, 0, 20, false);
 		CHECK_EQ(packptr->refs, 1);
 	
-		while (count != 1);
+		crow::onestep();
 		CHECK_EQ(packptr->refs, 1);
 
 		CHECK_EQ(count, 1);
@@ -68,7 +57,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		packptr = crow::send(addr, "data2", 0, 0, 20, false);
 		CHECK_EQ(packptr->refs, 1);
 	
-		while (count != 3);
+		crow::onestep();
 		CHECK_EQ(packptr->refs, 1);
 
 		CHECK_EQ(count, 3);
@@ -80,7 +69,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 	{
 		crow::send(addr2, "data", 0, 0, 20, false);
 
-		while (count != 1);
+		crow::onestep();
 
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::has_untravelled(), false);
@@ -92,7 +81,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 	{
 		crow::send(addr, "data", 0, 1, 20, false);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		crow::onestep();
 
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::total_travelled, 4); // pack * 2 + ack * 2
@@ -104,7 +93,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 	{
 		crow::send(addr, "data", 0, 2, 20, false);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		crow::onestep();
 
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::total_travelled, 6); // pack * 2 + ack * 2 + ack2 * 2
@@ -116,7 +105,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 	{
 		crow::send(waddr, "data", 0, 0, 2, false);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(15));
+		crow::onestep();
 
 		CHECK_EQ(count, 0);
 		CHECK_EQ(crow::total_travelled, 1);
@@ -128,7 +117,31 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 	{
 		crow::send(waddr, "data", 0, 1, 2, false);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(15));
+		CHECK_EQ(crow::incomming_stage_count(), 0);
+		CHECK_EQ(crow::outers_stage_count(), 1);
+		crow::onestep();
+
+		CHECK_EQ(crow::incomming_stage_count(), 0);
+		CHECK_EQ(crow::outers_stage_count(), 1);
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
 
 		CHECK_EQ(count, 0);
 		CHECK_EQ(crow::total_travelled, 5);
@@ -140,8 +153,25 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 	{
 		crow::send(waddr, "data", 0, 2, 2, false);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(15));
-
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+		crow::onestep();
+		
 		CHECK_EQ(count, 0);
 		CHECK_EQ(crow::total_travelled, 5);
 		CHECK_EQ(crow::has_untravelled(), false);

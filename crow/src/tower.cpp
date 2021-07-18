@@ -427,14 +427,14 @@ crow::packet_ptr crow_transport(crow::packet *pack, bool fastsend)
     pack->header.seqid = __seqcounter++;
     system_unlock();
 
-    if (fastsend == false)
-        return crow::travel(pack);
-    else
-    {
-        crow::packet_ptr ptr(pack);
-        crow_do_travel(pack);
-        return ptr;
-    }
+    //if (fastsend == false)
+    //    return crow::travel(pack);
+    //else
+    //{
+    crow::packet_ptr ptr(pack);
+    crow_do_travel(pack);
+    return ptr;
+    //}
 }
 
 void crow::nocontrol_travel(crow::packet *pack, bool fastsend)
@@ -756,6 +756,9 @@ void crow::onestep()
     crow_onestep_outers_stage();
     crow_onestep_incoming_stage();
 }
+
+int crow::incomming_stage_count() { return dlist_size(&crow_incoming); }
+int crow::outers_stage_count() { return dlist_size(&crow_outters); }
 
 void crow::spin()
 {

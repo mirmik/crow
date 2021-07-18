@@ -159,12 +159,16 @@ namespace crow
             sem_up(&sem);
         }
 
-        ~self_driven_gstuff() override
+        void finish() override
         {
-            nos::println("HERE");
             if (recvpack)
+            {
                 crow::deallocate_packet(recvpack);
+                recvpack = nullptr;
+            }
         }
+
+        ~self_driven_gstuff() { finish(); }
     };
 }
 
