@@ -78,7 +78,7 @@ namespace crow
                 uint8_t sended_to_gate : 1;
             } f;
         };
-        struct crow::header header;
+        struct crow_header header;
 
         uint8_t *stageptr() { return (uint8_t *)(&header + 1) + header.stg; }
 
@@ -100,7 +100,7 @@ namespace crow
         char *dataptr() { return (char *)(addrptr() + addrsize()); }
         uint16_t datasize()
         {
-            return (uint16_t)(header.flen - header.alen - sizeof(crow::header));
+            return (uint16_t)(header.flen - header.alen - sizeof(crow_header));
         }
 
         size_t fullsize() { return header.flen; };

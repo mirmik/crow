@@ -30,7 +30,7 @@ crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
     if (pack == nullptr)
         return nullptr;
 
-    pack->header.flen = (uint16_t)(sizeof(crow::header) + addrsize + datasize);
+    pack->header.flen = (uint16_t)(sizeof(crow_header) + addrsize + datasize);
     pack->header.alen = addrsize;
     pack->header.ackquant = 200;
     pack->header.pflag = 0;

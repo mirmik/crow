@@ -14,13 +14,13 @@
 
 void crow::udpgate::nblock_onestep()
 {
-    crow::header header;
+    crow_header header;
 
     struct sockaddr_in sender;
     socklen_t sendsize = sizeof(sender);
     memset(&sender, 0, sizeof(sender));
 
-    ssize_t len = recvfrom(sock, &header, sizeof(crow::header), MSG_PEEK,
+    ssize_t len = recvfrom(sock, &header, sizeof(crow_header), MSG_PEEK,
                            (struct sockaddr *)&sender, &sendsize);
 
     if (len <= 0)
@@ -29,9 +29,9 @@ void crow::udpgate::nblock_onestep()
     size_t flen = header.flen;
 
     if (!block)
-        block = crow::allocate_packet(flen - sizeof(crow::header));
+        block = crow::allocate_packet(flen - sizeof(crow_header));
     //(crow::packet *) malloc(flen + sizeof(crow::packet) -
-    // sizeof(crow::header));
+    // sizeof(crow_header));
 
     len = recvfrom(sock, &block->header, flen, 0, (struct sockaddr *)&sender,
                    &sendsize);

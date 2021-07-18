@@ -21,6 +21,30 @@
 #define CROW_TARGET_ACK 1
 #define CROW_BINARY_ACK 2
 
+struct crow_header
+{
+    union
+    {
+        uint8_t pflag; ///< Флаги пакета
+        struct
+        {
+            uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
+            ///< передается в типе.
+            uint8_t RESERVED : 1;
+            uint8_t noexec : 1; ///< Флаг предотвращает исполнение пакета.
+            ///< Используется для запросов существования
+            uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
+        } f;
+    };
+    uint16_t flen; ///< Полная длина пакета
+    uint8_t alen;  ///< Длина поля адреса.
+    uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
+    ///< знала, какую часть адреса обрабатывать.
+    uint16_t ackquant; ///< Таймаут для пересылки пакета.
+    uint16_t seqid; ///< Порядковый номер пакета. Присваивается отправителем.
+    uint8_t qos;    ///< Поле качества обслуживания.
+} __attribute__((packed));
+
 namespace crow
 {
     class gateway;
@@ -30,30 +54,6 @@ namespace crow
         @details Заголовок пакета располагается в первых байтах пакета.
         за заголовком следует поле адреса переменной длины, а за ним данные.
     */
-    struct header
-    {
-        union
-        {
-            uint8_t pflag; ///< Флаги пакета
-            struct
-            {
-                uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
-                                 ///< передается в типе.
-                uint8_t RESERVED : 1;
-                uint8_t noexec : 1; ///< Флаг предотвращает исполнение пакета.
-                                    ///< Используется для запросов существования
-                uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
-            } f;
-        };
-        uint16_t flen; ///< Полная длина пакета
-        uint8_t alen;  ///< Длина поля адреса.
-        uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
-                     ///< знала, какую часть адреса обрабатывать.
-        uint16_t ackquant; ///< Таймаут для пересылки пакета.
-        uint16_t
-            seqid; ///< Порядковый номер пакета. Присваивается отправителем.
-        uint8_t qos; ///< Поле качества обслуживания.
-    } __attribute__((packed));
 
     struct packet
     {
@@ -61,7 +61,7 @@ namespace crow
             DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
         struct dlist_head ulnk =
             DLIST_HEAD_INIT(ulnk); ///< Для подключения в список пользователя и
-                                   ///< зависимых протоколов.
+        ///< зависимых протоколов.
         crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
         uint16_t last_request_time; ///< время последней отправки
         uint16_t _ackcount; ///< счетчик количества попыток отправки
@@ -78,7 +78,7 @@ namespace crow
                 uint8_t sended_to_gate : 1;
             } f;
         };
-        struct crow::header header;
+        struct crow_header header;
 
         uint8_t *stageptr() { return (uint8_t *)(&header + 1) + header.stg; }
 
@@ -100,7 +100,7 @@ namespace crow
         char *dataptr() { return (char *)(addrptr() + addrsize()); }
         uint16_t datasize()
         {
-            return (uint16_t)(header.flen - header.alen - sizeof(crow::header));
+            return (uint16_t)(header.flen - header.alen - sizeof(crow_header));
         }
 
         size_t fullsize() { return header.flen; };
@@ -115,8 +115,7 @@ namespace crow
 
         void ackcount(uint16_t c) { _ackcount = c; }
         uint16_t ackcount() { return _ackcount; }
-    }; //На самом деле, он не должен быть packed.
-    //__attribute__((packed));
+    };
 
     /**
      * Выделить память для пакета.
@@ -133,7 +132,7 @@ namespace crow
                           size_t datasize);
 
     void packet_initialization(struct crow::packet *pack,
-                                crow::gateway *ingate);
+                               crow::gateway *ingate);
 
     // Только для аллокации через pool.
     void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
