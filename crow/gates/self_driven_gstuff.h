@@ -88,7 +88,7 @@ namespace crow
             dlist_del_init(&insend->lnk);
 
             int size = gstuffing((const char *)&insend->header,
-                                 insend->fullsize(), send_buffer);
+                                 insend->header.flen, send_buffer);
 
             send_it = send_buffer;
             send_eit = send_buffer + size;

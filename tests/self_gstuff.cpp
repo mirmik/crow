@@ -73,7 +73,7 @@ TEST_CASE("self_driven_gstuff2")
 		memcpy(crow_packet_addrptr(pack), "\x01", 1);
 		memcpy(crow_packet_dataptr(pack), "helloworld", 10);
 
-		int gsize = gstuffing((const char*)&pack->header, pack->fullsize(), buf2);
+		int gsize = gstuffing((const char*)&pack->header, pack->header.flen, buf2);
 
 		for (int i = 0; i < gsize; ++i)
 		{
