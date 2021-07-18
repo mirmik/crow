@@ -29,7 +29,7 @@ void crow::udpgate::nblock_onestep()
     size_t flen = header.flen;
 
     if (!block)
-        block = crow::allocate_packet(flen - sizeof(crow_header));
+        block = crow_allocate_packet(flen - sizeof(crow_header));
     //(crow_packet *) malloc(flen + sizeof(crow_packet) -
     // sizeof(crow_header));
 

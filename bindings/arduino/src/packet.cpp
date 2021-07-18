@@ -25,7 +25,7 @@ void crow_packet_initialization(crow_packet *pack, crow::gateway *ingate)
 crow_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
                                   size_t datasize)
 {
-    crow_packet *pack = crow::allocate_packet(addrsize + datasize);
+    crow_packet *pack = crow_allocate_packet(addrsize + datasize);
 
     if (pack == nullptr)
         return nullptr;

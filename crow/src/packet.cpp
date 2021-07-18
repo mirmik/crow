@@ -25,7 +25,7 @@ void crow_packet_initialization(struct crow_packet *pack, crow::gateway *ingate)
 struct crow_packet *
 crow_create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize)
 {
-    crow_packet *pack = crow::allocate_packet(addrsize + datasize);
+    crow_packet *pack = crow_allocate_packet(addrsize + datasize);
 
     if (pack == nullptr)
         return nullptr;
@@ -67,7 +67,7 @@ void crow_packet_revert(struct crow_packet * pack, igris::buffer *vec, size_t ve
     pack->header.stg = (uint8_t)(pack->header.stg + sz);
 }
 
-bool crow::has_allocated() { return !!allocated_count; }
+bool crow::has_allocated() { return !!crow_allocated_count; }
 
 
 

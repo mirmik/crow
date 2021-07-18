@@ -74,7 +74,7 @@ namespace crow
 
         void init_receiver()
         {
-            recvpack = crow::allocate_packet(received_maxpack_size);
+            recvpack = crow_allocate_packet(received_maxpack_size);
             gstuff_autorecv_setbuf(&recver, (char *)&recvpack->header,
                                    received_maxpack_size);
         }
@@ -160,7 +160,7 @@ namespace crow
         {
             if (recvpack)
             {
-                crow::deallocate_packet(recvpack);
+                crow_deallocate_packet(recvpack);
                 recvpack = nullptr;
             }
         }

@@ -55,11 +55,11 @@ static void __crow_utilize(crow_packet *pack)
 
     dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
     dlist_del(&pack->ulnk);
-    crow::deallocate_packet(pack);
+    crow_deallocate_packet(pack);
 
     if (__live_diagnostic_enabled)
     {
-        //nos::println("alive packages total:", crow::allocated_count);
+        //nos::println("alive packages total:", crow_allocated_count);
         // TODO : crow print function
     }
 }

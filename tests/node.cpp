@@ -44,7 +44,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		CHECK_EQ(ucount, 0);
 		CHECK_EQ(crow::total_travelled, 2);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 	SUBCASE("1")
@@ -81,7 +81,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		CHECK_EQ(ucount, 0);
 		CHECK_EQ(crow::total_travelled, 4);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 1);
+		CHECK_EQ(crow_allocated_count, 1);
 	}
 
 	SUBCASE("2")
@@ -118,7 +118,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		CHECK_EQ(ucount, 0);
 		CHECK_EQ(crow::total_travelled, 6);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 
@@ -160,7 +160,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		CHECK_EQ(ucount, 0);
 		CHECK_EQ(crow::total_travelled, 4); //pack*2 + err(qos:0)*2
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 	SUBCASE("1 wrong node")
@@ -197,7 +197,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		CHECK_EQ(ucount, 0);
 		CHECK_EQ(crow::total_travelled, 6); //pack + err(qos:2)
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 	SUBCASE("2 wrong node")
@@ -234,7 +234,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		CHECK_EQ(ucount, 0);
 		CHECK_EQ(crow::total_travelled, 8); //pack + err(qos:2)
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 
@@ -276,7 +276,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		CHECK_EQ(ucount, 0);
 		CHECK_EQ(crow::total_travelled, 1);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 	SUBCASE("1_undel")
@@ -313,7 +313,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		CHECK_EQ(ucount, 1);
 		CHECK_EQ(crow::total_travelled, 5);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 1);
+		CHECK_EQ(crow_allocated_count, 1);
 	}
 
 	SUBCASE("2_undel")
@@ -349,6 +349,6 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		CHECK_EQ(ucount, 1);
 		CHECK_EQ(crow::total_travelled, 5);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 }

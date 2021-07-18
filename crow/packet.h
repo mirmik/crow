@@ -81,6 +81,8 @@ struct crow_packet
     struct crow_header header;
 };
 
+extern int crow_allocated_count;
+
 __BEGIN_DECLS
 
 static inline uint8_t *crow_packet_stageptr(struct crow_packet *pack)
@@ -104,28 +106,25 @@ void crow_packet_initialization(struct crow_packet *pack,
 struct crow_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
                                        size_t datasize);
 
+struct crow_packet *crow_allocate_packet(size_t adlen);
+
+///Вернуть память выделенную для пакета pack
+void crow_deallocate_packet(struct crow_packet *pack);
+
 __END_DECLS
 
 namespace crow
 {
-    class gateway;
-
     /**
      * Выделить память для пакета.
      *
      * Выделяет adlen + sizeof(crow_packet) байт
      * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
      */
-    crow_packet *allocate_packet(size_t adlen);
-
-    ///Вернуть память выделенную для пакета pack
-    void deallocate_packet(crow_packet *pack);
-
     // Только для аллокации через pool.
     void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
     igris::pool *get_package_pool();
 
-    extern int allocated_count;
     bool has_allocated();
 
     void diagnostic(const char *label, crow_packet *pack);

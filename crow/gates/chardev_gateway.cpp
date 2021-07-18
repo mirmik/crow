@@ -31,7 +31,7 @@ void crow::chardev_gateway::dosend(struct crow_packet *pack)
 void crow::chardev_gateway::init_recv()
 {
 	system_lock();
-	rpack = (struct crow_packet*) crow::allocate_packet(packet_dataaddr_size);
+	rpack = (struct crow_packet*) crow_allocate_packet(packet_dataaddr_size);
 	memset((void*)rpack, 0, packet_dataaddr_size + sizeof(crow_packet::header));
 	if (rpack == nullptr)
 	{

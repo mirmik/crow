@@ -32,7 +32,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::total_travelled, 2);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 	SUBCASE("2_safe")
@@ -45,7 +45,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 1);
+		CHECK_EQ(crow_allocated_count, 1);
 	}
 
 	SUBCASE("3_safe")
@@ -60,7 +60,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 		CHECK_EQ(count, 3);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 1);
+		CHECK_EQ(crow_allocated_count, 1);
 	}
 
 	SUBCASE("addr2")
@@ -71,7 +71,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 
@@ -84,7 +84,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::total_travelled, 4); // pack * 2 + ack * 2
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 	SUBCASE("qos2")
@@ -96,7 +96,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::total_travelled, 6); // pack * 2 + ack * 2 + ack2 * 2
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 	SUBCASE("undelivered_0")
@@ -108,7 +108,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		CHECK_EQ(count, 0);
 		CHECK_EQ(crow::total_travelled, 1);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 	SUBCASE("undelivered_1")
@@ -144,7 +144,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		CHECK_EQ(count, 0);
 		CHECK_EQ(crow::total_travelled, 5);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 
 	SUBCASE("undelivered_2")
@@ -173,6 +173,6 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		CHECK_EQ(count, 0);
 		CHECK_EQ(crow::total_travelled, 5);
 		CHECK_EQ(crow::has_untravelled(), false);
-		CHECK_EQ(crow::allocated_count, 0);
+		CHECK_EQ(crow_allocated_count, 0);
 	}
 }
