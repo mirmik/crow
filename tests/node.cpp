@@ -24,7 +24,6 @@ void undel(crow::node_packet_ptr)
 
 TEST_CASE("node0" * doctest::timeout(0.5))
 {
-	nos::println("node0 test");
 	count = ucount = 0;
 	crow::total_travelled = 0;
 	crow::user_incoming_handler = nullptr;
@@ -326,7 +325,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 		node1.bind(11);
 
 		node0.send(11, waddr, "data", 2, 2, false);
-		
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));

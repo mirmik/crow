@@ -59,8 +59,6 @@ TEST_CASE("self_driven_gstuff2")
 		char buf[64];
 		char buf2[64];
 
-		crow::diagnostic_setup(true, true);
-
 		crow::self_driven_gstuff gate;
 
 		gate.init(buf, write, NULL);
@@ -77,7 +75,6 @@ TEST_CASE("self_driven_gstuff2")
 
 		int gsize = gstuffing((const char*)&pack->header, pack->fullsize(), buf2);
 
-		nos::print_dump(buf2, gsize);
 		for (int i = 0; i < gsize; ++i)
 		{
 			gate.newdata(buf2[i]);
@@ -86,7 +83,6 @@ TEST_CASE("self_driven_gstuff2")
 		crow::onestep();
 
 		crow::utilize(pack);
-		crow::diagnostic_setup(false, false);
 	}
 
 	CHECK_EQ(crow::total_travelled, 1);

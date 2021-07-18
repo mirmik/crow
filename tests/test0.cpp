@@ -19,8 +19,6 @@ void incoming(crow::packet * ptr)
 
 TEST_CASE("test0" * doctest::timeout(0.5))
 {
-	nos::println("test0 test");
-
 	count = 0;
 	crow::total_travelled = 0;
 	crow::user_incoming_handler = incoming;
@@ -171,7 +169,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		crow::onestep();
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();
-		
+
 		CHECK_EQ(count, 0);
 		CHECK_EQ(crow::total_travelled, 5);
 		CHECK_EQ(crow::has_untravelled(), false);

@@ -29,8 +29,6 @@ int add(int a, int b)
 
 TEST_CASE("rpc" * doctest::timeout(0.5))
 {
-	nos::println("rpc test");
-
 	crow::total_travelled = 0;
 	crow::rpc_node rpc;
 	crow::rpc_requestor requestor(addr, 77);
