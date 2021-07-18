@@ -71,7 +71,8 @@ namespace crow
             dprln("CONTROL NODE INCOMMING");
 
             auto nodemsg = node::message(pack);
-            auto saddr = pack->addr();
+            auto saddr = igris::buffer(crow_packet_addrptr(pack),
+                                       crow_packet_addrsize(pack));
             auto sid = node::sid(pack);
 
             igris::binreader reader(nodemsg.data());
@@ -103,7 +104,7 @@ namespace crow
                     crow::async_request(
                         async_request_callback, &srv_addr, srv_addr.naddr.nid,
                         srv_addr.naddr.naddr, node::message(pack), 2,
-                        pack->ackquant());
+                        pack->header.ackquant);
                 }
                 break;
 
