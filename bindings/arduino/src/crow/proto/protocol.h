@@ -13,8 +13,8 @@ namespace crow
         struct dlist_head lnk = DLIST_HEAD_INIT(lnk);
         uint8_t id;
 
-        virtual void incoming(crow::packet *pack) = 0;
-        virtual void undelivered(crow::packet *pack) { crow::release(pack); }
+        virtual void incoming(crow_packet *pack) = 0;
+        virtual void undelivered(crow_packet *pack) { crow::release(pack); }
         virtual void onestep() {}
 
         protocol(int id) : id(id) { dlist_add_tail(&lnk, &crow::protocols); }

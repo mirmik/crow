@@ -30,13 +30,13 @@ void crow::udpgate::nblock_onestep()
 
     if (!block)
         block = crow::allocate_packet(flen - sizeof(crow_header));
-    //(crow::packet *) malloc(flen + sizeof(crow::packet) -
+    //(crow_packet *) malloc(flen + sizeof(crow_packet) -
     // sizeof(crow_header));
 
     len = recvfrom(sock, &block->header, flen, 0, (struct sockaddr *)&sender,
                    &sendsize);
 
-    crow::packet_initialization(block, this);
+    crow_packet_initialization(block, this);
 
     igris::buffer vec[3] = {
         {(char*)&id, 1}, 
@@ -45,7 +45,7 @@ void crow::udpgate::nblock_onestep()
 
     block->revert(vec, 3);
 
-    crow::packet *pack = block;
+    crow_packet *pack = block;
     block = NULL;
 
     crow::nocontrol_travel(pack, fastsend);
@@ -108,7 +108,7 @@ void crow::udpgate::close()
     }
 }
 
-void crow::udpgate::send(crow::packet *pack)
+void crow::udpgate::send(crow_packet *pack)
 {
     uint32_t *addr = (uint32_t *)(pack->stageptr() + 1);
     uint16_t *port = (uint16_t *)(pack->stageptr() + 5);

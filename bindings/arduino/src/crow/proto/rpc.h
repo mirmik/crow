@@ -72,18 +72,18 @@ namespace crow
             rfuncmap[name] = new remote_function<Ret, Args...>(dlg);
         }
 
-        void incoming_packet(crow::packet *pack) override;
+        void incoming_packet(crow_packet *pack) override;
     };
 
     class rpc_request_node : public crow::node
     {
       public:
-        crow::packet *incpack;
+        crow_packet *incpack;
 
       public:
         template <class Ret, class... Args>
         void remote_request(crow::hostaddr_view addr, nid_t rid,
-                            const char *fname, Args &&... args)
+                            const char *fname, Args &&...args)
         {
             std::string args_data;
             igris::archive::binary_string_writer writer(args_data);
@@ -120,7 +120,7 @@ namespace crow
             send(rid, addr, args_data, 2, 50);
         }
 
-        void incoming_packet(crow::packet *pack) override
+        void incoming_packet(crow_packet *pack) override
         {
             incpack = pack;
             notify_one(0);
@@ -172,7 +172,7 @@ namespace crow
         }
 
         template <class Ret, class... Args>
-        int request(const char *fname, Ret &out, Args &&... args)
+        int request(const char *fname, Ret &out, Args &&...args)
         {
             rpc_request_node wnode;
             int status;
@@ -246,7 +246,7 @@ template <class Tuple, size_t... I>
 static void __expand(std::index_sequence<I...>, Tuple &&tpl,
                      const igris::trent &tr)
 {
-    std::apply([&](auto &&... args) { (__bind(args, tr[(int)I]), ...); }, tpl);
+    std::apply([&](auto &&...args) { (__bind(args, tr[(int)I]), ...); }, tpl);
 }
 
 template <class Ret, class... Args>

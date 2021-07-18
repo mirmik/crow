@@ -15,13 +15,13 @@ namespace crow
         struct semaphore sem = SEMAPHORE_INIT(sem, 1);
 
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
-        crow::packet *insend = nullptr;
+        crow_packet *insend = nullptr;
         char *send_buffer = nullptr;
         char *send_it = nullptr;
         char *send_eit = nullptr;
 
         int received_maxpack_size = 48;
-        crow::packet *recvpack = nullptr;
+        crow_packet *recvpack = nullptr;
         struct gstuff_autorecv recver;
 
         int (*write_callback)(void *, const char *data, unsigned int size);
@@ -60,12 +60,12 @@ namespace crow
 
         void newline_handler()
         {
-            struct crow::packet *pack = recvpack;
+            struct crow_packet *pack = recvpack;
             recvpack = NULL;
 
             pack->revert_gate(this->id);
 
-            crow::packet_initialization(pack, this);
+            crow_packet_initialization(pack, this);
 
             crow::nocontrol_travel(pack, false);
 
@@ -84,7 +84,7 @@ namespace crow
             if (dlist_empty(&to_send))
                 return;
 
-            insend = dlist_first_entry(&to_send, crow::packet, lnk);
+            insend = dlist_first_entry(&to_send, crow_packet, lnk);
             dlist_del_init(&insend->lnk);
 
             int size = gstuffing((const char *)&insend->header,
@@ -126,7 +126,7 @@ namespace crow
             }
         }
 
-        void send(crow::packet *pack) override
+        void send(crow_packet *pack) override
         {
             system_lock();
             dlist_move(&pack->lnk, &to_send);

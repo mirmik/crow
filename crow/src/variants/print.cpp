@@ -9,9 +9,9 @@
 #include <nos/fprint.h>
 #include <nos/print.h>
 
-void crow::diagnostic(const char *notation, crow::packet *pack)
+void crow::diagnostic(const char *notation, crow_packet *pack)
 {
-    bool postfix_points = pack->rawdata().size() > crow::debug_data_size;
+    bool postfix_points = crow_packet_datasize(pack) > crow::debug_data_size;
 
     nos::fprint("{}: ("
                 "qos:{}, "
@@ -29,12 +29,12 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
                 (uint16_t)pack->header.ackquant, (uint8_t)pack->header.alen,
                 (uint16_t)pack->header.flen, (uint8_t)pack->header.f.type,
                 pack->header.seqid,
-                igris::hexascii_encode(pack->addrptr(), pack->addrsize()),
-                pack->header.stg, pack->rawdata().size(),
-                igris::dstring(pack->rawdata().data(),
-                               pack->rawdata().size() > crow::debug_data_size
+                igris::hexascii_encode(crow_packet_addrptr(pack), crow_packet_addrsize(pack)),
+                pack->header.stg, crow_packet_datasize(pack),
+                igris::dstring(crow_packet_dataptr(pack),
+                               crow_packet_datasize(pack) > crow::debug_data_size
                                    ? crow::debug_data_size
-                                   : pack->rawdata().size()));
+                                   : crow_packet_datasize(pack)));
 
     if (postfix_points)
         nos::println("...)");

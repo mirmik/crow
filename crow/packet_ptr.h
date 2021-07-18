@@ -11,10 +11,10 @@ namespace crow
     class packet_ptr
     {
       protected:
-        crow::packet *pack;
+        crow_packet *pack;
 
       public:
-        packet_ptr(crow::packet *pack_) : pack(pack_)
+        packet_ptr(crow_packet *pack_) : pack(pack_)
         {
             if (pack == nullptr)
                 return;
@@ -39,13 +39,13 @@ namespace crow
             oth.pack = nullptr;
         }
 
-        crow::packet *get() { return pack; }
+        crow_packet *get() { return pack; }
 
-        crow::packet *get() const { return pack; }
+        crow_packet *get() const { return pack; }
 
-        crow::packet *operator->() { return pack; }
+        crow_packet *operator->() { return pack; }
 
-        crow::packet &operator*() { return *pack; }
+        crow_packet &operator*() { return *pack; }
 
         crow::packet_ptr &operator=(const crow::packet_ptr &oth)
         {

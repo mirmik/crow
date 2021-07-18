@@ -84,12 +84,13 @@ namespace crow
             }
         }
 
-        void incoming_packet(crow::packet *pack) override
+        void incoming_packet(crow_packet *pack) override
         {
             auto time = std::chrono::system_clock::now();
 
-            std::vector<uint8_t> addr(pack->addrptr(),
-                                      pack->addrptr() + pack->addrsize());
+            std::vector<uint8_t> addr(crow_packet_addrptr(pack),
+                                      crow_packet_addrptr(pack) +
+                                          crow_packet_addrsize(pack));
             targets[nodeaddr{addr, node::sid(pack)}] = record{time};
 
             crow::release(pack);
@@ -121,7 +122,7 @@ namespace crow
             node::send(nid, {addr.data(), addr.size()}, "", qos, ackquant);
         }
 
-        void incoming_packet(crow::packet *pack) override
+        void incoming_packet(crow_packet *pack) override
         {
             dlg(node::message(pack));
             crow::release(pack);

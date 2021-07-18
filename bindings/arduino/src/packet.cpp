@@ -12,7 +12,7 @@
 
 #include <igris/compiler.h>
 
-void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
+void crow_packet_initialization(crow_packet *pack, crow::gateway *ingate)
 {
     dlist_init(&pack->lnk);
     dlist_init(&pack->ulnk);
@@ -22,10 +22,10 @@ void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
     pack->refs = 0;
 }
 
-crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
+crow_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
                                   size_t datasize)
 {
-    crow::packet *pack = crow::allocate_packet(addrsize + datasize);
+    crow_packet *pack = crow::allocate_packet(addrsize + datasize);
 
     if (pack == nullptr)
         return nullptr;
@@ -42,13 +42,13 @@ crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
     return pack;
 }
 
-void crow::packet::revert_gate(uint8_t gateindex)
+void crow_packet::revert_gate(uint8_t gateindex)
 {
     *stageptr() = gateindex;
     ++header.stg;
 }
 
-void crow::packet::revert(igris::buffer *vec, size_t veclen)
+void crow_packet::revert(igris::buffer *vec, size_t veclen)
 {
     igris::buffer *it = vec + veclen - 1;
     igris::buffer *eit = vec - 1;

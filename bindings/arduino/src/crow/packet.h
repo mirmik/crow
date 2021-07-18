@@ -121,18 +121,18 @@ namespace crow
     /**
      * Выделить память для пакета.
      *
-     * Выделяет adlen + sizeof(crow::packet) байт
+     * Выделяет adlen + sizeof(crow_packet) байт
      * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
      */
-    crow::packet *allocate_packet(size_t adlen);
+    crow_packet *allocate_packet(size_t adlen);
 
     ///Вернуть память выделенную для пакета pack
-    void deallocate_packet(crow::packet *pack);
+    void deallocate_packet(crow_packet *pack);
 
     packet *create_packet(struct crow::gateway *ingate, uint8_t addrsize,
                           size_t datasize);
 
-    void packet_initialization(struct crow::packet *pack,
+    void packet_initialization(struct crow_packet *pack,
                                struct crow::gateway *ingate);
 
     // Только для аллокации через pool.
@@ -142,7 +142,7 @@ namespace crow
     extern int allocated_count;
     bool has_allocated();
 
-    void diagnostic(const char *label, crow::packet *pack);
+    void diagnostic(const char *label, crow_packet *pack);
 }
 
 #endif

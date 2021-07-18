@@ -1,6 +1,6 @@
 #include <crow/proto/rpc.h>
 
-void crow::rpc_node::incoming_packet(crow::packet *pack)
+void crow::rpc_node::incoming_packet(crow_packet *pack)
 {
     int8_t format;
     int8_t status;
@@ -33,7 +33,11 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
             {(char*)&status, 1},
         };
 
-        crow::node_send_v(nsh->rid, nsh->sid, pack->addr(), vdata, 1, 0, 10);
+        crow::node_send_v(nsh->rid, nsh->sid, 
+               {
+                   crow_packet_addrptr(pack),
+                   crow_packet_addrsize(pack)
+               }, vdata, 1, 0, 10);
 
         crow::release(pack);
         return;
@@ -52,7 +56,10 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
             outdata
         };
 
-        crow::node_send_v(nsh->rid, nsh->sid, pack->addr(), vdata, 2, 0, 10);
+        crow::node_send_v(nsh->rid, nsh->sid, {
+                   crow_packet_addrptr(pack),
+                   crow_packet_addrsize(pack)
+               }, vdata, 2, 0, 10);
     }
 
     else if (format == CROW_RPC_TEXT_FORMAT)
@@ -66,7 +73,10 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
         writer.dump(status);
         igris::serialize(writer, outdata);
 
-        crow::node_send(nsh->rid, nsh->sid, pack->addr(), senddata, 0, 0);
+        crow::node_send(nsh->rid, nsh->sid, {
+                   crow_packet_addrptr(pack),
+                   crow_packet_addrsize(pack)
+               }, senddata, 0, 0);
     }
 
     else
@@ -78,7 +88,10 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
             {(char*)&status, 1},
         };
 
-        crow::node_send_v(nsh->rid, nsh->sid, pack->addr(), vdata, 1, 0, 10);
+        crow::node_send_v(nsh->rid, nsh->sid, {
+                   crow_packet_addrptr(pack),
+                   crow_packet_addrsize(pack)
+               }, vdata, 1, 0, 10);
     }
 
     crow::release(pack);

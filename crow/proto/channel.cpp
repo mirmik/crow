@@ -5,9 +5,9 @@
 #include <igris/util/bug.h>
 #include <nos/print.h>
 
-void crow::channel::incoming_packet(crow::packet *pack)
+void crow::channel::incoming_packet(crow_packet *pack)
 {
-    crow::node_subheader *sh_node = (node_subheader *)pack->dataptr();
+    crow::node_subheader *sh_node = (node_subheader *)crow_packet_dataptr(pack);
     crow::subheader_channel *sh_channel = crow::get_subheader_channel(pack);
 
     switch (sh_channel->ftype)
@@ -24,7 +24,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
             if (pack->header.alen > raddr_cap)
                 return;
 
-            memcpy(raddr_ptr, pack->addrptr(), pack->header.alen);
+            memcpy(raddr_ptr, crow_packet_addrptr(pack), pack->header.alen);
             raddr_len = pack->header.alen;
             rid = sh_node->sid;
 
@@ -55,7 +55,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
             if (pack->header.alen > raddr_cap)
                 return;
 
-            memcpy(raddr_ptr, pack->addrptr(), pack->header.alen);
+            memcpy(raddr_ptr, crow_packet_addrptr(pack), pack->header.alen);
             raddr_len = pack->header.alen;
             rid = sh_node->sid;
             qos = sh_handshake->qos;
@@ -87,12 +87,12 @@ void crow::channel::incoming_packet(crow::packet *pack)
     crow::release(pack);
 }
 
-void crow::channel::incoming_data_packet(crow::packet *pack)
+void crow::channel::incoming_data_packet(crow_packet *pack)
 {
     this->incoming_handler(this, pack);
 }
 
-void crow::channel::undelivered_packet(crow::packet *pack)
+void crow::channel::undelivered_packet(crow_packet *pack)
 {
     notify_one(-1);
     f._state = CROW_CHANNEL_DISCONNECTED;
@@ -191,10 +191,10 @@ int crow::channel::send(const char *data, size_t size)
     return 0;
 }
 
-igris::buffer crow::channel::getdata(crow::packet *pack)
+igris::buffer crow::channel::getdata(crow_packet *pack)
 {
-    return igris::buffer(pack->dataptr() + sizeof(crow::node_subheader) +
+    return igris::buffer(crow_packet_dataptr(pack) + sizeof(crow::node_subheader) +
                             sizeof(crow::subheader_channel),
-                            pack->datasize() - sizeof(crow::node_subheader) -
+                            crow_packet_datasize(pack) - sizeof(crow::node_subheader) -
                             sizeof(crow::subheader_channel));
 }

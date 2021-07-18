@@ -13,7 +13,7 @@ namespace crow
 
         int reserved_size = 48;
 
-        crow::packet *insend = nullptr;
+        crow_packet *insend = nullptr;
         char *send_buffer;
         char *send_it;
         char *send_eit;
@@ -43,7 +43,7 @@ namespace crow
             if (dlist_empty(&to_send))
                 return;
 
-            insend = dlist_first_entry(&to_send, crow::packet, lnk);
+            insend = dlist_first_entry(&to_send, crow_packet, lnk);
             dlist_del_init(&insend->lnk);
 
             int size = gstuffing((const char *)&insend->header,
@@ -78,7 +78,7 @@ namespace crow
             }
         }
 
-        void send(crow::packet *pack) override
+        void send(crow_packet *pack) override
         {
             system_lock();
             dlist_move(&pack->lnk, &to_send);

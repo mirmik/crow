@@ -129,7 +129,7 @@ std::string outformat_tostr()
 	return std::string();
 }
 
-void output_do(igris::buffer data, crow::packet* pack)
+void output_do(igris::buffer data, crow_packet* pack)
 {
 	(void) pack;
 
@@ -251,7 +251,7 @@ void send_do(const std::string message)
 
 		case protoopt_e::PROTOOPT_PUBLISH:
 			{
-				/*crow::packet * pack = crow::make_publish_packet(
+				/*crow_packet * pack = crow::make_publish_packet(
 				                          addr, (uint8_t)addrsize,
 				                          theme.c_str(),
 				                          message.data(), message.size());
@@ -305,13 +305,13 @@ void send_do(const std::string message)
 	}
 }
 
-void incoming_handler(crow::packet *pack)
+void incoming_handler(crow_packet *pack)
 {
 	if (echo)
 	{
 		// Переотослать пакет точно повторяющий входящий.
-		crow::send({pack->addrptr(), pack->header.alen},
-		{pack->dataptr(), pack->datasize()},
+		crow::send({crow_packet_addrptr(pack), pack->header.alen},
+		{crow_packet_dataptr(pack), crow_packet_datasize(pack)},
 		pack->header.f.type,
 		pack->header.qos,
 		pack->header.ackquant);
@@ -320,8 +320,8 @@ void incoming_handler(crow::packet *pack)
 	if (api)
 	{
 		// Запуск встроенных функций.
-		char *dp = pack->dataptr();
-		size_t ds = pack->datasize();
+		char *dp = crow_packet_dataptr(pack);
+		size_t ds = crow_packet_datasize(pack);
 
 		if (strncmp(dp, "exit\n", ds) == 0)
 		{
@@ -337,7 +337,7 @@ void incoming_handler(crow::packet *pack)
 
 		case CROW_NODE_PROTOCOL:
 			{
-				auto rid = ((crow::node_subheader *) pack->dataptr())->rid;
+				auto rid = ((crow::node_subheader *) crow_packet_dataptr(pack))->rid;
 			
 				for (auto n : listened_nodes) 
 				{
@@ -355,13 +355,15 @@ void incoming_handler(crow::packet *pack)
 			}
 
 		default:
-			output_do(pack->rawdata(), pack);
+			output_do({
+				crow_packet_dataptr(pack), crow_packet_datasize(pack) 
+			}, pack);
 	}
 
 	crow::release(pack);
 }
 
-void print_channel_message(crow::channel* ch, crow::packet* pack)
+void print_channel_message(crow::channel* ch, crow_packet* pack)
 {
 	(void) ch;
 	(void) pack;

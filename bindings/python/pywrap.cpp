@@ -22,14 +22,14 @@ using ungil = py::call_guard<py::gil_scoped_release>;
 void register_subscriber_class(py::module & m);
 
 py::function incoming_handler_bind;
-void incoming_handler_bind_invoke(crow::packet *pack)
+void incoming_handler_bind_invoke(crow_packet *pack)
 {
 	crow::packet_ptr control(pack);
 	incoming_handler_bind(control);
 }
 
 py::function subscribe_handler_bind;
-void subscribe_handler_bind_invoke(crow::packet *pack)
+void subscribe_handler_bind_invoke(crow_packet *pack)
 {
 	crow::packet_ptr control(pack);
 	subscribe_handler_bind(control);

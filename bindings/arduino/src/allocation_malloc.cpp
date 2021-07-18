@@ -12,7 +12,7 @@
 
 int crow::allocated_count = 0;
 
-void crow::deallocate_packet(crow::packet *pack)
+void crow::deallocate_packet(crow_packet *pack)
 {
     //	system_lock();
     if (pack)
@@ -21,11 +21,11 @@ void crow::deallocate_packet(crow::packet *pack)
     //	system_unlock();
 }
 
-crow::packet *crow::allocate_packet(size_t adlen)
+crow_packet *crow::allocate_packet(size_t adlen)
 {
     //	system_lock();
     allocated_count++;
-    crow::packet *ret = (crow::packet *)malloc(adlen + sizeof(crow::packet));
+    crow_packet *ret = (crow_packet *)malloc(adlen + sizeof(crow_packet));
     //	system_unlock();
     return ret;
 }

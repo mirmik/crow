@@ -20,7 +20,7 @@ namespace crow
         struct dlist_head lnk; ///< встроенное поле списка.
         uint8_t id;            ///< номер врат.
 
-        virtual void send(crow::packet *) = 0;
+        virtual void send(crow_packet *) = 0;
         virtual void nblock_onestep() = 0;
         virtual void finish() = 0;
 

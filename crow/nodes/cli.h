@@ -19,16 +19,16 @@ namespace crow
         cli_node(Dictionary &&dictionary) : dictionary(std::move(dictionary)) {}
         cli_node(const Dictionary &dictionary) : dictionary(dictionary) {}
 
-        void incoming_packet(crow::packet *pack) override;
+        void incoming_packet(crow_packet *pack) override;
 
-        void undelivered_packet(crow::packet *pack) override
+        void undelivered_packet(crow_packet *pack) override
         {
             crow::release(pack);
         }
     };
 
     template <class Dictionary>
-    void crow::cli_node<Dictionary>::incoming_packet(crow::packet *pack)
+    void crow::cli_node<Dictionary>::incoming_packet(crow_packet *pack)
     {
         auto sh = crow::node::subheader(pack);
         auto data = crow::node_data(pack);
@@ -46,13 +46,14 @@ namespace crow
         int argc;
 
         if (data.data()[data.size() - 1] == '\n')
-            ((char*)data.data())[data.size() - 1] = 0;
+            ((char *)data.data())[data.size() - 1] = 0;
         else
         {
-            ((char*)data.data())[data.size()] = 0;
+            ((char *)data.data())[data.size()] = 0;
         }
 
-        argc = argvc_internal_split_n((char*)data.data(), data.size(), argv, 10);
+        argc =
+            argvc_internal_split_n((char *)data.data(), data.size(), argv, 10);
 
         if (argc == 0)
             goto __end__;
@@ -70,7 +71,8 @@ namespace crow
         }
 
         if (strlen(buf))
-            node_send(id, sh->sid, {pack->addrptr(), pack->addrsize()},
+            node_send(id, sh->sid,
+                      {crow_packet_addrptr(pack), crow_packet_addrsize(pack)},
                       {buf, strlen(buf)}, 2, 200);
 
     __end__:

@@ -2,7 +2,7 @@
 #include <crow/tower.h>
 #include <igris/dprint.h>
 
-void crow::diagnostic(const char *notation, crow::packet *pack)
+void crow::diagnostic(const char *notation, crow_packet *pack)
 {
     dpr(notation);
     dpr(": (");
@@ -21,7 +21,7 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
     dpr(",type:");
     dpr((uint8_t)pack->header.f.type);
     dpr(",addr:");
-    debug_writehex(pack->addrptr(), pack->addrsize());
+    debug_writehex(crow_packet_addrptr(pack), crow_packet_addrsize(pack));
     dpr(",stg:");
     dpr(pack->header.stg);
     dpr(",rescount:");

@@ -4,7 +4,7 @@
 #include "subscriber.h"
 #include <crow/brocker/crowker.h>
 
-void incoming_crowker_handler(struct crow::packet *pack)
+void incoming_crowker_handler(struct crow_packet *pack)
 {
 
     struct crow_subheader_pubsub *shps = crow::get_subheader_pubsub(pack);
@@ -22,13 +22,13 @@ void incoming_crowker_handler(struct crow::packet *pack)
 
     case SUBSCRIBE:
     {
-        auto shps_c = get_subheader_pubsub_control(pack);
-        std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
+        auto shps_c = crow::get_subheader_pubsub_control(pack);
+        std::string theme(crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub) +
                               sizeof(crow_subheader_pubsub_control),
                           shps->thmsz);
 
         crow::crowker::instance()->crow_subscribe(
-            {pack->addrptr(), pack->addrsize()}, theme, shps_c->qos,
+            {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, theme, shps_c->qos,
             shps_c->ackquant);
     }
     break;
@@ -58,18 +58,18 @@ void incoming_crowker_handler(struct crow::packet *pack)
     crow::release(pack);
 }
 
-void undelivered_crowker_handler(struct crow::packet *pack)
+void undelivered_crowker_handler(struct crow_packet *pack)
 {
     auto shps = crow::get_subheader_pubsub(pack);
 
     if (shps->type == PUBLISH)
     {
-        std::string theme(pack->dataptr() + sizeof(crow_subheader_pubsub) +
+        std::string theme(crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub) +
                               sizeof(crow_subheader_pubsub_data),
                           shps->thmsz);
 
         crow::crowker::instance()->erase_crow_subscriber(
-            std::string((char *)pack->addrptr(), pack->header.alen));
+            std::string((char *)crow_packet_addrptr(pack), pack->header.alen));
     }
 
     crow::release(pack);

@@ -13,14 +13,14 @@ namespace crow
     class udpgate : public gateway
     {
         int sock = 0;
-        crow::packet *block = nullptr;
+        crow_packet *block = nullptr;
         bool fastsend = CROW_FASTSEND_DEFAULT;
 
       public:
         udpgate() {}
         udpgate(uint16_t port) { open(port); }
 
-        void send(crow::packet *) override;
+        void send(crow_packet *) override;
         void nblock_onestep() override;
 
         int open(uint16_t port = 0);

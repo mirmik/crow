@@ -23,8 +23,8 @@ namespace crow
             bind(id);
         }
 
-        void incoming_packet(crow::packet *pack) override;
-        void undelivered_packet(crow::packet *pack) override;
+        void incoming_packet(crow_packet *pack) override;
+        void undelivered_packet(crow_packet *pack) override;
     };
 
     __BEGIN_DECLS

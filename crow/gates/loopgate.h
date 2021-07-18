@@ -13,15 +13,16 @@ namespace crow
       public:
         loopgate() {}
 
-        void send(crow::packet *pack) override
+        void send(crow_packet *pack) override
         {
-            crow::packet *copypack =
-                crow::allocate_packet(pack->addrsize() + pack->datasize());
+            crow_packet *copypack = crow::allocate_packet(
+                crow_packet_addrsize(pack) + crow_packet_datasize(pack));
 
             memcpy(copypack, pack,
-                   sizeof(crow::packet) + pack->addrsize() + pack->datasize());
+                   sizeof(crow_packet) + crow_packet_addrsize(pack) +
+                       crow_packet_datasize(pack));
 
-            crow::packet_initialization(copypack, this);
+            crow_packet_initialization(copypack, this);
             copypack->revert_gate(id);
 
             crow::return_to_tower(pack, 0);

@@ -4,7 +4,7 @@
 
 #include <nos/trace.h>
 
-void crow::acceptor::incoming_packet(crow::packet *pack)
+void crow::acceptor::incoming_packet(crow_packet *pack)
 {
     crow::subheader_channel *shc = crow::get_subheader_channel(pack);
 
@@ -21,7 +21,7 @@ void crow::acceptor::incoming_packet(crow::packet *pack)
         crow::release(pack);
 }
 
-void crow::acceptor::undelivered_packet(crow::packet *pack)
+void crow::acceptor::undelivered_packet(crow_packet *pack)
 {
     crow::release(pack);
 }

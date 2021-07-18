@@ -12,20 +12,20 @@
 
 #include <igris/compiler.h>
 
-void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
+void crow_packet_initialization(struct crow_packet *pack, crow::gateway *ingate)
 {
     dlist_init(&pack->lnk);
     dlist_init(&pack->ulnk);
     pack->ingate = ingate;
-    pack->ackcount(5);
+    pack->_ackcount = 5;
     pack->flags = 0;
     pack->refs = 0;
 }
 
-crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
-                                  size_t datasize)
+struct crow_packet *
+crow_create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize)
 {
-    crow::packet *pack = crow::allocate_packet(addrsize + datasize);
+    crow_packet *pack = crow::allocate_packet(addrsize + datasize);
 
     if (pack == nullptr)
         return nullptr;
@@ -37,18 +37,18 @@ crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
     pack->header.qos = 0;
     pack->header.stg = 0;
 
-    packet_initialization(pack, ingate);
+    crow_packet_initialization(pack, ingate);
 
     return pack;
 }
 
-void crow::packet::revert_gate(uint8_t gateindex)
+void crow_packet::revert_gate(uint8_t gateindex)
 {
     *stageptr() = gateindex;
     ++header.stg;
 }
 
-void crow::packet::revert(igris::buffer *vec, size_t veclen)
+void crow_packet::revert(igris::buffer *vec, size_t veclen)
 {
     igris::buffer *it = vec + veclen - 1;
     igris::buffer *eit = vec - 1;
@@ -68,3 +68,36 @@ void crow::packet::revert(igris::buffer *vec, size_t veclen)
 }
 
 bool crow::has_allocated() { return !!allocated_count; }
+
+
+
+uint8_t * crow_packet_addrptr(struct crow_packet * pack)
+{
+    return (uint8_t *)(&pack->header + 1);
+}
+
+uint8_t crow_packet_addrsize(struct crow_packet * pack)
+{
+    return pack->header.alen;
+}
+
+char * crow_packet_dataptr(struct crow_packet * pack)
+{
+    return (char *)(crow_packet_addrptr(pack) + crow_packet_addrsize(pack));
+}
+
+uint16_t crow_packet_datasize(struct crow_packet * pack)
+{
+    return (uint16_t)(pack->header.flen - pack->header.alen - sizeof(struct crow_header));
+}
+
+/*
+crow::hostaddr_view crow_packet::addr()
+{
+    return igris::buffer((char *)crow_packet_addrptr(this), crow_packet_addrsize(this));
+}
+
+igris::buffer crow_packet::rawdata()
+{
+    return igris::buffer(crow_packet_dataptr(this), crow_packet_datasize(this));
+}*/

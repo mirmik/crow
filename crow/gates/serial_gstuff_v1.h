@@ -20,14 +20,14 @@ namespace crow
     {
         int fd;
 
-        struct crow::packet *rpack;
+        struct crow_packet *rpack;
         bool debug;
 
         struct gstuff_autorecv_v1 recver;
 
         void newline_handler();
 
-        void send(crow::packet *) override;
+        void send(crow_packet *) override;
         void nblock_onestep() override;
         void finish() override {}
 

@@ -1,6 +1,6 @@
 #include <crow/gates/chardev_gateway.h>
 
-/*void crow::chardev_protocol::send(crow::packet * pack) 
+/*void crow::chardev_protocol::send(crow_packet * pack) 
 {
 	system_lock();
 //	dlist_move(&pack->lnk, &queue);

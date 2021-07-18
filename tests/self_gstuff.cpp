@@ -26,14 +26,14 @@ TEST_CASE("self_driven_gstuff")
 		gate.init(buf, write, NULL);
 		gate.bind(13);
 
-		auto * pack = crow::create_packet(nullptr, 1, 10);
+		auto * pack = crow_create_packet(nullptr, 1, 10);
 
 		pack->header.f.type = 0 & 0x1F;
 		pack->header.qos = 0;
 		pack->header.ackquant = 0;
 
-		memcpy(pack->addrptr(), "\x01", 1);
-		memcpy(pack->dataptr(), "helloworld", 10);
+		memcpy(crow_packet_addrptr(pack), "\x01", 1);
+		memcpy(crow_packet_dataptr(pack), "helloworld", 10);
 
 		CHECK_EQ(ccc, 0);
 		gate.send(pack);
@@ -64,14 +64,14 @@ TEST_CASE("self_driven_gstuff2")
 		gate.init(buf, write, NULL);
 		gate.bind(13);
 
-		auto * pack = crow::create_packet(nullptr, 1, 10);
+		auto * pack = crow_create_packet(nullptr, 1, 10);
 
 		pack->header.f.type = 9 & 0x1F;
 		pack->header.qos = 0;
 		pack->header.ackquant = 0;
 
-		memcpy(pack->addrptr(), "\x01", 1);
-		memcpy(pack->dataptr(), "helloworld", 10);
+		memcpy(crow_packet_addrptr(pack), "\x01", 1);
+		memcpy(crow_packet_dataptr(pack), "helloworld", 10);
 
 		int gsize = gstuffing((const char*)&pack->header, pack->fullsize(), buf2);
 

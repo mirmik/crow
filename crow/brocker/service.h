@@ -37,7 +37,7 @@ namespace crow
 
     class crowker_service_node;
 
-    void async_request_callback(void *arg, int sts, crow::packet *pack);
+    void async_request_callback(void *arg, int sts, crow_packet *pack);
 
     class node_retransler;
     class channel_retransler;
@@ -66,7 +66,7 @@ namespace crow
         //	crowker_service_control_node_cls() = default;
 
       protected:
-        void incoming_packet(crow::packet *pack) override
+        void incoming_packet(crow_packet *pack) override
         {
             dprln("CONTROL NODE INCOMMING");
 
@@ -141,7 +141,7 @@ namespace crow
             crow::release(pack);
         }
 
-        void undelivered_packet(crow::packet *pack) override
+        void undelivered_packet(crow_packet *pack) override
         {
             dprln("CONTROL_NODE_UNDELIVERED");
             crow::release(pack);

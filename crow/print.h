@@ -7,7 +7,7 @@
 
 namespace crow
 {
-    void diagnostic(const char *notation, crow::packet *pack);
+    void diagnostic(const char *notation, crow_packet *pack);
 }
 
 #endif

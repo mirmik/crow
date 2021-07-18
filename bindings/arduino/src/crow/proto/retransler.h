@@ -15,7 +15,7 @@ namespace crow
         uint16_t aid;
         uint16_t bid;
 
-        igris::delegate<void, service_retransler *, crow::packet *>
+        igris::delegate<void, service_retransler *, crow_packet *>
             error_handler;
 
       protected:
@@ -30,7 +30,7 @@ namespace crow
             bind();
         }
 
-        void opposite_address(crow::packet *pack, nid_t &rid,
+        void opposite_address(crow_packet *pack, nid_t &rid,
                               crow::hostaddr_view &host)
         {
             auto sh = crow::node::subheader(pack);
@@ -48,7 +48,7 @@ namespace crow
             }
         }
 
-        void incoming_packet(crow::packet *pack)
+        void incoming_packet(crow_packet *pack)
         {
             nid_t rid;
             crow::hostaddr_view host;
@@ -59,7 +59,7 @@ namespace crow
             crow::release(pack);
         }
 
-        void undelivered_packet(crow::packet *pack)
+        void undelivered_packet(crow_packet *pack)
         {
             nid_t rid;
             crow::hostaddr_view host;

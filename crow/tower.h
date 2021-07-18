@@ -18,17 +18,17 @@ namespace crow
     extern bool diagnostic_noack;
     extern unsigned int total_travelled;
 
-    extern void (*user_incoming_handler)(crow::packet *pack);
-    extern void (*user_type_handler)(crow::packet *pack);
-    extern void (*undelivered_handler)(crow::packet *pack);
+    extern void (*user_incoming_handler)(crow_packet *pack);
+    extern void (*user_type_handler)(crow_packet *pack);
+    extern void (*undelivered_handler)(crow_packet *pack);
 
     extern void (*unsleep_handler)();
 
     extern bool retransling_allowed;
 
     // Передать пакет в обработку.
-    packet_ptr travel(crow::packet *pack);
-    void nocontrol_travel(crow::packet *pack, bool fastsend);
+    packet_ptr travel(crow_packet *pack);
+    void nocontrol_travel(crow_packet *pack, bool fastsend);
 
     // Включить трассировку пакетов.
     void enable_diagnostic();
@@ -56,11 +56,11 @@ namespace crow
                              bool fastsend = CROW_FASTSEND_DEFAULT);
 
     // Эта функция вызывается вратами после обработки отсылаемого пакета.
-    void return_to_tower(crow::packet *pack, uint8_t sts);
+    void return_to_tower(crow_packet *pack, uint8_t sts);
 
     // Используется пользовательским кодом для освобождения пакета.
-    void release(crow::packet *pack);
-    void utilize(crow::packet *pack);
+    void release(crow_packet *pack);
+    void utilize(crow_packet *pack);
 
     // Взятие отметки времени.
     uint16_t millis();
@@ -100,6 +100,6 @@ namespace crow
     int outers_stage_count();
 }
 
-void crow_tower_release(crow::packet *pack);
+void crow_tower_release(crow_packet *pack);
 
 #endif
