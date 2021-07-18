@@ -63,7 +63,7 @@ namespace crow
             struct crow_packet *pack = recvpack;
             recvpack = NULL;
 
-            pack->revert_gate(this->id);
+            crow_packet_revert_gate(pack, this->id);
 
             crow_packet_initialization(pack, this);
 

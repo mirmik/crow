@@ -23,7 +23,7 @@ namespace crow
                        crow_packet_datasize(pack));
 
             crow_packet_initialization(copypack, this);
-            copypack->revert_gate(id);
+            crow_packet_revert_gate(copypack, id);
 
             crow::return_to_tower(pack, 0);
             crow::nocontrol_travel(copypack, false);
