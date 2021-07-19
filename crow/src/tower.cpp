@@ -326,6 +326,35 @@ static void crow_tower_send_to_gate_phase(struct crow_packet * pack)
     }
 }
 
+static void crow_tower_incoming_ack_phase(crow_packet *pack)
+{
+    if (__diagnostic_enabled && crow::diagnostic_noack == false)
+        crow::diagnostic("inack", pack);
+
+    switch (pack->header.f.type)
+    {
+        case G1_ACK_TYPE:
+            confirmed_utilize_from_outers(pack);
+            break;
+
+        case G1_ACK21_TYPE:
+            confirmed_utilize_from_outers(pack);
+            crow_send_ack2(pack);
+            break;
+
+        case G1_ACK22_TYPE:
+            qos_release_from_incoming(pack);
+            break;
+
+        default:
+            break;
+    }
+
+    system_lock();
+    __crow_utilize(pack);
+    system_unlock();
+}
+
 static void crow_do_travel(crow_packet *pack)
 {
     crow::total_travelled++;
@@ -338,32 +367,7 @@ static void crow_do_travel(crow_packet *pack)
         if (pack->header.f.ack)
         {
             //Перехватываем ack пакеты.
-            if (__diagnostic_enabled && crow::diagnostic_noack == false)
-                crow::diagnostic("inack", pack);
-
-            switch (pack->header.f.type)
-            {
-                case G1_ACK_TYPE:
-                    confirmed_utilize_from_outers(pack);
-                    break;
-
-                case G1_ACK21_TYPE:
-                    confirmed_utilize_from_outers(pack);
-                    crow_send_ack2(pack);
-                    break;
-
-                case G1_ACK22_TYPE:
-                    qos_release_from_incoming(pack);
-                    break;
-
-                default:
-                    break;
-            }
-
-            system_lock();
-            __crow_utilize(pack);
-            system_unlock();
-
+            crow_tower_incoming_ack_phase(pack);
             return;
         }
 
