@@ -7,11 +7,47 @@
 #include <igris/datastruct/dlist.h>
 #include <igris/sync/syslock.h>
 
+struct crow_gateway;
+
+struct crow_gateway_operations
+{
+    void (*send)(struct crow_gateway *, struct crow_packet *);
+    void (*deinit)(struct crow_gateway *);
+
+    // selector support operations
+    int (*get_fds)(struct crow_gateway *, int *fds);
+    void (*onestep)(struct crow_gateway *);
+};
+
+struct crow_gateway
+{
+    struct dlist_head lnk; ///< встроенное поле списка.
+    const struct crow_gateway_operations *ops;
+
+    uint8_t id; ///< номер врат.
+};
+
+extern struct dlist_head crow_gateway_list;
+
+__BEGIN_DECLS
+
+void crow_gateway_init(struct crow_gateway *gate,
+                       struct crow_gateway_operations *ops);
+
+int crow_gateway_bind(struct crow_gateway *gate, int no);
+
+void crow_gateway_deinit(struct crow_gateway *gate);
+
+struct crow_gateway *crow_get_gateway(int no);
+
+__END_DECLS
+
 /**
     @brief Абстрактный класс врат. Врата отвечают за пересылку пакетов
     между башнями.
     @details Может некоторое время хранить отправляемые пакеты.
 */
+
 namespace crow
 {
     class gateway
