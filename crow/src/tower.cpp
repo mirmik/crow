@@ -396,6 +396,8 @@ static void crow_do_travel(crow_packet *pack)
                             memcmp(crow_packet_addrptr(inc), crow_packet_addrptr(pack),
                                    inc->header.alen) == 0)
                     {
+                        // Пакет уже фигурирует как принятый, поэтому
+                        // отбрасываем его.
                         system_lock();
                         __crow_utilize(pack);
                         system_unlock();
@@ -404,18 +406,20 @@ static void crow_do_travel(crow_packet *pack)
                     }
                 }
 
+                // Фиксирем пакет как принятый для фильтрации
+                // возможных последующих копий.
                 system_lock();
                 add_to_incoming_list(pack);
                 system_unlock();
             }
-            else
-            {
-                crow_tower_release(pack);
-            }
         }
-        else
+         
+        if (pack->ingate && pack->header.qos != 2)
         {
-            //Если пакет отправлен из данного нода, обслуживание не требуется
+            // Если пакет отправлен из данного нода, или не требуется
+            // подтверждения второго уровня, обслуживание со стороны башни не требуется.
+            // Вносим соответствующую пометку, что по crow_release пакет мог быть
+            // удалён.
             crow_tower_release(pack);
         }
 
