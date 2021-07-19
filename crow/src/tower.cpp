@@ -277,6 +277,29 @@ static void crow_tower_send_to_gate_phase(struct crow_packet * pack)
 
     if (gate == NULL)
     {
+        //second version compatible
+        struct crow_gateway *gateway = crow_get_gateway(gidx);
+
+        if (gateway)
+        {
+            if (pack->header.f.ack)
+            {
+                if (__diagnostic_enabled && crow::diagnostic_noack == false)
+                    crow::diagnostic("track", pack);
+            }
+            else
+            {
+                if (__diagnostic_enabled)
+                    crow::diagnostic("trans", pack);
+            }
+            //Здесь пакет штампуется временем отправки и пересылается во врата.
+            //Врата должны после пересылки отправить его назад в башню
+            //с помощью return_to_tower для контроля качества.
+            assert(pack->f.sended_to_gate == 0);
+            pack->f.sended_to_gate = 1;
+            gateway->ops->send(gateway, pack);
+        }
+
         if (__diagnostic_enabled)
             crow::diagnostic("wgate", pack);
 
