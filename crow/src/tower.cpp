@@ -413,7 +413,7 @@ static void crow_do_travel(crow_packet *pack)
                 system_unlock();
             }
         }
-         
+
         if (pack->ingate && pack->header.qos != 2)
         {
             // Если пакет отправлен из данного нода, или не требуется
@@ -424,11 +424,7 @@ static void crow_do_travel(crow_packet *pack)
         }
 
         //Решаем, что делать с пришедшим пакетом.
-        if (!pack->header.f.noexec)
-            crow_incoming_handler(pack);
-        else
-            crow::release(pack);
-
+        crow_incoming_handler(pack);
         return;
     }
     else
@@ -449,6 +445,7 @@ static void crow_do_travel(crow_packet *pack)
                 );
             }
 
+            // TODO: Будущий код. 
             //crow_travel_error(pack);
             //return;
         }
