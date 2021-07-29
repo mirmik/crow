@@ -24,7 +24,7 @@ namespace crow
 
         int len = hexer_s((uint8_t *)out.data(), in.size(), in.data());
 
-        /*if (len == CROW_HEXER_MORE3_DOT) 
+        /*if (len == CROW_HEXER_MORE3_DOT)
             dprln("crow::hexer: more then three symbols after dot.");
 
         if (len == CROW_HEXER_ODD_GRID)
@@ -42,7 +42,13 @@ namespace crow
 } // namespace crow
 
 
-crow::hostaddr crow::crowker_address() 
+crow::hostaddr crow::crowker_address()
 {
+    if (getenv("CROWKER") == NULL)
+    {
+        printf("Crowker env is not defined.\r\n");
+        exit(0);
+    }
+
     return crow::address(getenv("CROWKER"));
 }
