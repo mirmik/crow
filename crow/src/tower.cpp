@@ -463,10 +463,6 @@ crow::packet_ptr crow_transport(crow_packet *pack)
     pack->header.seqid = __seqcounter++;
     system_unlock();
 
-    //if (fastsend == false)
-    //    return crow::travel(pack);
-    //else
-    //{
     crow::packet_ptr ptr(pack);
     crow_do_travel(pack);
 
@@ -475,7 +471,6 @@ crow::packet_ptr crow_transport(crow_packet *pack)
         crow::unsleep_handler();
 
     return ptr;
-    //}
 }
 
 void crow::nocontrol_travel(crow_packet *pack, bool fastsend)
