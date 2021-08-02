@@ -41,12 +41,18 @@ PYBIND11_MODULE(libcrow, m)
 	            .def("rawdata",
 	                 [](packet_ptr & self) -> py::bytes
 	{
-		auto buf = self->rawdata();
+		igris::buffer buf = { 
+			crow_packet_dataptr(self.get()), 
+			crow_packet_datasize(self.get()) 
+		};
 		return {buf.data(), buf.size()};
 	})
 	.def("addr", [](packet_ptr & self) -> crow::hostaddr
 	{
-		return self->addr();
+		return { 
+			crow_packet_addrptr(self.get()), 
+			crow_packet_addrsize(self.get())
+		};
 	});
 
 	py::class_<node_packet_ptr>(m, "node_packet_ptr", pack)
@@ -112,7 +118,7 @@ PYBIND11_MODULE(libcrow, m)
 	                   uint16_t ackquant,
 	                   bool fastsend)
 	{
-		return crow::send(addr, data, type, qos, ackquant, fastsend);
+		return crow::send(addr, data, type, qos, ackquant);
 	});
 
 	m.def("create_udpgate", &crow::create_udpgate, py::arg("id")=CROW_UDPGATE_NO, py::arg("port")=0);
@@ -185,7 +191,7 @@ PYBIND11_MODULE(libcrow, m)
 	    uint16_t ackquant,
 	    bool fastsend)
 	{
-		return node.send(rid,addr, data, qos, ackquant, fastsend);
+		return node.send(rid,addr, data, qos, ackquant);
 	}, ungil(), py::arg("rid"), py::arg("addr"), py::arg("data"), py::arg("qos")=2, py::arg("ackquant")=50, py::arg("fastsend")=false);
 
 	py::class_<crow::pynode_delegate, crow::node>(m, "PyNode")

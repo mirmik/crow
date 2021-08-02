@@ -3,6 +3,7 @@
 
 #include <crow/pubsub/pubsub.h>
 #include <crow/pubsub/subscriber.h>
+#include <crow/hostaddr.h>
 #include <pybind11/embed.h>
 
 #include <functional>
