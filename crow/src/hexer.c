@@ -15,6 +15,11 @@ int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
     {
         switch (*it)
         {
+        case '\r':
+        case '\n':
+        case '0':
+            return sz;
+
         case '.':
         {
             uint8_t byte = 0;
