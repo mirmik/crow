@@ -339,15 +339,15 @@ void incoming_handler(crow_packet *pack)
 			{
 				auto rid = ((crow::node_subheader *) crow_packet_dataptr(pack))->rid;
 			
-				for (auto n : listened_nodes) 
-				{
-					if (rid == n) 
-					{
+				//for (auto n : listened_nodes) 
+				//{
+				//	if (rid == n) 
+				//	{
 						output_do(crow::node::message(pack), pack);
 						crow::release(pack);
 						return;
-					}
-				}
+				//	}
+				//}
 			}
 			{
 				crow::node_protocol.incoming(pack); // send error package

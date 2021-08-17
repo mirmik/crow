@@ -137,7 +137,7 @@ PYBIND11_MODULE(libcrow, m)
 		crow::pubsub_protocol.incoming_handler = subscribe_handler_bind_invoke;
 	});
 
-	m.def("address", &address);
+	m.def("address", [](std::string str){ return crow::address(str); });
 
 	m.def("subscribe",
 	      (void (*)(
