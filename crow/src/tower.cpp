@@ -433,7 +433,7 @@ static void crow_do_travel(crow_packet *pack)
         //Ветка транзитного пакета. Логика поиска врат и пересылки.
         if (pack->ingate && crow::retransling_allowed == false)
         {
-            static int warned = 0;
+            /*static int warned = 0;
             if (warned == 0)
             {
                 warned = 1;
@@ -443,11 +443,11 @@ static void crow_do_travel(crow_packet *pack)
                     "Or use --retransler option if utility allowed it.\n"
                     "Default retransling will be disabled in future releases.\n"
                 );
-            }
+            }*/
 
             // TODO: Будущий код. 
-            //crow_travel_error(pack);
-            //return;
+            crow_travel_error(pack);
+            return;
         }
 
         crow_tower_send_to_gate_phase(pack);
