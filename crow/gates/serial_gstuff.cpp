@@ -24,8 +24,8 @@ void crow::serial_gstuff::newline_handler()
 }
 
 struct crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
-                                                       uint32_t baudrate,
-                                                       uint8_t id, bool debug)
+        uint32_t baudrate,
+        uint8_t id, bool debug)
 {
     int ret;
 
@@ -80,6 +80,9 @@ struct crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
         BUG();
     }
 
+    tattr.c_cflag &= ~(PARENB);
+    tattr.c_cflag &= ~(PARODD);
+
     /* put terminal in raw mode after flushing */
     ret = tcsetattr(g->fd, TCSAFLUSH, &tattr);
 
@@ -109,8 +112,8 @@ void crow::serial_gstuff::nblock_onestep()
     if (rpack == NULL)
     {
         rpack = (struct crow_packet *)malloc(GSTUFF_MAXPACK_SIZE +
-                                              sizeof(struct crow_packet) -
-                                              sizeof(struct crow_header));
+                                             sizeof(struct crow_packet) -
+                                             sizeof(struct crow_header));
         gstuff_autorecv_setbuf(&recver, (char *)&rpack->header,
                                GSTUFF_MAXPACK_SIZE);
     }
@@ -129,29 +132,29 @@ void crow::serial_gstuff::nblock_onestep()
 
             switch (c)
             {
-            case GSTUFF_START:
-                dpr("GSTUFF_START");
-                break;
+                case GSTUFF_START:
+                    dpr("GSTUFF_START");
+                    break;
 
-            case GSTUFF_STOP:
-                dpr("GSTUFF_STOP");
-                break;
+                case GSTUFF_STOP:
+                    dpr("GSTUFF_STOP");
+                    break;
 
-            case GSTUFF_STUB:
-                dpr("GSTUFF_STUB");
-                break;
+                case GSTUFF_STUB:
+                    dpr("GSTUFF_STUB");
+                    break;
 
-            case GSTUFF_STUB_START:
-                dpr("GSTUFF_STUB_START");
-                break;
+                case GSTUFF_STUB_START:
+                    dpr("GSTUFF_STUB_START");
+                    break;
 
-            case GSTUFF_STUB_STOP:
-                dpr("GSTUFF_STUB_STOP");
-                break;
+                case GSTUFF_STUB_STOP:
+                    dpr("GSTUFF_STUB_STOP");
+                    break;
 
-            case GSTUFF_STUB_STUB:
-                dpr("GSTUFF_STUB_STUB");
-                break;
+                case GSTUFF_STUB_STUB:
+                    dpr("GSTUFF_STUB_STUB");
+                    break;
             }
 
             dln();
@@ -161,16 +164,16 @@ void crow::serial_gstuff::nblock_onestep()
 
         switch (ret)
         {
-        case GSTUFF_CRC_ERROR:
-            crow::warn("warn: gstuff crc error");
-            break;
+            case GSTUFF_CRC_ERROR:
+                crow::warn("warn: gstuff crc error");
+                break;
 
-        case GSTUFF_NEWPACKAGE:
-            newline_handler();
-            break;
+            case GSTUFF_NEWPACKAGE:
+                newline_handler();
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 }
