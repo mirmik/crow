@@ -337,7 +337,7 @@ void incoming_handler(crow_packet *pack)
 
 		case CROW_NODE_PROTOCOL:
 			{
-				auto rid = ((crow::node_subheader *) crow_packet_dataptr(pack))->rid;
+				//auto rid = ((crow::node_subheader *) crow_packet_dataptr(pack))->rid;
 			
 				//for (auto n : listened_nodes) 
 				//{
@@ -770,13 +770,13 @@ int main(int argc, char *argv[])
 // Вывод информации о созданных вратах.
 	if (info)
 	{
-		printf("gates:\n");
-		printf("\tgate %d: udp port %d\n", CROW_UDPGATE_NO, udpport);
+		nos::println("udpgate: gateno:12 port:{}", udpport);
 
-		if (serial_port != NULL)
-			nos::println("gate is here (TODO)");
-		//printf("\tgate %d: serial port %s\n", 42, serial_port);
-
+		if (serial_port != NULL) 
+		{
+			nos::fprintln("serial: gateno:42 path:{}", serial_port);
+		}
+		
 		nos::println("informat:", informat_tostr());
 		nos::println("outformat:", outformat_tostr());
 	}

@@ -36,6 +36,8 @@ licant.modules.module("crow",
 		"src/address.cpp",
 		"src/gateway.cpp",
 		"src/iter.cpp",
+
+		"nodes/rshell_cli_node.cpp",
 	
 		"proto/acceptor.cpp",
 		"proto/node.cpp",

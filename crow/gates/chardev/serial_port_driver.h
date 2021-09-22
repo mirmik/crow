@@ -21,6 +21,8 @@ namespace crow
             sts = port.nonblock(true);
             if (sts < 0)
                 return sts;
+
+            return sts;
         }
 
         void read(char *data, int size) { port.read(data, size); }
