@@ -33,7 +33,7 @@ static void incom_test(crow::node_packet_ptr ptr)
 static void undel_test(crow::node_packet_ptr)
 {}
 
-int cli_handle(char * buf, int len, char* ans, int maxanslen)
+void cli_handle(char * buf, int len, char* ans, int maxanslen)
 {
 	CHECK_EQ(len, 5);
 
@@ -42,13 +42,12 @@ int cli_handle(char * buf, int len, char* ans, int maxanslen)
 		count++;
 	}
 
-	int anslen = snprintf(ans, maxanslen, "HelloWorld");
-	return anslen;
+	snprintf(ans, maxanslen, "HelloWorld");
 }
 
 TEST_CASE("rshell_cli" * doctest::timeout(0.5))
 {
-	crow::rshell_cli_node rnode(igris::make_delegate(cli_handle));
+	crow::rshell_cli_node_delegate rnode(igris::make_delegate(cli_handle));
 	crow::node_delegate node0(incom_test, undel_test);
 
 	rnode.bind(10);

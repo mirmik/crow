@@ -20,6 +20,7 @@ void crow_packet_initialization(struct crow_packet *pack, crow::gateway *ingate)
     pack->_ackcount = 5;
     pack->flags = 0;
     pack->refs = 0;
+    *((char*)(&pack->header) + pack->header.flen) = 0;
 }
 
 struct crow_packet *
