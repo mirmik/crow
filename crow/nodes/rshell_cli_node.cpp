@@ -26,7 +26,6 @@ void crow::rshell_cli_node_base::incoming_packet(crow_packet *pack)
 
     free(ansbuf);
 
-__end__:
     crow::release(pack);
     return;
 }

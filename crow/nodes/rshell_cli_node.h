@@ -1,11 +1,13 @@
 /** @file */
 
-#ifndef CROW_CLI_NODE
-#define CROW_CLI_NODE
+#ifndef CROW_CLI_NODE_RSHELL
+#define CROW_CLI_NODE_RSHELL
 
 #include <crow/proto/node.h>
 #include <igris/datastruct/argvc.h>
 #include <igris/event/delegate.h>
+
+#include <igris/shell/rshell_executor.h>
 
 namespace crow
 {
@@ -29,9 +31,9 @@ namespace crow
 
     class rshell_cli_node_delegate : public rshell_cli_node_base
     {
-      public:
         igris::delegate<void, char *, int, char *, int> dlg;
 
+      public:
         rshell_cli_node_delegate(
             igris::delegate<void, char *, int, char *, int> handle)
             : dlg(handle)
@@ -48,11 +50,22 @@ namespace crow
 
     class rshell_cli_node : public rshell_cli_node_base
     {
-        igris::rshell_executor *executor;
+        igris::rshell_executor *_executor;
+
+      public:
+        rshell_cli_node() {}
+        rshell_cli_node(igris::rshell_executor *executor) : _executor(executor)
+        {
+        }
+
+        void set_executor(igris::rshell_executor *executor)
+        {
+            _executor = executor;
+        }
 
         int handle(char *a, int b, char *c, int d) override
         {
-            executor->unsafe_execute(a, b, c, d);
+            _executor->execute(a, b, c, d);
             int anslen = strlen(c);
             return anslen;
         }

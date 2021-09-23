@@ -27,6 +27,6 @@ void crow::diagnostic(const char *notation, crow_packet *pack)
     dpr(",rescount:");
     dpr((uint8_t)pack->_ackcount);
     dpr(",data:");
-    dpr(pack->rawdata().slice(0, 20));
+    debug_write(pack->dataptr(), 20 > pack->datasize() ? pack->datasize() : 20);
     dprln(")");
 }

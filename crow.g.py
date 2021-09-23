@@ -89,10 +89,14 @@ licant.modules.module("crow.minimal",
 		"src/packet_ptr.cpp",
 		"src/tower.cpp",
 		"src/gateway.cpp",
+		"src/hexer.c",
+		"src/hostaddr_view.cpp",
+
 		"proto/node.cpp",
 		"proto/node-sync.cpp",
 		"proto/channel.cpp",
-		"src/hexer.c"
+
+		"nodes/rshell_cli_node.cpp",
 	],
 	mdepends = ["crow.include", "crow.diagnostic"]
 )

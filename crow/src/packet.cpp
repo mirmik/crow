@@ -91,3 +91,38 @@ uint16_t crow_packet_datasize(struct crow_packet * pack)
 {
     return (uint16_t)(pack->header.flen - pack->header.alen - sizeof(struct crow_header));
 }
+
+void crow::packet::revert_gate(uint8_t gateindex) 
+{
+
+}
+
+void crow::packet::revert(igris::buffer *vec, size_t veclen) 
+{
+
+}
+
+uint8_t * crow::packet::addrptr() 
+{
+    return crow_packet_addrptr(this);
+}
+
+uint8_t  crow::packet::addrsize() 
+{
+    return crow_packet_addrsize(this);
+}
+
+char * crow::packet::dataptr() 
+{
+    return crow_packet_dataptr(this);
+}
+
+uint16_t crow::packet::datasize() 
+{
+    return crow_packet_datasize(this);
+}
+
+char * crow::packet::endptr() 
+{
+    return (char*)&header + header.flen;
+}

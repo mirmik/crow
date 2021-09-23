@@ -78,7 +78,24 @@ struct crow_packet
         } f;
     };
     struct crow_header header;
+
+  public:
+    void revert_gate(uint8_t gateindex);
+    void revert(igris::buffer *vec, size_t veclen);
+
+    uint8_t *addrptr();
+    uint8_t addrsize();
+
+    char *dataptr();
+    uint16_t datasize();
+
+    char *endptr();
 };
+
+namespace crow
+{
+    using packet = crow_packet;
+}
 
 extern int crow_allocated_count;
 
