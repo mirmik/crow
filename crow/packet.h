@@ -85,9 +85,11 @@ struct crow_packet
 
     uint8_t *addrptr();
     uint8_t addrsize();
+    igris::buffer addr() { return {addrptr(), addrsize()}; }
 
     char *dataptr();
     uint16_t datasize();
+    igris::buffer data() { return {dataptr(), datasize()}; }
 
     char *endptr();
 };

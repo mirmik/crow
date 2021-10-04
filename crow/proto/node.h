@@ -100,7 +100,7 @@ namespace crow
             DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
         uint16_t id = 0;
 
-        virtual void incoming_packet(crow_packet *pack) { crow::release(pack); }
+        virtual void incoming_packet(crow_packet *pack) = 0;
 
         virtual void undelivered_packet(crow_packet *pack)
         {

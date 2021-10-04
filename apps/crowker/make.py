@@ -7,6 +7,8 @@ from licant.cxx_modules import application
 from licant.libs import include
 import os
 
+licant.include("crow")
+
 application("crowker", 
 	sources = [
 		"main.cpp",
