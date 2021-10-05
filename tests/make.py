@@ -15,6 +15,7 @@ tests_c = [
 application("runtests",
 	sources = [
 		"*.cpp",
+		"brocker/*.cpp"
 	],
 	mdepends=["crow", "crow.udpgate"],
 
