@@ -22,4 +22,12 @@
 #define CROWKER_CONTROL_SERVICE_NID 6
 #define CROW_FASTSEND_DEFAULT true
 
+#ifndef CROW_DEFAULT_QOS
+#define CROW_DEFAULT_QOS 2
+#endif
+
+#ifndef CROW_DEFAULT_ACKQUANT
+#define CROW_DEFAULT_ACKQUANT 50
+#endif
+
 #endif

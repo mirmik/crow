@@ -92,6 +92,11 @@ struct crow_packet
     igris::buffer data() { return {dataptr(), datasize()}; }
 
     char *endptr();
+
+    template <class T> T &subheader()
+    {
+        return *reinterpret_cast<T *>(dataptr());
+    }
 };
 
 namespace crow
@@ -146,6 +151,9 @@ namespace crow
     bool has_allocated();
 
     void diagnostic(const char *label, crow_packet *pack);
+
+    using packet = ::crow_packet;
+    using packet_header = ::crow_header;
 }
 
 #endif
