@@ -9,27 +9,27 @@
 
 namespace crowker_implementation
 {
-    class subscriber;
+    class client;
 
     class theme
     {
       public:
         std::string name;
-        std::set<subscriber *> subs;
+        std::set<client *> subs;
         int64_t timestamp_publish;
         int64_t timestamp_activity;
 
       public:
-        size_t count_subscribers() { return subs.size(); }
+        size_t count_clients() { return subs.size(); }
 
-        void link_subscriber(subscriber *sub) { subs.insert(sub); }
+        void link_client(client *sub) { subs.insert(sub); }
 
-        bool has_subscriber(subscriber *sub) { return subs.count(sub); }
+        bool has_client(client *sub) { return subs.count(sub); }
 
-        void unlink_subscriber(subscriber *sub) { subs.erase(sub); }
+        void unlink_client(client *sub) { subs.erase(sub); }
 
         void publish(const std::string &data);
     };
-} // namespace crowker_implementation
+}
 
 #endif

@@ -7,17 +7,17 @@
 #include <string>
 
 #include "options.h"
-#include "subscriber.h"
+#include "client.h"
 
 namespace crowker_implementation
 {
-    class crow_subscriber : public subscriber
+    class crow_client : public client
     {
       public:
         std::string addr;
 
-        static std::map<std::string, crow_subscriber> allsubs;
-        static crow_subscriber *get(const std::string &addr)
+        static std::map<std::string, crow_client> allsubs;
+        static crow_client *get(const std::string &addr)
         {
             return &allsubs[addr];
         }

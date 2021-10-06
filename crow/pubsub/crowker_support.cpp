@@ -64,11 +64,7 @@ void undelivered_crowker_handler(struct crow_packet *pack)
 
     if (shps->type == PUBLISH)
     {
-        std::string theme(crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub) +
-                              sizeof(crow_subheader_pubsub_data),
-                          shps->thmsz);
-
-        crow::crowker::instance()->erase_crow_subscriber(
+        crow::crowker::instance()->erase_crow_client(
             std::string((char *)crow_packet_addrptr(pack), pack->header.alen));
     }
 

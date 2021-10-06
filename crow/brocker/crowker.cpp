@@ -11,7 +11,7 @@ void crow::crowker::publish(const std::string &theme, const std::string &data)
     int subs_count;
 
     auto *thm = get_theme(theme);
-    subs_count = thm->count_subscribers();
+    subs_count = thm->count_clients();
 
     thm->publish(data);
 
@@ -44,14 +44,15 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
     auto *thm = get_theme(theme);
     thm->timestamp_activity = crowker_eval_timestamp();
 
-    auto *sub = crowker_implementation::crow_subscriber::get(saddr);
+    auto *sub = crowker_implementation::crow_client::get(saddr);
+    sub->context = this;
 
     // TODO: Перенести. Незачем перезаписывать адресс каждый раз.
     sub->addr = saddr;
 
-    if (!thm->has_subscriber(sub))
+    if (!thm->has_client(sub))
     {
-        thm->link_subscriber(sub);
+        thm->link_client(sub);
         crowker_implementation::options *&opts = sub->thms[thm].opts;
         opts = new crowker_implementation::crow_options{qos, ackquant};
 
@@ -81,23 +82,24 @@ void crow::crowker::tcp_subscribe(const std::string &theme,
 {
 
     auto *thm = get_theme(theme);
-    auto *sub = crowker_implementation::tcp_subscriber::get(sock->getaddr());
+    auto *sub = crowker_implementation::tcp_client::get(sock->getaddr());
+    sub->context = this;
     sub->sock = sock;
 
-    if (!thm->has_subscriber(sub))
+    if (!thm->has_client(sub))
     {
-        thm->link_subscriber(sub);
+        thm->link_client(sub);
 
         if (brocker_info)
             nos::fprintln("subscribe(tcp): a:{}", sock->getaddr());
     }
 }
 
-void crow::crowker::unlink_theme_subscriber(
-    crowker_implementation::theme *thm, crowker_implementation::subscriber *sub)
+void crow::crowker::unlink_theme_client(
+    crowker_implementation::theme *thm, crowker_implementation::client *sub)
 {
-    thm->unlink_subscriber(sub);
-    if (thm->count_subscribers() == 0)
+    thm->unlink_client(sub);
+    if (thm->count_clients() == 0)
     {
         themes.erase(thm->name);
     }

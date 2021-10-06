@@ -7,18 +7,18 @@
 #include <nos/inet/tcp_socket.h>
 #include <string>
 
-#include "subscriber.h"
+#include "client.h"
 
 namespace crowker_implementation
 {
 
-    class tcp_subscriber : public subscriber
+    class tcp_client : public client
     {
       public:
         nos::inet::tcp_socket *sock;
 
-        static std::map<nos::inet::netaddr, tcp_subscriber> allsubs;
-        static tcp_subscriber *get(const nos::inet::netaddr addr)
+        static std::map<nos::inet::netaddr, tcp_client> allsubs;
+        static tcp_client *get(const nos::inet::netaddr addr)
         {
             return &allsubs[addr];
         }
@@ -26,7 +26,6 @@ namespace crowker_implementation
         void publish(const std::string &theme, const std::string &data,
                      options *opts) override;
     };
-
-} // namespace crowker_implementation
+}
 
 #endif

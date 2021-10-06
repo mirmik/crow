@@ -9,8 +9,8 @@
 
 #include "theme.h"
 
-#include "crow_subscriber.h"
-#include "tcp_subscriber.h"
+#include "crow_client.h"
+#include "tcp_client.h"
 #include <crow/hostaddr.h>
 
 using namespace crowker_implementation;
@@ -22,6 +22,7 @@ namespace crow
     class crowker
     {
       public:
+        // std::set<std::shared_ptr<client>> clients;
         std::map<std::string, theme> themes;
         bool brocker_info = false;
         bool log_publish = false;
@@ -49,17 +50,17 @@ namespace crow
         void tcp_subscribe(const std::string &theme,
                            nos::inet::tcp_socket *sock);
 
-        void unlink_theme_subscriber(crowker_implementation::theme *thm,
-                                     crowker_implementation::subscriber *sub);
+        void unlink_theme_client(crowker_implementation::theme *thm,
+                                 crowker_implementation::client *sub);
 
-        void erase_crow_subscriber(const std::string &addr)
+        void erase_crow_client(const std::string &addr)
         {
-            crowker_implementation::crow_subscriber::allsubs.erase(addr);
+            crowker_implementation::crow_client::allsubs.erase(addr);
         }
 
-        void erase_tcp_subscriber(const nos::inet::netaddr &addr)
+        void erase_tcp_client(const nos::inet::netaddr &addr)
         {
-            crowker_implementation::tcp_subscriber::allsubs.erase(addr);
+            crowker_implementation::tcp_client::allsubs.erase(addr);
         }
 
       private:

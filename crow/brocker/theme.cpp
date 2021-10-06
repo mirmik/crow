@@ -1,7 +1,7 @@
 /** @file */
 
 #include "theme.h"
-#include "subscriber.h"
+#include "client.h"
 
 #include <chrono>
 

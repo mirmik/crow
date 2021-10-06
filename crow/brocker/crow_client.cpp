@@ -1,12 +1,12 @@
 /** @file */
 
-#include "crow_subscriber.h"
+#include "crow_client.h"
 #include <crow/pubsub/pubsub.h>
 
-std::map<std::string, crowker_implementation::crow_subscriber>
-    crowker_implementation::crow_subscriber::allsubs;
+std::map<std::string, crowker_implementation::crow_client>
+    crowker_implementation::crow_client::allsubs;
 
-void crowker_implementation::crow_subscriber::publish(
+void crowker_implementation::crow_client::publish(
     const std::string &theme, const std::string &data,
     crowker_implementation::options *opts)
 {
