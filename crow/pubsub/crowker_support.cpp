@@ -7,9 +7,9 @@
 void incoming_crowker_handler(struct crow_packet *pack)
 {
 
-    struct crow_subheader_pubsub *shps = crow::get_subheader_pubsub(pack);
+    crow::subheader_pubsub & shps = pack->subheader<crow::subheader_pubsub>();
 
-    switch (shps->type)
+    switch (shps.type)
     {
     case PUBLISH:
     {
@@ -22,20 +22,20 @@ void incoming_crowker_handler(struct crow_packet *pack)
 
     case SUBSCRIBE:
     {
-        auto shps_c = crow::get_subheader_pubsub_control(pack);
-        std::string theme(crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub) +
-                              sizeof(crow_subheader_pubsub_control),
-                          shps->thmsz);
+        auto& shps_c = pack->subheader<crow::subheader_pubsub_control>();
+        std::string theme(crow_packet_dataptr(pack) + sizeof(crow::subheader_pubsub) +
+                              sizeof(crow::subheader_pubsub_control),
+                          shps.thmsz);
 
         crow::crowker::instance()->crow_subscribe(
-            {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, theme, shps_c->qos,
-            shps_c->ackquant);
+            {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, theme, shps_c.qos,
+            shps_c.ackquant);
     }
     break;
 
     default:
     {
-        printf("unresolved pubsub frame type %d", (uint8_t)shps->type);
+        printf("unresolved pubsub frame type %d", (uint8_t)shps.type);
     }
     break;
 
@@ -60,9 +60,9 @@ void incoming_crowker_handler(struct crow_packet *pack)
 
 void undelivered_crowker_handler(struct crow_packet *pack)
 {
-    auto shps = crow::get_subheader_pubsub(pack);
+    auto& shps = pack->subheader<crow::subheader_pubsub>();
 
-    if (shps->type == PUBLISH)
+    if (shps.type == PUBLISH)
     {
         crow::crowker::instance()->erase_crow_client(
             std::string((char *)crow_packet_addrptr(pack), pack->header.alen));

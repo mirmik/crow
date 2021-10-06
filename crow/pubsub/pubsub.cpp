@@ -53,8 +53,8 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
                                const igris::buffer data, uint8_t qos,
                                uint16_t acktime, uint8_t type)
 {
-    struct crow_subheader_pubsub subps;
-    struct crow_subheader_pubsub_data subps_d;
+    crow::subheader_pubsub subps;
+    crow::subheader_pubsub_data subps_d;
 
     subps.type = type;
     subps.thmsz = theme.size();
@@ -75,8 +75,8 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
                                  const igris::buffer *vec, int vecsz,
                                  uint8_t qos, uint16_t acktime)
 {
-    struct crow_subheader_pubsub subps;
-    struct crow_subheader_pubsub_data subps_d;
+    crow::subheader_pubsub subps;
+    crow::subheader_pubsub_data subps_d;
 
     subps.type = PUBLISH;
     subps.thmsz = theme.size();
@@ -103,8 +103,8 @@ void crow::subscribe(const crow::hostaddr_view &addr,
 {
     size_t thmsz = theme.size();
 
-    struct crow_subheader_pubsub subps;
-    struct crow_subheader_pubsub_control subps_c;
+    crow::subheader_pubsub subps;
+    crow::subheader_pubsub_control subps_c;
 
     subps.type = SUBSCRIBE;
     subps.thmsz = (uint8_t)thmsz;

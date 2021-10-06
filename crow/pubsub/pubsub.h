@@ -18,27 +18,27 @@ struct crow_theme;
 #define SUBSCRIBE 0
 #define PUBLISH 1
 #define MESSAGE 2
-//#define GETLAST 3
-
-typedef struct crow_subheader_pubsub
-{
-    uint8_t type;
-    uint8_t thmsz;
-} __attribute__((packed)) crow_subheader_pubsub_t;
-
-typedef struct crow_subheader_pubsub_data
-{
-    uint16_t datsz;
-} __attribute__((packed)) crow_subheader_pubsub_data_t;
-
-typedef struct crow_subheader_pubsub_control
-{
-    uint8_t qos;
-    uint16_t ackquant;
-} __attribute__((packed)) crow_subheader_pubsub_control_t;
+#define SERVICE_ANSWER 3
 
 namespace crow
 {
+    struct subheader_pubsub
+    {
+        uint8_t type;
+        uint8_t thmsz;
+    } __attribute__((packed));
+
+    struct subheader_pubsub_data
+    {
+        uint16_t datsz;
+    } __attribute__((packed));
+
+    struct subheader_pubsub_control
+    {
+        uint8_t qos;
+        uint16_t ackquant;
+    } __attribute__((packed));
+
     class pubsub_protocol_cls : public crow::protocol
     {
       public:
@@ -74,58 +74,36 @@ namespace crow
                    uint8_t qo0, uint16_t acktime, uint8_t rqos,
                    uint16_t racktime);
 
-    static inline crow_subheader_pubsub_t *
-    get_subheader_pubsub(crow_packet *pack)
-    {
-        return (crow_subheader_pubsub_t *)crow_packet_dataptr(pack);
-    }
-
-    static inline crow_subheader_pubsub_data_t *
-    get_subheader_pubsub_data(crow_packet *pack)
-    {
-        return (
-            crow_subheader_pubsub_data_t *)(crow_packet_dataptr(pack) +
-                                            sizeof(crow_subheader_pubsub_t));
-    }
-
-    static inline crow_subheader_pubsub_control_t *
-    get_subheader_pubsub_control(crow_packet *pack)
-    {
-        return (
-            crow_subheader_pubsub_control_t *)(crow_packet_dataptr(pack) +
-                                               sizeof(crow_subheader_pubsub_t));
-    }
-
     static inline char *packet_pubsub_thmptr(struct crow_packet *pack)
     {
-        return crow_packet_dataptr(pack) + sizeof(crow_subheader_pubsub_t) +
-               sizeof(crow_subheader_pubsub_data_t);
+        return crow_packet_dataptr(pack) + sizeof(subheader_pubsub) +
+               sizeof(subheader_pubsub_data);
     }
 
     static inline char *packet_pubsub_datptr(struct crow_packet *pack)
     {
         return crow::packet_pubsub_thmptr(pack) +
-               get_subheader_pubsub(pack)->thmsz;
+               pack->subheader<subheader_pubsub>().thmsz;
     }
 
     namespace pubsub
     {
         static inline igris::buffer get_theme(crow_packet *pack)
         {
-            struct crow_subheader_pubsub *shps = get_subheader_pubsub(pack);
-            return igris::buffer(crow::packet_pubsub_thmptr(pack), shps->thmsz);
+            subheader_pubsub &shps = pack->subheader<subheader_pubsub>();
+            return igris::buffer(crow::packet_pubsub_thmptr(pack), shps.thmsz);
         }
 
         static inline igris::buffer get_data(crow_packet *pack)
         {
             assert(pack->header.f.type == CROW_PUBSUB_PROTOCOL);
-            struct crow_subheader_pubsub_data *shps_d =
-                get_subheader_pubsub_data(pack);
+            subheader_pubsub_data &shps_d =
+                pack->subheader<subheader_pubsub_data>();
 
             return igris::buffer(crow::packet_pubsub_datptr(pack),
-                                 shps_d->datsz);
+                                 shps_d.datsz);
         }
-    } // namespace pubsub
+    }
 
     class pubsub_packet_ptr : public packet_ptr
     {
