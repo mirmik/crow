@@ -51,6 +51,10 @@ licant.modules.module("crow",
 		"proto/service.cpp",
 		"proto/rpc.cpp",
 
+		"nodes/subscriber_node.cpp",
+		"nodes/publisher_node.cpp",
+		"nodes/crowker_pubsub_node.cpp",
+
 		"addons/noslogger.cpp",
 	],
 

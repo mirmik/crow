@@ -28,15 +28,18 @@ namespace crow
         uint8_t thmsz;
     } __attribute__((packed));
 
-    struct subheader_pubsub_data
+    struct subheader_pubsub_data : public subheader_pubsub
     {
         uint16_t datsz;
+        igris::buffer theme() { return {(char *)(this + 1), thmsz}; }
+        igris::buffer data() { return {(char *)(this + 1) + thmsz, datsz}; }
     } __attribute__((packed));
 
-    struct subheader_pubsub_control
+    struct subheader_pubsub_control : public subheader_pubsub
     {
         uint8_t qos;
         uint16_t ackquant;
+        igris::buffer theme() { return {(char *)(this + 1), thmsz}; }
     } __attribute__((packed));
 
     class pubsub_protocol_cls : public crow::protocol
@@ -74,37 +77,6 @@ namespace crow
                    uint8_t qo0, uint16_t acktime, uint8_t rqos,
                    uint16_t racktime);
 
-    static inline char *packet_pubsub_thmptr(struct crow_packet *pack)
-    {
-        return crow_packet_dataptr(pack) + sizeof(subheader_pubsub) +
-               sizeof(subheader_pubsub_data);
-    }
-
-    static inline char *packet_pubsub_datptr(struct crow_packet *pack)
-    {
-        return crow::packet_pubsub_thmptr(pack) +
-               pack->subheader<subheader_pubsub>().thmsz;
-    }
-
-    namespace pubsub
-    {
-        static inline igris::buffer get_theme(crow_packet *pack)
-        {
-            subheader_pubsub &shps = pack->subheader<subheader_pubsub>();
-            return igris::buffer(crow::packet_pubsub_thmptr(pack), shps.thmsz);
-        }
-
-        static inline igris::buffer get_data(crow_packet *pack)
-        {
-            assert(pack->header.f.type == CROW_PUBSUB_PROTOCOL);
-            subheader_pubsub_data &shps_d =
-                pack->subheader<subheader_pubsub_data>();
-
-            return igris::buffer(crow::packet_pubsub_datptr(pack),
-                                 shps_d.datsz);
-        }
-    }
-
     class pubsub_packet_ptr : public packet_ptr
     {
       public:
@@ -114,9 +86,17 @@ namespace crow
         {
         }
 
-        igris::buffer theme() { return pubsub::get_theme(pack); }
-        igris::buffer data() { return pubsub::get_data(pack); }
-        igris::buffer message() { return pubsub::get_data(pack); }
+        igris::buffer theme()
+        {
+            auto &subheader = pack->subheader<subheader_pubsub_data>();
+            return subheader.theme();
+        }
+
+        igris::buffer message()
+        {
+            auto &subheader = pack->subheader<subheader_pubsub_data>();
+            return subheader.data();
+        }
     };
 } // namespace crow
 

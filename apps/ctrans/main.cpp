@@ -8,6 +8,7 @@
 #include <crow/pubsub/pubsub.h>
 #include <crow/proto/channel.h>
 #include <crow/proto/acceptor.h>
+#include <crow/nodes/publisher_node.h>
 
 #include <crow/address.h>
 #include <crow/select.h>
@@ -72,7 +73,7 @@ std::string pipelinecmd;
 int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
-//int unselect_pipe_fd[2];
+crow::publisher_node publish_node;
 
 enum class protoopt_e
 {
@@ -80,7 +81,8 @@ enum class protoopt_e
 	PROTOOPT_CHANNEL,
 	PROTOOPT_NODE,
 	PROTOOPT_REVERSE_CHANNEL,
-	PROTOOPT_PUBLISH
+	PROTOOPT_PUBLISH,
+	PROTOOPT_PUBLISH_NODE
 };
 
 enum class input_format
@@ -250,58 +252,56 @@ void send_do(const std::string message)
 			break;
 
 		case protoopt_e::PROTOOPT_PUBLISH:
-			{
-				/*crow_packet * pack = crow::make_publish_packet(
-				                          addr, (uint8_t)addrsize,
-				                          theme.c_str(),
-				                          message.data(), message.size());
+		{
+			crow::publish(
+			{addr, (uint8_t)addrsize},
+			theme.c_str(),
+			message,
+			qos, ackquant);
+		}
+		break;
 
-				pack->qos(qos);
-				pack->ackquant(ackquant);
-				if (infinite)
-					pack->set_infinite_ack();
-
-				crow::travel(pack);*/
-
-				crow::publish(
-				{addr, (uint8_t)addrsize},
-				theme.c_str(),
-				message,
-				qos, ackquant);
-			}
-
-			break;
+		case protoopt_e::PROTOOPT_PUBLISH_NODE:
+		{
+			publish_node.publish(
+			{addr, (uint8_t)addrsize},
+			CROWKER_SERVICE_BROCKER_NODE_NO,
+			theme.c_str(),
+			message,
+			qos, ackquant);
+		}
+		break;
 
 		case protoopt_e::PROTOOPT_CHANNEL:
-			{
-				int ret = channel.send(message.data(), message.size());
+		{
+			int ret = channel.send(message.data(), message.size());
 
-				if (ret == CROW_CHANNEL_ERR_NOCONNECT)
-				{
-					nos::println("Channel is not connected");
-				}
+			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+			{
+				nos::println("Channel is not connected");
 			}
-			break;
+		}
+		break;
 
 		case protoopt_e::PROTOOPT_NODE:
-			{
-				crow::node_send(1, nodeno,
-				{addr, (uint8_t)addrsize},
-				{message.data(), message.size()},
-				qos, ackquant);
-			}
-			break;
+		{
+			crow::node_send(1, nodeno,
+			{addr, (uint8_t)addrsize},
+			{message.data(), message.size()},
+			qos, ackquant);
+		}
+		break;
 
 		case protoopt_e::PROTOOPT_REVERSE_CHANNEL:
-			{
-				int ret = reverse_channel->send(message.data(), message.size());
+		{
+			int ret = reverse_channel->send(message.data(), message.size());
 
-				if (ret == CROW_CHANNEL_ERR_NOCONNECT)
-				{
-					nos::println("Channel is not connected");
-				}
+			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+			{
+				nos::println("Channel is not connected");
 			}
-			break;
+		}
+		break;
 	}
 }
 
@@ -332,31 +332,36 @@ void incoming_handler(crow_packet *pack)
 	switch (pack->header.f.type)
 	{
 		case CROW_PUBSUB_PROTOCOL:
-			output_do(crow::pubsub::get_data(pack), pack);
-			break;
+		{
+			auto & subheader = pack->subheader<crow::subheader_pubsub_data>();
+			output_do(subheader.data(), pack);
+		}
+		break;
 
 		case CROW_NODE_PROTOCOL:
-			{
-				//auto rid = ((crow::node_subheader *) crow_packet_dataptr(pack))->rid;
-			
-				//for (auto n : listened_nodes) 
-				//{
-				//	if (rid == n) 
-				//	{
-						output_do(crow::node::message(pack), pack);
-						crow::release(pack);
-						return;
-				//	}
-				//}
-			}
-			{
-				crow::node_protocol.incoming(pack); // send error package
-				return;
-			}
+		{
+			//auto rid = ((crow::node_subheader *) crow_packet_dataptr(pack))->rid;
+
+			//for (auto n : listened_nodes)
+			//{
+			//	if (rid == n)
+			//	{
+			output_do(crow::node::message(pack), pack);
+			crow::release(pack);
+			return;
+			//	}
+			//}
+		}
+
+/*		{
+			crow::node_protocol.incoming(pack); // send error package
+			return;
+		}*/
 
 		default:
-			output_do({
-				crow_packet_dataptr(pack), crow_packet_datasize(pack) 
+			output_do(
+			{
+				crow_packet_dataptr(pack), crow_packet_datasize(pack)
 			}, pack);
 	}
 
@@ -381,23 +386,23 @@ crow::channel* acceptor_create_channel()
 	return ch;
 }
 
-void chardev_gateway_constructor(char * instruction) 
+void chardev_gateway_constructor(char * instruction)
 {
 	crow::chardev_protocol * protocol;
 	crow::chardev_driver *   driver;
 
 	auto parts = igris::split(instruction, ':');
 
-	if (parts.size() != 2) 
+	if (parts.size() != 2)
 	{
 		nos::println("Usage: --cdev DRIVER[,DRVOPTS]:PROTOCOL[,PROTOOPT]");
 		exit(0);
 	}
 
 	auto drvargs = igris::split(parts[0], ',');
-	if (drvargs[0] == "serial") 
+	if (drvargs[0] == "serial")
 	{
-		if (drvargs.size() != 6) 
+		if (drvargs.size() != 6)
 		{
 			nos::println("Usage: serial,PATH,BAUD,PARITY,DATABITS,STOPBITS:...");
 			exit(0);
@@ -411,23 +416,23 @@ void chardev_gateway_constructor(char * instruction)
 		auto databits = std::stoi(drvargs[4]);
 		auto stopbits = std::stoi(drvargs[5]);
 
-		int sts = port_driver->open(path, baud, parity, databits, stopbits);		
+		int sts = port_driver->open(path, baud, parity, databits, stopbits);
 		nos::println(sts);
 
 		driver = port_driver;
 	}
-	else 
+	else
 	{
 		nos::println("unresolved driver", drvargs[0]);
 		exit(0);
 	}
 
 	auto protoargs = igris::split(parts[1], ',');
-	if (protoargs[0] == "gstuff") 
+	if (protoargs[0] == "gstuff")
 	{
 		nos::println("construct gstuff protocol");
 	}
-	else 
+	else
 	{
 		nos::println("unresolved protocol", protoargs[0]);
 		exit(0);
@@ -489,6 +494,7 @@ void print_help()
 	    "      --listen-node     (node)    listen that node ids\n"
 	    "      --subscribe       (pubsub)  subscribe to crowker theme\n"
 	    "      --publish         (pubsub)  publish to crowker theme\n"
+	    "      --publish2        (pubsub)  publish to crowker theme\n"
 	    "\n"
 	    "Info option list:\n"
 	    "      --info\n"
@@ -511,6 +517,7 @@ void print_help()
 
 int main(int argc, char *argv[])
 {
+	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
 	pthread_t console_thread;
 
 	const struct option long_options[] =
@@ -545,6 +552,7 @@ int main(int argc, char *argv[])
 
 		{"subscribe", required_argument, NULL, 'l'},
 		{"publish", required_argument, NULL, 'P'},
+		{"publish2", required_argument, NULL, 'L'},
 		{"retransler", no_argument, NULL, 'R'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
@@ -635,14 +643,14 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'U':
+			{
+				auto lst = igris::split(optarg, ',');
+				for (auto a : lst)
 				{
-					auto lst = igris::split(optarg, ',');
-					for (auto a : lst)
-					{
-						listened_nodes.push_back(atoi(a.data()));
-					}
+					listened_nodes.push_back(atoi(a.data()));
 				}
-				break;
+			}
+			break;
 
 			case 'g':
 				gdebug = true;
@@ -668,6 +676,11 @@ int main(int argc, char *argv[])
 			case 'P':
 				theme = optarg;
 				protoopt = protoopt_e::PROTOOPT_PUBLISH;
+				break;
+
+			case 'L':
+				theme = optarg;
+				protoopt = protoopt_e::PROTOOPT_PUBLISH_NODE;
 				break;
 
 			case 'l':
@@ -772,11 +785,11 @@ int main(int argc, char *argv[])
 	{
 		nos::println("udpgate: gateno:12 port:{}", udpport);
 
-		if (serial_port != NULL) 
+		if (serial_port != NULL)
 		{
 			nos::fprintln("serial: gateno:42 path:{}", serial_port);
 		}
-		
+
 		nos::println("informat:", informat_tostr());
 		nos::println("outformat:", outformat_tostr());
 	}

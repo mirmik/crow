@@ -1,0 +1,27 @@
+#ifndef CROW_NODES_CROWKER_PUBSUB_NODE_H
+#define CROW_NODES_CROWKER_PUBSUB_NODE_H
+
+#include <crow/proto/node.h>
+
+namespace crow
+{
+    class crowker_pubsub_node_api
+    {
+      public:
+        virtual void subscribe_on_theme(crow::hostaddr_view, int nid,
+                                        igris::buffer theme) = 0;
+
+        virtual void publish_to_theme(igris::buffer theme,
+                                      igris::buffer data) = 0;
+    };
+
+    class crowker_pubsub_node : public crow::node
+    {
+        crowker_pubsub_node_api *api;
+
+      private:
+        void incoming_packet(crow_packet *) override;
+    };
+}
+
+#endif

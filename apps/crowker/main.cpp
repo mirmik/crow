@@ -4,10 +4,10 @@
 #include <crow/address.h>
 #include <crow/select.h>
 #include <crow/nodes/cli.h>
+#include <crow/nodes/crowker_pubsub_node.h>
 
 #include <getopt.h>
 #include <stdbool.h>
-
 #include <stdio.h>
 
 #include <map>
@@ -32,6 +32,8 @@ bool brocker_info = false;
 int udpport = -1;
 int tcpport = -1;
 bool quite = false;
+
+crow::crowker_pubsub_node pubsub_node;
 
 void tcp_client_listener(nos::inet::tcp_socket client)
 {
@@ -146,6 +148,7 @@ void print_help()
 int main(int argc, char *argv[])
 {
 	crow::pubsub_protocol.enable_crowker_subsystem();
+	pubsub_node.bind(CROWKER_SERVICE_BROCKER_NODE_NO);
 
 	const struct option long_options[] =
 	{

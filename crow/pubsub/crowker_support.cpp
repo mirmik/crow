@@ -4,6 +4,8 @@
 #include "subscriber.h"
 #include <crow/brocker/crowker.h>
 
+#include <igris/util/bug.h>
+
 void incoming_crowker_handler(struct crow_packet *pack)
 {
 
@@ -11,48 +13,56 @@ void incoming_crowker_handler(struct crow_packet *pack)
 
     switch (shps.type)
     {
-    case PUBLISH:
-    {
-        auto theme = std::string(crow::pubsub::get_theme(pack));
-        auto data = std::string(crow::pubsub::get_data(pack));
+        case PUBLISH:
+        {
+            auto& shps_d = pack->subheader<crow::subheader_pubsub_data>();
+            auto theme = shps_d.theme().to_string();
+            auto data = shps_d.data().to_string();
+            crow::crowker::instance()->publish(theme, data);
+        }
+        break;
 
-        crow::crowker::instance()->publish(theme, data);
-    }
-    break;
-
-    case SUBSCRIBE:
-    {
-        auto& shps_c = pack->subheader<crow::subheader_pubsub_control>();
-        std::string theme(crow_packet_dataptr(pack) + sizeof(crow::subheader_pubsub) +
+        case SUBSCRIBE:
+        {
+            auto& shps_c = pack->subheader<crow::subheader_pubsub_control>();
+            std::string theme(crow_packet_dataptr(pack) + sizeof(crow::subheader_pubsub) +
                               sizeof(crow::subheader_pubsub_control),
-                          shps.thmsz);
+                              shps.thmsz);
 
-        crow::crowker::instance()->crow_subscribe(
+            crow::crowker::instance()->crow_subscribe(
             {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, theme, shps_c.qos,
             shps_c.ackquant);
-    }
-    break;
-
-    default:
-    {
-        printf("unresolved pubsub frame type %d", (uint8_t)shps.type);
-    }
-    break;
-
-    case MESSAGE:
-    {
-        crow::subscriber *sub;
-        igris::buffer theme = crow::pubsub::get_theme(pack);
-
-        dlist_for_each_entry(sub, &crow::pubsub_protocol.subscribers, lnk)
-        {
-            if (theme == sub->theme)
-            {
-                sub->newpack_handler(pack);
-                return;
-            }
         }
-    }
+        break;
+
+        case SERVICE_ANSWER:
+        {
+            BUG();
+        }
+        break;
+
+        default:
+        {
+            printf("unresolved pubsub frame type %d", (uint8_t)shps.type);
+        }
+        break;
+
+        //case MESSAGE:
+        //{
+        //    BUG();
+
+        /*    crow::subscriber *sub;
+            igris::buffer theme = crow::pubsub::get_theme(pack);
+
+            dlist_for_each_entry(sub, &crow::pubsub_protocol.subscribers, lnk)
+            {
+                if (theme == sub->theme)
+                {
+                    sub->newpack_handler(pack);
+                    return;
+                }
+            }*/
+        //}
     }
 
     crow::release(pack);
