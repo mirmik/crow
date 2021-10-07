@@ -8,16 +8,12 @@
 
 void crow::crowker::publish(const std::string &theme, const std::string &data)
 {
-    int subs_count;
-
     auto *thm = get_theme(theme);
-    subs_count = thm->count_clients();
-
     thm->publish(data);
-
+    
     if (brocker_info || log_publish)
     {
-        nos::fprintln("publish: t:{} s:{} d:{}", theme, subs_count,
+        nos::fprintln("publish: t:{} s:{} d:{}", theme, thm->count_clients(),
                       igris::dstring(data));
     }
 }
@@ -75,6 +71,18 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
                           ackquant, theme);
         }
     }
+}
+
+void crow::crowker::subscribe(const std::string &theme, client * cl)
+{
+    auto *thm = get_theme(theme);
+    thm->timestamp_activity = crowker_eval_timestamp();
+    cl->thms[thm].opts = nullptr;
+
+    if (brocker_info)
+        nos::fprintln("new subscribe(crow): t:{}", theme);
+
+    thm->link_client(cl);
 }
 
 void crow::crowker::tcp_subscribe(const std::string &theme,

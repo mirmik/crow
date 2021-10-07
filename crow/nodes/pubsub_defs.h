@@ -42,7 +42,12 @@ namespace crow
     struct consume_subheader : public pubsub_subheader
     {
         int datsize;
-        igris::buffer message() { return {(char *)(this + 1), datsize}; }
+        int thmsize;
+        igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
+        igris::buffer message()
+        {
+            return {(char *)(this + 1) + thmsize, datsize};
+        }
     } __attribute__((packed));
 
     struct publish_and_subscribe_subheader : public pubsub_subheader

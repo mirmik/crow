@@ -16,12 +16,6 @@ namespace crow
 
 namespace crowker_implementation
 {
-    /*enum class ClientStatus
-    {
-        Active,
-        Disconnected
-    };*/
-
     struct themenote
     {
         options *opts = nullptr;
@@ -30,15 +24,13 @@ namespace crowker_implementation
 
     class client
     {
-        // ClientStatus status = Active;
-
       public:
         crow::crowker *context;
         std::unordered_map<theme *, themenote> thms;
 
       public:
         // bool is_disconnected();
-        ~client();
+        virtual ~client();
         virtual void publish(const std::string &theme, const std::string &data,
                              options *opts) = 0;
     };

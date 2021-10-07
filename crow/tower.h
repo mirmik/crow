@@ -32,6 +32,7 @@ namespace crow
 
     // Включить трассировку пакетов.
     void enable_diagnostic();
+    bool diagnostic_enabled();
 
     // Включить трассировку аллокации.
     void enable_live_diagnostic();

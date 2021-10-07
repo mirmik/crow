@@ -7,6 +7,8 @@
 #include <set>
 #include <string>
 
+#include <nos/print.h>
+
 namespace crowker_implementation
 {
     class client;
@@ -26,7 +28,11 @@ namespace crowker_implementation
 
         bool has_client(client *sub) { return subs.count(sub); }
 
-        void unlink_client(client *sub) { subs.erase(sub); }
+        void unlink_client(client *sub)
+        {
+            nos::println("unlink");
+            subs.erase(sub);
+        }
 
         void publish(const std::string &data);
     };

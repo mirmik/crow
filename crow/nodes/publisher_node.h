@@ -9,7 +9,7 @@ namespace crow
     {
         igris::buffer theme;
         crow::hostaddr_view crowker_addr;
-        int crowker_node;
+        int crowker_node = CROWKER_SERVICE_BROCKER_NODE_NO;
 
         int qos = 2;
         int ackquant = 50;

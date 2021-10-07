@@ -24,3 +24,45 @@ void crow::subscriber_node::incoming_packet(crow_packet* pack)
 crow::subscriber_node::subscriber_node(igris::delegate<void, igris::buffer> incoming)
 	: incoming_handler(incoming)
 {}
+
+
+void crow::subscriber_node::subscribe(crow::hostaddr_view crowker_addr,
+                                      int crowker_node,
+                                      igris::buffer theme,
+                                      uint8_t qos,
+                                      uint16_t ackquant,
+                                      uint8_t rqos,
+                                      uint16_t rackquant)
+{
+	this->crowker_node = crowker_node;
+	this->crowker_addr = crowker_addr;
+	this->qos = qos;
+	this->rqos = rqos;
+	this->ackquant = ackquant;
+	this->rackquant = rackquant;
+	this->theme = theme;
+	subscribe();
+}
+
+void crow::subscriber_node::subscribe()
+{
+	crow::subscribe_subheader sh;
+
+	sh.type = PubSubTypes::Subscribe;
+	sh.rqos = rqos;
+	sh.rackquant = rackquant;
+	sh.keepalive = keepalive;
+	sh.thmsize = theme.size();
+
+	const igris::buffer iov[] =
+	{
+		{(char*)&sh + sizeof(node_subheader), sizeof(sh) - sizeof(node_subheader)},
+		theme
+	};
+
+	send_v(
+	    crowker_node,
+	    crowker_addr,
+	    iov, std::size(iov),
+	    qos, ackquant);
+}

@@ -25,9 +25,7 @@ void incoming_crowker_handler(struct crow_packet *pack)
         case SUBSCRIBE:
         {
             auto& shps_c = pack->subheader<crow::subheader_pubsub_control>();
-            std::string theme(crow_packet_dataptr(pack) + sizeof(crow::subheader_pubsub) +
-                              sizeof(crow::subheader_pubsub_control),
-                              shps.thmsz);
+            std::string theme = shps_c.theme().to_string();
 
             crow::crowker::instance()->crow_subscribe(
             {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, theme, shps_c.qos,

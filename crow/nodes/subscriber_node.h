@@ -28,6 +28,9 @@ namespace crow
         void set_theme(igris::buffer theme);
 
         void subscribe();
+        void subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
+                       igris::buffer theme, uint8_t qos, uint16_t ackquant,
+                       uint8_t rqos, uint16_t rackquant);
 
       private:
         void incoming_packet(crow_packet *) override;

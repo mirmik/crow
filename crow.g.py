@@ -82,6 +82,7 @@ licant.module("crow.crowker",
 		"brocker/client.cpp",
 		"brocker/crow_client.cpp",
 		"brocker/tcp_client.cpp",
+		"brocker/crowker_api.cpp",
 	]
 )
 

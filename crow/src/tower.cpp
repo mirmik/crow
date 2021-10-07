@@ -36,6 +36,7 @@ bool __live_diagnostic_enabled = false;
 bool _in_incoming_handler = false;
 bool _in_undelivered_handler = false;
 
+bool crow::diagnostic_enabled() { return __diagnostic_enabled; }
 void crow::enable_diagnostic() { __diagnostic_enabled = true; }
 
 void crow::enable_live_diagnostic() { __live_diagnostic_enabled = true; }

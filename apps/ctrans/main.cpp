@@ -9,6 +9,8 @@
 #include <crow/proto/channel.h>
 #include <crow/proto/acceptor.h>
 #include <crow/nodes/publisher_node.h>
+#include <crow/nodes/subscriber_node.h>
+#include <crow/nodes/pubsub_defs.h>
 
 #include <crow/address.h>
 #include <crow/select.h>
@@ -55,6 +57,7 @@ bool echo = false;
 bool gdebug = false;
 bool info = false;
 bool subscribe_mode = false;
+bool subscribe2_mode = false;
 
 int acceptorno = -1;
 int channelno = -1;
@@ -74,6 +77,7 @@ int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
 crow::publisher_node publish_node;
+crow::subscriber_node subscriber_node;
 
 enum class protoopt_e
 {
@@ -340,23 +344,22 @@ void incoming_handler(crow_packet *pack)
 
 		case CROW_NODE_PROTOCOL:
 		{
-			//auto rid = ((crow::node_subheader *) crow_packet_dataptr(pack))->rid;
+			if (subscribe2_mode)
+			{
+				auto & subheader = pack->subheader<crow::consume_subheader>();
+				output_do(subheader.message(), pack);
+				return;
+			}
 
-			//for (auto n : listened_nodes)
-			//{
-			//	if (rid == n)
-			//	{
 			output_do(crow::node::message(pack), pack);
 			crow::release(pack);
 			return;
-			//	}
-			//}
 		}
 
-/*		{
-			crow::node_protocol.incoming(pack); // send error package
-			return;
-		}*/
+		/*		{
+					crow::node_protocol.incoming(pack); // send error package
+					return;
+				}*/
 
 		default:
 			output_do(
@@ -518,6 +521,7 @@ void print_help()
 int main(int argc, char *argv[])
 {
 	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
+	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
 	pthread_t console_thread;
 
 	const struct option long_options[] =
@@ -551,6 +555,7 @@ int main(int argc, char *argv[])
 		{"pipeline", required_argument, NULL, 'e'},
 
 		{"subscribe", required_argument, NULL, 'l'},
+		{"subscribe2", required_argument, NULL, 'K'},
 		{"publish", required_argument, NULL, 'P'},
 		{"publish2", required_argument, NULL, 'L'},
 		{"retransler", no_argument, NULL, 'R'},
@@ -686,6 +691,11 @@ int main(int argc, char *argv[])
 			case 'l':
 				theme = optarg;
 				subscribe_mode = 1;
+				break;
+
+			case 'K':
+				theme = optarg;
+				subscribe2_mode = 1;
 				break;
 
 			case 'w':
@@ -874,6 +884,24 @@ int main(int argc, char *argv[])
 				{addr, (size_t)addrsize},
 				theme.c_str(),
 				qos, ackquant, qos, ackquant);
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			}
+		}).detach();
+	}
+
+	if (subscribe2_mode)
+	{
+		std::thread([]()
+		{
+			while (1)
+			{
+				subscriber_node.subscribe(
+				{addr, (size_t)addrsize},
+				CROWKER_SERVICE_BROCKER_NODE_NO,
+				theme.c_str(),
+				qos, ackquant,
+				qos, ackquant
+				);
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			}
 		}).detach();

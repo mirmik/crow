@@ -41,6 +41,7 @@ namespace crow
 
         bool operator==(igris::buffer buf) const;
         bool operator==(const hostaddr_view &buf) const;
+        bool operator<(const hostaddr_view &buf) const;
     };
 }
 

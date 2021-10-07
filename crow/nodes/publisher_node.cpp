@@ -11,7 +11,7 @@ void crow::publisher_node::publish(igris::buffer data)
 
 	const igris::buffer iov[] =
 	{
-		{(char*)&sh, sizeof(sh)},
+		{(char*)&sh + sizeof(node_subheader), sizeof(sh) - sizeof(node_subheader)},
 		theme,
 		data,
 	};

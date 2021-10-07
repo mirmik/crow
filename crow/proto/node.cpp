@@ -83,11 +83,11 @@ void crow::node_protocol_cls::send_node_error(struct crow_packet *pack, int errc
     };
 
     crow::send_v(
-               {
-                   crow_packet_addrptr(pack),
-                   crow_packet_addrsize(pack)
-               }
-               , iov, 2, CROW_NODE_PROTOCOL, 0, pack->header.ackquant);
+    {
+        crow_packet_addrptr(pack),
+        crow_packet_addrsize(pack)
+    }
+    , iov, 2, CROW_NODE_PROTOCOL, 0, pack->header.ackquant);
 }
 
 void crow::node_protocol_cls::incoming(crow_packet *pack)
@@ -107,9 +107,19 @@ void crow::node_protocol_cls::incoming(crow_packet *pack)
 
     if (srv == nullptr)
     {
+        if (crow::diagnostic_enabled())
+        {
+            dprln("nodeproto: packet for unregistred node", sh->rid);
+        }
+
         send_node_error(pack, CROW_ERRNO_UNREGISTRED_RID);
         crow::release(pack);
         return;
+    }
+
+    if (crow::diagnostic_enabled())
+    {
+        dprln("nodeproto: packet for node", sh->rid);
     }
 
     switch (sh->f.type)
