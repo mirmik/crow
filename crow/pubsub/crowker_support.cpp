@@ -8,7 +8,6 @@
 
 void incoming_crowker_handler(struct crow_packet *pack)
 {
-
     crow::subheader_pubsub & shps = pack->subheader<crow::subheader_pubsub>();
 
     switch (shps.type)
@@ -44,23 +43,6 @@ void incoming_crowker_handler(struct crow_packet *pack)
             printf("unresolved pubsub frame type %d", (uint8_t)shps.type);
         }
         break;
-
-        //case MESSAGE:
-        //{
-        //    BUG();
-
-        /*    crow::subscriber *sub;
-            igris::buffer theme = crow::pubsub::get_theme(pack);
-
-            dlist_for_each_entry(sub, &crow::pubsub_protocol.subscribers, lnk)
-            {
-                if (theme == sub->theme)
-                {
-                    sub->newpack_handler(pack);
-                    return;
-                }
-            }*/
-        //}
     }
 
     crow::release(pack);

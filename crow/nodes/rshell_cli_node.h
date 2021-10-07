@@ -18,14 +18,10 @@ namespace crow
     class rshell_cli_node_base : public crow::node
     {
         int answer_buffer_size = 96;
+        bool subscribe_mode = false;
 
       public:
         void incoming_packet(crow_packet *pack) override;
-        void undelivered_packet(crow_packet *pack) override
-        {
-            crow::release(pack);
-        }
-
         virtual int handle(char *, int, char *, int) = 0;
     };
 
