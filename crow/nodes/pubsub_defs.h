@@ -11,7 +11,7 @@ namespace crow
         Publish,
         Subscribe,
         Consume,
-        PublishAndSubscribe
+        Request
     };
 
     struct pubsub_subheader : public node_subheader
@@ -47,6 +47,25 @@ namespace crow
         igris::buffer message()
         {
             return {(char *)(this + 1) + thmsize, datsize};
+        }
+    } __attribute__((packed));
+
+    struct request_subheader : public pubsub_subheader
+    {
+        uint8_t rqos;
+        uint16_t rackquant;
+        uint16_t keepalive;
+        uint8_t thmsize;
+        uint8_t repthmsize;
+        uint16_t datsize;
+        igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
+        igris::buffer reply_theme()
+        {
+            return {(char *)(this + 1) + thmsize, repthmsize};
+        }
+        igris::buffer message()
+        {
+            return {(char *)(this + 1) + thmsize + repthmsize, datsize};
         }
     } __attribute__((packed));
 

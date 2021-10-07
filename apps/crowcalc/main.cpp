@@ -6,15 +6,16 @@
 #include <chrono>
 
 #include <crow/proto/rpc.h>
+#include <crow/nodes/service_node.h>
 #include <crow/address.h>
 #include <crow/crow.h>
 
 #include <nos/fprint.h>
-
 #include <igris/getopt/cliopts.h>
 
 crow::udpgate ugate;
 crow::rpc_node rpcnode;
+crow::service_node service;
 
 std::string hello(std::string inpstr) 
 {
@@ -41,6 +42,13 @@ double func_div(double a, double b)
 	return a / b;
 }
 
+int foo(char * data, int datlen, char * ans, int ansmax) 
+{
+	nos::println("foo");
+	sprintf(ans, "HelloWorld\r\n");
+	return strlen(ans);
+}
+
 int main(int argc, char ** argv)
 {
 	igris::cliopts cliopts;
@@ -52,7 +60,14 @@ int main(int argc, char ** argv)
 	if (debug)
 		crow::diagnostic_setup(true, false);
 
+	crow::hostaddr crowker = crow::address(argv[1]);
+	nos::println("Crowker: ", argv[1]);
+
 	ugate.bind();
+
+	service.bind();
+	service.set_handle(foo); 
+	service.subscribe(crowker, CROWKER_SERVICE_BROCKER_NODE_NO, "calc", 2,50,2,50);
 
 	int port = cliopts.get_integer("udp");
 	nos::fprintln("Make udp server, port : {}", port);

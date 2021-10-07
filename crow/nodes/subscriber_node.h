@@ -1,28 +1,20 @@
 #ifndef CROW_SUBSCRIBER_NODE_H
 #define CROW_SUBSCRIBER_NODE_H
 
+#include <crow/nodes/publisher_node.h>
 #include <crow/proto/node.h>
 #include <igris/event/delegate.h>
 
 namespace crow
 {
-    class subscriber_node : public crow::node
+    class abstract_subscriber_node : public crow::publisher_node
     {
-        igris::delegate<void, igris::buffer> incoming_handler;
-        int qos = 2;
-        int ackquant = 50;
         int rqos = 2;
         int rackquant = 50;
         int keepalive = 30;
 
-        igris::buffer theme;
-        crow::hostaddr_view crowker_addr;
-        int crowker_node;
-
       public:
-        subscriber_node() = default;
-        subscriber_node(igris::delegate<void, igris::buffer> incoming);
-
+        abstract_subscriber_node() = default;
         void set_brocker_address(crow::hostaddr_view crowker_addr,
                                  int crowker_node);
         void set_theme(igris::buffer theme);
@@ -31,6 +23,15 @@ namespace crow
         void subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
                        igris::buffer theme, uint8_t qos, uint16_t ackquant,
                        uint8_t rqos, uint16_t rackquant);
+    };
+
+    class subscriber_node : public crow::abstract_subscriber_node
+    {
+        igris::delegate<void, igris::buffer> incoming_handler;
+
+      public:
+        subscriber_node() = default;
+        subscriber_node(igris::delegate<void, igris::buffer> incoming);
 
       private:
         void incoming_packet(crow_packet *) override;

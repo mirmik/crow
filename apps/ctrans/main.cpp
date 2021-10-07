@@ -3,15 +3,14 @@
 #include <crow/gates/chardev_gateway.h>
 #include <crow/gates/chardev/serial_port_driver.h>
 #include <crow/gates/udpgate.h>
-
 #include <crow/tower.h>
 #include <crow/pubsub/pubsub.h>
 #include <crow/proto/channel.h>
 #include <crow/proto/acceptor.h>
 #include <crow/nodes/publisher_node.h>
 #include <crow/nodes/subscriber_node.h>
+#include <crow/nodes/request_node.h>
 #include <crow/nodes/pubsub_defs.h>
-
 #include <crow/address.h>
 #include <crow/select.h>
 
@@ -28,14 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <string>
 #include <map>
 #include <thread>
-
 #include <iostream>
-
-#include <unistd.h>
 
 bool infinite = false;
 bool debug_mode = false;
@@ -58,6 +55,7 @@ bool gdebug = false;
 bool info = false;
 bool subscribe_mode = false;
 bool subscribe2_mode = false;
+bool request_mode = false;
 
 int acceptorno = -1;
 int channelno = -1;
@@ -72,12 +70,14 @@ std::vector<int> listened_nodes;
 std::string pulse;
 std::string theme;
 std::string pipelinecmd;
+std::string request_theme_postfix = ":unchanged";
 
 int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
 crow::publisher_node publish_node;
 crow::subscriber_node subscriber_node;
+crow::request_node request_node;
 
 enum class protoopt_e
 {
@@ -86,6 +86,7 @@ enum class protoopt_e
 	PROTOOPT_NODE,
 	PROTOOPT_REVERSE_CHANNEL,
 	PROTOOPT_PUBLISH,
+	PROTOOPT_REQUEST,
 	PROTOOPT_PUBLISH_NODE
 };
 
@@ -133,6 +134,25 @@ std::string outformat_tostr()
 	}
 
 	return std::string();
+}
+
+
+std::string gen_random_string(const int len)
+{
+	std::string tmp_s;
+	static const char alphanum[] =
+	    "0123456789"
+	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	    "abcdefghijklmnopqrstuvwxyz";
+
+	srand( (unsigned) time(NULL) * getpid());
+
+	tmp_s.reserve(len);
+
+	for (int i = 0; i < len; ++i)
+		tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
+
+	return tmp_s;
 }
 
 void output_do(igris::buffer data, crow_packet* pack)
@@ -190,8 +210,6 @@ std::pair<std::string, bool> input_do(const std::string& data)
 
 void pipeline(const std::string& cmd)
 {
-	nos::println("pipeline", cmd);
-
 	int ans;
 
 	int child_pid;
@@ -234,9 +252,6 @@ void pipeline(const std::string& cmd)
 			exit(-1);
 		}
 	}
-
-	// parent branch
-	dprln("parent:", getpid());
 
 	DATAINPUT_FILENO = pipe_from_child[0];
 	DATAOUTPUT_FILENO = pipe_to_child[1];
@@ -296,6 +311,19 @@ void send_do(const std::string message)
 		}
 		break;
 
+		case protoopt_e::PROTOOPT_REQUEST:
+		{
+			request_node.request(
+			{addr, (uint8_t)addrsize},
+			CROWKER_SERVICE_BROCKER_NODE_NO,
+			theme,
+			theme + request_theme_postfix,
+			{message.data(), message.size()},
+			qos, ackquant, qos, ackquant
+			);
+		}
+		break;
+
 		case protoopt_e::PROTOOPT_REVERSE_CHANNEL:
 		{
 			int ret = reverse_channel->send(message.data(), message.size());
@@ -344,7 +372,7 @@ void incoming_handler(crow_packet *pack)
 
 		case CROW_NODE_PROTOCOL:
 		{
-			if (subscribe2_mode)
+			if (subscribe2_mode || request_mode)
 			{
 				auto & subheader = pack->subheader<crow::consume_subheader>();
 				output_do(subheader.message(), pack);
@@ -355,11 +383,6 @@ void incoming_handler(crow_packet *pack)
 			crow::release(pack);
 			return;
 		}
-
-		/*		{
-					crow::node_protocol.incoming(pack); // send error package
-					return;
-				}*/
 
 		default:
 			output_do(
@@ -496,8 +519,9 @@ void print_help()
 	    "      --node            (node)    send message to specified node\n"
 	    "      --listen-node     (node)    listen that node ids\n"
 	    "      --subscribe       (pubsub)  subscribe to crowker theme\n"
+	    "      --subscribe2      (node)    subscribe to crowker theme\n"
 	    "      --publish         (pubsub)  publish to crowker theme\n"
-	    "      --publish2        (pubsub)  publish to crowker theme\n"
+	    "      --publish2        (node)    publish to crowker theme\n"
 	    "\n"
 	    "Info option list:\n"
 	    "      --info\n"
@@ -522,6 +546,7 @@ int main(int argc, char *argv[])
 {
 	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
+	request_node.bind(CTRANS_DEFAULT_REQUEST_NODE);
 	pthread_t console_thread;
 
 	const struct option long_options[] =
@@ -558,6 +583,7 @@ int main(int argc, char *argv[])
 		{"subscribe2", required_argument, NULL, 'K'},
 		{"publish", required_argument, NULL, 'P'},
 		{"publish2", required_argument, NULL, 'L'},
+		{"request", required_argument, NULL, 'G'},
 		{"retransler", no_argument, NULL, 'R'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
@@ -696,6 +722,12 @@ int main(int argc, char *argv[])
 			case 'K':
 				theme = optarg;
 				subscribe2_mode = 1;
+				break;
+
+			case 'G':
+				theme = optarg;
+				request_mode = 1;
+				protoopt = protoopt_e::PROTOOPT_REQUEST;
 				break;
 
 			case 'w':

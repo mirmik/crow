@@ -7,6 +7,7 @@ namespace crow
 {
     class publisher_node : public crow::node
     {
+      protected:
         igris::buffer theme;
         crow::hostaddr_view crowker_addr;
         int crowker_node = CROWKER_SERVICE_BROCKER_NODE_NO;
