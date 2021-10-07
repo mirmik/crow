@@ -547,6 +547,7 @@ int main(int argc, char *argv[])
 	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
 	request_node.bind(CTRANS_DEFAULT_REQUEST_NODE);
+	request_theme_postfix = std::string(":" + gen_random_string(10));
 	pthread_t console_thread;
 
 	const struct option long_options[] =
