@@ -8,7 +8,7 @@ namespace crow
         igris::delegate<void, crow::node_packet_ptr> incom;
         igris::delegate<void, crow::node_packet_ptr> undeliv;
 
-      public:
+    public:
         node_delegate(igris::delegate<void, crow::node_packet_ptr> incom,
                       igris::delegate<void, crow::node_packet_ptr> undeliv)
             : incom(incom), undeliv(undeliv)
@@ -25,4 +25,4 @@ namespace crow
             undeliv(crow::node_packet_ptr(pack));
         }
     };
-} // namespace crow
+}
