@@ -66,3 +66,13 @@ void crow::abstract_subscriber_node::subscribe()
 	    iov, std::size(iov),
 	    qos, ackquant);
 }
+
+void crow::abstract_subscriber_node::subscribe(
+	crow::hostaddr_view crowker_addr, 
+	igris::buffer theme) 
+{
+	this->crowker_addr = crowker_addr;
+	this->theme = theme;
+
+	subscribe();
+}

@@ -4,7 +4,8 @@
 
 void crow::service_node::incoming_packet(crow_packet * pack) 
 {
-    char buf[48];
+    char * answer = (char*)malloc(answer_buffer_size);
+    memset(answer, 0, answer_buffer_size);
 
     auto& subheader = pack->subheader<consume_subheader>();
     auto data = subheader.message();
@@ -15,14 +16,13 @@ void crow::service_node::incoming_packet(crow_packet * pack)
         data.data() + 1 + reply_theme_length, 
         data.size() - 1 - reply_theme_length };
 
-    int anslen = dlg(message.data(), message.size(), buf, 48);
-    auto answer = igris::buffer(buf, anslen);
-
+    int anslen = dlg(message.data(), message.size(), answer, answer_buffer_size);
+    
     publish(
         pack->addr(),
         subheader.sid,
         reply_theme,
-        answer,
+        { answer, anslen },
         qos,
         ackquant
     );

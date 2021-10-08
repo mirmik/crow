@@ -4,7 +4,8 @@
 
 void crow::request_node::incoming_packet(crow_packet *pack) 
 {
-	nos::println("request_node: incomming todo");
+	dlist_move(&pack->ulnk, &incoming_list);
+	notify_one(0);
 }
 
 void crow::request_node::request(crow::hostaddr_view crowker_addr,
@@ -53,4 +54,14 @@ void crow::request_node::request(igris::buffer data)
 	    crowker_addr,
 	    iov, std::size(iov),
 	    qos, ackquant);
+}
+
+crow::packet_ptr crow::request_node::sync_request(igris::buffer data) 
+{
+	request(data);
+	int sts = waitevent();
+	(void) sts;
+
+	auto * ptr = dlist_first_entry(&incoming_list, crow::packet, ulnk);
+	return crow::packet_ptr(ptr);
 }
