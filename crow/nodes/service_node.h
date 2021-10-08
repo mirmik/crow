@@ -8,6 +8,7 @@ namespace crow
     class service_node : public crow::abstract_subscriber_node
     {
         igris::delegate<int, char *, int, char *, int> dlg;
+        int answer_buffer_size = 256;
 
       public:
         service_node(igris::delegate<int, char *, int, char *, int> dlg)

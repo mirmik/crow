@@ -94,12 +94,12 @@ uint16_t crow_packet_datasize(struct crow_packet * pack)
 
 void crow::packet::revert_gate(uint8_t gateindex) 
 {
-
+    crow_packet_revert_gate(this, gateindex);
 }
 
 void crow::packet::revert(igris::buffer *vec, size_t veclen) 
 {
-
+    crow_packet_revert(this, vec, veclen);
 }
 
 uint8_t * crow::packet::addrptr() 

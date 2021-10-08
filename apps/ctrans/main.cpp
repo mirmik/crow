@@ -36,9 +36,6 @@
 
 bool infinite = false;
 bool debug_mode = false;
-
-const uint8_t* addr = nullptr;
-int addrsize;
 crow::hostaddr address;
 
 bool userqos = false;
@@ -56,6 +53,7 @@ bool info = false;
 bool subscribe_mode = false;
 bool subscribe2_mode = false;
 bool request_mode = false;
+bool crowker_mode = false;
 
 int acceptorno = -1;
 int channelno = -1;
@@ -265,7 +263,7 @@ void send_do(const std::string message)
 	{
 		case protoopt_e::PROTOOPT_BASIC:
 			crow::send(
-			{addr, (uint8_t)addrsize},
+			address,
 			{message.data(), message.size()},
 			type, qos, ackquant);
 			break;
@@ -273,7 +271,7 @@ void send_do(const std::string message)
 		case protoopt_e::PROTOOPT_PUBLISH:
 		{
 			crow::publish(
-			{addr, (uint8_t)addrsize},
+			address,
 			theme.c_str(),
 			message,
 			qos, ackquant);
@@ -283,7 +281,7 @@ void send_do(const std::string message)
 		case protoopt_e::PROTOOPT_PUBLISH_NODE:
 		{
 			publish_node.publish(
-			{addr, (uint8_t)addrsize},
+			address,
 			CROWKER_SERVICE_BROCKER_NODE_NO,
 			theme.c_str(),
 			message,
@@ -305,7 +303,7 @@ void send_do(const std::string message)
 		case protoopt_e::PROTOOPT_NODE:
 		{
 			crow::node_send(1, nodeno,
-			{addr, (uint8_t)addrsize},
+			address,
 			{message.data(), message.size()},
 			qos, ackquant);
 		}
@@ -314,7 +312,7 @@ void send_do(const std::string message)
 		case protoopt_e::PROTOOPT_REQUEST:
 		{
 			request_node.request(
-			{addr, (uint8_t)addrsize},
+			address,
 			CROWKER_SERVICE_BROCKER_NODE_NO,
 			theme,
 			theme + request_theme_postfix,
@@ -708,27 +706,32 @@ int main(int argc, char *argv[])
 			case 'P':
 				theme = optarg;
 				protoopt = protoopt_e::PROTOOPT_PUBLISH;
+				crowker_mode = 1;
 				break;
 
 			case 'L':
 				theme = optarg;
 				protoopt = protoopt_e::PROTOOPT_PUBLISH_NODE;
+				crowker_mode = 1;
 				break;
 
 			case 'l':
 				theme = optarg;
 				subscribe_mode = 1;
+				crowker_mode = 1;
 				break;
 
 			case 'K':
 				theme = optarg;
 				subscribe2_mode = 1;
+				crowker_mode = 1;
 				break;
 
 			case 'G':
 				theme = optarg;
 				request_mode = 1;
 				protoopt = protoopt_e::PROTOOPT_REQUEST;
+				crowker_mode = 1;
 				break;
 
 			case 'w':
@@ -766,7 +769,7 @@ int main(int argc, char *argv[])
 				BUG();
 				break;
 		}
-	}
+	} 
 
 	if (crow::create_udpgate(CROW_UDPGATE_NO, udpport))
 	{
@@ -809,18 +812,18 @@ int main(int argc, char *argv[])
 			exit(0);
 		}
 
-		addr = address.data();
-		addrsize = address.size();
-
-		if (addrsize < 0)
-		{
-			printf("Wrong address format\n");
-			exit(-1);
-		}
+//		if (address.size() < 0)
+//		{
+//			printf("Wrong address format\n");
+//			exit(-1);
+//		}
 	}
 	else
 	{
-		addrsize = 0;
+		if (crowker_mode) 
+		{
+			address = crow::crowker_address();
+		}
 	}
 
 // Вывод информации о созданных вратах.
@@ -853,7 +856,7 @@ int main(int argc, char *argv[])
 		channel.init(33, print_channel_message);
 		channel.set_addr_buffer((char*)malloc(128), 128);
 
-		int ret = channel.connect(addr, addrsize, channelno, qos, ackquant);
+		int ret = channel.connect(address.data(), address.size(), channelno, qos, ackquant);
 
 		if (ret)
 		{
@@ -914,7 +917,7 @@ int main(int argc, char *argv[])
 			while (1)
 			{
 				crow::subscribe(
-				{addr, (size_t)addrsize},
+				address,
 				theme.c_str(),
 				qos, ackquant, qos, ackquant);
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -929,7 +932,7 @@ int main(int argc, char *argv[])
 			while (1)
 			{
 				subscriber_node.subscribe(
-				{addr, (size_t)addrsize},
+				address,
 				CROWKER_SERVICE_BROCKER_NODE_NO,
 				theme.c_str(),
 				qos, ackquant,

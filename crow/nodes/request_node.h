@@ -7,6 +7,8 @@ namespace crow
 {
     class request_node : public crow::node
     {
+        dlist_head incoming_list = DLIST_HEAD_INIT(incoming_list);
+
         igris::buffer theme;
         igris::buffer reply_theme;
         crow::hostaddr_view crowker_addr;
@@ -25,6 +27,7 @@ namespace crow
                      uint8_t rqos, uint16_t rackquant);
 
         void request(igris::buffer data);
+        crow::packet_ptr sync_request(igris::buffer data);
 
       private:
         void incoming_packet(crow_packet *pack) override;

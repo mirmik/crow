@@ -105,6 +105,12 @@ licant.modules.module("crow.minimal",
 		"proto/channel.cpp",
 
 		"nodes/rshell_cli_node.cpp",
+		"nodes/subscriber_node.cpp",
+		"nodes/publisher_node.cpp",
+		"nodes/crowker_pubsub_node.cpp",
+
+		"nodes/service_node.cpp",
+		"nodes/request_node.cpp",
 	],
 	mdepends = ["crow.include", "crow.diagnostic"]
 )
