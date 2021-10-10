@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <unistd.h>
 
 #include <string>
@@ -70,8 +71,12 @@ std::string theme;
 std::string pipelinecmd;
 std::string request_theme_postfix = ":unchanged";
 
+std::thread console_thread;
+
 int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
+
+std::shared_ptr<crow::udpgate> udpgate;
 
 crow::publisher_node publish_node;
 crow::subscriber_node subscriber_node;
@@ -342,7 +347,7 @@ void incoming_handler(crow_packet *pack)
 		// Переотослать пакет точно повторяющий входящий.
 		crow::send({crow_packet_addrptr(pack), pack->header.alen},
 		{crow_packet_dataptr(pack), crow_packet_datasize(pack)},
-		pack->header.f.type,
+		pack->header.u.f.type,
 		pack->header.qos,
 		pack->header.ackquant);
 	}
@@ -359,7 +364,7 @@ void incoming_handler(crow_packet *pack)
 		}
 	}
 
-	switch (pack->header.f.type)
+	switch (pack->header.u.f.type)
 	{
 		case CROW_PUBSUB_PROTOCOL:
 		{
@@ -467,10 +472,8 @@ void chardev_gateway_constructor(char * instruction)
 	//cdev_gates.emplace_back(driver, protocol, FULL_MESSAGE_SEND_STRATEGY);
 }
 
-void *console_listener(void *arg)
+void console_listener()
 {
-	(void)arg;
-
 	std::string input;
 	char readbuf[1024];
 
@@ -546,7 +549,6 @@ int main(int argc, char *argv[])
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
 	request_node.bind(CTRANS_DEFAULT_REQUEST_NODE);
 	request_theme_postfix = std::string(":" + gen_random_string(10));
-	pthread_t console_thread;
 
 	const struct option long_options[] =
 	{
@@ -771,7 +773,8 @@ int main(int argc, char *argv[])
 		}
 	} 
 
-	if (crow::create_udpgate(CROW_UDPGATE_NO, udpport))
+	udpgate = crow::create_udpgate_safe(CROW_UDPGATE_NO, udpport);
+	if (!udpgate->opened())
 	{
 		perror("udpgate open");
 		exit(-1);
@@ -903,11 +906,8 @@ int main(int argc, char *argv[])
 	// Создание консольного ввода, если необходимо.
 	if (!noconsole)
 	{
-		if (pthread_create(&console_thread, NULL, console_listener, NULL))
-		{
-			fprintf(stderr, "Error creating thread\n");
-			return 1;
-		}
+		console_thread = std::thread(console_listener);
+		console_thread.detach();
 	}
 
 	if (subscribe_mode)

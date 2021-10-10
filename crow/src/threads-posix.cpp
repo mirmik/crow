@@ -36,7 +36,7 @@ void signal_sigint_handler(int sig)
         exit(0);
 }
 
-void signal_sigkill_handler(int sig)
+/*void signal_sigkill_handler(int sig)
 {
     if (_spin_runned)
     {
@@ -49,7 +49,7 @@ void signal_sigkill_handler(int sig)
         sigkill_old_action.sa_handler(sig);
     else
         exit(0);
-}
+}*/
 
 void crow::unselect()
 {
@@ -72,8 +72,8 @@ void crow::spin_with_select()
     crow::unselect_init();
     crow::select_collect_fds();
 
-    sigaction(SIGKILL, NULL, &sigkill_old_action);
-    signal(SIGKILL, signal_sigkill_handler);
+//    sigaction(SIGKILL, NULL, &sigkill_old_action);
+//    signal(SIGKILL, signal_sigkill_handler);
 
     sigaction(SIGINT, NULL, &sigint_old_action);
     signal(SIGINT, signal_sigint_handler);

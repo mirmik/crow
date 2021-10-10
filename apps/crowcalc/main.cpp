@@ -42,7 +42,7 @@ double func_div(double a, double b)
 	return a / b;
 }
 
-int foo(char * data, int datlen, char * ans, int ansmax) 
+int foo(char *, int, char * ans, int) 
 {
 	nos::println("foo");
 	sprintf(ans, "HelloWorld\r\n");

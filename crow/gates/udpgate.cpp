@@ -12,6 +12,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <memory>
+
 void crow::udpgate::nblock_onestep()
 {
     crow_header header;
@@ -142,4 +144,21 @@ int crow::create_udpgate(uint8_t id, uint16_t port)
     }
 
     return 0;
+}
+
+std::shared_ptr<crow::udpgate> crow::create_udpgate_safe(uint8_t id, uint16_t port)
+{
+    int sts;
+
+    auto g = std::make_shared<crow::udpgate>();
+    if ((sts = g->open(port)))
+        return g;
+
+    if ((sts = g->bind(id)))
+    {
+        g->close();
+        return g;
+    }
+
+    return g;
 }

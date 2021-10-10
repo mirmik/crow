@@ -5,6 +5,7 @@
 
 #include <crow/defs.h>
 #include <crow/gateway.h>
+#include <memory>
 
 namespace crow
 {
@@ -21,6 +22,8 @@ namespace crow
 
         void send(crow_packet *) override;
         void nblock_onestep() override;
+
+        bool opened() { return sock > 0; }
 
         int open(uint16_t port = 0);
         void close();
@@ -41,6 +44,8 @@ namespace crow
     };
 
     int create_udpgate(uint8_t id = CROW_UDPGATE_NO, uint16_t port = 0);
-} // namespace crow
+    std::shared_ptr<crow::udpgate> create_udpgate_safe(uint8_t id,
+                                                       uint16_t port = 0);
+}
 
 #endif
