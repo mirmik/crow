@@ -18,7 +18,7 @@ void crow_packet_initialization(struct crow_packet *pack, crow::gateway *ingate)
     dlist_init(&pack->ulnk);
     pack->ingate = ingate;
     pack->_ackcount = 5;
-    pack->flags = 0;
+    pack->u.flags = 0;
     pack->refs = 0;
     *((char*)(&pack->header) + pack->header.flen) = 0;
 }
@@ -34,7 +34,7 @@ crow_create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize)
     pack->header.flen = (uint16_t)(sizeof(crow_header) + addrsize + datasize);
     pack->header.alen = addrsize;
     pack->header.ackquant = 200;
-    pack->header.pflag = 0;
+    pack->header.u.pflag = 0;
     pack->header.qos = 0;
     pack->header.stg = 0;
 

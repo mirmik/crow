@@ -25,9 +25,9 @@ void crow::diagnostic(const char *notation, crow_packet *pack)
                 "stg:{}, "
                 "dlen:{}, "
                 "data:{}",
-                notation, pack->header.qos, (uint8_t)pack->header.f.ack,
+                notation, pack->header.qos, (uint8_t)pack->header.u.f.ack,
                 (uint16_t)pack->header.ackquant, (uint8_t)pack->header.alen,
-                (uint16_t)pack->header.flen, (uint8_t)pack->header.f.type,
+                (uint16_t)pack->header.flen, (uint8_t)pack->header.u.f.type,
                 pack->header.seqid,
                 igris::hexascii_encode(crow_packet_addrptr(pack), crow_packet_addrsize(pack)),
                 pack->header.stg, crow_packet_datasize(pack),

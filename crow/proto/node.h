@@ -38,32 +38,30 @@ namespace crow
     {
         uint16_t sid;
         uint16_t rid;
-        union
+        union _u
         {
             uint8_t flags = 0;
-
-            struct
+            struct _f
             {
                 uint8_t reserved : 4;
                 uint8_t type : 4;
             } f;
-        };
+        } u;
     } __attribute__((packed));
 
     struct node_subheader_annotation
     {
         uint16_t sid;
         uint16_t rid;
-        union
+        union _u
         {
             uint8_t flags = 0;
-
             struct
             {
                 uint8_t reserved : 4;
                 uint8_t type : 4;
             } f;
-        };
+        } u;
 
         int parse(igris::buffer data)
         {
@@ -74,7 +72,7 @@ namespace crow
 
             reader.read_binary(sid);
             reader.read_binary(rid);
-            reader.read_binary(flags);
+            reader.read_binary(u.flags);
 
             return 0;
         }

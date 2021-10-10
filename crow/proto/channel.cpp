@@ -14,7 +14,7 @@ void crow::channel::incoming_packet(crow_packet *pack)
     {
     case crow::Frame::HANDSHAKE_REQUEST:
         // Кто-то пытается установить с нами связь.
-        if (f.naive_listener || f._state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
+        if (u.f.naive_listener || u.f._state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
         {
             crow::subheader_handshake *sh_handshake =
                 crow::get_subheader_handshake(pack);
@@ -33,7 +33,7 @@ void crow::channel::incoming_packet(crow_packet *pack)
 
             send_handshake_answer();
 
-            f._state = CROW_CHANNEL_CONNECTED;
+            u.f._state = CROW_CHANNEL_CONNECTED;
         }
         else
         {
@@ -44,7 +44,7 @@ void crow::channel::incoming_packet(crow_packet *pack)
 
     case crow::Frame::HANDSHAKE_ANSWER:
         // Кто-то ответил на зов.
-        if (f._state == CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER)
+        if (u.f._state == CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER)
         {
             // Если мы еще ни с кем и никогда.
             crow::subheader_handshake *sh_handshake =
@@ -61,7 +61,7 @@ void crow::channel::incoming_packet(crow_packet *pack)
             qos = sh_handshake->qos;
             ackquant = sh_handshake->ackquant;
 
-            f._state = CROW_CHANNEL_CONNECTED;
+            u.f._state = CROW_CHANNEL_CONNECTED;
             notify_one(0);
         }
         else
@@ -76,7 +76,7 @@ void crow::channel::incoming_packet(crow_packet *pack)
         return;
 
     case crow::Frame::REFUSE:
-        f._state = CROW_CHANNEL_DISCONNECTED;
+        u.f._state = CROW_CHANNEL_DISCONNECTED;
         break;
 
     default:
@@ -95,7 +95,7 @@ void crow::channel::incoming_data_packet(crow_packet *pack)
 void crow::channel::undelivered_packet(crow_packet *pack)
 {
     notify_one(-1);
-    f._state = CROW_CHANNEL_DISCONNECTED;
+    u.f._state = CROW_CHANNEL_DISCONNECTED;
     crow::release(pack);
 }
 
@@ -108,7 +108,7 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len,
 
     sh_node.sid = id;
     sh_node.rid = this->rid = rid;
-    sh_node.f.type = CROW_NODEPACK_COMMON;
+    sh_node.u.f.type = CROW_NODEPACK_COMMON;
 
     sh_channel.frame_id = 0;
     sh_channel.ftype = crow::Frame::HANDSHAKE_REQUEST;
@@ -123,7 +123,7 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len,
         {(char*)&sh_handshake, sizeof(sh_handshake)}
     };
 
-    f._state = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER;
+    u.f._state = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER;
 
     //_state = crow::State::CONNECTED;
     crow::send_v({raddr_ptr, raddr_len}, vec,
@@ -139,7 +139,7 @@ void crow::channel::send_handshake_answer()
 
     sh_node.sid = id;
     sh_node.rid = rid;
-    sh_node.f.type = CROW_NODEPACK_COMMON;
+    sh_node.u.f.type = CROW_NODEPACK_COMMON;
 
     sh_channel.frame_id = 0;
     sh_channel.ftype = crow::Frame::HANDSHAKE_ANSWER;
@@ -162,7 +162,7 @@ void crow::channel::send_handshake_answer()
 
 int crow::channel::send(const char *data, size_t size)
 {
-    if (f._state != CROW_CHANNEL_CONNECTED)
+    if (u.f._state != CROW_CHANNEL_CONNECTED)
     {
         return CROW_CHANNEL_ERR_NOCONNECT;
     }
@@ -172,7 +172,7 @@ int crow::channel::send(const char *data, size_t size)
 
     sh_node.sid = this->id;
     sh_node.rid = this->rid;
-    sh_node.f.type = CROW_NODEPACK_COMMON;
+    sh_node.u.f.type = CROW_NODEPACK_COMMON;
 
     sh_channel.frame_id = this->fid++;
     sh_channel.ftype = crow::Frame::DATA;

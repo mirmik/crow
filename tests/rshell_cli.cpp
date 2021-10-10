@@ -12,14 +12,6 @@ static int count = 0;
 static int count2 = 0;
 static auto addr = crow::address(".99");
 
-static void incom(crow::node_packet_ptr)
-{
-	count++;
-}
-
-static void undel(crow::node_packet_ptr)
-{}
-
 static void incom_test(crow::node_packet_ptr ptr)
 {
 	auto data = ptr.message();

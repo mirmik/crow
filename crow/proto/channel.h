@@ -40,16 +40,16 @@ namespace crow
         uint8_t qos;
         uint16_t ackquant;
         uint16_t fid = 0;
-        union
+        union _u
         {
             uint8_t flags = 0;
-            struct
+            struct _f
             {
                 uint8_t _state : 4;
                 uint8_t dynamic_addr : 1;
                 uint8_t naive_listener : 1;
             } f;
-        };
+        } u;
         incoming_handler_t incoming_handler;
 
         channel() : lnk(DLIST_HEAD_INIT(lnk)){};
@@ -70,8 +70,8 @@ namespace crow
             raddr_cap = sz;
         }
 
-        void naive_listener_mode(bool en) { f.naive_listener = en; }
-        uint8_t state() { return (uint8_t)f._state; }
+        void naive_listener_mode(bool en) { u.f.naive_listener = en; }
+        uint8_t state() { return (uint8_t)u.f._state; }
 
         void incoming_packet(crow_packet *pack) override;
         void incoming_data_packet(crow_packet *pack);
@@ -84,7 +84,7 @@ namespace crow
 
         void wait_handshake_request()
         {
-            f._state = CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST;
+            u.f._state = CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST;
         }
 
         int send(const char *data, size_t size);

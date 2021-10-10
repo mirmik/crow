@@ -28,7 +28,7 @@ TEST_CASE("self_driven_gstuff")
 
 		auto * pack = crow_create_packet(nullptr, 1, 10);
 
-		pack->header.f.type = 0 & 0x1F;
+		pack->header.u.f.type = 0 & 0x1F;
 		pack->header.qos = 0;
 		pack->header.ackquant = 0;
 
@@ -66,7 +66,7 @@ TEST_CASE("self_driven_gstuff2")
 
 		auto * pack = crow_create_packet(nullptr, 1, 10);
 
-		pack->header.f.type = 9 & 0x1F;
+		pack->header.u.f.type = 9 & 0x1F;
 		pack->header.qos = 0;
 		pack->header.ackquant = 0;
 

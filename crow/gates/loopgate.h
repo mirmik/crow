@@ -28,7 +28,7 @@ namespace crow
             crow::return_to_tower(pack, 0);
             crow::nocontrol_travel(copypack, false);
         }
-        void nblock_onestep() {}
+        void nblock_onestep() override {}
 
         void finish() override {}
     };

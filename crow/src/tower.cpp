@@ -89,10 +89,10 @@ void crow::release(crow_packet *pack)
 {
     system_lock();
 
-    if (pack->f.released_by_tower && pack->refs == 0)
+    if (pack->u.f.released_by_tower && pack->refs == 0)
         __crow_utilize(pack);
     else
-        pack->f.released_by_world = true;
+        pack->u.f.released_by_world = true;
 
     system_unlock();
 }
@@ -105,10 +105,10 @@ void crow_tower_release(crow_packet *pack)
     //Инициализируем для последуещего освобождения в utilize
     dlist_del_init(&pack->lnk);
 
-    if (pack->f.released_by_world && pack->refs == 0)
+    if (pack->u.f.released_by_world && pack->refs == 0)
         __crow_utilize(pack);
     else
-        pack->f.released_by_tower = true;
+        pack->u.f.released_by_tower = true;
 
     system_unlock();
 }
@@ -122,7 +122,7 @@ static void confirmed_utilize_from_outers(crow_packet *pack)
                 pack->header.alen == it->header.alen &&
                 !memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack), pack->header.alen))
         {
-            it->f.confirmed = 1;
+            it->u.f.confirmed = 1;
             crow_tower_release(it);
             return;
         }
@@ -197,7 +197,7 @@ static void crow_incoming_handler(crow_packet *pack)
 
     dlist_for_each_entry(it, &crow::protocols, lnk)
     {
-        if (it->id == pack->header.f.type)
+        if (it->id == pack->header.u.f.type)
         {
             _in_incoming_handler = true;
             it->incoming(pack);
@@ -231,14 +231,14 @@ static void crow_send_ack(crow_packet *pack)
     assert(pack);
     assert(ack);
 
-    ack->header.f.type =
+    ack->header.u.f.type =
         pack->header.qos == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE;
-    ack->header.f.ack = 1;
+    ack->header.u.f.ack = 1;
     ack->header.qos = CROW_WITHOUT_ACK;
     ack->header.ackquant = pack->header.ackquant;
     ack->header.seqid = pack->header.seqid;
     memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack), pack->header.alen);
-    ack->f.released_by_world = true;
+    ack->u.f.released_by_world = true;
     crow::travel(ack);
 }
 
@@ -249,8 +249,8 @@ static void crow_send_ack2(crow_packet *pack)
     assert(pack);
     assert(ack);
 
-    ack->header.f.type = G1_ACK22_TYPE;
-    ack->header.f.ack = 1;
+    ack->header.u.f.type = G1_ACK22_TYPE;
+    ack->header.u.f.ack = 1;
     ack->header.qos = CROW_WITHOUT_ACK;
     ack->header.ackquant = pack->header.ackquant;
     ack->header.seqid = pack->header.seqid;
@@ -283,7 +283,7 @@ static void crow_tower_send_to_gate_phase(struct crow_packet * pack)
 
         if (gateway)
         {
-            if (pack->header.f.ack)
+            if (pack->header.u.f.ack)
             {
                 if (__diagnostic_enabled && crow::diagnostic_noack == false)
                     crow::diagnostic("track", pack);
@@ -296,8 +296,8 @@ static void crow_tower_send_to_gate_phase(struct crow_packet * pack)
             //Здесь пакет штампуется временем отправки и пересылается во врата.
             //Врата должны после пересылки отправить его назад в башню
             //с помощью return_to_tower для контроля качества.
-            assert(pack->f.sended_to_gate == 0);
-            pack->f.sended_to_gate = 1;
+            assert(pack->u.f.sended_to_gate == 0);
+            pack->u.f.sended_to_gate = 1;
             gateway->ops->send(gateway, pack);
         }
 
@@ -308,7 +308,7 @@ static void crow_tower_send_to_gate_phase(struct crow_packet * pack)
     }
     else
     {
-        if (pack->header.f.ack)
+        if (pack->header.u.f.ack)
         {
             if (__diagnostic_enabled && crow::diagnostic_noack == false)
                 crow::diagnostic("track", pack);
@@ -321,8 +321,8 @@ static void crow_tower_send_to_gate_phase(struct crow_packet * pack)
         //Здесь пакет штампуется временем отправки и пересылается во врата.
         //Врата должны после пересылки отправить его назад в башню
         //с помощью return_to_tower для контроля качества.
-        assert(pack->f.sended_to_gate == 0);
-        pack->f.sended_to_gate = 1;
+        assert(pack->u.f.sended_to_gate == 0);
+        pack->u.f.sended_to_gate = 1;
         gate->send(pack);
     }
 }
@@ -332,7 +332,7 @@ static void crow_tower_incoming_ack_phase(crow_packet *pack)
     if (__diagnostic_enabled && crow::diagnostic_noack == false)
         crow::diagnostic("inack", pack);
 
-    switch (pack->header.f.type)
+    switch (pack->header.u.f.type)
     {
         case G1_ACK_TYPE:
             confirmed_utilize_from_outers(pack);
@@ -365,7 +365,7 @@ static void crow_do_travel(crow_packet *pack)
         //Ветка доставленного пакета.
         crow_revert_address(pack);
 
-        if (pack->header.f.ack)
+        if (pack->header.u.f.ack)
         {
             //Перехватываем ack пакеты.
             crow_tower_incoming_ack_phase(pack);
@@ -457,7 +457,7 @@ uint16_t __seqcounter = 0;
 crow::packet_ptr crow_transport(crow_packet *pack)
 {
     pack->header.stg = 0;
-    pack->header.f.ack = 0;
+    pack->header.u.f.ack = 0;
     system_lock();
     pack->header.seqid = __seqcounter++;
     system_unlock();
@@ -497,7 +497,7 @@ crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
         return nullptr;
     }
 
-    pack->header.f.type = type & 0x1F;
+    pack->header.u.f.type = type & 0x1F;
     pack->header.qos = qos;
     pack->header.ackquant = ackquant;
 
@@ -524,7 +524,7 @@ crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
     if (pack == nullptr)
         return nullptr;
 
-    pack->header.f.type = type & 0x1F;
+    pack->header.u.f.type = type & 0x1F;
     pack->header.qos = qos;
     pack->header.ackquant = ackquant;
 
@@ -569,7 +569,7 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
     if (pack == nullptr)
         return nullptr;
 
-    pack->header.f.type = type & 0x1F;
+    pack->header.u.f.type = type & 0x1F;
     pack->header.qos = qos;
     pack->header.ackquant = ackquant;
 
@@ -597,7 +597,7 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
 
 void crow::return_to_tower(crow_packet *pack, uint8_t sts)
 {
-    pack->f.sended_to_gate = 0;
+    pack->u.f.sended_to_gate = 0;
     assert(pack);
 
     system_lock();
@@ -642,7 +642,7 @@ void crow::onestep_travel_only()
 
 void crow_undelivered(crow_packet *pack)
 {
-    pack->f.undelivered = 1;
+    pack->u.f.undelivered = 1;
     crow::protocol *it;
 
     if (crow::undelivered_handler)
@@ -654,7 +654,7 @@ void crow_undelivered(crow_packet *pack)
 
     dlist_for_each_entry(it, &crow::protocols, lnk)
     {
-        if (it->id == pack->header.f.type)
+        if (it->id == pack->header.u.f.type)
         {
             _in_undelivered_handler = true;
             it->undelivered(pack);
@@ -705,7 +705,7 @@ static inline void crow_onestep_outers_stage()
 
     dlist_for_each_entry_safe(pack, n, &crow_outters, lnk)
     {
-        assert(pack->f.released_by_tower == 0);
+        assert(pack->u.f.released_by_tower == 0);
 
         if (curtime - pack->last_request_time >= pack->header.ackquant)
         {
@@ -746,7 +746,7 @@ static inline void crow_onestep_incoming_stage()
 
     dlist_for_each_entry_safe(pack, n, &crow_incoming, lnk)
     {
-        assert(pack->f.released_by_tower == 0);
+        assert(pack->u.f.released_by_tower == 0);
 
         if (curtime - pack->last_request_time >= pack->header.ackquant)
         {
@@ -757,7 +757,7 @@ static inline void crow_onestep_incoming_stage()
 
             if (pack->_ackcount == 0)
             {
-                pack->f.undelivered = 1;
+                pack->u.f.undelivered = 1;
                 __crow_utilize(pack);
             }
             else

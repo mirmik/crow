@@ -97,6 +97,7 @@ namespace crow
 
             // массово запаковываем аргументы c помощью трикса.
             int ___[] = {(writer.dump(args), 0)...};
+            (void)___;
 
             send(rid, addr, args_data, 2, 50);
         }

@@ -19,7 +19,7 @@ crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid,
     crow::node_subheader sh;
     sh.sid = sid;
     sh.rid = rid;
-    sh.f.type = CROW_NODEPACK_COMMON;
+    sh.u.f.type = CROW_NODEPACK_COMMON;
 
     const igris::buffer iov[2] =
     {
@@ -38,7 +38,7 @@ crow::packet_ptr crow::node_send_special(uint16_t sid, uint16_t rid,
     crow::node_subheader sh;
     sh.sid = sid;
     sh.rid = rid;
-    sh.f.type = type;
+    sh.u.f.type = type;
 
     const igris::buffer iov[2] =
     {
@@ -57,7 +57,7 @@ crow::packet_ptr crow::node_send_v(uint16_t sid, uint16_t rid,
     crow::node_subheader sh;
     sh.sid = sid;
     sh.rid = rid;
-    sh.f.type = CROW_NODEPACK_COMMON;
+    sh.u.f.type = CROW_NODEPACK_COMMON;
 
     const igris::buffer iov[1] =
     {
@@ -74,7 +74,7 @@ void crow::node_protocol_cls::send_node_error(struct crow_packet *pack, int errc
 
     sh.sid = crow::node_protocol.rid(pack);
     sh.rid = crow::node_protocol.sid(pack);
-    sh.f.type = CROW_NODEPACK_ERROR;
+    sh.u.f.type = CROW_NODEPACK_ERROR;
 
     const igris::buffer iov[2] =
     {
@@ -122,7 +122,7 @@ void crow::node_protocol_cls::incoming(crow_packet *pack)
         dprln("nodeproto: packet for node", sh.rid);
     }
 
-    switch (sh.f.type)
+    switch (sh.u.f.type)
     {
         case CROW_NODEPACK_COMMON:
             srv->incoming_packet(pack);

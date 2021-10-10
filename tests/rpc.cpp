@@ -7,20 +7,8 @@
 #include <thread>
 #include <chrono>
 
-static int count = 0;
-static int ucount = 0;
 static auto addr = crow::address(".99");
 static auto waddr = crow::address(".12.127.0.0.1:10998");
-
-static void incom(crow::node_packet_ptr)
-{
-	count++;
-}
-
-static void undel(crow::node_packet_ptr)
-{
-	ucount++;
-}
 
 int add(int a, int b)
 {

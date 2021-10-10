@@ -33,10 +33,10 @@ namespace crow
 */
 struct crow_header
 {
-    union
+    union _u
     {
-        uint8_t pflag; ///< Флаги пакета
-        struct
+        uint8_t pflag = 0; ///< Флаги пакета
+        struct _f
         {
             uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
             ///< передается в типе.
@@ -44,7 +44,7 @@ struct crow_header
             uint8_t RESERVED2 : 1;
             uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
         } f;
-    };
+    } u;
     uint16_t flen; ///< Полная длина пакета
     uint8_t alen;  ///< Длина поля адреса.
     uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
@@ -65,10 +65,10 @@ struct crow_packet
     uint16_t last_request_time; ///< время последней отправки
     uint16_t _ackcount; ///< счетчик количества попыток отправки
     int8_t refs;
-    union
+    union _u
     {
-        uint8_t flags; ///< Местные флаги
-        struct
+        uint8_t flags = 0; ///< Местные флаги
+        struct _f
         {
             uint8_t released_by_world : 1;
             uint8_t released_by_tower : 1;
@@ -76,7 +76,7 @@ struct crow_packet
             uint8_t undelivered : 1;
             uint8_t sended_to_gate : 1;
         } f;
-    };
+    } u;
     struct crow_header header;
 
   public:

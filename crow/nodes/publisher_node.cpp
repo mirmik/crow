@@ -31,8 +31,8 @@ void crow::publisher_node::publish(crow::hostaddr_view addr,
              int qos,
              int ackquant) 
 {
-	crowker_addr = addr;
-	crowker_node = crowker_node;
+	this->crowker_addr = addr;
+	this->crowker_node = crowker_node;
 	this-> theme = theme;
 	this->qos = qos;
 	this->ackquant = ackquant;
