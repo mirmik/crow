@@ -19,7 +19,7 @@ application("runtests",
 	],
 	mdepends=["crow", "crow.udpgate"],
 
-	cxxstd="c++20",
+	cxxstd="c++17",
 	ccstd="c11",
 	cxx_flags = "-g -Werror=all -Werror=pedantic -Wno-gnu-zero-variadic-macro-arguments",
 	cc_flags = "-g -Werror=all -Werror=pedantic -Wno-gnu-zero-variadic-macro-arguments",
