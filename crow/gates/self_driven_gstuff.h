@@ -12,7 +12,7 @@ namespace crow
 {
     class self_driven_gstuff : public crow::gateway
     {
-        struct semaphore sem = SEMAPHORE_INIT(sem, 1);
+        sem_t sem;
 
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
         crow_packet *insend = nullptr;
@@ -27,12 +27,14 @@ namespace crow
         int (*write_callback)(void *, const char *data, unsigned int size);
         void *write_privdata;
 
-      public:
+    public:
         void init(char *send_buffer,
                   int (*write_callback)(void *, const char *data,
                                         unsigned int size),
                   void *write_privdata)
         {
+            sem_init(&sem, 0, 1);
+
             this->send_buffer = send_buffer;
             init_receiver();
             invalidate_sender();
@@ -132,7 +134,7 @@ namespace crow
             dlist_move(&pack->lnk, &to_send);
             system_unlock();
 
-            if (sem_try_down(&sem))
+            if (sem_trywait(&sem))
                 return;
 
             if (insend == nullptr)
@@ -140,12 +142,12 @@ namespace crow
                 start_send();
             }
 
-            sem_up(&sem);
+            sem_post(&sem);
         }
 
         void nblock_onestep() override
         {
-            if (sem_try_down(&sem))
+            if (sem_trywait(&sem))
                 return;
 
             if (send_it != send_eit)
@@ -153,7 +155,7 @@ namespace crow
                 continue_send();
             }
 
-            sem_up(&sem);
+            sem_post(&sem);
         }
 
         void finish() override
