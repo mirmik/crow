@@ -16,10 +16,12 @@ namespace crow
 {
     class msgbox : public crow::node
     {
-        struct semaphore message_lock = SEMAPHORE_INIT(message_lock, 1);
+        sem_t message_lock;
         struct dlist_head messages = DLIST_HEAD_INIT(messages);
 
-      public:
+    public:
+        msgbox();
+
         crow::node_packet_ptr query(uint16_t rid,
                                     const crow::hostaddr_view &addr,
                                     const igris::buffer data, uint8_t qos,
