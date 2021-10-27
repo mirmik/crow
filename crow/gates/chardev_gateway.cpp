@@ -7,89 +7,88 @@
 
 void crow::chardev_gateway::send(struct crow_packet *pack)
 {
-	system_lock();
+    system_lock();
 
-	if (dlist_empty(&to_send))
-	{
-		dosend(pack);
-	}
-	else
-	{
-		dlist_move_tail(&pack->lnk, &to_send);
-	}
+    if (dlist_empty(&to_send))
+    {
+        dosend(pack);
+    }
+    else
+    {
+        dlist_move_tail(&pack->lnk, &to_send);
+    }
 
-	system_unlock();
+    system_unlock();
 }
 
 void crow::chardev_gateway::dosend(struct crow_packet *pack)
 {
-	insend = pack;
-	protocol->send_automate_reset(insend);
-	driver->start_send();
+    insend = pack;
+    protocol->send_automate_reset(insend);
+    driver->start_send();
 }
 
 void crow::chardev_gateway::init_recv()
 {
-	system_lock();
-	rpack = (struct crow_packet*) crow_allocate_packet(packet_dataaddr_size);
-	memset((void*)rpack, 0, packet_dataaddr_size + sizeof(crow_packet::header));
-	if (rpack == nullptr)
-	{
-		return;
-		system_unlock();
-	}
+    system_lock();
+    rpack = (struct crow_packet *)crow_allocate_packet(packet_dataaddr_size);
+    memset((void *)rpack, 0,
+           packet_dataaddr_size + sizeof(crow_packet::header));
+    if (rpack == nullptr)
+    {
+        return;
+        system_unlock();
+    }
 
-	protocol->receive_automate_setbuf((char*)&rpack->header, packet_dataaddr_size);
-	protocol->receive_automate_reset();
+    protocol->receive_automate_setbuf((char *)&rpack->header,
+                                      packet_dataaddr_size);
+    protocol->receive_automate_reset();
 
-	system_unlock();
+    system_unlock();
 }
 
 void crow::chardev_gateway::nblock_onestep()
 {
 
-	if (rpack == nullptr)
-		init_recv();
+    if (rpack == nullptr)
+        init_recv();
 
-	driver->nonblock_tryread();
+    driver->nonblock_tryread();
 
-	/*while (driver->ready_for_recv())
-	{
-		char c;
-		driver->read(&c, 1);
+    /*while (driver->ready_for_recv())
+    {
+        char c;
+        driver->read(&c, 1);
 
-		int sts = protocol->receive_automate_newdata(c);
+        int sts = protocol->receive_automate_newdata(c);
 
-		//if (sts == CROW_NEWPACK)
-		//{
-		//nos::println("newpack");
-		//}
-	}*/
+        //if (sts == CROW_NEWPACK)
+        //{
+        //nos::println("newpack");
+        //}
+    }*/
 }
 
 void crow::chardev_gateway::newline_handler()
 {
-	struct crow_packet *block = rpack;
-	rpack = NULL;
+    struct crow_packet *block = rpack;
+    rpack = NULL;
 
-	crow_packet_revert_gate(block, id);
+    crow_packet_revert_gate(block, id);
 
-	crow_packet_initialization(block, this);
-	crow::nocontrol_travel(block, false);
+    crow_packet_initialization(block, this);
+    crow::nocontrol_travel(block, false);
 }
-crow::chardev_gateway::chardev_gateway(
-    crow::chardev_driver * driver,
-    crow::chardev_protocol * protocol)
+crow::chardev_gateway::chardev_gateway(crow::chardev_driver *driver,
+                                       crow::chardev_protocol *protocol)
 {
-	this->driver = driver;
-	this->protocol = protocol;
+    this->driver = driver;
+    this->protocol = protocol;
 }
 
 void crow::chardev_gateway::newdata(char c)
 {
-	protocol->receive_automate_newdata(c);
+    protocol->receive_automate_newdata(c);
 }
 
-
-void crow::chardev_gateway::packet_sended_handler()
-{}
+void crow::chardev_gateway::packet_sended_handler() {}

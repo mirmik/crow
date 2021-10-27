@@ -10,7 +10,7 @@ namespace crow
 {
     class loopgate : public gateway
     {
-      public:
+    public:
         loopgate() {}
 
         void send(crow_packet *pack) override

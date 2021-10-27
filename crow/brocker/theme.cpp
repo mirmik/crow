@@ -3,8 +3,8 @@
 #include "theme.h"
 #include "client.h"
 
-#include <nos/print.h>
 #include <chrono>
+#include <nos/print.h>
 
 int64_t crowker_eval_timestamp()
 {
@@ -19,7 +19,7 @@ void crowker_implementation::theme::publish(const std::string &data)
 {
     for (auto *sub : subs)
     {
-        crowker_implementation::options * opts = nullptr;
+        crowker_implementation::options *opts = nullptr;
         if (sub->thms.count(this))
             opts = sub->thms[this].opts;
         sub->publish(name, {data.data(), data.size()}, opts);

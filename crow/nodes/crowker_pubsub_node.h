@@ -7,7 +7,7 @@ namespace crow
 {
     class crowker_pubsub_node_api
     {
-      public:
+    public:
         virtual void subscribe_on_theme(crow::hostaddr_view, int nid,
                                         igris::buffer theme, uint8_t rqos,
                                         uint16_t rackquant) = 0;
@@ -20,10 +20,10 @@ namespace crow
     {
         crowker_pubsub_node_api *api;
 
-      public:
+    public:
         void set_api(crowker_pubsub_node_api *api) { this->api = api; }
 
-      private:
+    private:
         void incoming_packet(crow_packet *) override;
     };
 }

@@ -38,7 +38,7 @@ namespace crow
 {
     class remote_function_basic
     {
-      public:
+    public:
         virtual int invoke(igris::buffer data, igris::buffer out) = 0;
         virtual int invoke_text_format(igris::buffer data,
                                        std::string &out) = 0;
@@ -50,7 +50,7 @@ namespace crow
     {
         igris::delegate<Ret, Args...> dlg;
 
-      public:
+    public:
         remote_function(igris::delegate<Ret, Args...> dlg) : dlg(dlg) {}
 
         int invoke(igris::buffer data, igris::buffer output) override;
@@ -63,7 +63,7 @@ namespace crow
     {
         std::unordered_map<std::string, remote_function_basic *> rfuncmap;
 
-      public:
+    public:
         void bind(int node_no = CROW_RPC_NODE_NO) { node::bind(node_no); }
 
         template <class Ret, class... Args>
@@ -77,13 +77,13 @@ namespace crow
 
     class rpc_request_node : public crow::node
     {
-      public:
+    public:
         crow_packet *incpack;
 
-      public:
+    public:
         template <class Ret, class... Args>
         void remote_request(crow::hostaddr_view addr, nid_t rid,
-                            const char *fname, Args &&...args)
+                            const char *fname, Args &&... args)
         {
             std::string args_data;
             igris::archive::binary_string_writer writer(args_data);
@@ -165,7 +165,7 @@ namespace crow
         crow::hostaddr_view addr;
         crow::nid_t rid;
 
-      public:
+    public:
         rpc_requestor(crow::hostaddr_view addr,
                       crow::nid_t rid = CROW_RPC_NODE_NO)
             : addr(addr), rid(rid)
@@ -173,7 +173,7 @@ namespace crow
         }
 
         template <class Ret, class... Args>
-        int request(const char *fname, Ret &out, Args &&...args)
+        int request(const char *fname, Ret &out, Args &&... args)
         {
             rpc_request_node wnode;
             int status;
@@ -247,7 +247,7 @@ template <class Tuple, size_t... I>
 static void __expand(std::index_sequence<I...>, Tuple &&tpl,
                      const igris::trent &tr)
 {
-    std::apply([&](auto &&...args) { (__bind(args, tr[(int)I]), ...); }, tpl);
+    std::apply([&](auto &&... args) { (__bind(args, tr[(int)I]), ...); }, tpl);
 }
 
 template <class Ret, class... Args>

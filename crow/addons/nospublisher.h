@@ -11,7 +11,7 @@ namespace crow
         uint8_t alen;
         const char *theme;
 
-      public:
+    public:
         void init(uint8_t *addr, uint8_t alen, const char *theme)
         {
             this->addr = addr;
@@ -19,7 +19,7 @@ namespace crow
             this->theme = theme;
         }
 
-      public:
+    public:
         ssize_t write(const void *ptr, size_t sz) override
         {
             crow::publish(addr, alen, theme, ptr, sz, 0, 200);
@@ -35,7 +35,7 @@ namespace crow
         char buffer[64];
         int cursor = 0;
 
-      public:
+    public:
         void init(uint8_t *addr, uint8_t alen, const char *theme)
         {
             this->addr = addr;
@@ -43,7 +43,7 @@ namespace crow
             this->theme = theme;
         }
 
-      public:
+    public:
         ssize_t write(const void *ptr, size_t sz) override
         {
             const char *cptr = (const char *)ptr;

@@ -16,7 +16,7 @@ namespace crow
         crow_packet *block = nullptr;
         bool fastsend = CROW_FASTSEND_DEFAULT;
 
-      public:
+    public:
         udpgate() {}
         udpgate(uint16_t port) { open(port); }
 

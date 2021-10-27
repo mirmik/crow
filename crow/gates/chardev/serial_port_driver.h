@@ -10,7 +10,7 @@ namespace crow
     {
         nos::serial_port port;
 
-      public:
+    public:
         int open(const char *path, uint32_t baud, char parity, uint8_t databits,
                  uint8_t stopbits)
         {

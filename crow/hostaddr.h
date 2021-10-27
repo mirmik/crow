@@ -15,7 +15,7 @@ namespace crow
     {
         std::vector<uint8_t> _addr;
 
-      public:
+    public:
         hostaddr() = default;
 
         const uint8_t *data() const { return _addr.data(); }

@@ -6,7 +6,7 @@
 DLIST_HEAD(crow::gateway_list);
 DLIST_HEAD(crow_gateway_list);
 
-int crow_gateway_bind(struct crow_gateway * gate, int id)
+int crow_gateway_bind(struct crow_gateway *gate, int id)
 {
     system_lock();
     if (crow_get_gateway(id))
@@ -19,9 +19,9 @@ int crow_gateway_bind(struct crow_gateway * gate, int id)
     return 0;
 }
 
-struct crow_gateway * crow_get_gateway(int no)
+struct crow_gateway *crow_get_gateway(int no)
 {
-    crow_gateway * g;
+    crow_gateway *g;
     dlist_for_each_entry(g, &crow_gateway_list, lnk)
     {
         if (g->id == no)
@@ -49,7 +49,7 @@ int crow::gateway::bind(int id)
 
 crow::gateway *crow::get_gateway(int no)
 {
-    crow::gateway * g;
+    crow::gateway *g;
     dlist_for_each_entry(g, &crow::gateway_list, lnk)
     {
         if (g->id == no)

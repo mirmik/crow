@@ -9,7 +9,7 @@ namespace crow
 {
     class protocol
     {
-      public:
+    public:
         struct dlist_head lnk = DLIST_HEAD_INIT(lnk);
         uint8_t id;
 

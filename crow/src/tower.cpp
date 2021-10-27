@@ -60,16 +60,12 @@ static void __crow_utilize(crow_packet *pack)
 
     if (__live_diagnostic_enabled)
     {
-        //nos::println("alive packages total:", crow_allocated_count);
+        // nos::println("alive packages total:", crow_allocated_count);
         // TODO : crow print function
     }
 }
 
-void crow::utilize(crow_packet *pack)
-{
-    __crow_utilize(pack);
-}
-
+void crow::utilize(crow_packet *pack) { __crow_utilize(pack); }
 
 /*static crow::gateway *crow_find_target_gateway(crow_packet *pack)
 {
@@ -119,8 +115,9 @@ static void confirmed_utilize_from_outers(crow_packet *pack)
     dlist_for_each_entry(it, &crow_outters, lnk)
     {
         if (it->header.seqid == pack->header.seqid &&
-                pack->header.alen == it->header.alen &&
-                !memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack), pack->header.alen))
+            pack->header.alen == it->header.alen &&
+            !memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack),
+                    pack->header.alen))
         {
             it->u.f.confirmed = 1;
             crow_tower_release(it);
@@ -135,8 +132,9 @@ static void qos_release_from_incoming(crow_packet *pack)
     dlist_for_each_entry(it, &crow_incoming, lnk)
     {
         if (it->header.seqid == pack->header.seqid &&
-                pack->header.alen == it->header.alen &&
-                !memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack), pack->header.alen))
+            pack->header.alen == it->header.alen &&
+            !memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack),
+                    pack->header.alen))
         {
             crow_tower_release(it);
             return;
@@ -237,7 +235,8 @@ static void crow_send_ack(crow_packet *pack)
     ack->header.qos = CROW_WITHOUT_ACK;
     ack->header.ackquant = pack->header.ackquant;
     ack->header.seqid = pack->header.seqid;
-    memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack), pack->header.alen);
+    memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack),
+           pack->header.alen);
     ack->u.f.released_by_world = true;
     crow::travel(ack);
 }
@@ -254,7 +253,8 @@ static void crow_send_ack2(crow_packet *pack)
     ack->header.qos = CROW_WITHOUT_ACK;
     ack->header.ackquant = pack->header.ackquant;
     ack->header.seqid = pack->header.seqid;
-    memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack), pack->header.alen);
+    memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack),
+           pack->header.alen);
     crow::travel(ack);
 }
 
@@ -271,14 +271,14 @@ static void crow_revert_address(crow_packet *pack)
     }
 }
 
-static void crow_tower_send_to_gate_phase(struct crow_packet * pack)
+static void crow_tower_send_to_gate_phase(struct crow_packet *pack)
 {
     uint8_t gidx = *crow_packet_stageptr(pack);
     crow::gateway *gate = crow::get_gateway(gidx);
 
     if (gate == NULL)
     {
-        //second version compatible
+        // second version compatible
         struct crow_gateway *gateway = crow_get_gateway(gidx);
 
         if (gateway)
@@ -334,21 +334,21 @@ static void crow_tower_incoming_ack_phase(crow_packet *pack)
 
     switch (pack->header.u.f.type)
     {
-        case G1_ACK_TYPE:
-            confirmed_utilize_from_outers(pack);
-            break;
+    case G1_ACK_TYPE:
+        confirmed_utilize_from_outers(pack);
+        break;
 
-        case G1_ACK21_TYPE:
-            confirmed_utilize_from_outers(pack);
-            crow_send_ack2(pack);
-            break;
+    case G1_ACK21_TYPE:
+        confirmed_utilize_from_outers(pack);
+        crow_send_ack2(pack);
+        break;
 
-        case G1_ACK22_TYPE:
-            qos_release_from_incoming(pack);
-            break;
+    case G1_ACK22_TYPE:
+        qos_release_from_incoming(pack);
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     system_lock();
@@ -382,7 +382,7 @@ static void crow_do_travel(crow_packet *pack)
             //Для пакетов с подтверждение посылаем ack первого или второго
             //типов.
             if (pack->header.qos == CROW_TARGET_ACK ||
-                    pack->header.qos == CROW_BINARY_ACK)
+                pack->header.qos == CROW_BINARY_ACK)
                 crow_send_ack(pack);
 
             if (pack->header.qos == CROW_BINARY_ACK)
@@ -393,9 +393,10 @@ static void crow_do_travel(crow_packet *pack)
                 dlist_for_each_entry(inc, &crow_incoming, lnk)
                 {
                     if (inc->header.seqid == pack->header.seqid &&
-                            inc->header.alen == pack->header.alen &&
-                            memcmp(crow_packet_addrptr(inc), crow_packet_addrptr(pack),
-                                   inc->header.alen) == 0)
+                        inc->header.alen == pack->header.alen &&
+                        memcmp(crow_packet_addrptr(inc),
+                               crow_packet_addrptr(pack),
+                               inc->header.alen) == 0)
                     {
                         // Пакет уже фигурирует как принятый, поэтому
                         // отбрасываем его.
@@ -418,9 +419,9 @@ static void crow_do_travel(crow_packet *pack)
         if (pack->ingate && pack->header.qos != 2)
         {
             // Если пакет отправлен из данного нода, или не требуется
-            // подтверждения второго уровня, обслуживание со стороны башни не требуется.
-            // Вносим соответствующую пометку, что по crow_release пакет мог быть
-            // удалён.
+            // подтверждения второго уровня, обслуживание со стороны башни не
+            // требуется. Вносим соответствующую пометку, что по crow_release
+            // пакет мог быть удалён.
             crow_tower_release(pack);
         }
 
@@ -439,10 +440,11 @@ static void crow_do_travel(crow_packet *pack)
             {
                 warned = 1;
                 crow::warn(
-                    "Crow get retransling request but retransling is not allowed.\n"
-                    "Set crow::retransling_allowed option for enable retransling\n"
-                    "Or use --retransler option if utility allowed it.\n"
-                );
+                    "Crow get retransling request but retransling is not "
+                    "allowed.\n"
+                    "Set crow::retransling_allowed option for enable "
+                    "retransling\n"
+                    "Or use --retransler option if utility allowed it.\n");
             }
 
             crow_travel_error(pack);
@@ -484,7 +486,6 @@ void crow::nocontrol_travel(crow_packet *pack, bool fastsend)
     dlist_add_tail(&pack->lnk, &crow_travelled);
     system_unlock();
 }
-
 
 crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
                             const igris::buffer data, uint8_t type, uint8_t qos,
@@ -776,8 +777,8 @@ static inline void crow_onestep_incoming_stage()
 
 void crow::onestep()
 {
-    crow::gateway * gate;
-    dlist_for_each_entry (gate, &crow::gateway_list, lnk)
+    crow::gateway *gate;
+    dlist_for_each_entry(gate, &crow::gateway_list, lnk)
     {
         gate->nblock_onestep();
     }
@@ -824,11 +825,8 @@ bool crow::has_untravelled_now()
 
 void crow::finish()
 {
-    crow::gateway * gate;
-    dlist_for_each_entry(gate, &crow::gateway_list, lnk)
-    {
-        gate->finish();
-    }
+    crow::gateway *gate;
+    dlist_for_each_entry(gate, &crow::gateway_list, lnk) { gate->finish(); }
 }
 
 bool crow::fully_empty()

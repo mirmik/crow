@@ -9,13 +9,13 @@ namespace crow
 {
     class publisher
     {
-      private:
+    private:
         const char *theme;
         crow::hostaddr_view addr;
         uint8_t qos = 0;
         uint16_t acktime = 50;
 
-      public:
+    public:
         publisher() {}
 
         publisher(const crow::hostaddr_view &addr, const char *theme)

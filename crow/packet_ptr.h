@@ -10,10 +10,10 @@ namespace crow
 {
     class packet_ptr
     {
-      protected:
+    protected:
         crow_packet *pack;
 
-      public:
+    public:
         packet_ptr(crow_packet *pack_) : pack(pack_)
         {
             if (pack == nullptr)

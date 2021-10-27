@@ -18,9 +18,8 @@ void crow::rpc_node::incoming_packet(crow_packet *pack)
     reader.load_set_buffer(function_name);
 
     data = igris::buffer{
-        (char*)reader.pointer(), 
-        (size_t)((char *)reader.end() - (char *)reader.pointer())
-    };
+        (char *)reader.pointer(),
+        (size_t)((char *)reader.end() - (char *)reader.pointer())};
 
     remote_function_basic *procedure =
         rfuncmap[std::string(function_name.data(), function_name.size())];
@@ -28,16 +27,14 @@ void crow::rpc_node::incoming_packet(crow_packet *pack)
     {
         status = CROW_RPC_ERROR_FUNCTION_NOT_FOUNDED;
 
-        igris::buffer vdata[] =
-        {
-            {(char*)&status, 1},
+        igris::buffer vdata[] = {
+            {(char *)&status, 1},
         };
 
-        crow::node_send_v(nsh->rid, nsh->sid, 
-               {
-                   crow_packet_addrptr(pack),
-                   crow_packet_addrsize(pack)
-               }, vdata, 1, 0, 10);
+        crow::node_send_v(
+            nsh->rid, nsh->sid,
+            {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, vdata, 1,
+            0, 10);
 
         crow::release(pack);
         return;
@@ -47,19 +44,15 @@ void crow::rpc_node::incoming_packet(crow_packet *pack)
     {
         size_t outsize = procedure->outsize();
         void *outbuf = alloca(outsize);
-        outdata = igris::buffer{(char*)outbuf, outsize};
+        outdata = igris::buffer{(char *)outbuf, outsize};
         status = procedure->invoke(data, outdata);
 
-        igris::buffer vdata[] =
-        {
-            {(char*)&status, 1},
-            outdata
-        };
+        igris::buffer vdata[] = {{(char *)&status, 1}, outdata};
 
-        crow::node_send_v(nsh->rid, nsh->sid, {
-                   crow_packet_addrptr(pack),
-                   crow_packet_addrsize(pack)
-               }, vdata, 2, 0, 10);
+        crow::node_send_v(
+            nsh->rid, nsh->sid,
+            {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, vdata, 2,
+            0, 10);
     }
 
     else if (format == CROW_RPC_TEXT_FORMAT)
@@ -73,25 +66,23 @@ void crow::rpc_node::incoming_packet(crow_packet *pack)
         writer.dump(status);
         igris::serialize(writer, outdata);
 
-        crow::node_send(nsh->rid, nsh->sid, {
-                   crow_packet_addrptr(pack),
-                   crow_packet_addrsize(pack)
-               }, senddata, 0, 0);
+        crow::node_send(nsh->rid, nsh->sid,
+                        {crow_packet_addrptr(pack), crow_packet_addrsize(pack)},
+                        senddata, 0, 0);
     }
 
     else
     {
         status = CROW_RPC_ERROR_UNRESOLVED_FORMAT;
 
-        igris::buffer vdata[] =
-        {
-            {(char*)&status, 1},
+        igris::buffer vdata[] = {
+            {(char *)&status, 1},
         };
 
-        crow::node_send_v(nsh->rid, nsh->sid, {
-                   crow_packet_addrptr(pack),
-                   crow_packet_addrsize(pack)
-               }, vdata, 1, 0, 10);
+        crow::node_send_v(
+            nsh->rid, nsh->sid,
+            {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, vdata, 1,
+            0, 10);
     }
 
     crow::release(pack);

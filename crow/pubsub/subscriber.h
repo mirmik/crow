@@ -9,10 +9,10 @@ namespace crow
 {
     class subscriber
     {
-      public:
+    public:
         dlist_head lnk;
 
-      public:
+    public:
         crow::hostaddr_view addr;
         const char *theme;
         uint8_t qos;
@@ -22,7 +22,7 @@ namespace crow
 
         igris::delegate<void, crow::pubsub_packet_ptr> dlg;
 
-      public:
+    public:
         subscriber() = default;
         subscriber(igris::delegate<void, crow::pubsub_packet_ptr> dlg)
             : dlg(dlg)

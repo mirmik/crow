@@ -24,11 +24,11 @@ namespace crowker_implementation
 
     class client
     {
-      public:
+    public:
         crow::crowker *context;
         std::unordered_map<theme *, themenote> thms;
 
-      public:
+    public:
         // bool is_disconnected();
         virtual ~client();
         virtual void publish(const std::string &theme, const std::string &data,

@@ -11,14 +11,14 @@ namespace crow
         void (*_dlg)(void *, int, crow_packet *);
         void *_arg;
 
-      public:
+    public:
         oneshoot_async_requester(void (*dlg)(void *, int, crow_packet *),
                                  void *arg)
             : _dlg(dlg), _arg(arg)
         {
         }
 
-      protected:
+    protected:
         void incoming_packet(crow_packet *pack) override
         {
             dprln("ASYNC_REQUESTER_INCOMING");

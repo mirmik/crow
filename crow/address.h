@@ -3,9 +3,9 @@
 #ifndef CROW_ADDRESS_H
 #define CROW_ADDRESS_H
 
+#include <igris/compiler.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <sys/cdefs.h>
 
 #include <crow/hexer.h>
 #include <crow/hostaddr.h>

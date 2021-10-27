@@ -21,13 +21,13 @@ namespace crow
 {
     class crowker
     {
-      public:
+    public:
         // std::set<std::shared_ptr<client>> clients;
         std::map<std::string, theme> themes;
         bool brocker_info = false;
         bool log_publish = false;
 
-      public:
+    public:
         void set_info_mode(bool en) { brocker_info = en; }
 
         theme *get_theme(const std::string &name);
@@ -65,7 +65,7 @@ namespace crow
             crowker_implementation::tcp_client::allsubs.erase(addr);
         }
 
-      private:
+    private:
         crowker() = default;
     };
 } // namespace crow

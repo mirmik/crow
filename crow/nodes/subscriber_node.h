@@ -13,7 +13,7 @@ namespace crow
         int rackquant = 50;
         int keepalive = 30;
 
-      public:
+    public:
         abstract_subscriber_node() = default;
         void set_brocker_address(crow::hostaddr_view crowker_addr,
                                  int crowker_node);
@@ -31,11 +31,11 @@ namespace crow
     {
         igris::delegate<void, igris::buffer> incoming_handler;
 
-      public:
+    public:
         subscriber_node() = default;
         subscriber_node(igris::delegate<void, igris::buffer> incoming);
 
-      private:
+    private:
         void incoming_packet(crow_packet *) override;
     };
 }

@@ -19,7 +19,7 @@ namespace crow
     class hostaddr;
     class hostaddr_view
     {
-      public:
+    public:
         const uint8_t *addr;
         size_t alen;
 

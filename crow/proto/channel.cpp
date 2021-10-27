@@ -14,7 +14,8 @@ void crow::channel::incoming_packet(crow_packet *pack)
     {
     case crow::Frame::HANDSHAKE_REQUEST:
         // Кто-то пытается установить с нами связь.
-        if (u.f.naive_listener || u.f._state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
+        if (u.f.naive_listener ||
+            u.f._state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
         {
             crow::subheader_handshake *sh_handshake =
                 crow::get_subheader_handshake(pack);
@@ -116,12 +117,9 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len,
     sh_handshake.qos = this->qos = qos;
     sh_handshake.ackquant = this->ackquant = ackquant;
 
-    igris::buffer vec[] =
-    {
-        {(char*)&sh_node, sizeof(sh_node)},
-        {(char*)&sh_channel, sizeof(sh_channel)},
-        {(char*)&sh_handshake, sizeof(sh_handshake)}
-    };
+    igris::buffer vec[] = {{(char *)&sh_node, sizeof(sh_node)},
+                           {(char *)&sh_channel, sizeof(sh_channel)},
+                           {(char *)&sh_handshake, sizeof(sh_handshake)}};
 
     u.f._state = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER;
 
@@ -147,12 +145,9 @@ void crow::channel::send_handshake_answer()
     sh_handshake.qos = this->qos;
     sh_handshake.ackquant = this->ackquant;
 
-    igris::buffer vec[] =
-    {
-        {(char*)&sh_node, sizeof(sh_node)},
-        {(char*)&sh_channel, sizeof(sh_channel)},
-        {(char*)&sh_handshake, sizeof(sh_handshake)}
-    };
+    igris::buffer vec[] = {{(char *)&sh_node, sizeof(sh_node)},
+                           {(char *)&sh_channel, sizeof(sh_channel)},
+                           {(char *)&sh_handshake, sizeof(sh_handshake)}};
 
     //_state = crow::State::CONNECTED;
     crow::send_v({raddr_ptr, raddr_len}, vec,
@@ -177,11 +172,10 @@ int crow::channel::send(const char *data, size_t size)
     sh_channel.frame_id = this->fid++;
     sh_channel.ftype = crow::Frame::DATA;
 
-    igris::buffer vec[] =
-    {
-        {(char*)&sh_node, sizeof(sh_node)},
-        {(char*)&sh_channel, sizeof(sh_channel)},
-        {(char*)data, size},
+    igris::buffer vec[] = {
+        {(char *)&sh_node, sizeof(sh_node)},
+        {(char *)&sh_channel, sizeof(sh_channel)},
+        {(char *)data, size},
     };
 
     crow::send_v({this->raddr_ptr, this->raddr_len}, vec,
@@ -193,8 +187,9 @@ int crow::channel::send(const char *data, size_t size)
 
 igris::buffer crow::channel::getdata(crow_packet *pack)
 {
-    return igris::buffer(crow_packet_dataptr(pack) + sizeof(crow::node_subheader) +
-                            sizeof(crow::subheader_channel),
-                            crow_packet_datasize(pack) - sizeof(crow::node_subheader) -
-                            sizeof(crow::subheader_channel));
+    return igris::buffer(
+        crow_packet_dataptr(pack) + sizeof(crow::node_subheader) +
+            sizeof(crow::subheader_channel),
+        crow_packet_datasize(pack) - sizeof(crow::node_subheader) -
+            sizeof(crow::subheader_channel));
 }

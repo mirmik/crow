@@ -15,13 +15,13 @@ namespace crowker_implementation
 
     class theme
     {
-      public:
+    public:
         std::string name;
         std::set<client *> subs;
         int64_t timestamp_publish;
         int64_t timestamp_activity;
 
-      public:
+    public:
         size_t count_clients() { return subs.size(); }
 
         void link_client(client *sub) { subs.insert(sub); }
