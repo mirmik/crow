@@ -1,4 +1,3 @@
 #include <crow/warn.h>
 
-void crow::warn(igris::buffer msg)
-{}
+void crow::warn(igris::buffer msg) {}

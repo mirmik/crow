@@ -21,30 +21,24 @@ crow::packet_ptr crow::node_send(uint16_t sid, uint16_t rid,
     sh.rid = rid;
     sh.u.f.type = CROW_NODEPACK_COMMON;
 
-    const igris::buffer iov[2] =
-    {
-        {(char*)&sh, sizeof(sh)},
-        {(char*)data.data(), data.size()}
-    };
+    const igris::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
+                                  {(char *)data.data(), data.size()}};
 
     return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
 }
 
 crow::packet_ptr crow::node_send_special(uint16_t sid, uint16_t rid,
-        const crow::hostaddr_view &addr,
-        uint8_t type, const igris::buffer data,
-        uint8_t qos, uint16_t ackquant)
+                                         const crow::hostaddr_view &addr,
+                                         uint8_t type, const igris::buffer data,
+                                         uint8_t qos, uint16_t ackquant)
 {
     crow::node_subheader sh;
     sh.sid = sid;
     sh.rid = rid;
     sh.u.f.type = type;
 
-    const igris::buffer iov[2] =
-    {
-        {(char*)&sh, sizeof(sh)},
-        {(char*)data.data(), data.size()}
-    };
+    const igris::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
+                                  {(char *)data.data(), data.size()}};
 
     return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
 }
@@ -59,16 +53,14 @@ crow::packet_ptr crow::node_send_v(uint16_t sid, uint16_t rid,
     sh.rid = rid;
     sh.u.f.type = CROW_NODEPACK_COMMON;
 
-    const igris::buffer iov[1] =
-    {
-        {(char*)&sh, sizeof(sh)}
-    };
+    const igris::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
 
     return crow::send_vv(addr, iov, 1, vec, veclen, CROW_NODE_PROTOCOL, qos,
                          ackquant);
 }
 
-void crow::node_protocol_cls::send_node_error(struct crow_packet *pack, int errcode)
+void crow::node_protocol_cls::send_node_error(struct crow_packet *pack,
+                                              int errcode)
 {
     crow::node_subheader sh;
 
@@ -76,27 +68,20 @@ void crow::node_protocol_cls::send_node_error(struct crow_packet *pack, int errc
     sh.rid = crow::node_protocol.sid(pack);
     sh.u.f.type = CROW_NODEPACK_ERROR;
 
-    const igris::buffer iov[2] =
-    {
-        {(char*)&sh, sizeof(sh)},
-        {(char*)&errcode, sizeof(errcode)}
-    };
+    const igris::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
+                                  {(char *)&errcode, sizeof(errcode)}};
 
-    crow::send_v(
-    {
-        crow_packet_addrptr(pack),
-        crow_packet_addrsize(pack)
-    }
-    , iov, 2, CROW_NODE_PROTOCOL, 0, pack->header.ackquant);
+    crow::send_v({crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, iov,
+                 2, CROW_NODE_PROTOCOL, 0, pack->header.ackquant);
 }
 
 void crow::node_protocol_cls::incoming(crow_packet *pack)
 {
-    auto& sh = pack->subheader<node_subheader>();
+    auto &sh = pack->subheader<node_subheader>();
     crow::node *srv = nullptr;
 
-    crow::node * srvs;
-    dlist_for_each_entry (srvs, &crow::nodes_list, lnk)
+    crow::node *srvs;
+    dlist_for_each_entry(srvs, &crow::nodes_list, lnk)
     {
         if (srvs->id == sh.rid)
         {
@@ -124,24 +109,25 @@ void crow::node_protocol_cls::incoming(crow_packet *pack)
 
     switch (sh.u.f.type)
     {
-        case CROW_NODEPACK_COMMON:
-            srv->incoming_packet(pack);
-            break;
+    case CROW_NODEPACK_COMMON:
+        srv->incoming_packet(pack);
+        break;
 
-        case CROW_NODEPACK_ERROR:
-            srv->notify_one(get_error_code(pack));
-            crow::release(pack);
-            break;
+    case CROW_NODEPACK_ERROR:
+        srv->notify_one(get_error_code(pack));
+        crow::release(pack);
+        break;
     }
     return;
 }
 
 void crow::node_protocol_cls::undelivered(crow_packet *pack)
 {
-    crow::node_subheader *sh = (crow::node_subheader *)crow_packet_dataptr(pack);
+    crow::node_subheader *sh =
+        (crow::node_subheader *)crow_packet_dataptr(pack);
 
-    crow::node * srvs;
-    dlist_for_each_entry ( srvs, &crow::nodes_list, lnk)
+    crow::node *srvs;
+    dlist_for_each_entry(srvs, &crow::nodes_list, lnk)
     {
         if (srvs->id == sh->sid)
         {
@@ -167,8 +153,8 @@ crow::node *crow::find_node(int id)
 
     // TODO: переделать на хештаблицу
 
-    crow::node * node;
-    dlist_for_each_entry (node, &nodes_list, lnk)
+    crow::node *node;
+    dlist_for_each_entry(node, &nodes_list, lnk)
     {
         protector++;
 
@@ -192,8 +178,7 @@ void crow::bind_node_dynamic(crow::node *srv)
         counter++;
         if (counter == 0)
             counter = (1 << 15);
-    }
-    while (crow::find_node(counter) != nullptr);
+    } while (crow::find_node(counter) != nullptr);
 
     __link_node(srv, counter);
     system_unlock();

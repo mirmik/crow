@@ -14,7 +14,7 @@ namespace crowker_implementation
 
     class tcp_client : public client
     {
-      public:
+    public:
         nos::inet::tcp_socket *sock;
 
         static std::map<nos::inet::netaddr, tcp_client> allsubs;

@@ -111,8 +111,8 @@ void crow::serial_gstuff_v1::nblock_onestep()
     if (rpack == NULL)
     {
         rpack = (struct crow_packet *)malloc(GSTUFF_MAXPACK_SIZE +
-                                              sizeof(struct crow_packet) -
-                                              sizeof(struct crow_header));
+                                             sizeof(struct crow_packet) -
+                                             sizeof(struct crow_header));
         gstuff_autorecv_setbuf_v1(&recver, (char *)&rpack->header,
                                   GSTUFF_MAXPACK_SIZE);
     }

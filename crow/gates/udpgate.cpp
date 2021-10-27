@@ -40,10 +40,9 @@ void crow::udpgate::nblock_onestep()
 
     crow_packet_initialization(block, this);
 
-    igris::buffer vec[3] = {
-        {(char*)&id, 1}, 
-        {(char*)&sender.sin_addr.s_addr, 4}, 
-        {(char*)&sender.sin_port, 2}};
+    igris::buffer vec[3] = {{(char *)&id, 1},
+                            {(char *)&sender.sin_addr.s_addr, 4},
+                            {(char *)&sender.sin_port, 2}};
 
     crow_packet_revert(block, vec, 3);
 
@@ -112,7 +111,7 @@ void crow::udpgate::close()
 
 void crow::udpgate::send(crow_packet *pack)
 {
-    uint32_t *addr = (uint32_t *)(crow_packet_stageptr(pack)  + 1);
+    uint32_t *addr = (uint32_t *)(crow_packet_stageptr(pack) + 1);
     uint16_t *port = (uint16_t *)(crow_packet_stageptr(pack) + 5);
 
     struct sockaddr_in ipaddr;
@@ -146,7 +145,8 @@ int crow::create_udpgate(uint8_t id, uint16_t port)
     return 0;
 }
 
-std::shared_ptr<crow::udpgate> crow::create_udpgate_safe(uint8_t id, uint16_t port)
+std::shared_ptr<crow::udpgate> crow::create_udpgate_safe(uint8_t id,
+                                                         uint16_t port)
 {
     int sts;
 

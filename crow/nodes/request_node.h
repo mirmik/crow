@@ -20,7 +20,7 @@ namespace crow
         int rackquant = 50;
         int keepalive = 60;
 
-      public:
+    public:
         void request(crow::hostaddr_view crowker_addr, int crowker_node,
                      igris::buffer theme, igris::buffer reptheme,
                      igris::buffer data, uint8_t qos, uint16_t ackquant,
@@ -29,7 +29,7 @@ namespace crow
         void request(igris::buffer data);
         crow::packet_ptr sync_request(igris::buffer data);
 
-      private:
+    private:
         void incoming_packet(crow_packet *pack) override;
     };
 }

@@ -6,14 +6,14 @@
 #include <map>
 #include <string>
 
-#include "options.h"
 #include "client.h"
+#include "options.h"
 
 namespace crowker_implementation
 {
     class crow_client : public client
     {
-      public:
+    public:
         std::string addr;
 
         static std::map<std::string, crow_client> allsubs;

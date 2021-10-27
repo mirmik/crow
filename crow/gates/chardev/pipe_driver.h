@@ -9,7 +9,7 @@ namespace crow
     {
         int fd;
 
-      public:
+    public:
         chardev_pipe_driver() {}
         chardev_pipe_driver(int fd) { bind_fd(fd); }
 

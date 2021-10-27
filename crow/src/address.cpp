@@ -41,7 +41,6 @@ namespace crow
     }
 } // namespace crow
 
-
 crow::hostaddr crow::crowker_address()
 {
     if (getenv("CROWKER") == NULL)

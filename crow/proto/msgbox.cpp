@@ -1,14 +1,11 @@
 #include <crow/proto/msgbox.h>
 
-crow::msgbox::msgbox() 
-{
-    sem_init(&message_lock, 0, 1);
-}
+crow::msgbox::msgbox() { sem_init(&message_lock, 0, 1); }
 
 crow::node_packet_ptr crow::msgbox::query(uint16_t rid,
-        const crow::hostaddr_view &addr,
-        const igris::buffer data, uint8_t qos,
-        uint16_t ackquant)
+                                          const crow::hostaddr_view &addr,
+                                          const igris::buffer data, uint8_t qos,
+                                          uint16_t ackquant)
 {
     assert(dlist_empty(&messages));
     auto ptr = send(rid, addr, data, qos, ackquant);
@@ -44,14 +41,9 @@ crow::packet_ptr crow::msgbox::reply(crow::node_packet_ptr msg,
                                      uint16_t ackquant)
 {
     return send(
-               msg.rid(),
-               {
-                   crow_packet_addrptr(msg.get()),
-                   crow_packet_addrsize(msg.get())
-               },
-               data,
-               qos,
-               ackquant);
+        msg.rid(),
+        {crow_packet_addrptr(msg.get()), crow_packet_addrsize(msg.get())}, data,
+        qos, ackquant);
 }
 
 void crow::msgbox::incoming_packet(crow_packet *pack)

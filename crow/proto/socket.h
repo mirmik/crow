@@ -7,7 +7,7 @@ namespace crow
 {
     class socket_base : public node
     {
-      public:
+    public:
         dlist_head q = DLIST_HEAD_INIT(q);
 
         void incoming_packet(crow_packet *pack) { dlist_add(&pack->ulnk, &q); }
@@ -15,7 +15,7 @@ namespace crow
 
     class socket : public socket_base
     {
-      public:
+    public:
         socket(int nodeno) { this->bind(nodeno); }
 
         void undelivered_packet(crow_packet *pack) { crow::release(pack); }

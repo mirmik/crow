@@ -8,41 +8,41 @@
 
 void incoming_crowker_handler(struct crow_packet *pack)
 {
-    crow::subheader_pubsub & shps = pack->subheader<crow::subheader_pubsub>();
+    crow::subheader_pubsub &shps = pack->subheader<crow::subheader_pubsub>();
 
     switch (shps.type)
     {
-        case PUBLISH:
-        {
-            auto& shps_d = pack->subheader<crow::subheader_pubsub_data>();
-            auto theme = shps_d.theme().to_string();
-            auto data = shps_d.data().to_string();
-            crow::crowker::instance()->publish(theme, data);
-        }
-        break;
+    case PUBLISH:
+    {
+        auto &shps_d = pack->subheader<crow::subheader_pubsub_data>();
+        auto theme = shps_d.theme().to_string();
+        auto data = shps_d.data().to_string();
+        crow::crowker::instance()->publish(theme, data);
+    }
+    break;
 
-        case SUBSCRIBE:
-        {
-            auto& shps_c = pack->subheader<crow::subheader_pubsub_control>();
-            std::string theme = shps_c.theme().to_string();
+    case SUBSCRIBE:
+    {
+        auto &shps_c = pack->subheader<crow::subheader_pubsub_control>();
+        std::string theme = shps_c.theme().to_string();
 
-            crow::crowker::instance()->crow_subscribe(
-            {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, theme, shps_c.qos,
-            shps_c.ackquant);
-        }
-        break;
+        crow::crowker::instance()->crow_subscribe(
+            {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, theme,
+            shps_c.qos, shps_c.ackquant);
+    }
+    break;
 
-        case SERVICE_ANSWER:
-        {
-            BUG();
-        }
-        break;
+    case SERVICE_ANSWER:
+    {
+        BUG();
+    }
+    break;
 
-        default:
-        {
-            printf("unresolved pubsub frame type %d", (uint8_t)shps.type);
-        }
-        break;
+    default:
+    {
+        printf("unresolved pubsub frame type %d", (uint8_t)shps.type);
+    }
+    break;
     }
 
     crow::release(pack);
@@ -50,7 +50,7 @@ void incoming_crowker_handler(struct crow_packet *pack)
 
 void undelivered_crowker_handler(struct crow_packet *pack)
 {
-    auto& shps = pack->subheader<crow::subheader_pubsub>();
+    auto &shps = pack->subheader<crow::subheader_pubsub>();
 
     if (shps.type == PUBLISH)
     {

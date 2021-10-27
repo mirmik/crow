@@ -20,11 +20,11 @@ void crow_packet_initialization(struct crow_packet *pack, crow::gateway *ingate)
     pack->_ackcount = 5;
     pack->u.flags = 0;
     pack->refs = 0;
-    *((char*)(&pack->header) + pack->header.flen) = 0;
+    *((char *)(&pack->header) + pack->header.flen) = 0;
 }
 
-struct crow_packet *
-crow_create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize)
+struct crow_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
+                                       size_t datasize)
 {
     crow_packet *pack = crow_allocate_packet(addrsize + datasize);
 
@@ -43,13 +43,14 @@ crow_create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize)
     return pack;
 }
 
-void crow_packet_revert_gate(struct crow_packet * pack, uint8_t gateindex)
+void crow_packet_revert_gate(struct crow_packet *pack, uint8_t gateindex)
 {
     *crow_packet_stageptr(pack) = gateindex;
     ++pack->header.stg;
 }
 
-void crow_packet_revert(struct crow_packet * pack, igris::buffer *vec, size_t veclen)
+void crow_packet_revert(struct crow_packet *pack, igris::buffer *vec,
+                        size_t veclen)
 {
     igris::buffer *it = vec + veclen - 1;
     igris::buffer *eit = vec - 1;
@@ -70,59 +71,43 @@ void crow_packet_revert(struct crow_packet * pack, igris::buffer *vec, size_t ve
 
 bool crow::has_allocated() { return !!crow_allocated_count; }
 
-
-
-uint8_t * crow_packet_addrptr(struct crow_packet * pack)
+uint8_t *crow_packet_addrptr(struct crow_packet *pack)
 {
     return (uint8_t *)(&pack->header + 1);
 }
 
-uint8_t crow_packet_addrsize(struct crow_packet * pack)
+uint8_t crow_packet_addrsize(struct crow_packet *pack)
 {
     return pack->header.alen;
 }
 
-char * crow_packet_dataptr(struct crow_packet * pack)
+char *crow_packet_dataptr(struct crow_packet *pack)
 {
     return (char *)(crow_packet_addrptr(pack) + crow_packet_addrsize(pack));
 }
 
-uint16_t crow_packet_datasize(struct crow_packet * pack)
+uint16_t crow_packet_datasize(struct crow_packet *pack)
 {
-    return (uint16_t)(pack->header.flen - pack->header.alen - sizeof(struct crow_header));
+    return (uint16_t)(pack->header.flen - pack->header.alen -
+                      sizeof(struct crow_header));
 }
 
-void crow::packet::revert_gate(uint8_t gateindex) 
+void crow::packet::revert_gate(uint8_t gateindex)
 {
     crow_packet_revert_gate(this, gateindex);
 }
 
-void crow::packet::revert(igris::buffer *vec, size_t veclen) 
+void crow::packet::revert(igris::buffer *vec, size_t veclen)
 {
     crow_packet_revert(this, vec, veclen);
 }
 
-uint8_t * crow::packet::addrptr() 
-{
-    return crow_packet_addrptr(this);
-}
+uint8_t *crow::packet::addrptr() { return crow_packet_addrptr(this); }
 
-uint8_t  crow::packet::addrsize() 
-{
-    return crow_packet_addrsize(this);
-}
+uint8_t crow::packet::addrsize() { return crow_packet_addrsize(this); }
 
-char * crow::packet::dataptr() 
-{
-    return crow_packet_dataptr(this);
-}
+char *crow::packet::dataptr() { return crow_packet_dataptr(this); }
 
-uint16_t crow::packet::datasize() 
-{
-    return crow_packet_datasize(this);
-}
+uint16_t crow::packet::datasize() { return crow_packet_datasize(this); }
 
-char * crow::packet::endptr() 
-{
-    return (char*)&header + header.flen;
-}
+char *crow::packet::endptr() { return (char *)&header + header.flen; }

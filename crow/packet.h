@@ -79,7 +79,7 @@ struct crow_packet
     } u;
     struct crow_header header;
 
-  public:
+public:
     void revert_gate(uint8_t gateindex);
     void revert(igris::buffer *vec, size_t veclen);
 

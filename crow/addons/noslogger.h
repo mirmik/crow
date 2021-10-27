@@ -10,7 +10,7 @@ namespace crow
 {
     class publish_logger : public nos::log::logger
     {
-      public:
+    public:
         crow::hostaddr_view addr;
         const char *theme;
 

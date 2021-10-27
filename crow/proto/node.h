@@ -92,7 +92,7 @@ namespace crow
 
     class node
     {
-      public:
+    public:
         struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
         struct dlist_head waitlnk =
             DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
@@ -177,10 +177,10 @@ namespace crow
 
     class node_protocol_cls : public crow::protocol
     {
-      private:
+    private:
         void send_node_error(crow_packet *pack, int errcode);
 
-      public:
+    public:
         void incoming(crow_packet *pack) override;
         void undelivered(crow_packet *pack) override;
 
@@ -205,7 +205,7 @@ namespace crow
 
     class node_packet_ptr : public packet_ptr
     {
-      public:
+    public:
         node_packet_ptr(crow_packet *pack_) : packet_ptr(pack_) {}
         node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
         node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}

@@ -1,7 +1,7 @@
 /** @file */
 
-#include <crow/hostaddr_view.h>
 #include <crow/brocker/crowker.h>
+#include <crow/hostaddr_view.h>
 
 #include <igris/util/dstring.h>
 #include <nos/fprint.h>
@@ -10,7 +10,7 @@ void crow::crowker::publish(const std::string &theme, const std::string &data)
 {
     auto *thm = get_theme(theme);
     thm->publish(data);
-    
+
     if (brocker_info || log_publish)
     {
         nos::fprintln("publish: t:{} s:{} d:{}", theme, thm->count_clients(),
@@ -73,7 +73,7 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
     }
 }
 
-void crow::crowker::subscribe(const std::string &theme, client * cl)
+void crow::crowker::subscribe(const std::string &theme, client *cl)
 {
     auto *thm = get_theme(theme);
     thm->timestamp_activity = crowker_eval_timestamp();
@@ -103,8 +103,8 @@ void crow::crowker::tcp_subscribe(const std::string &theme,
     }
 }
 
-void crow::crowker::unlink_theme_client(
-    crowker_implementation::theme *thm, crowker_implementation::client *sub)
+void crow::crowker::unlink_theme_client(crowker_implementation::theme *thm,
+                                        crowker_implementation::client *sub)
 {
     thm->unlink_client(sub);
     if (thm->count_clients() == 0)

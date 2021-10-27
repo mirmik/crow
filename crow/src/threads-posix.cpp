@@ -72,8 +72,8 @@ void crow::spin_with_select()
     crow::unselect_init();
     crow::select_collect_fds();
 
-//    sigaction(SIGKILL, NULL, &sigkill_old_action);
-//    signal(SIGKILL, signal_sigkill_handler);
+    //    sigaction(SIGKILL, NULL, &sigkill_old_action);
+    //    signal(SIGKILL, signal_sigkill_handler);
 
     sigaction(SIGINT, NULL, &sigint_old_action);
     signal(SIGINT, signal_sigint_handler);
@@ -202,9 +202,9 @@ void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
     thr.detach();
 }
 
-void crow::start_resubscribe_thread(int millis) 
+void crow::start_resubscribe_thread(int millis)
 {
-	crow::pubsub_protocol_cls::start_resubscribe_thread(millis);
+    crow::pubsub_protocol_cls::start_resubscribe_thread(millis);
 }
 
 void crow::spin_join() { _thread.join(); }

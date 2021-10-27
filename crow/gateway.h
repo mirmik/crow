@@ -52,7 +52,7 @@ namespace crow
 {
     class gateway
     {
-      public:
+    public:
         struct dlist_head lnk; ///< встроенное поле списка.
         uint8_t id;            ///< номер врат.
 

@@ -19,7 +19,7 @@ namespace crow
     {
         int answer_buffer_size = 256;
 
-      public:
+    public:
         void incoming_packet(crow_packet *pack) override;
         virtual int handle(char *, int, char *, int) = 0;
     };
@@ -28,7 +28,7 @@ namespace crow
     {
         igris::delegate<void, char *, int, char *, int> dlg;
 
-      public:
+    public:
         rshell_cli_node_delegate(
             igris::delegate<void, char *, int, char *, int> handle)
             : dlg(handle)
@@ -47,7 +47,7 @@ namespace crow
     {
         igris::rshell_executor *_executor;
 
-      public:
+    public:
         rshell_cli_node() {}
         rshell_cli_node(igris::rshell_executor *executor) : _executor(executor)
         {

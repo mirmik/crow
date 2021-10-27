@@ -21,7 +21,7 @@ void crow::pubsub_protocol_cls::incoming(crow_packet *pack)
     }
     else
     {
-        auto & shdr = pack->subheader<crow::subheader_pubsub_data>();
+        auto &shdr = pack->subheader<crow::subheader_pubsub_data>();
         igris::buffer theme = shdr.theme();
 
         crow::subscriber *sub;
@@ -61,12 +61,13 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
     subps_d.datsz = data.size();
 
     const igris::buffer iov[] = {
-        {(char*)&subps_d, sizeof(subps_d)},
-        {(char*)theme.data(), subps_d.thmsz},
+        {(char *)&subps_d, sizeof(subps_d)},
+        {(char *)theme.data(), subps_d.thmsz},
         data,
     };
 
-    return crow::send_v(addr, iov, std::size(iov), CROW_PUBSUB_PROTOCOL, qos, acktime);
+    return crow::send_v(addr, iov, std::size(iov), CROW_PUBSUB_PROTOCOL, qos,
+                        acktime);
 }
 
 crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
@@ -86,17 +87,17 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
     }
 
     const igris::buffer iov[] = {
-        {(char*)&subps_d, sizeof(subps_d)},
-        {(char*)theme.data(), subps_d.thmsz},
+        {(char *)&subps_d, sizeof(subps_d)},
+        {(char *)theme.data(), subps_d.thmsz},
     };
 
-    return crow::send_vv(addr, iov, std::size(iov), vec, vecsz, CROW_PUBSUB_PROTOCOL, qos,
-                         acktime);
+    return crow::send_vv(addr, iov, std::size(iov), vec, vecsz,
+                         CROW_PUBSUB_PROTOCOL, qos, acktime);
 }
 
-void crow::subscribe(const crow::hostaddr_view &addr,
-                     const igris::buffer theme, uint8_t qos,
-                     uint16_t acktime, uint8_t rqos, uint16_t racktime)
+void crow::subscribe(const crow::hostaddr_view &addr, const igris::buffer theme,
+                     uint8_t qos, uint16_t acktime, uint8_t rqos,
+                     uint16_t racktime)
 {
     size_t thmsz = theme.size();
     crow::subheader_pubsub_control subps_c;
@@ -107,8 +108,8 @@ void crow::subscribe(const crow::hostaddr_view &addr,
     subps_c.ackquant = racktime;
 
     const igris::buffer iov[] = {
-        {(char*)&subps_c, sizeof(subps_c)},
-        {(char*)theme.data(), theme.size()},
+        {(char *)&subps_c, sizeof(subps_c)},
+        {(char *)theme.data(), theme.size()},
     };
 
     crow::send_v(addr, iov, std::size(iov), CROW_PUBSUB_PROTOCOL, qos, acktime);

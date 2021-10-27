@@ -29,7 +29,7 @@ namespace crow
 
     class channel : public crow::node
     {
-      public:
+    public:
         using incoming_handler_t = void (*)(crow::channel *, crow_packet *);
 
         dlist_head lnk;

@@ -11,7 +11,7 @@ namespace crow
 
     class crowker_api_client : public client
     {
-      public:
+    public:
         struct options_struct
         {
             uint8_t qos;
@@ -26,7 +26,7 @@ namespace crow
 
         std::map<std::string, options_struct> options;
 
-      public:
+    public:
         void publish(const std::string &theme, const std::string &data,
                      crowker_implementation::options *opts) override;
 
@@ -37,11 +37,11 @@ namespace crow
     {
         std::map<std::pair<crow::hostaddr, int>, crowker_api_client> clients;
 
-      public:
+    public:
         crowker_pubsub_node *crowker_node;
         crow::crowker *crowker;
 
-      public:
+    public:
         void subscribe_on_theme(crow::hostaddr_view, int nid,
                                 igris::buffer theme, uint8_t rqos,
                                 uint16_t rackquant) override;

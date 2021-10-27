@@ -17,11 +17,11 @@ namespace crow
 
     class chardev_protocol
     {
-      public:
+    public:
         chardev_gateway *gate;
         chardev_driver *driver; // fast access
 
-      public:
+    public:
         virtual void send_automate_reset(crow_packet *pack) = 0;
         virtual int send_automate_getdata(char *buf, int maxlen) = 0;
 
@@ -32,7 +32,7 @@ namespace crow
 
     class chardev_driver
     {
-      public:
+    public:
         chardev_gateway *gateway;
 
         // virtual int room() = 0; // количество символов, которые устройство
@@ -50,7 +50,7 @@ namespace crow
 
     class chardev_gateway : public crow::gateway
     {
-      public:
+    public:
         chardev_driver *driver;
         chardev_protocol *protocol;
 
@@ -59,7 +59,7 @@ namespace crow
         crow_packet *insend;
         crow_packet *rpack;
 
-      public:
+    public:
         chardev_gateway(chardev_driver *driver, chardev_protocol *protocol);
 
         void dosend(struct crow_packet *pack);
@@ -71,7 +71,7 @@ namespace crow
         void newline_handler();
         void packet_sended_handler();
 
-      public: // driver callback
+    public: // driver callback
         void newdata(char c);
     };
 }
