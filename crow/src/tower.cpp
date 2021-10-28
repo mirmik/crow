@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <igris/sync/syslock.h>
+#include <igris/time/systime.h>
 
 #include <crow/gateway.h>
 #include <crow/print.h>
@@ -152,13 +153,13 @@ bool crow_time_comparator(crow_packet *a, crow_packet *b)
 
 static void add_to_incoming_list(crow_packet *pack)
 {
-    pack->last_request_time = crow::millis();
+    pack->last_request_time = millis();
     dlist_move_sorted(pack, &crow_incoming, lnk, crow_time_comparator);
 }
 
 static void add_to_outters_list(crow_packet *pack)
 {
-    pack->last_request_time = crow::millis();
+    pack->last_request_time = millis();
     dlist_move_sorted(pack, &crow_outters, lnk, crow_time_comparator);
 }
 
@@ -695,7 +696,7 @@ static inline void crow_onestep_outers_stage()
     crow_packet *pack;
     crow_packet *n;
 
-    uint16_t curtime = crow::millis();
+    uint16_t curtime = millis();
 
     system_lock();
     if (dlist_empty(&crow_outters))
@@ -736,7 +737,7 @@ static inline void crow_onestep_incoming_stage()
     crow_packet *pack;
     crow_packet *n;
 
-    uint16_t curtime = crow::millis();
+    uint16_t curtime = millis();
 
     system_lock();
     if (dlist_empty(&crow_incoming))
@@ -845,7 +846,7 @@ int64_t crow::get_minimal_timeout()
     int64_t result;
     int64_t i_finish;
     int64_t o_finish;
-    int64_t curtime = crow::millis();
+    int64_t curtime = millis();
 
     if (!dlist_empty(&crow_incoming))
     {
