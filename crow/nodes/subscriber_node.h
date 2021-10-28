@@ -17,7 +17,6 @@ namespace crow
         abstract_subscriber_node() = default;
         void set_brocker_address(crow::hostaddr_view crowker_addr,
                                  int crowker_node);
-        void set_theme(igris::buffer theme);
 
         void subscribe();
         void subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
@@ -34,6 +33,11 @@ namespace crow
     public:
         subscriber_node() = default;
         subscriber_node(igris::delegate<void, igris::buffer> incoming);
+
+        void set_handle(igris::delegate<void, igris::buffer> incoming)
+        {
+            incoming_handler = incoming;
+        }
 
     private:
         void incoming_packet(crow_packet *) override;
