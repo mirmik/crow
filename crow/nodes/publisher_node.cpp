@@ -39,3 +39,8 @@ void crow::publisher_node::publish(crow::hostaddr_view addr,
 
 	publish(data);
 }
+
+void crow::publisher_node::set_theme(igris::buffer thm) 
+{
+	this->theme = thm;
+}

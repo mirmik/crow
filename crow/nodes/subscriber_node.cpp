@@ -76,3 +76,11 @@ void crow::abstract_subscriber_node::subscribe(
 
 	subscribe();
 }
+
+void crow::abstract_subscriber_node::set_brocker_address(
+	crow::hostaddr_view crowker_addr,
+    int crowker_node) 
+{
+	this->crowker_addr = crowker_addr;
+	this->crowker_node = crowker_node;
+}
