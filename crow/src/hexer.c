@@ -7,6 +7,7 @@
 
 int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
 {
+    (void)maxsz; // < TODO
     const char *it = src;
     const char *const eit = src + srcsz;
     uint16_t sz = 0;

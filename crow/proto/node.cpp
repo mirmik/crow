@@ -147,7 +147,7 @@ void crow::__link_node(crow::node *srv, uint16_t id)
     // system_unlock();
 }
 
-crow::node *crow::find_node(int id)
+crow::node *crow::find_node(size_t id)
 {
     int protector = 0;
 

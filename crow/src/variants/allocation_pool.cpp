@@ -29,6 +29,7 @@ void crow_deallocate_packet(crow_packet *pack)
 
 crow_packet *crow_allocate_packet(size_t adlen)
 {
+    (void) adlen;
     system_lock();
     void *ret = _crow_packet_pool.get();
 

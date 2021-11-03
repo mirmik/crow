@@ -79,7 +79,7 @@ namespace crow
     };
 
     class node;
-    crow::node *find_node(int id);
+    crow::node *find_node(size_t id);
     void __link_node(node *srvs, uint16_t id);
     void bind_node_dynamic(node *srvs);
 
