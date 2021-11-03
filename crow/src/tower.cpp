@@ -440,12 +440,14 @@ static void crow_do_travel(crow_packet *pack)
             if (warned == 0)
             {
                 warned = 1;
+#ifndef MEMORY_ECONOMY
                 crow::warn(
                     "Crow get retransling request but retransling is not "
                     "allowed.\n"
                     "Set crow::retransling_allowed option for enable "
                     "retransling\n"
                     "Or use --retransler option if utility allowed it.\n");
+#endif
             }
 
             crow_travel_error(pack);

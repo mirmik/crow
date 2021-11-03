@@ -10,7 +10,9 @@ namespace crow
         igris::delegate<int, char *, int, char *, int> dlg;
         int answer_buffer_size = 256;
 
-    public:
+      public:
+        service_node() = default;
+
         service_node(igris::delegate<int, char *, int, char *, int> dlg)
             : dlg(dlg)
         {
@@ -21,9 +23,14 @@ namespace crow
             this->dlg = dlg;
         }
 
-        service_node() {}
+        void init(igris::delegate<int, char *, int, char *, int> dlg,
+                  int ansbufsize)
+        {
+            this->dlg = dlg;
+            answer_buffer_size = ansbufsize;
+        }
 
-    private:
+      private:
         void incoming_packet(crow_packet *) override;
     };
 }

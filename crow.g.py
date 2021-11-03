@@ -98,6 +98,7 @@ licant.modules.module("crow.minimal",
 		"src/tower.cpp",
 		"src/gateway.cpp",
 		"src/hexer.c",
+		"src/address.cpp",
 		"src/hostaddr_view.cpp",
 
 		"proto/node.cpp",
