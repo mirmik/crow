@@ -31,3 +31,8 @@ void crow::publisher_node::publish(crow::hostaddr_view addr, int crowker_node,
 
     publish(data);
 }
+
+void crow::publisher_node::set_theme(igris::buffer theme) 
+{
+    this->theme = theme;
+}

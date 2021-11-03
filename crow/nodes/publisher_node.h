@@ -21,6 +21,8 @@ namespace crow
                      igris::buffer theme, igris::buffer data, int qos,
                      int ackquant);
 
+        void set_theme(igris::buffer theme);
+
     private:
         void incoming_packet(crow_packet *pack) override
         {

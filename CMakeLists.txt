@@ -36,6 +36,8 @@ file(GLOB SOURCES_TEST
 	tests/*.cpp
 )
 
+set(CROW_SOURCES ${SOURCES} PARENT_SCOPE)
+
 add_library(crow SHARED ${SOURCES} ${PLATFORM_SOURCES})
 target_include_directories(crow PRIVATE .)
 
