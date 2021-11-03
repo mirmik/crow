@@ -43,6 +43,7 @@ namespace crow
         virtual int invoke_text_format(igris::buffer data,
                                        std::string &out) = 0;
         virtual size_t outsize() = 0;
+        virtual ~remote_function_basic() = default;
     };
 
     template <class Ret, class... Args>
@@ -57,6 +58,7 @@ namespace crow
         int invoke_text_format(igris::buffer data,
                                std::string &output) override;
         size_t outsize() override { return sizeof_helper<Ret>::size; }
+        ~remote_function() = default;
     };
 
     class rpc_node : public crow::node
@@ -73,6 +75,14 @@ namespace crow
         }
 
         void incoming_packet(crow_packet *pack) override;
+
+        ~rpc_node() override
+        {
+            for (auto &pair : rfuncmap)
+            {
+                delete pair.second;
+            }
+        }
     };
 
     class rpc_request_node : public crow::node

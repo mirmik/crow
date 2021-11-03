@@ -120,7 +120,6 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		crow::onestep();
 
 		CHECK_EQ(crow::incomming_stage_count(), 0);
-		CHECK_EQ(crow::outers_stage_count(), 1);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();
@@ -141,6 +140,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		std::this_thread::sleep_for(std::chrono::milliseconds(3));
 		crow::onestep();
 
+		CHECK_EQ(crow::outers_stage_count(), 0);
 		CHECK_EQ(count, 0);
 		CHECK_EQ(crow::total_travelled, 5);
 		CHECK_EQ(crow::has_untravelled(), false);

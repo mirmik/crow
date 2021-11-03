@@ -4,13 +4,16 @@
 #include <crow/gates/loopgate.h>
 #include <crow/tower.h>
 
+crow::udpgate udpgate;
+crow::loopgate loopgate;
+
 int main(int argc, char** argv)
 {
 	crow::retransling_allowed = true;
-	crow::create_loopgate(99);
-	crow::create_udpgate(12, 10099);
-	//crow::start_spin();
-	//crow::diagnostic_setup(true, true);
+	loopgate.bind(99);
+	udpgate.bind(12);
+	udpgate.open(10099);
+
 
 	doctest::Context context;
 

@@ -25,6 +25,7 @@ crow_packet *crow_allocate_packet(size_t adlen)
 
     // inc 1 for zero symbol
     crow_packet *ret = (crow_packet *)malloc(adlen + sizeof(crow_packet) + 1);
+    memset((void*)ret, 0, adlen + sizeof(crow_packet) +1);
 
     return ret;
 }

@@ -32,6 +32,7 @@ crow_packet *crow_allocate_packet(size_t adlen)
     (void) adlen;
     system_lock();
     void *ret = _crow_packet_pool.get();
+    memset(ret, 0, _crow_packet_pool.element_size());
 
     if (ret)
         crow_allocated_count++;
