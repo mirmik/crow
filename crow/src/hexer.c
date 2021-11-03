@@ -19,7 +19,7 @@ int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
         case '\r':
         case '\n':
         case '0':
-            return sz;
+            return (int)sz;
 
         case '.':
         {
