@@ -1,9 +1,11 @@
 /** @file */
 
+#include <utility>
 #include "pubsub.h"
 #include "subscriber.h"
 
 #include <crow/hexer.h>
+#include <igris/util/size.h>
 #include <igris/sync/syslock.h>
 
 crow::pubsub_protocol_cls crow::pubsub_protocol;
@@ -66,7 +68,7 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
         data,
     };
 
-    return crow::send_v(addr, iov, std::size(iov), CROW_PUBSUB_PROTOCOL, qos,
+    return crow::send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
                         acktime);
 }
 
@@ -91,7 +93,7 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
         {(char *)theme.data(), subps_d.thmsz},
     };
 
-    return crow::send_vv(addr, iov, std::size(iov), vec, vecsz,
+    return crow::send_vv(addr, iov, igris::size(iov), vec, vecsz,
                          CROW_PUBSUB_PROTOCOL, qos, acktime);
 }
 
@@ -112,7 +114,7 @@ void crow::subscribe(const crow::hostaddr_view &addr, const igris::buffer theme,
         {(char *)theme.data(), theme.size()},
     };
 
-    crow::send_v(addr, iov, std::size(iov), CROW_PUBSUB_PROTOCOL, qos, acktime);
+    crow::send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos, acktime);
 }
 
 void crow::pubsub_protocol_cls::resubscribe_all()
