@@ -2,6 +2,7 @@
 
 #include <crow/gates/serial_gstuff_v1.h>
 #include <crow/tower.h>
+#include <crow/warn.h>
 
 #include <igris/util/bug.h>
 
@@ -135,7 +136,7 @@ void crow::serial_gstuff_v1::nblock_onestep()
         switch (ret)
         {
         case GSTUFF_CRC_ERROR_V1:
-            dprln("warn: gstuff crc error");
+            crow::warn("warn: gstuff crc error");
             break;
 
         case GSTUFF_NEWPACKAGE_V1:

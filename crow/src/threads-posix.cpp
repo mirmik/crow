@@ -1,5 +1,6 @@
 #include <crow/pubsub/pubsub.h>
 #include <crow/tower.h>
+#include <crow/warn.h>
 
 #include <chrono>
 #include <thread>
@@ -104,7 +105,7 @@ void crow::spin_with_select_realtime(int abort_on_fault)
     int ret;
     if ((ret = this_thread_set_realtime_priority()))
     {
-        dprln("Error on set_realtime_priority", ret);
+        crow::warn("Error on set_realtime_priority");
 
         if (abort_on_fault)
             abort();

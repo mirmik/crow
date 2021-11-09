@@ -126,43 +126,6 @@ void crow::serial_gstuff::nblock_onestep()
                                    GSTUFF_MAXPACK_SIZE);
         }
 
-        if (debug)
-        {
-            dprhex(c);
-            dprchar('\t');
-            dprchar(c);
-            dprchar('\t');
-
-            switch (c)
-            {
-            case GSTUFF_START:
-                dpr("GSTUFF_START");
-                break;
-
-            case GSTUFF_STOP:
-                dpr("GSTUFF_STOP");
-                break;
-
-            case GSTUFF_STUB:
-                dpr("GSTUFF_STUB");
-                break;
-
-            case GSTUFF_STUB_START:
-                dpr("GSTUFF_STUB_START");
-                break;
-
-            case GSTUFF_STUB_STOP:
-                dpr("GSTUFF_STUB_STOP");
-                break;
-
-            case GSTUFF_STUB_STUB:
-                dpr("GSTUFF_STUB_STUB");
-                break;
-            }
-
-            dln();
-        }
-
         int ret = gstuff_autorecv_newchar(&recver, c);
 
         switch (ret)

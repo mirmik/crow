@@ -2,6 +2,7 @@
 #define CROW_SOCKET_H
 
 #include <crow/proto/node.h>
+#include <crow/warn.h>
 
 namespace crow
 {
@@ -32,7 +33,7 @@ namespace crow
             while (!dlist_empty(&q))
             {
                 waitevent();
-                dprln("unwait recv");
+                crow::warn("unwait recv");
             }
 
             auto it = dlist_first_entry(&q, crow_packet, ulnk);

@@ -23,7 +23,7 @@ TEST_CASE("self_driven_gstuff")
 
 		crow::self_driven_gstuff gate;
 
-		gate.init(buf, write, NULL);
+		gate.init(buf, write, NULL, 100);
 		gate.bind(13);
 
 		auto * pack = crow_create_packet(nullptr, 1, 10);
@@ -61,7 +61,7 @@ TEST_CASE("self_driven_gstuff2")
 
 		crow::self_driven_gstuff gate;
 
-		gate.init(buf, write, NULL);
+		gate.init(buf, write, NULL, 100);
 		gate.bind(13);
 
 		auto * pack = crow_create_packet(nullptr, 1, 10);
@@ -81,7 +81,6 @@ TEST_CASE("self_driven_gstuff2")
 		}
 
 		crow::onestep();
-
 		crow::utilize(pack);
 	}
 

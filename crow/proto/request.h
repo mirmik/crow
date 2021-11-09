@@ -12,8 +12,9 @@ namespace crow
         void *_arg;
 
     public:
-        oneshoot_async_requester(void (*dlg)(void *, int, crow_packet *),
-                                 void *arg)
+        [[deprecated]] oneshoot_async_requester(void (*dlg)(void *, int,
+                                                            crow_packet *),
+                                                void *arg)
             : _dlg(dlg), _arg(arg)
         {
         }
@@ -21,14 +22,14 @@ namespace crow
     protected:
         void incoming_packet(crow_packet *pack) override
         {
-            dprln("ASYNC_REQUESTER_INCOMING");
+            crow::warn("ASYNC_REQUESTER_INCOMING");
             _dlg(this, 0, pack);
             destroy();
         }
 
         void undelivered_packet(crow_packet *pack) override
         {
-            dprln("ASYNC_REQUESTER_UNDELIVERED");
+            crow::warn("ASYNC_REQUESTER_UNDELIVERED");
             _dlg(this, -1, pack);
             destroy();
         }
@@ -43,7 +44,7 @@ namespace crow
     {
         if (qos == 0)
         {
-            dprln("WARN: async_request qos is 0. changed to 2");
+            crow::warn("WARN: async_request qos is 0. changed to 2");
             qos = 2;
         }
 
@@ -62,7 +63,7 @@ namespace crow
     {
         if (qos == 0)
         {
-            dprln("WARN: async_request qos is 0. changed to 2");
+            crow::warn("WARN: async_request qos is 0. changed to 2");
             qos = 2;
         }
 

@@ -1,6 +1,7 @@
 #include <crow/proto/acceptor.h>
 #include <crow/proto/channel.h>
 #include <crow/tower.h>
+#include <crow/warn.h>
 
 #include <nos/trace.h>
 
@@ -28,6 +29,6 @@ void crow::acceptor::undelivered_packet(crow_packet *pack)
 
 uint16_t crow::dynport()
 {
-    dprln("TODO: crow::dynport");
+    crow::warn("TODO: crow::dynport");
     return 512;
 }

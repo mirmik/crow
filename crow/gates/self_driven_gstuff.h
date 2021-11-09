@@ -27,7 +27,7 @@ namespace crow
         int (*write_callback)(void *, const char *data, unsigned int size);
         void *write_privdata;
 
-      public:
+    public:
         void init(char *send_buffer,
                   int (*write_callback)(void *, const char *data,
                                         unsigned int size),
@@ -47,7 +47,6 @@ namespace crow
         {
             int status;
             status = gstuff_autorecv_newchar(&recver, c);
-            debug_putchar(c);
             switch (status)
             {
             case GSTUFF_NEWPACKAGE:

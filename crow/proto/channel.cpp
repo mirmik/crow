@@ -1,6 +1,7 @@
 #include <crow/proto/acceptor.h>
 #include <crow/proto/channel.h>
 #include <crow/tower.h>
+#include <crow/warn.h>
 
 #include <igris/util/bug.h>
 #include <nos/print.h>
@@ -38,7 +39,7 @@ void crow::channel::incoming_packet(crow_packet *pack)
         }
         else
         {
-            dprln("WARN: HANDSHAKE_REQUEST on another state");
+            crow::warn("WARN: HANDSHAKE_REQUEST on another state");
         }
 
         break;
@@ -67,7 +68,7 @@ void crow::channel::incoming_packet(crow_packet *pack)
         }
         else
         {
-            dprln("WARN: HANDSHAKE_ANSWER on another state");
+            crow::warn("WARN: HANDSHAKE_ANSWER on another state");
         }
 
         break;
