@@ -13,7 +13,7 @@ int write(void * priv, const char * data, unsigned int size)
 	return size;
 }
 
-TEST_CASE("self_driven_gstuff")
+TEST_CASE("self_driven_gstuff.output")
 {
 	crow::total_travelled = 0;
 	crow::user_incoming_handler = nullptr;
@@ -49,7 +49,7 @@ TEST_CASE("self_driven_gstuff")
 	CHECK_EQ(crow_allocated_count, 0);
 }
 
-TEST_CASE("self_driven_gstuff2")
+TEST_CASE("self_driven_gstuff.input")
 {
 	crow::total_travelled = 0;
 	crow::user_incoming_handler = nullptr;
