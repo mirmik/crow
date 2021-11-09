@@ -23,56 +23,52 @@ licant.module("crow.threads", "linux", default=True,
 	sources = ["crow/src/threads-posix.cpp"]
 )
 
-licant.modules.module("crow",
+licant.modules.module("crow.minimal",
 	srcdir = "crow",
 	sources = [
-		"src/tower.cpp",
 		"src/packet.cpp",
 		"src/variants/warn.cpp",
 		"src/packet_ptr.cpp",
-		"src/hostaddr.cpp",
-		"src/hostaddr_view.cpp",
+		"src/tower.cpp",
+		"src/gateway.cpp",
 		"src/hexer.c",
 		"src/address.cpp",
-		"src/gateway.cpp",
-		"src/iter.cpp",
-
-		"nodes/rshell_cli_node.cpp",
-	
-		"proto/acceptor.cpp",
+		"src/hostaddr_view.cpp",
+		"src/hostaddr.cpp",
 		"proto/node.cpp",
-		"proto/socket.cpp",
 		"proto/node-sync.cpp",
 		"proto/channel.cpp",
-		"proto/msgbox.cpp",
-		"proto/channel-sync.cpp",
-		
-		"pubsub/pubsub.cpp",
-		"proto/service.cpp",
-		"proto/rpc.cpp",
-
+		"nodes/rshell_cli_node.cpp",
 		"nodes/subscriber_node.cpp",
 		"nodes/publisher_node.cpp",
 		"nodes/crowker_pubsub_node.cpp",
-
 		"nodes/service_node.cpp",
 		"nodes/request_node.cpp",
+	],
+	mdepends = ["crow.include", "crow.diagnostic"]
+)
 
+licant.modules.module("crow",
+	srcdir = "crow",
+	sources = [
+		"src/iter.cpp",
+		"proto/acceptor.cpp",
+		"proto/socket.cpp",
+		"proto/msgbox.cpp",
+		"proto/channel-sync.cpp",		
+		"proto/rpc.cpp",
 		"addons/noslogger.cpp",
 	],
 
 	mdepends = [
 		"crow.allocator",
 		"crow.time",
-		"crow.include",
 		"crow.threads",
-		"crow.diagnostic",
 		"crow.select",
 		"crow.crowker",
-
-		"crow.chardev_gateway"
-
-		#"crow.crowker.service_node"
+		"crow.chardev_gateway",
+		"crow.minimal",
+		"crow.protocol.pubsub",
 	]
 )
 
@@ -89,35 +85,12 @@ licant.module("crow.crowker",
 	]
 )
 
-licant.modules.module("crow.minimal",
-	srcdir = "crow",
-	sources = [
-		"src/packet.cpp",
-		"src/variants/warn.cpp",
-		"src/packet_ptr.cpp",
-		"src/tower.cpp",
-		"src/gateway.cpp",
-		"src/hexer.c",
-		"src/address.cpp",
-		"src/hostaddr_view.cpp",
-
-		"proto/node.cpp",
-		"proto/node-sync.cpp",
-		"proto/channel.cpp",
-
-		"nodes/rshell_cli_node.cpp",
-		"nodes/subscriber_node.cpp",
-		"nodes/publisher_node.cpp",
-		"nodes/crowker_pubsub_node.cpp",
-
-		"nodes/service_node.cpp",
-		"nodes/request_node.cpp",
-	],
-	mdepends = ["crow.include", "crow.diagnostic"]
-)
-
 licant.modules.module("crow.diagnostic", "debug",
 	sources=["crow/src/variants/print-debug.cpp"]
+)
+
+licant.modules.module("crow.diagnostic", "stub",
+	sources=["crow/src/variants/print-stub.cpp"]
 )
 
 licant.modules.module("crow.include", 
@@ -156,8 +129,12 @@ licant.module("crow.chardev_gateway",
 #####################################################################################
 ####################################PROTOCOLS########################################
 
-licant.module("crow.protocol.pubsub",
+licant.module("crow.protocol.pubsub", "impl", default=True,
 	sources = ["crow/pubsub/pubsub.cpp"]
+)
+
+licant.module("crow.protocol.pubsub", "stub",
+	defines = ["WITHOUT_CROW_PUBSUB=1"]
 )
 
 #####################################################################################

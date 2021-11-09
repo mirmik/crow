@@ -18,6 +18,9 @@ void crow::service_node::incoming_packet(crow_packet *pack)
     int anslen =
         dlg(message.data(), message.size(), answer, answer_buffer_size);
 
+    dprln("publish");
     publish(pack->addr(), subheader.sid, reply_theme, {answer, anslen}, qos,
             ackquant);
+
+    dprln("publish end");
 }

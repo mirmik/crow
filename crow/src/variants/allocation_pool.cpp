@@ -41,9 +41,9 @@ crow_packet *crow_allocate_packet(size_t adlen)
 
     if (__live_diagnostic_enabled)
     {
-        debug_print("alloc: ");
-        debug_printhex_ptr(ret);
-        debug_print("\r\n");
+        //debug_print("alloc: ");
+        //debug_printhex_ptr(ret);
+        //debug_print("\r\n");
     }
 
     return (crow_packet *)ret;

@@ -31,23 +31,23 @@ namespace crow
         void init(char *send_buffer,
                   int (*write_callback)(void *, const char *data,
                                         unsigned int size),
-                  void *write_privdata)
+                  void *write_privdata, int received_maxpack_size)
         {
-            sem_init(&sem, 0, 1);
-
+            //            sem_init(&sem, 0, 1);
             this->send_buffer = send_buffer;
-            init_receiver();
-            invalidate_sender();
-
+            this->received_maxpack_size = received_maxpack_size;
             this->write_callback = write_callback;
             this->write_privdata = write_privdata;
+
+            init_receiver();
+            invalidate_sender();
         }
 
         void newdata(char c)
         {
             int status;
-
             status = gstuff_autorecv_newchar(&recver, c);
+            debug_putchar(c);
             switch (status)
             {
             case GSTUFF_NEWPACKAGE:
@@ -63,11 +63,9 @@ namespace crow
         {
             struct crow_packet *pack = recvpack;
             recvpack = NULL;
-
             crow_packet_revert_gate(pack, this->id);
             crow_packet_initialization(pack, this);
             crow::nocontrol_travel(pack, false);
-
             init_receiver();
         }
 
@@ -131,28 +129,28 @@ namespace crow
             dlist_move(&pack->lnk, &to_send);
             system_unlock();
 
-            if (sem_trywait(&sem))
-                return;
+            //            if (sem_trywait(&sem))
+            //                return;
 
             if (insend == nullptr)
             {
                 start_send();
             }
 
-            sem_post(&sem);
+            //            sem_post(&sem);
         }
 
         void nblock_onestep() override
         {
-            if (sem_trywait(&sem))
-                return;
+            //            if (sem_trywait(&sem))
+            //                return;
 
             if (send_it != send_eit)
             {
                 continue_send();
             }
 
-            sem_post(&sem);
+            //            sem_post(&sem);
         }
 
         void finish() override

@@ -10,5 +10,5 @@ crow::hostaddr::operator crow::hostaddr_view() { return view(); }
 
 crow::hostaddr::hostaddr(const crow::hostaddr_view &h)
 {
-    _addr = std::vector<uint8_t>(h.data(), h.data() + h.size());
+    _addr = std::vector<uint8_t>((uint8_t*)h.data(), (uint8_t*)h.data() + h.size());
 }
