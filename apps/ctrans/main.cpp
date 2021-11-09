@@ -69,7 +69,7 @@ std::vector<int> listened_nodes;
 std::string pulse;
 std::string theme;
 std::string pipelinecmd;
-std::string request_theme_postfix = ":unchanged";
+std::string reply_theme = ":unchanged:";
 
 std::thread console_thread;
 
@@ -320,7 +320,7 @@ void send_do(const std::string message)
 			address,
 			CROWKER_SERVICE_BROCKER_NODE_NO,
 			theme,
-			theme + request_theme_postfix,
+			reply_theme,
 			{message.data(), message.size()},
 			qos, ackquant, qos, ackquant
 			);
@@ -382,7 +382,7 @@ void incoming_handler(crow_packet *pack)
 				return;
 			}
 
-			output_do(crow::node::message(pack), pack);
+			output_do(crow::node_data(pack), pack);
 			crow::release(pack);
 			return;
 		}
@@ -548,7 +548,7 @@ int main(int argc, char *argv[])
 	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
 	request_node.bind(CTRANS_DEFAULT_REQUEST_NODE);
-	request_theme_postfix = std::string(":" + gen_random_string(10));
+	reply_theme = gen_random_string(10);
 
 	const struct option long_options[] =
 	{

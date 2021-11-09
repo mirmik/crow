@@ -29,11 +29,11 @@ namespace crow
 
     class channel : public crow::node
     {
-    public:
+      public:
         using incoming_handler_t = void (*)(crow::channel *, crow_packet *);
 
         dlist_head lnk;
-        uint16_t rid;
+        nodeid_t rid;
         void *raddr_ptr = nullptr;
         size_t raddr_len = 0;
         size_t raddr_cap = 0;
@@ -78,7 +78,7 @@ namespace crow
 
         void undelivered_packet(crow_packet *pack) override;
 
-        void handshake(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
+        void handshake(const uint8_t *raddr, uint16_t rlen, nodeid_t rid,
                        uint8_t qos = 2, uint16_t ackquant = 200);
         void send_handshake_answer();
 
@@ -92,7 +92,7 @@ namespace crow
         static igris::buffer getdata(crow_packet *pack);
 
         //////////////////SYNC API/////////////////////////
-        int connect(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
+        int connect(const uint8_t *raddr, uint16_t rlen, nodeid_t rid,
                     uint8_t qos = 2, uint16_t ackquant = 200);
 
         int syncrecv(crow_packet **ppack);
