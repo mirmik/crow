@@ -9,9 +9,12 @@ void crow::publisher_node::publish(igris::buffer data)
     sh.thmsize = theme.size();
     sh.datsize = data.size();
 
-    const igris::buffer iov[] = {
-        {(char *)&sh + sizeof(node_subheader),
-         sizeof(sh) - sizeof(node_subheader)},
+    const igris::buffer iov[] =
+    {
+        {
+            (char *)&sh + sizeof(node_subheader),
+            sizeof(sh) - sizeof(node_subheader)
+        },
         theme,
         data,
     };
@@ -32,7 +35,15 @@ void crow::publisher_node::publish(crow::hostaddr_view addr, int crowker_node,
     publish(data);
 }
 
-void crow::publisher_node::set_theme(igris::buffer theme) 
+void crow::publisher_node::set_theme(igris::buffer theme)
 {
     this->theme = theme;
 }
+
+
+crow::publisher_node::publisher_node(
+    igris::buffer theme,
+    crow::hostaddr_view crowker_addr,
+    int crowker_node)
+        : theme(theme), crowker_addr(crowker_addr), crowker_node(crowker_node)
+{}

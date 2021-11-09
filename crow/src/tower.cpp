@@ -16,8 +16,8 @@
 #include <nos/print.h>
 
 bool crow::diagnostic_noack = false;
-uint16_t crow::debug_data_size = 28;
-unsigned int crow::total_travelled;
+uint16_t crow::debug_data_size = 60;
+unsigned int crow::total_travelled = 0;
 
 bool crow::retransling_allowed = false;
 

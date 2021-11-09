@@ -5,8 +5,11 @@
 
 void crow::service_node::incoming_packet(crow_packet *pack)
 {
-    char *answer = (char *)malloc(answer_buffer_size);
-    memset(answer, 0, answer_buffer_size);
+    static char answer [16];
+    memset(answer, 0, 16);
+    answer_buffer_size = 15;
+    //char *answer = (char *)malloc(answer_buffer_size);
+    //memset(answer, 0, answer_buffer_size);
 
     auto &subheader = pack->subheader<consume_subheader>();
     auto data = subheader.message();
@@ -19,9 +22,8 @@ void crow::service_node::incoming_packet(crow_packet *pack)
     int anslen =
         dlg(message.data(), message.size(), answer, answer_buffer_size);
 
-    crow::warn("publish");
     publish(pack->addr(), subheader.sid, reply_theme, {answer, anslen}, qos,
             ackquant);
 
-    crow::warn("publish end");
+    crow::release(pack);
 }

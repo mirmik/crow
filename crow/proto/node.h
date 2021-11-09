@@ -92,7 +92,7 @@ namespace crow
 
     class node
     {
-    public:
+      public:
         struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
         struct dlist_head waitlnk =
             DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
@@ -130,7 +130,8 @@ namespace crow
                               uint8_t qos = CROW_DEFAULT_QOS,
                               uint16_t ackquant = CROW_DEFAULT_ACKQUANT)
         {
-            assert(id != 0);
+            if (id == 0)
+                bind();
             return crow::node_send(id, rid, raddr, data, qos, ackquant);
         }
 
@@ -140,7 +141,8 @@ namespace crow
                                       uint8_t qos = CROW_DEFAULT_QOS,
                                       uint16_t ackquant = CROW_DEFAULT_ACKQUANT)
         {
-            assert(id != 0);
+            if (id == 0)
+                bind();
             return crow::node_send_special(id, rid, raddr, type, data, qos,
                                            ackquant);
         }
@@ -149,7 +151,8 @@ namespace crow
                                 const igris::buffer *vdat, size_t vlen,
                                 uint8_t qos, uint16_t ackquant)
         {
-            assert(id != 0);
+            if (id == 0)
+                bind();
             return crow::node_send_v(id, rid, raddr, vdat, vlen, qos, ackquant);
         }
 
@@ -177,10 +180,10 @@ namespace crow
 
     class node_protocol_cls : public crow::protocol
     {
-    private:
+      private:
         void send_node_error(crow_packet *pack, int errcode);
 
-    public:
+      public:
         void incoming(crow_packet *pack) override;
         void undelivered(crow_packet *pack) override;
 
@@ -205,7 +208,7 @@ namespace crow
 
     class node_packet_ptr : public packet_ptr
     {
-    public:
+      public:
         node_packet_ptr(crow_packet *pack_) : packet_ptr(pack_) {}
         node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
         node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}

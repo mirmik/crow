@@ -41,8 +41,8 @@ namespace crow
 
     struct consume_subheader : public pubsub_subheader
     {
-        int datsize;
-        int thmsize;
+        uint8_t thmsize;
+        uint16_t datsize;
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
         igris::buffer message()
         {

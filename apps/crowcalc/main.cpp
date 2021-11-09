@@ -60,6 +60,12 @@ int main(int argc, char ** argv)
 	if (debug)
 		crow::diagnostic_setup(true, false);
 
+	if (argc == 1) 
+	{
+		nos::println("Usage: crowcalc CROWKER");
+		exit(0);
+	}
+
 	crow::hostaddr crowker = crow::address(argv[1]);
 	nos::println("Crowker: ", argv[1]);
 
