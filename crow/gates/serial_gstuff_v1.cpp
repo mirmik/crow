@@ -24,9 +24,9 @@ void crow::serial_gstuff_v1::newline_handler()
 }
 
 struct crow::serial_gstuff_v1 *crow::create_serial_gstuff_v1(const char *path,
-                                                             uint32_t baudrate,
-                                                             uint8_t id,
-                                                             bool debug)
+        uint32_t baudrate,
+        uint8_t id,
+        bool debug)
 {
     int ret;
 
@@ -101,7 +101,7 @@ void crow::serial_gstuff_v1::send(crow::packet *pack)
 {
     char buffer[512];
 
-    int len = gstuffing_v1((char *)&pack->header(), pack->header().flen, buffer);
+    int len = gstuffing_v1((char *)&dynamic_cast<compacted_packet*>(pack)->header(), pack->full_length(), buffer);
     write(fd, buffer, len);
     crow::return_to_tower(pack, CROW_SENDED);
 }
@@ -112,8 +112,8 @@ void crow::serial_gstuff_v1::nblock_onestep()
     if (rpack == NULL)
     {
         rpack = (crow::compacted_packet *)malloc(GSTUFF_MAXPACK_SIZE +
-                                             sizeof(crow::packet) -
-                                             sizeof(struct crow::header_v1));
+                sizeof(crow::packet) -
+                sizeof(struct crow::header_v1));
         new (rpack) crow::compacted_packet;
         gstuff_autorecv_setbuf_v1(&recver, (char *)&rpack->header(),
                                   GSTUFF_MAXPACK_SIZE);

@@ -3,7 +3,6 @@
 
 #include <crow/packet.h>
 #include <crow/proto/protocol.h>
-#include <crow/types.h>
 
 #include <igris/binreader.h>
 #include <igris/datastruct/dlist.h>

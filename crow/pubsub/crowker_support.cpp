@@ -55,7 +55,7 @@ void undelivered_crowker_handler(crow::packet *pack)
     if (shps.type == PUBLISH)
     {
         crow::crowker::instance()->erase_crow_client(
-            std::string((char *)pack->addrptr(), pack->header().alen));
+            std::string((char *)pack->addrptr(), pack->addrsize()));
     }
 
     crow::release(pack);

@@ -102,7 +102,7 @@ void crow::serial_gstuff::send(crow::packet *pack)
 {
     char buffer[512];
 
-    int len = gstuffing((char *)&pack->header(), pack->header().flen, buffer);
+    int len = gstuffing((char *)&dynamic_cast<compacted_packet*>(pack)->header(), pack->full_length(), buffer);
     write(fd, buffer, len);
     crow::return_to_tower(pack, CROW_SENDED);
 }

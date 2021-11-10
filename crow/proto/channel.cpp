@@ -22,12 +22,12 @@ void crow::channel::incoming_packet(crow::packet *pack)
                 crow::get_subheader_handshake(pack);
 
             // TODO: перенести аллокацию под адрес в другое место
-            // raddr_ptr = malloc(pack->header().alen);
-            if (pack->header().alen > raddr_cap)
+            // raddr_ptr = malloc(pack->addrsize());
+            if (pack->addrsize() > raddr_cap)
                 return;
 
-            memcpy(raddr_ptr, pack->addrptr(), pack->header().alen);
-            raddr_len = pack->header().alen;
+            memcpy(raddr_ptr, pack->addrptr(), pack->addrsize());
+            raddr_len = pack->addrsize();
             rid = sh_node->sid;
 
             this->qos = sh_handshake->qos;
@@ -53,12 +53,12 @@ void crow::channel::incoming_packet(crow::packet *pack)
                 crow::get_subheader_handshake(pack);
 
             // TODO: перенести аллокацию под адрес в другое место
-            // raddr_ptr = malloc(pack->header().alen);
-            if (pack->header().alen > raddr_cap)
+            // raddr_ptr = malloc(pack->addrsize());
+            if (pack->addrsize() > raddr_cap)
                 return;
 
-            memcpy(raddr_ptr, pack->addrptr(), pack->header().alen);
-            raddr_len = pack->header().alen;
+            memcpy(raddr_ptr, pack->addrptr(), pack->addrsize());
+            raddr_len = pack->addrsize();
             rid = sh_node->sid;
             qos = sh_handshake->qos;
             ackquant = sh_handshake->ackquant;

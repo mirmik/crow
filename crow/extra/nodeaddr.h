@@ -9,11 +9,11 @@ namespace crow
 {
     class nodeaddr
     {
-      public:
+    public:
         std::vector<uint8_t> naddr;
-        nid_t nid;
+        nodeid_t nid;
 
-      public:
+    public:
         crow::hostaddr_view hostaddr() const
         {
             return {naddr.data(), naddr.size()};

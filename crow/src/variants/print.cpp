@@ -26,13 +26,13 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
         "stg:{}, "
         "dlen:{}, "
         "data:{}",
-        notation, pack->header().qos, (uint8_t)pack->header().u.f.ack,
-        (uint16_t)pack->header().ackquant, (uint8_t)pack->header().alen,
-        (uint16_t)pack->header().flen, (uint8_t)pack->header().u.f.type,
-        pack->header().seqid,
+        notation, pack->quality(), pack->ack(),
+        pack->ackquant(), pack->addrsize(),
+        pack->full_length(), pack->type(),
+        pack->seqid(),
         igris::hexascii_encode(pack->addrptr(),
                                pack->addrsize()),
-        pack->header().stg, pack->datasize(),
+        pack->stage(), pack->datasize(),
         igris::dstring(pack->dataptr(),
                        pack->datasize() > crow::debug_data_size
                            ? crow::debug_data_size

@@ -95,7 +95,22 @@ namespace crow
         virtual char *endptr() = 0;
         virtual uint8_t *stageptr() = 0;
 
-        virtual header_v1 &header() = 0;
+        virtual uint16_t full_length() = 0;
+        virtual uint8_t type() = 0;
+        virtual uint8_t quality() = 0;
+        virtual uint16_t ackquant() = 0;
+        virtual uint8_t stage() = 0;
+        virtual uint16_t seqid() = 0;
+        virtual uint8_t ack() = 0;
+
+        virtual void set_type(uint8_t) = 0;
+        virtual void set_quality(uint8_t) = 0;
+        virtual void set_ackquant(uint16_t) = 0;
+        virtual void set_stage(uint8_t) = 0;
+        virtual void set_seqid(uint16_t) = 0;
+        virtual void set_ack(uint8_t) = 0;
+
+        // virtual header_v1 &header() = 0;
 
         igris::buffer addr() { return {addrptr(), addrsize()}; }
         igris::buffer data() { return {dataptr(), datasize()}; }
@@ -104,6 +119,9 @@ namespace crow
         {
             return *reinterpret_cast<T *>(dataptr());
         }
+
+        virtual void increment_stage(int i) = 0;
+        virtual void increment_seqid(int i = 1) = 0;
     };
 
     class compacted_packet : public packet
@@ -112,7 +130,7 @@ namespace crow
         header_v1 _header;
 
     public:
-        header_v1 &header() override { return _header; }
+        header_v1 &header() { return _header; }
 
         void revert_gate(uint8_t gateindex) override;
         void revert(igris::buffer *vec, size_t veclen) override;
@@ -124,11 +142,28 @@ namespace crow
         uint16_t datasize() override;
 
         char *endptr() override;
+        uint8_t type() { return _header.u.f.type; }
+        uint16_t seqid() { return _header.seqid; }
 
         uint8_t *stageptr() override
         {
-            return (uint8_t *)(&header() + 1) + header().stg;
+            return (uint8_t *)(&_header + 1) + _header.stg;
         }
+
+        uint16_t full_length() override { return _header.flen; }
+        uint8_t quality() override { return _header.qos; }
+        uint16_t ackquant() override { return _header.ackquant; }
+        uint8_t stage() override { return _header.stg; }
+        uint8_t ack() override { return _header.u.f.ack; }
+
+        virtual void set_type(uint8_t arg) { _header.u.f.type = arg; }
+        virtual void set_quality(uint8_t arg) { _header.qos = arg; }
+        virtual void set_ackquant(uint16_t arg) { _header.ackquant = arg; }
+        virtual void set_stage(uint8_t arg) { _header.stg = arg; }
+        virtual void set_seqid(uint16_t arg) { _header.seqid = arg; }
+        virtual void set_ack(uint8_t arg) { _header.u.f.ack = arg; };
+        void increment_stage(int i) override { _header.stg += i; }
+        void increment_seqid(int i) override { _header.seqid += i; }
     };
 }
 

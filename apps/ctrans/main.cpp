@@ -345,11 +345,11 @@ void incoming_handler(crow::packet *pack)
 	if (echo)
 	{
 		// Переотослать пакет точно повторяющий входящий.
-		crow::send({pack->addrptr(), pack->header().alen},
+		crow::send(pack->addr(),
 		{pack->dataptr(), pack->datasize()},
-		pack->header().u.f.type,
-		pack->header().qos,
-		pack->header().ackquant);
+		pack->type(),
+		pack->quality(),
+		pack->ackquant());
 	}
 
 	if (api)
@@ -364,7 +364,7 @@ void incoming_handler(crow::packet *pack)
 		}
 	}
 
-	switch (pack->header().u.f.type)
+	switch (pack->type())
 	{
 		case CROW_PUBSUB_PROTOCOL:
 		{

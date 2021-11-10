@@ -72,7 +72,7 @@ void crow::node_protocol_cls::send_node_error(crow::packet *pack,
                                   {(char *)&errcode, sizeof(errcode)}};
 
     crow::send_v({pack->addrptr(), pack->addrsize()}, iov,
-                 2, CROW_NODE_PROTOCOL, 0, pack->header().ackquant);
+                 2, CROW_NODE_PROTOCOL, 0, pack->ackquant());
 }
 
 void crow::node_protocol_cls::incoming(crow::packet *pack)

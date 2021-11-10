@@ -123,7 +123,7 @@ void crow::udpgate::send(crow::packet *pack)
     ipaddr.sin_port = *port;
     ipaddr.sin_addr.s_addr = *addr;
 
-    sendto(sock, (const char *)&pack->header(), pack->header().flen, 0,
+    sendto(sock, (const char *)&dynamic_cast<crow::compacted_packet *>(pack)->header(), pack->full_length(), 0,
            (struct sockaddr *)&ipaddr, iplen);
     crow::return_to_tower(pack, CROW_SENDED);
 }

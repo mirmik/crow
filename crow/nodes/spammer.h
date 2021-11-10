@@ -107,7 +107,7 @@ namespace crow
     public:
         spam_subscriber(igris::delegate<void, igris::buffer> dlg) : dlg(dlg) {}
 
-        void subscribe(nid_t nid, crow::hostaddr_view host, uint8_t qos = 2,
+        void subscribe(nodeid_t nid, crow::hostaddr_view host, uint8_t qos = 2,
                        uint16_t ackquant = 200)
         {
             this->addr = std::vector<uint8_t>(
