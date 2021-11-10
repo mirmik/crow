@@ -42,8 +42,11 @@ void crow::publisher_node::set_theme(igris::buffer theme)
 
 
 crow::publisher_node::publisher_node(
-    igris::buffer theme,
-    crow::hostaddr_view crowker_addr,
-    int crowker_node)
+    crow::hostaddr_view crowker_addr, int crowker_node, igris::buffer theme)
         : theme(theme), crowker_addr(crowker_addr), crowker_node(crowker_node)
+{}
+
+crow::publisher_node::publisher_node(
+    crow::hostaddr_view crowker_addr, igris::buffer theme)
+        : theme(theme), crowker_addr(crowker_addr), crowker_node(CROWKER_SERVICE_BROCKER_NODE_NO)
 {}

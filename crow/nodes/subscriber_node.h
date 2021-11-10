@@ -42,6 +42,8 @@ namespace crow
     private:
         void incoming_packet(crow::packet *) override;
     };
+
+    using subscriber = subscriber_node;
 }
 
 #endif

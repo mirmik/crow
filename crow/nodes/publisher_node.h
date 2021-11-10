@@ -16,8 +16,9 @@ namespace crow
         int ackquant = 0;
 
     public:
-        publisher_node(igris::buffer theme, crow::hostaddr_view crowker_addr,
-                       int crowker_node = CROWKER_SERVICE_BROCKER_NODE_NO);
+        publisher_node(crow::hostaddr_view crowker_addr, int crowker_node,
+                       igris::buffer theme);
+        publisher_node(crow::hostaddr_view crowker_addr, igris::buffer theme);
 
         publisher_node() = default;
 
@@ -36,6 +37,8 @@ namespace crow
             crow::release(pack);
         }
     };
+
+    using publisher = publisher_node;
 }
 
 #endif
