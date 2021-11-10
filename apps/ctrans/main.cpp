@@ -34,7 +34,6 @@
 #include <thread>
 #include <iostream>
 
-bool infinite = false;
 bool debug_mode = false;
 crow::hostaddr address;
 
@@ -538,8 +537,7 @@ int main(int argc, char *argv[])
 		{"qos", required_argument, NULL, 'q'}, // qos отправляемых сообщений. 0 по умолчанию
 		{"type", required_argument, NULL, 't'}, // метка типа отправляемых сообщений
 		{"ackquant", required_argument, NULL, 'A'}, // установка кванта ack
-		{"infinite", no_argument, NULL, 'I'},
-
+		
 		{"noend", no_argument, NULL, 'x'}, // Блокирует добавление символа конца строки.
 		{"nlout", no_argument, NULL, 'N'}, // Блокирует добавление символа конца строки.
 		{"echo", no_argument, NULL, 'E'}, // Активирует функцию эха входящих пакетов.
@@ -596,10 +594,6 @@ int main(int argc, char *argv[])
 
 			case 't':
 				type = (uint8_t)atoi(optarg);
-				break;
-
-			case 'I':
-				infinite = true;
 				break;
 
 			case 'u':
