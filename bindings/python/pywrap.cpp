@@ -9,7 +9,9 @@
 #include <crow/packet_ptr.h>
 #include <crow/tower.h>
 #include <crow/iter.h>
-#include <crow/pubsub/pubsub.h>
+#include <crow/nodes/request_node.h>
+#include <crow/nodes/subscriber_node.h>
+#include <crow/nodes/publisher_node.h>
 #include <crow/proto/node.h>
 #include "pynode.h"
 #include <crow/proto/msgbox.h>
@@ -138,32 +140,6 @@ PYBIND11_MODULE(libcrow, m)
 	});
 
 	m.def("address", [](std::string str){ return crow::address(str); });
-
-	m.def("subscribe",
-	      (void (*)(
-	           const crow::hostaddr & addr,
-	           const std::string & theme,
-	           uint8_t ack, uint16_t ackquant,
-	           uint8_t rack, uint16_t rackquant)) &subscribe,
-	      py::arg("addr"),
-	      py::arg("theme"),
-	      py::arg("ack")=2, py::arg("ackquant")=50,
-	      py::arg("rack")=2, py::arg("rackquant")=50);
-
-	m.def("publish",
-	      [](
-	           const crow::hostaddr & addr,
-	           const std::string & theme,
-	           const std::string & data,
-	           uint8_t ack, uint16_t ackquant) 
-	      {
-	      	return crow::publish(addr, theme, data, ack, ackquant);
-	      },
-	      py::arg("addr"),
-	      py::arg("theme"),
-	      py::arg("data"),
-	      py::arg("ack")=2, 
-	      py::arg("ackquant")=50);
 
 	static int unused; // the capsule needs something to reference
 	py::capsule cleanup(&unused, [](void *)

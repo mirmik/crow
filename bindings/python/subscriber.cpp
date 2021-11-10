@@ -1,8 +1,7 @@
 #include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 
-#include <crow/pubsub/pubsub.h>
-#include <crow/pubsub/subscriber.h>
+#include <crow/nodes/subscriber_node.h>
 #include <crow/hostaddr.h>
 #include <pybind11/embed.h>
 
@@ -11,7 +10,7 @@
 
 namespace py = pybind11;
 
-
+/*
 class pybind_subscriber : public crow::subscriber
 {
 	std::function<void(crow::pubsub_packet_ptr)> delegate;
@@ -29,8 +28,8 @@ public:
 	}
 
 	void subscribe(
-	    const crow::hostaddr& addr,
 	    const std::string& theme,
+	    const crow::hostaddr& addr,
 	    uint8_t qos,
 	    uint16_t ackquant,
 	    uint8_t rqos,
@@ -58,10 +57,11 @@ void register_subscriber_class(py::module & m)
 	.def("subscribe", &pybind_subscriber::subscribe,
 	     py::arg("addr"),
 	     py::arg("theme"),
-	     py::arg("ack") = 2,
-	     py::arg("ackquant") = 50,
-	     py::arg("rack") = 2,
-	     py::arg("rackquant") = 50)
+	     py::arg("ack") = 0,
+	     py::arg("ackquant") = 0,
+	     py::arg("rack") = 0,
+	     py::arg("rackquant") = 0)
 	.def("resubscribe", &pybind_subscriber::resubscribe)
 	;
 }
+*/
