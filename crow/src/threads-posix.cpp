@@ -1,4 +1,3 @@
-#include <crow/pubsub/pubsub.h>
 #include <crow/tower.h>
 #include <crow/warn.h>
 

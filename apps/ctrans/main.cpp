@@ -4,7 +4,6 @@
 #include <crow/gates/chardev/serial_port_driver.h>
 #include <crow/gates/udpgate.h>
 #include <crow/tower.h>
-#include <crow/pubsub/pubsub.h>
 #include <crow/proto/channel.h>
 #include <crow/proto/acceptor.h>
 #include <crow/nodes/publisher_node.h>

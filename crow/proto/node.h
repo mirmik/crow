@@ -2,7 +2,8 @@
 #define CROW_NODE_H
 
 #include <crow/packet.h>
-#include <crow/proto/protocol.h>
+#include <crow/packet_ptr.h>
+#include <crow/tower.h>
 
 #include <igris/binreader.h>
 #include <igris/datastruct/dlist.h>
@@ -135,16 +136,16 @@ namespace crow
         friend class node_protocol_cls;
     };
 
-    class node_protocol_cls : public crow::protocol
+    class node_protocol_cls /*: public crow::protocol*/
     {
     private:
         void send_node_error(crow::packet *pack, int errcode);
 
     public:
-        void incoming(crow::packet *pack) override;
-        void undelivered(crow::packet *pack) override;
+        void incoming(crow::packet *pack);
+        void undelivered(crow::packet *pack);
 
-        node_protocol_cls() : protocol(CROW_NODE_PROTOCOL) {}
+        node_protocol_cls() /*: protocol(CROW_NODE_PROTOCOL)*/ {}
 
         static auto sid(crow::packet *pack)
         {

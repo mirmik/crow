@@ -9,9 +9,9 @@
 
 #include <crow/gateway.h>
 #include <crow/print.h>
-#include <crow/proto/protocol.h>
 #include <crow/tower.h>
 #include <crow/warn.h>
+#include <crow/proto/node.h>
 
 #include <nos/print.h>
 
@@ -21,7 +21,6 @@ unsigned int crow::total_travelled = 0;
 
 bool crow::retransling_allowed = false;
 
-struct dlist_head crow::protocols = DLIST_HEAD_INIT(crow::protocols);
 DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
@@ -116,9 +115,9 @@ static void confirmed_utilize_from_outers(crow::packet *pack)
     dlist_for_each_entry(it, &crow_outters, lnk)
     {
         if (it->seqid() == pack->seqid() &&
-            pack->addrsize() == it->addrsize() &&
-            !memcmp(it->addrptr(), pack->addrptr(),
-                    pack->addrsize()))
+                pack->addrsize() == it->addrsize() &&
+                !memcmp(it->addrptr(), pack->addrptr(),
+                        pack->addrsize()))
         {
             it->u.f.confirmed = 1;
             crow_tower_release(it);
@@ -133,9 +132,9 @@ static void qos_release_from_incoming(crow::packet *pack)
     dlist_for_each_entry(it, &crow_incoming, lnk)
     {
         if (it->seqid() == pack->seqid() &&
-            pack->addrsize() == it->addrsize() &&
-            !memcmp(it->addrptr(), pack->addrptr(),
-                    pack->addrsize()))
+                pack->addrsize() == it->addrsize() &&
+                !memcmp(it->addrptr(), pack->addrptr(),
+                        pack->addrsize()))
         {
             crow_tower_release(it);
             return;
@@ -184,8 +183,6 @@ static void crow_travel_error(crow::packet *pack)
 
 static void crow_incoming_handler(crow::packet *pack)
 {
-    crow::protocol *it;
-
     if (crow::user_incoming_handler)
     {
         _in_incoming_handler = true;
@@ -194,15 +191,12 @@ static void crow_incoming_handler(crow::packet *pack)
         return;
     }
 
-    dlist_for_each_entry(it, &crow::protocols, lnk)
+    if (CROW_NODE_PROTOCOL == pack->type())
     {
-        if (it->id == pack->type())
-        {
-            _in_incoming_handler = true;
-            it->incoming(pack);
-            _in_incoming_handler = false;
-            return;
-        }
+        _in_incoming_handler = true;
+        crow::node_protocol.incoming(pack);
+        _in_incoming_handler = false;
+        return;
     }
 
     if (crow::user_type_handler)
@@ -382,7 +376,7 @@ static void crow_do_travel(crow::packet *pack)
             //Для пакетов с подтверждение посылаем ack первого или второго
             //типов.
             if (pack->quality() == CROW_TARGET_ACK ||
-                pack->quality() == CROW_BINARY_ACK)
+                    pack->quality() == CROW_BINARY_ACK)
                 crow_send_ack(pack);
 
             if (pack->quality() == CROW_BINARY_ACK)
@@ -393,10 +387,10 @@ static void crow_do_travel(crow::packet *pack)
                 dlist_for_each_entry(inc, &crow_incoming, lnk)
                 {
                     if (inc->seqid() == pack->seqid() &&
-                        inc->addrsize() == pack->addrsize() &&
-                        memcmp(inc->addrptr(),
-                               pack->addrptr(),
-                               inc->addrsize()) == 0)
+                            inc->addrsize() == pack->addrsize() &&
+                            memcmp(inc->addrptr(),
+                                   pack->addrptr(),
+                                   inc->addrsize()) == 0)
                     {
                         // Пакет уже фигурирует как принятый, поэтому
                         // отбрасываем его.
@@ -646,7 +640,6 @@ void crow::onestep_travel_only()
 void crow_undelivered(crow::packet *pack)
 {
     pack->u.f.undelivered = 1;
-    crow::protocol *it;
 
     if (crow::undelivered_handler)
     {
@@ -655,16 +648,14 @@ void crow_undelivered(crow::packet *pack)
         _in_undelivered_handler = false;
     }
 
-    dlist_for_each_entry(it, &crow::protocols, lnk)
+    if (CROW_NODE_PROTOCOL == pack->type())
     {
-        if (it->id == pack->type())
-        {
-            _in_undelivered_handler = true;
-            it->undelivered(pack);
-            _in_undelivered_handler = false;
-            return;
-        }
+        _in_undelivered_handler = true;
+        crow::node_protocol.undelivered(pack);
+        _in_undelivered_handler = false;
+        return;
     }
+
 }
 
 static inline void crow_onestep_send_stage()
@@ -785,8 +776,8 @@ void crow::onestep()
         gate->nblock_onestep();
     }
 
-    crow::protocol *it;
-    dlist_for_each_entry(it, &crow::protocols, lnk) { it->onestep(); }
+    //crow::protocol *it;
+    //dlist_for_each_entry(it, &crow::protocols, lnk) { it->onestep(); }
 
     crow_onestep_send_stage();
     crow_onestep_outers_stage();
