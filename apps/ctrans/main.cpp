@@ -369,10 +369,7 @@ void incoming_handler(crow::packet *pack)
 		}
 
 		default:
-			output_do(
-			{
-				pack->dataptr(), pack->datasize()
-			}, pack);
+			output_do(pack->data(), pack);
 	}
 
 	crow::release(pack);
