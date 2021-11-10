@@ -158,7 +158,7 @@ std::string gen_random_string(const int len)
 	return tmp_s;
 }
 
-void output_do(igris::buffer data, crow_packet* pack)
+void output_do(igris::buffer data, crow::packet* pack)
 {
 	(void) pack;
 
@@ -340,23 +340,23 @@ void send_do(const std::string message)
 	}
 }
 
-void incoming_handler(crow_packet *pack)
+void incoming_handler(crow::packet *pack)
 {
 	if (echo)
 	{
 		// Переотослать пакет точно повторяющий входящий.
-		crow::send({crow_packet_addrptr(pack), pack->header.alen},
-		{crow_packet_dataptr(pack), crow_packet_datasize(pack)},
-		pack->header.u.f.type,
-		pack->header.qos,
-		pack->header.ackquant);
+		crow::send({pack->addrptr(), pack->header().alen},
+		{pack->dataptr(), pack->datasize()},
+		pack->header().u.f.type,
+		pack->header().qos,
+		pack->header().ackquant);
 	}
 
 	if (api)
 	{
 		// Запуск встроенных функций.
-		char *dp = crow_packet_dataptr(pack);
-		size_t ds = crow_packet_datasize(pack);
+		char *dp = pack->dataptr();
+		size_t ds = pack->datasize();
 
 		if (strncmp(dp, "exit\n", ds) == 0)
 		{
@@ -364,7 +364,7 @@ void incoming_handler(crow_packet *pack)
 		}
 	}
 
-	switch (pack->header.u.f.type)
+	switch (pack->header().u.f.type)
 	{
 		case CROW_PUBSUB_PROTOCOL:
 		{
@@ -390,14 +390,14 @@ void incoming_handler(crow_packet *pack)
 		default:
 			output_do(
 			{
-				crow_packet_dataptr(pack), crow_packet_datasize(pack)
+				pack->dataptr(), pack->datasize()
 			}, pack);
 	}
 
 	crow::release(pack);
 }
 
-void print_channel_message(crow::channel* ch, crow_packet* pack)
+void print_channel_message(crow::channel* ch, crow::packet* pack)
 {
 	(void) ch;
 	(void) pack;

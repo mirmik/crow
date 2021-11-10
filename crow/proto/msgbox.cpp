@@ -28,7 +28,7 @@ crow::node_packet_ptr crow::msgbox::receive()
         sem_wait(&message_lock);
     }
 
-    crow_packet *pack = dlist_first_entry(&messages, crow_packet, ulnk);
+    crow::packet *pack = dlist_first_entry(&messages, crow::packet, ulnk);
     dlist_del_init(&pack->ulnk);
 
     sem_post(&message_lock);
@@ -42,11 +42,11 @@ crow::packet_ptr crow::msgbox::reply(crow::node_packet_ptr msg,
 {
     return send(
         msg.rid(),
-        {crow_packet_addrptr(msg.get()), crow_packet_addrsize(msg.get())}, data,
+        {msg->addrptr(), msg->addrsize()}, data,
         qos, ackquant);
 }
 
-void crow::msgbox::incoming_packet(crow_packet *pack)
+void crow::msgbox::incoming_packet(crow::packet *pack)
 {
     sem_wait(&message_lock);
     dlist_add_tail(&pack->ulnk, &messages);
@@ -55,14 +55,14 @@ void crow::msgbox::incoming_packet(crow_packet *pack)
     notify_one(0);
 }
 
-void crow::msgbox::undelivered_packet(crow_packet *pack) { notify_one(-1); }
+void crow::msgbox::undelivered_packet(crow::packet *pack) { notify_one(-1); }
 
 crow::msgbox::~msgbox()
 {
     sem_wait(&message_lock);
     while (!dlist_empty(&messages))
     {
-        crow_packet *pack = dlist_first_entry(&messages, crow_packet, ulnk);
+        crow::packet *pack = dlist_first_entry(&messages, crow::packet, ulnk);
         dlist_del_init(&pack->ulnk);
         crow::release(pack);
     }

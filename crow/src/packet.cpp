@@ -12,7 +12,7 @@
 
 #include <igris/compiler.h>
 
-void crow_packet_initialization(struct crow_packet *pack, crow::gateway *ingate)
+void crow_packet_initialization(crow::compacted_packet *pack, crow::gateway *ingate)
 {
     dlist_init(&pack->lnk);
     dlist_init(&pack->ulnk);
@@ -20,43 +20,42 @@ void crow_packet_initialization(struct crow_packet *pack, crow::gateway *ingate)
     pack->_ackcount = 5;
     pack->u.flags = 0;
     pack->refs = 0;
-    *((char *)(&pack->header) + pack->header.flen) = 0;
+    *((char *)(&pack->header()) + pack->header().flen) = 0;
 }
 
-struct crow_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
-                                       size_t datasize)
+crow::compacted_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
+                                 size_t datasize)
 {
-    crow_packet *pack = crow_allocate_packet(addrsize + datasize);
+    crow::compacted_packet *pack = crow_allocate_packet(addrsize + datasize);
 
     if (pack == nullptr)
         return nullptr;
 
-    pack->header.flen = (uint16_t)(sizeof(crow_header) + addrsize + datasize);
-    pack->header.alen = addrsize;
-    pack->header.ackquant = 200;
-    pack->header.u.pflag = 0;
-    pack->header.qos = 0;
-    pack->header.stg = 0;
+    pack->header().flen = (uint16_t)(sizeof(crow::header_v1) + addrsize + datasize);
+    pack->header().alen = addrsize;
+    pack->header().ackquant = 200;
+    pack->header().u.pflag = 0;
+    pack->header().qos = 0;
+    pack->header().stg = 0;
 
     crow_packet_initialization(pack, ingate);
 
     return pack;
 }
 
-void crow_packet_revert_gate(struct crow_packet *pack, uint8_t gateindex)
+void crow::compacted_packet::revert_gate(uint8_t gateindex)
 {
-    *crow_packet_stageptr(pack) = gateindex;
-    ++pack->header.stg;
+    *stageptr() = gateindex;
+    ++header().stg;
 }
 
-void crow_packet_revert(struct crow_packet *pack, igris::buffer *vec,
-                        size_t veclen)
+void crow::compacted_packet::revert(igris::buffer *vec, size_t veclen)
 {
     igris::buffer *it = vec + veclen - 1;
     igris::buffer *eit = vec - 1;
 
     size_t sz = 0;
-    uint8_t *tgt = crow_packet_stageptr(pack);
+    uint8_t *tgt = stageptr();
 
     for (; it != eit; --it)
     {
@@ -66,48 +65,33 @@ void crow_packet_revert(struct crow_packet *pack, igris::buffer *vec,
         while (ptr != eptr)
             *tgt++ = *--ptr;
     }
-    pack->header.stg = (uint8_t)(pack->header.stg + sz);
+    header().stg = (uint8_t)(header().stg + sz);
 }
 
 bool crow::has_allocated() { return !!crow_allocated_count; }
 
-uint8_t *crow_packet_addrptr(struct crow_packet *pack)
+uint8_t *crow::compacted_packet::addrptr()
 {
-    return (uint8_t *)(&pack->header + 1);
+    return (uint8_t *)(&header() + 1);
 }
 
-uint8_t crow_packet_addrsize(struct crow_packet *pack)
+uint8_t crow::compacted_packet::addrsize()
 {
-    return pack->header.alen;
+    return header().alen;
 }
 
-char *crow_packet_dataptr(struct crow_packet *pack)
+char *crow::compacted_packet::dataptr()
 {
-    return (char *)(crow_packet_addrptr(pack) + crow_packet_addrsize(pack));
+    return (char *)(addrptr() + addrsize());
 }
 
-uint16_t crow_packet_datasize(struct crow_packet *pack)
+uint16_t crow::compacted_packet::datasize()
 {
-    return (uint16_t)(pack->header.flen - pack->header.alen -
-                      sizeof(struct crow_header));
+    return (uint16_t)(header().flen - header().alen -
+                      sizeof(struct crow::header_v1));
 }
 
-void crow::packet::revert_gate(uint8_t gateindex)
+char *crow::compacted_packet::endptr()
 {
-    crow_packet_revert_gate(this, gateindex);
+    return (char *)&header() + header().flen;
 }
-
-void crow::packet::revert(igris::buffer *vec, size_t veclen)
-{
-    crow_packet_revert(this, vec, veclen);
-}
-
-uint8_t *crow::packet::addrptr() { return crow_packet_addrptr(this); }
-
-uint8_t crow::packet::addrsize() { return crow_packet_addrsize(this); }
-
-char *crow::packet::dataptr() { return crow_packet_dataptr(this); }
-
-uint16_t crow::packet::datasize() { return crow_packet_datasize(this); }
-
-char *crow::packet::endptr() { return (char *)&header + header.flen; }

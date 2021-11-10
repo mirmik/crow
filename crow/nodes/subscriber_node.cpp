@@ -1,7 +1,7 @@
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/nodes/subscriber_node.h>
 
-void crow::subscriber_node::incoming_packet(crow_packet *pack)
+void crow::subscriber_node::incoming_packet(crow::packet *pack)
 {
     auto &s = pack->subheader<pubsub_subheader>();
 

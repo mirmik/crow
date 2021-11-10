@@ -74,7 +74,7 @@ namespace crow
             rfuncmap[name] = new remote_function<Ret, Args...>(dlg);
         }
 
-        void incoming_packet(crow_packet *pack) override;
+        void incoming_packet(crow::packet *pack) override;
 
         ~rpc_node() override
         {
@@ -88,7 +88,7 @@ namespace crow
     class rpc_request_node : public crow::node
     {
     public:
-        crow_packet *incpack;
+        crow::packet *incpack;
 
     public:
         template <class Ret, class... Args>
@@ -131,7 +131,7 @@ namespace crow
             send(rid, addr, args_data, 2, 50);
         }
 
-        void incoming_packet(crow_packet *pack) override
+        void incoming_packet(crow::packet *pack) override
         {
             incpack = pack;
             notify_one(0);

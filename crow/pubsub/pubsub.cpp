@@ -15,7 +15,7 @@ crow::pubsub_protocol_cls &crow::pubsub_protocol_cls::instance()
     return crow::pubsub_protocol;
 }
 
-void crow::pubsub_protocol_cls::incoming(crow_packet *pack)
+void crow::pubsub_protocol_cls::incoming(crow::packet *pack)
 {
     if (incoming_handler)
     {
@@ -39,7 +39,7 @@ void crow::pubsub_protocol_cls::incoming(crow_packet *pack)
     }
 }
 
-void crow::pubsub_protocol_cls::undelivered(crow_packet *pack)
+void crow::pubsub_protocol_cls::undelivered(crow::packet *pack)
 {
     if (undelivered_handler)
     {

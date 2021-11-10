@@ -24,7 +24,7 @@ namespace crow
         void set_api(crowker_pubsub_node_api *api) { this->api = api; }
 
     private:
-        void incoming_packet(crow_packet *) override;
+        void incoming_packet(crow::packet *) override;
     };
 }
 

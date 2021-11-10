@@ -22,7 +22,7 @@ namespace crow
         chardev_driver *driver; // fast access
 
     public:
-        virtual void send_automate_reset(crow_packet *pack) = 0;
+        virtual void send_automate_reset(crow::packet *pack) = 0;
         virtual int send_automate_getdata(char *buf, int maxlen) = 0;
 
         virtual int receive_automate_newdata(char c) = 0;
@@ -56,16 +56,16 @@ namespace crow
 
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
         int packet_dataaddr_size = 48;
-        crow_packet *insend;
-        crow_packet *rpack;
+        crow::packet *insend;
+        crow::compacted_packet *rpack;
 
     public:
         chardev_gateway(chardev_driver *driver, chardev_protocol *protocol);
 
-        void dosend(struct crow_packet *pack);
+        void dosend(crow::packet *pack);
         void init_recv();
 
-        void send(crow_packet *) override;
+        void send(crow::packet *) override;
         void nblock_onestep() override;
 
         void newline_handler();

@@ -5,7 +5,7 @@
 #include <crow/gates/chardev_gateway.h>
 #include <crow/tower.h>
 
-void crow::chardev_gateway::send(struct crow_packet *pack)
+void crow::chardev_gateway::send(crow::packet *pack)
 {
     system_lock();
 
@@ -21,7 +21,7 @@ void crow::chardev_gateway::send(struct crow_packet *pack)
     system_unlock();
 }
 
-void crow::chardev_gateway::dosend(struct crow_packet *pack)
+void crow::chardev_gateway::dosend(crow::packet *pack)
 {
     insend = pack;
     protocol->send_automate_reset(insend);
@@ -31,16 +31,16 @@ void crow::chardev_gateway::dosend(struct crow_packet *pack)
 void crow::chardev_gateway::init_recv()
 {
     system_lock();
-    rpack = (struct crow_packet *)crow_allocate_packet(packet_dataaddr_size);
+    rpack = crow_allocate_packet(packet_dataaddr_size);
     memset((void *)rpack, 0,
-           packet_dataaddr_size + sizeof(crow_packet::header));
+           packet_dataaddr_size + sizeof(crow::header_v1));
     if (rpack == nullptr)
     {
         return;
         system_unlock();
     }
 
-    protocol->receive_automate_setbuf((char *)&rpack->header,
+    protocol->receive_automate_setbuf((char *)&rpack->header(),
                                       packet_dataaddr_size);
     protocol->receive_automate_reset();
 
@@ -71,10 +71,10 @@ void crow::chardev_gateway::nblock_onestep()
 
 void crow::chardev_gateway::newline_handler()
 {
-    struct crow_packet *block = rpack;
+    crow::compacted_packet *block = rpack;
     rpack = NULL;
 
-    crow_packet_revert_gate(block, id);
+    block->revert_gate(id);
 
     crow_packet_initialization(block, this);
     crow::nocontrol_travel(block, false);

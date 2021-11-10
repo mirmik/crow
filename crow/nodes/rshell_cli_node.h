@@ -20,7 +20,7 @@ namespace crow
         int answer_buffer_size = 256;
 
     public:
-        void incoming_packet(crow_packet *pack) override;
+        void incoming_packet(crow::packet *pack) override;
         virtual int handle(char *, int, char *, int) = 0;
     };
 

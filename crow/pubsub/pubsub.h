@@ -46,14 +46,14 @@ namespace crow
     {
     public:
         struct dlist_head subscribers = DLIST_HEAD_INIT(subscribers);
-        void (*incoming_handler)(crow_packet *);
-        void (*undelivered_handler)(crow_packet *);
+        void (*incoming_handler)(crow::packet *);
+        void (*undelivered_handler)(crow::packet *);
 
     public:
         pubsub_protocol_cls() : protocol(CROW_PUBSUB_PROTOCOL) {}
 
-        void incoming(crow_packet *pack) override;
-        void undelivered(crow_packet *pack) override;
+        void incoming(crow::packet *pack) override;
+        void undelivered(crow::packet *pack) override;
 
         static void start_resubscribe_thread(int millis);
         void resubscribe_all();
@@ -80,7 +80,7 @@ namespace crow
     class pubsub_packet_ptr : public packet_ptr
     {
     public:
-        pubsub_packet_ptr(crow_packet *pack) : packet_ptr(pack) {}
+        pubsub_packet_ptr(crow::packet *pack) : packet_ptr(pack) {}
 
         pubsub_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth.get())
         {

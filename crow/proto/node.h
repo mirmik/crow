@@ -83,11 +83,10 @@ namespace crow
     void __link_node(node *srvs, uint16_t id);
     void bind_node_dynamic(node *srvs);
 
-    static auto node_data(crow_packet *pack)
+    static auto node_data(crow::packet *pack)
     {
-        return igris::buffer(crow_packet_dataptr(pack) + sizeof(node_subheader),
-                             crow_packet_datasize(pack) -
-                                 sizeof(node_subheader));
+        return igris::buffer(pack->dataptr() + sizeof(node_subheader),
+                             pack->datasize() - sizeof(node_subheader));
     }
 
     class node
@@ -98,9 +97,9 @@ namespace crow
             DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
         uint16_t id = 0;
 
-        virtual void incoming_packet(crow_packet *pack) = 0;
+        virtual void incoming_packet(crow::packet *pack) = 0;
 
-        virtual void undelivered_packet(crow_packet *pack)
+        virtual void undelivered_packet(crow::packet *pack)
         {
             notify_all(-1);
             crow::release(pack);
@@ -153,22 +152,22 @@ namespace crow
             return crow::node_send_v(id, rid, raddr, vdat, vlen, qos, ackquant);
         }
 
-        static igris::buffer message(crow_packet *pack)
+        static igris::buffer message(crow::packet *pack)
         {
             return node_data(pack);
         }
 
-        static node_subheader *subheader(crow_packet *pack)
+        static node_subheader *subheader(crow::packet *pack)
         {
-            return (crow::node_subheader *)crow_packet_dataptr(pack);
+            return (crow::node_subheader *)pack->dataptr();
         }
 
-        static nid_t sid(crow_packet *pack) { return subheader(pack)->sid; }
+        static nid_t sid(crow::packet *pack) { return subheader(pack)->sid; }
 
-        static node_subheader_annotation annotation(crow_packet *pack)
+        static node_subheader_annotation annotation(crow::packet *pack)
         {
             node_subheader_annotation annot;
-            annot.parse(crow_packet_dataptr(pack));
+            annot.parse(pack->dataptr());
             return annot;
         }
 
@@ -178,24 +177,24 @@ namespace crow
     class node_protocol_cls : public crow::protocol
     {
     private:
-        void send_node_error(crow_packet *pack, int errcode);
+        void send_node_error(crow::packet *pack, int errcode);
 
     public:
-        void incoming(crow_packet *pack) override;
-        void undelivered(crow_packet *pack) override;
+        void incoming(crow::packet *pack) override;
+        void undelivered(crow::packet *pack) override;
 
         node_protocol_cls() : protocol(CROW_NODE_PROTOCOL) {}
 
-        static auto sid(crow_packet *pack)
+        static auto sid(crow::packet *pack)
         {
-            return ((node_subheader *)(crow_packet_dataptr(pack)))->sid;
+            return ((node_subheader *)(pack->dataptr()))->sid;
         }
-        static auto rid(crow_packet *pack)
+        static auto rid(crow::packet *pack)
         {
-            return ((node_subheader *)(crow_packet_dataptr(pack)))->rid;
+            return ((node_subheader *)(pack->dataptr()))->rid;
         }
 
-        static auto get_error_code(crow_packet *pack)
+        static auto get_error_code(crow::packet *pack)
         {
             return *(int *)(node_data(pack).data());
         }
@@ -206,7 +205,7 @@ namespace crow
     class node_packet_ptr : public packet_ptr
     {
     public:
-        node_packet_ptr(crow_packet *pack_) : packet_ptr(pack_) {}
+        node_packet_ptr(crow::packet *pack_) : packet_ptr(pack_) {}
         node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
         node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}
 

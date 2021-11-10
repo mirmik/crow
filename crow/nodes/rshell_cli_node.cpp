@@ -1,6 +1,6 @@
 #include <crow/nodes/rshell_cli_node.h>
 
-void crow::rshell_cli_node_base::incoming_packet(crow_packet *pack)
+void crow::rshell_cli_node_base::incoming_packet(crow::packet *pack)
 {
     auto sh = crow::node::subheader(pack);
     auto data = crow::node_data(pack);
@@ -14,8 +14,8 @@ void crow::rshell_cli_node_base::incoming_packet(crow_packet *pack)
     if (anslen > 0)
     {
         node_send(id, sh->sid,
-                  igris::buffer(crow_packet_addrptr(pack),
-                                crow_packet_addrsize(pack)),
+                  igris::buffer(pack->addrptr(),
+                                pack->addrsize()),
                   igris::buffer(ansbuf, anslen), 2, 200);
     }
 

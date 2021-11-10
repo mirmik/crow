@@ -24,7 +24,7 @@ namespace crow
         void set_theme(igris::buffer theme);
 
     private:
-        void incoming_packet(crow_packet *pack) override
+        void incoming_packet(crow::packet *pack) override
         {
             crow::release(pack);
         }

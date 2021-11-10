@@ -59,7 +59,7 @@ crow::packet_ptr crow::node_send_v(uint16_t sid, uint16_t rid,
                          ackquant);
 }
 
-void crow::node_protocol_cls::send_node_error(struct crow_packet *pack,
+void crow::node_protocol_cls::send_node_error(crow::packet *pack,
                                               int errcode)
 {
     crow::node_subheader sh;
@@ -71,11 +71,11 @@ void crow::node_protocol_cls::send_node_error(struct crow_packet *pack,
     const igris::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
                                   {(char *)&errcode, sizeof(errcode)}};
 
-    crow::send_v({crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, iov,
-                 2, CROW_NODE_PROTOCOL, 0, pack->header.ackquant);
+    crow::send_v({pack->addrptr(), pack->addrsize()}, iov,
+                 2, CROW_NODE_PROTOCOL, 0, pack->header().ackquant);
 }
 
-void crow::node_protocol_cls::incoming(crow_packet *pack)
+void crow::node_protocol_cls::incoming(crow::packet *pack)
 {
     auto &sh = pack->subheader<node_subheader>();
     crow::node *srv = nullptr;
@@ -111,10 +111,10 @@ void crow::node_protocol_cls::incoming(crow_packet *pack)
     return;
 }
 
-void crow::node_protocol_cls::undelivered(crow_packet *pack)
+void crow::node_protocol_cls::undelivered(crow::packet *pack)
 {
     crow::node_subheader *sh =
-        (crow::node_subheader *)crow_packet_dataptr(pack);
+        (crow::node_subheader *)pack->dataptr();
 
     crow::node *srvs;
     dlist_for_each_entry(srvs, &crow::nodes_list, lnk)

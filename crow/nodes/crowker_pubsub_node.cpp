@@ -3,7 +3,7 @@
 
 #include <nos/fprint.h>
 
-void crow::crowker_pubsub_node::incoming_packet(crow_packet *pack)
+void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
 {
     auto &s = pack->subheader<pubsub_subheader>();
 

@@ -26,119 +26,132 @@ namespace crow
     class gateway;
 }
 
-/**
-    @brief Структура заголовок пакета.
-    @details Заголовок пакета располагается в первых байтах пакета.
-    за заголовком следует поле адреса переменной длины, а за ним данные.
-*/
-struct crow_header
-{
-    union _u
-    {
-        uint8_t pflag = 0; ///< Флаги пакета
-        struct _f
-        {
-            uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
-            ///< передается в типе.
-            uint8_t RESERVED1 : 1;
-            uint8_t RESERVED2 : 1;
-            uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
-        } f;
-    } u;
-    uint16_t flen; ///< Полная длина пакета
-    uint8_t alen;  ///< Длина поля адреса.
-    uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
-    ///< знала, какую часть адреса обрабатывать.
-    uint16_t ackquant; ///< Таймаут для пересылки пакета.
-    uint16_t seqid; ///< Порядковый номер пакета. Присваивается отправителем.
-    uint8_t qos;    ///< Поле качества обслуживания.
-} __attribute__((packed));
-
-struct crow_packet
-{
-    struct dlist_head lnk =
-        DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
-    struct dlist_head ulnk =
-        DLIST_HEAD_INIT(ulnk); ///< Для подключения в список пользователя и
-    ///< зависимых протоколов.
-    crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
-    uint16_t last_request_time; ///< время последней отправки
-    uint16_t _ackcount; ///< счетчик количества попыток отправки
-    int8_t refs;
-    union _u
-    {
-        uint8_t flags = 0; ///< Местные флаги
-        struct _f
-        {
-            uint8_t released_by_world : 1;
-            uint8_t released_by_tower : 1;
-            uint8_t confirmed : 1;
-            uint8_t undelivered : 1;
-            uint8_t sended_to_gate : 1;
-        } f;
-    } u;
-    struct crow_header header;
-
-public:
-    void revert_gate(uint8_t gateindex);
-    void revert(igris::buffer *vec, size_t veclen);
-
-    uint8_t *addrptr();
-    uint8_t addrsize();
-    igris::buffer addr() { return {addrptr(), addrsize()}; }
-
-    char *dataptr();
-    uint16_t datasize();
-    igris::buffer data() { return {dataptr(), datasize()}; }
-
-    char *endptr();
-
-    template <class T> T &subheader()
-    {
-        return *reinterpret_cast<T *>(dataptr());
-    }
-};
-
 namespace crow
 {
-    using packet = crow_packet;
+    /**
+        @brief Структура заголовок пакета.
+        @details Заголовок пакета располагается в первых байтах пакета.
+        за заголовком следует поле адреса переменной длины, а за ним данные.
+    */
+    struct header_v1
+    {
+        union _u
+        {
+            uint8_t pflag = 0; ///< Флаги пакета
+            struct _f
+            {
+                uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
+                ///< передается в типе.
+                uint8_t RESERVED1 : 1;
+                uint8_t RESERVED2 : 1;
+                uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
+            } f;
+        } u;
+        uint16_t flen; ///< Полная длина пакета
+        uint8_t alen;  ///< Длина поля адреса.
+        uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
+        ///< знала, какую часть адреса обрабатывать.
+        uint16_t ackquant; ///< Таймаут для пересылки пакета.
+        uint16_t
+            seqid; ///< Порядковый номер пакета. Присваивается отправителем.
+        uint8_t qos; ///< Поле качества обслуживания.
+    } __attribute__((packed));
+
+    class packet
+    {
+    public:
+        struct dlist_head lnk =
+            DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
+        struct dlist_head ulnk =
+            DLIST_HEAD_INIT(ulnk); ///< Для подключения в список пользователя и
+        ///< зависимых протоколов.
+        crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
+        uint16_t last_request_time; ///< время последней отправки
+        uint16_t _ackcount; ///< счетчик количества попыток отправки
+        int8_t refs;
+        union _u
+        {
+            uint8_t flags = 0; ///< Местные флаги
+            struct _f
+            {
+                uint8_t released_by_world : 1;
+                uint8_t released_by_tower : 1;
+                uint8_t confirmed : 1;
+                uint8_t undelivered : 1;
+                uint8_t sended_to_gate : 1;
+            } f;
+        } u;
+
+    public:
+        virtual void revert_gate(uint8_t gateindex) = 0;
+        virtual void revert(igris::buffer *vec, size_t veclen) = 0;
+
+        virtual uint8_t *addrptr() = 0;
+        virtual uint8_t addrsize() = 0;
+
+        virtual char *dataptr() = 0;
+        virtual uint16_t datasize() = 0;
+
+        virtual char *endptr() = 0;
+        virtual uint8_t *stageptr() = 0;
+
+        virtual header_v1 &header() = 0;
+
+        igris::buffer addr() { return {addrptr(), addrsize()}; }
+        igris::buffer data() { return {dataptr(), datasize()}; }
+
+        template <class T> T &subheader()
+        {
+            return *reinterpret_cast<T *>(dataptr());
+        }
+    };
+
+    class compacted_packet : public packet
+    {
+    public:
+        header_v1 _header;
+
+    public:
+        header_v1 &header() override { return _header; }
+
+        void revert_gate(uint8_t gateindex) override;
+        void revert(igris::buffer *vec, size_t veclen) override;
+
+        uint8_t *addrptr() override;
+        uint8_t addrsize() override;
+
+        char *dataptr() override;
+        uint16_t datasize() override;
+
+        char *endptr() override;
+
+        uint8_t *stageptr() override
+        {
+            return (uint8_t *)(&header() + 1) + header().stg;
+        }
+    };
 }
 
 extern int crow_allocated_count;
 
 __BEGIN_DECLS
 
-static inline uint8_t *crow_packet_stageptr(struct crow_packet *pack)
-{
-    return (uint8_t *)(&pack->header + 1) + pack->header.stg;
-}
-
-void crow_packet_revert_gate(struct crow_packet *pack, uint8_t gateindex);
-void crow_packet_revert(struct crow_packet *pack, igris::buffer *vec,
-                        size_t veclen);
-
-uint8_t *crow_packet_addrptr(struct crow_packet *pack);
-uint8_t crow_packet_addrsize(struct crow_packet *pack);
-
-char *crow_packet_dataptr(struct crow_packet *pack);
-uint16_t crow_packet_datasize(struct crow_packet *pack);
-
-void crow_packet_initialization(struct crow_packet *pack,
+void crow_packet_initialization(crow::compacted_packet *pack,
                                 crow::gateway *ingate);
 
-struct crow_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
-                                       size_t datasize);
+crow::compacted_packet *crow_create_packet(crow::gateway *ingate,
+                                           uint8_t addrsize, size_t datasize);
 
 /**
  * Выделить память для пакета.
  *
- * Выделяет adlen + sizeof(crow_packet) байт
+ * Выделяет adlen + sizeof(crow::packet) байт
  * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
  */
-struct crow_packet *crow_allocate_packet(size_t adlen);
+crow::compacted_packet *crow_allocate_packet(size_t adlen);
 
 ///Вернуть память выделенную для пакета pack
-void crow_deallocate_packet(struct crow_packet *pack);
+void crow_deallocate_packet(crow::packet *pack);
 
 __END_DECLS
 
@@ -150,10 +163,7 @@ namespace crow
 
     bool has_allocated();
 
-    void diagnostic(const char *label, crow_packet *pack);
-
-    using packet = ::crow_packet;
-    using packet_header = ::crow_header;
+    void diagnostic(const char *label, crow::packet *pack);
 }
 
 #endif

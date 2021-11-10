@@ -30,7 +30,7 @@ namespace crow
     class channel : public crow::node
     {
     public:
-        using incoming_handler_t = void (*)(crow::channel *, crow_packet *);
+        using incoming_handler_t = void (*)(crow::channel *, crow::packet *);
 
         dlist_head lnk;
         uint16_t rid;
@@ -73,10 +73,10 @@ namespace crow
         void naive_listener_mode(bool en) { u.f.naive_listener = en; }
         uint8_t state() { return (uint8_t)u.f._state; }
 
-        void incoming_packet(crow_packet *pack) override;
-        void incoming_data_packet(crow_packet *pack);
+        void incoming_packet(crow::packet *pack) override;
+        void incoming_data_packet(crow::packet *pack);
 
-        void undelivered_packet(crow_packet *pack) override;
+        void undelivered_packet(crow::packet *pack) override;
 
         void handshake(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
                        uint8_t qos = 2, uint16_t ackquant = 200);
@@ -89,13 +89,13 @@ namespace crow
 
         int send(const char *data, size_t size);
 
-        static igris::buffer getdata(crow_packet *pack);
+        static igris::buffer getdata(crow::packet *pack);
 
         //////////////////SYNC API/////////////////////////
         int connect(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
                     uint8_t qos = 2, uint16_t ackquant = 200);
 
-        int syncrecv(crow_packet **ppack);
+        int syncrecv(crow::packet **ppack);
     };
 
     struct subheader_channel
@@ -110,16 +110,16 @@ namespace crow
         uint16_t ackquant;
     } __attribute__((packed));
 
-    static inline subheader_channel *get_subheader_channel(crow_packet *pack)
+    static inline subheader_channel *get_subheader_channel(crow::packet *pack)
     {
-        return (subheader_channel *)(crow_packet_dataptr(pack) +
+        return (subheader_channel *)(pack->dataptr() +
                                      sizeof(crow::node_subheader));
     }
 
     static inline subheader_handshake *
-    get_subheader_handshake(crow_packet *pack)
+    get_subheader_handshake(crow::packet *pack)
     {
-        return (subheader_handshake *)(crow_packet_dataptr(pack) +
+        return (subheader_handshake *)(pack->dataptr() +
                                        sizeof(crow::node_subheader) +
                                        sizeof(crow::subheader_channel));
     }

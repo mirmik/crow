@@ -14,7 +14,7 @@ void crow::engage_packet_pool(void *zone, size_t zonesize, size_t elsize)
     _crow_packet_pool.init(zone, zonesize, elsize);
 }
 
-void crow_deallocate_packet(crow_packet *pack)
+void crow_deallocate_packet(crow::packet *pack)
 {
     assert(pack);
 
@@ -27,24 +27,18 @@ void crow_deallocate_packet(crow_packet *pack)
     system_unlock();
 }
 
-crow_packet *crow_allocate_packet(size_t adlen)
+crow::compacted_packet *crow_allocate_packet(size_t adlen)
 {
     (void) adlen;
     system_lock();
     void *ret = _crow_packet_pool.get();
     memset(ret, 0, _crow_packet_pool.element_size());
+    new (ret) crow::compacted_packet;
 
     if (ret)
         crow_allocated_count++;
 
     system_unlock();
 
-    if (__live_diagnostic_enabled)
-    {
-        //debug_print("alloc: ");
-        //debug_printhex_ptr(ret);
-        //debug_print("\r\n");
-    }
-
-    return (crow_packet *)ret;
+    return (crow::packet *)ret;
 }

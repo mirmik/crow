@@ -41,7 +41,7 @@ namespace crow
         }
 
     private:
-        void incoming_packet(crow_packet *) override;
+        void incoming_packet(crow::packet *) override;
     };
 }
 

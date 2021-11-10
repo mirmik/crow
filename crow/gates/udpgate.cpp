@@ -16,13 +16,13 @@
 
 void crow::udpgate::nblock_onestep()
 {
-    crow_header header;
+    crow::header_v1 header;
 
     struct sockaddr_in sender;
     socklen_t sendsize = sizeof(sender);
     memset(&sender, 0, sizeof(sender));
 
-    ssize_t len = recvfrom(sock, &header, sizeof(crow_header), MSG_PEEK,
+    ssize_t len = recvfrom(sock, &header, sizeof(crow::header_v1), MSG_PEEK,
                            (struct sockaddr *)&sender, &sendsize);
 
     if (len <= 0)
@@ -31,11 +31,11 @@ void crow::udpgate::nblock_onestep()
     size_t flen = header.flen;
 
     if (!block)
-        block = crow_allocate_packet(flen - sizeof(crow_header));
-    //(crow_packet *) malloc(flen + sizeof(crow_packet) -
-    // sizeof(crow_header));
+        block = crow_allocate_packet(flen - sizeof(crow::header_v1));
+    //(crow::packet *) malloc(flen + sizeof(crow::packet) -
+    // sizeof(crow::header_v1));
 
-    len = recvfrom(sock, &block->header, flen, 0, (struct sockaddr *)&sender,
+    len = recvfrom(sock, &block->header(), flen, 0, (struct sockaddr *)&sender,
                    &sendsize);
 
     crow_packet_initialization(block, this);
@@ -44,9 +44,9 @@ void crow::udpgate::nblock_onestep()
                             {(char *)&sender.sin_addr.s_addr, 4},
                             {(char *)&sender.sin_port, 2}};
 
-    crow_packet_revert(block, vec, 3);
+    block->revert(vec, 3);
 
-    crow_packet *pack = block;
+    crow::packet *pack = block;
     block = NULL;
 
     crow::nocontrol_travel(pack, fastsend);
@@ -109,10 +109,10 @@ void crow::udpgate::close()
     }
 }
 
-void crow::udpgate::send(crow_packet *pack)
+void crow::udpgate::send(crow::packet *pack)
 {
-    uint32_t *addr = (uint32_t *)(crow_packet_stageptr(pack) + 1);
-    uint16_t *port = (uint16_t *)(crow_packet_stageptr(pack) + 5);
+    uint32_t *addr = (uint32_t *)(pack->stageptr() + 1);
+    uint16_t *port = (uint16_t *)(pack->stageptr() + 5);
 
     struct sockaddr_in ipaddr;
     socklen_t iplen = sizeof(struct sockaddr_in);
@@ -123,7 +123,7 @@ void crow::udpgate::send(crow_packet *pack)
     ipaddr.sin_port = *port;
     ipaddr.sin_addr.s_addr = *addr;
 
-    sendto(sock, (const char *)&pack->header, pack->header.flen, 0,
+    sendto(sock, (const char *)&pack->header(), pack->header().flen, 0,
            (struct sockaddr *)&ipaddr, iplen);
     crow::return_to_tower(pack, CROW_SENDED);
 }

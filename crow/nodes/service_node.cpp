@@ -3,7 +3,7 @@
 #include <crow/warn.h>
 #include <nos/print.h>
 
-void crow::service_node::incoming_packet(crow_packet *pack)
+void crow::service_node::incoming_packet(crow::packet *pack)
 {
     char *answer = (char *)malloc(answer_buffer_size);
     memset(answer, 0, answer_buffer_size);

@@ -14,10 +14,10 @@
 
 void crow::serial_gstuff_v1::newline_handler()
 {
-    struct crow_packet *block = rpack;
+    crow::compacted_packet *block = rpack;
     rpack = NULL;
 
-    crow_packet_revert_gate(block, id);
+    block->revert_gate(id);
 
     crow_packet_initialization(block, this);
     crow::nocontrol_travel(block, false);
@@ -97,11 +97,11 @@ struct crow::serial_gstuff_v1 *crow::create_serial_gstuff_v1(const char *path,
     return g;
 }
 
-void crow::serial_gstuff_v1::send(struct crow_packet *pack)
+void crow::serial_gstuff_v1::send(crow::packet *pack)
 {
     char buffer[512];
 
-    int len = gstuffing_v1((char *)&pack->header, pack->header.flen, buffer);
+    int len = gstuffing_v1((char *)&pack->header(), pack->header().flen, buffer);
     write(fd, buffer, len);
     crow::return_to_tower(pack, CROW_SENDED);
 }
@@ -111,10 +111,11 @@ void crow::serial_gstuff_v1::nblock_onestep()
 #define GSTUFF_MAXPACK_SIZE 512
     if (rpack == NULL)
     {
-        rpack = (struct crow_packet *)malloc(GSTUFF_MAXPACK_SIZE +
-                                             sizeof(struct crow_packet) -
-                                             sizeof(struct crow_header));
-        gstuff_autorecv_setbuf_v1(&recver, (char *)&rpack->header,
+        rpack = (crow::compacted_packet *)malloc(GSTUFF_MAXPACK_SIZE +
+                                             sizeof(crow::packet) -
+                                             sizeof(struct crow::header_v1));
+        new (rpack) crow::compacted_packet;
+        gstuff_autorecv_setbuf_v1(&recver, (char *)&rpack->header(),
                                   GSTUFF_MAXPACK_SIZE);
     }
 

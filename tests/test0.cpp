@@ -11,7 +11,7 @@ static auto addr = crow::address(".99");
 static auto addr2 = crow::address(".99.99");
 static int count = 0;
 
-void incoming(crow_packet * ptr)
+void incoming(crow::packet * ptr)
 {
 	count++;
 	crow::release(ptr);

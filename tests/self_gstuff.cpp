@@ -28,12 +28,12 @@ TEST_CASE("self_driven_gstuff.output")
 
 		auto * pack = crow_create_packet(nullptr, 1, 10);
 
-		pack->header.u.f.type = 0 & 0x1F;
-		pack->header.qos = 0;
-		pack->header.ackquant = 0;
+		pack->header().u.f.type = 0 & 0x1F;
+		pack->header().qos = 0;
+		pack->header().ackquant = 0;
 
-		memcpy(crow_packet_addrptr(pack), "\x01", 1);
-		memcpy(crow_packet_dataptr(pack), "helloworld", 10);
+		memcpy(pack->addrptr(), "\x01", 1);
+		memcpy(pack->addrptr(), "helloworld", 10);
 
 		CHECK_EQ(ccc, 0);
 		gate.send(pack);
@@ -66,14 +66,14 @@ TEST_CASE("self_driven_gstuff.input")
 
 		auto * pack = crow_create_packet(nullptr, 1, 10);
 
-		pack->header.u.f.type = 9 & 0x1F;
-		pack->header.qos = 0;
-		pack->header.ackquant = 0;
+		pack->header().u.f.type = 9 & 0x1F;
+		pack->header().qos = 0;
+		pack->header().ackquant = 0;
 
-		memcpy(crow_packet_addrptr(pack), "\x01", 1);
-		memcpy(crow_packet_dataptr(pack), "helloworld", 10);
+		memcpy(pack->addrptr(), "\x01", 1);
+		memcpy(pack->dataptr(), "helloworld", 10);
 
-		int gsize = gstuffing((const char*)&pack->header, pack->header.flen, buf2);
+		int gsize = gstuffing((const char*)&pack->header(), pack->header().flen, buf2);
 
 		for (int i = 0; i < gsize; ++i)
 		{

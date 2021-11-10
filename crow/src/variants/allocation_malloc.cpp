@@ -12,20 +12,22 @@
 
 int crow_allocated_count = 0;
 
-void crow_deallocate_packet(crow_packet *pack)
+void crow_deallocate_packet(crow::packet *pack)
 {
     if (pack)
         crow_allocated_count--;
     free(pack);
 }
 
-crow_packet *crow_allocate_packet(size_t adlen)
+crow::compacted_packet *crow_allocate_packet(size_t adlen)
 {
     crow_allocated_count++;
 
     // inc 1 for zero symbol
-    crow_packet *ret = (crow_packet *)malloc(adlen + sizeof(crow_packet) + 1);
-    memset((void*)ret, 0, adlen + sizeof(crow_packet) +1);
+    crow::compacted_packet *ret = (crow::compacted_packet *)
+        malloc(adlen + sizeof(crow::compacted_packet) + 1);
+    memset((void*)ret, 0, adlen + sizeof(crow::compacted_packet) +1);
+    new (ret) crow::compacted_packet;
 
     return ret;
 }

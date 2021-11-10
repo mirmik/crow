@@ -30,7 +30,7 @@ namespace crow
         crow::packet_ptr sync_request(igris::buffer data);
 
     private:
-        void incoming_packet(crow_packet *pack) override;
+        void incoming_packet(crow::packet *pack) override;
     };
 }
 

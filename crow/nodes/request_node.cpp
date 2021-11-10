@@ -2,7 +2,7 @@
 #include <crow/nodes/request_node.h>
 #include <nos/print.h>
 
-void crow::request_node::incoming_packet(crow_packet *pack)
+void crow::request_node::incoming_packet(crow::packet *pack)
 {
     dlist_move(&pack->ulnk, &incoming_list);
     notify_one(0);

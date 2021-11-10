@@ -6,7 +6,7 @@
 
 #include <igris/util/bug.h>
 
-void incoming_crowker_handler(struct crow_packet *pack)
+void incoming_crowker_handler(crow::packet *pack)
 {
     crow::subheader_pubsub &shps = pack->subheader<crow::subheader_pubsub>();
 
@@ -27,7 +27,7 @@ void incoming_crowker_handler(struct crow_packet *pack)
         std::string theme = shps_c.theme().to_string();
 
         crow::crowker::instance()->crow_subscribe(
-            {crow_packet_addrptr(pack), crow_packet_addrsize(pack)}, theme,
+            {pack->addrptr(), pack->addrsize()}, theme,
             shps_c.qos, shps_c.ackquant);
     }
     break;
@@ -48,14 +48,14 @@ void incoming_crowker_handler(struct crow_packet *pack)
     crow::release(pack);
 }
 
-void undelivered_crowker_handler(struct crow_packet *pack)
+void undelivered_crowker_handler(crow::packet *pack)
 {
     auto &shps = pack->subheader<crow::subheader_pubsub>();
 
     if (shps.type == PUBLISH)
     {
         crow::crowker::instance()->erase_crow_client(
-            std::string((char *)crow_packet_addrptr(pack), pack->header.alen));
+            std::string((char *)pack->addrptr(), pack->header().alen));
     }
 
     crow::release(pack);

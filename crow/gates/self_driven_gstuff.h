@@ -15,13 +15,13 @@ namespace crow
         sem_t sem;
 
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
-        crow_packet *insend = nullptr;
+        crow::compacted_packet *insend = nullptr;
         char *send_buffer = nullptr;
         char *send_it = nullptr;
         char *send_eit = nullptr;
 
         int received_maxpack_size = 48;
-        crow_packet *recvpack = nullptr;
+        crow::compacted_packet *recvpack = nullptr;
         struct gstuff_autorecv recver;
 
         int (*write_callback)(void *, const char *data, unsigned int size);
@@ -60,9 +60,9 @@ namespace crow
 
         void newline_handler()
         {
-            struct crow_packet *pack = recvpack;
+            crow::compacted_packet *pack = recvpack;
             recvpack = NULL;
-            crow_packet_revert_gate(pack, this->id);
+            pack->revert_gate(this->id);
             crow_packet_initialization(pack, this);
             crow::nocontrol_travel(pack, false);
             init_receiver();
@@ -71,7 +71,7 @@ namespace crow
         void init_receiver()
         {
             recvpack = crow_allocate_packet(received_maxpack_size);
-            gstuff_autorecv_setbuf(&recver, (char *)&recvpack->header,
+            gstuff_autorecv_setbuf(&recver, (char *)&recvpack->header(),
                                    received_maxpack_size);
         }
 
@@ -80,11 +80,12 @@ namespace crow
             if (dlist_empty(&to_send))
                 return;
 
-            insend = dlist_first_entry(&to_send, crow_packet, lnk);
+            insend = (crow::compacted_packet *)dlist_first_entry(
+                &to_send, crow::packet, lnk);
             dlist_del_init(&insend->lnk);
 
-            int size = gstuffing((const char *)&insend->header,
-                                 insend->header.flen, send_buffer);
+            int size = gstuffing((const char *)&insend->header(),
+                                 insend->header().flen, send_buffer);
 
             send_it = send_buffer;
             send_eit = send_buffer + size;
@@ -122,7 +123,7 @@ namespace crow
             }
         }
 
-        void send(crow_packet *pack) override
+        void send(crow::packet *pack) override
         {
             system_lock();
             dlist_move(&pack->lnk, &to_send);

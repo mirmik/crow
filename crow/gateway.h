@@ -11,7 +11,7 @@ struct crow_gateway;
 
 struct crow_gateway_operations
 {
-    void (*send)(struct crow_gateway *, struct crow_packet *);
+    void (*send)(struct crow_gateway *, crow::packet *);
     void (*deinit)(struct crow_gateway *);
 
     // selector support operations
@@ -56,7 +56,7 @@ namespace crow
         struct dlist_head lnk; ///< встроенное поле списка.
         uint8_t id;            ///< номер врат.
 
-        virtual void send(crow_packet *) = 0;
+        virtual void send(crow::packet *) = 0;
         virtual void nblock_onestep() = 0;
         virtual void finish() = 0;
 
