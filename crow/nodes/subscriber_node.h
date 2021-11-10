@@ -11,7 +11,6 @@ namespace crow
     {
         int rqos = 2;
         int rackquant = 50;
-        int keepalive = 30;
 
     public:
         abstract_subscriber_node() = default;

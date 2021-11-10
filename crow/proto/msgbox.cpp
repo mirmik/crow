@@ -2,7 +2,7 @@
 
 crow::msgbox::msgbox() { sem_init(&message_lock, 0, 1); }
 
-crow::node_packet_ptr crow::msgbox::query(uint16_t rid,
+crow::node_packet_ptr crow::msgbox::query(nodeid_t rid,
                                           const crow::hostaddr_view &addr,
                                           const igris::buffer data, uint8_t qos,
                                           uint16_t ackquant)

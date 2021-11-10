@@ -7,7 +7,11 @@
 
 namespace crow
 {
+#if defined(MEMORY_ECONOMY)
+    static inline void warn(igris::buffer) {}
+#else
     void warn(igris::buffer msg);
+#endif
 }
 
 #endif

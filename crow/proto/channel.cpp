@@ -102,7 +102,7 @@ void crow::channel::undelivered_packet(crow::packet *pack)
 }
 
 void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len,
-                              uint16_t rid, uint8_t qos, uint16_t ackquant)
+                              nodeid_t rid, uint8_t qos, uint16_t ackquant)
 {
     crow::node_subheader sh_node;
     crow::subheader_channel sh_channel;

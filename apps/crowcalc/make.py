@@ -17,7 +17,8 @@ application("crowcalc",
 	],
 	mdepends=["crow", "crow.udpgate"],
 	defines = defines,
-	cxx_flags = "-Wextra -Wall",
+	cxx_flags = "-Wextra -Wall -g",
+	cc_flags = "-Wextra -Wall -g",
 	libs = ["pthread", "readline", "igris", "nos"],
 	cxxstd = "c++17"
 )

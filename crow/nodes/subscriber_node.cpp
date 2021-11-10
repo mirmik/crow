@@ -50,7 +50,6 @@ void crow::abstract_subscriber_node::subscribe()
     sh.type = PubSubTypes::Subscribe;
     sh.rqos = rqos;
     sh.rackquant = rackquant;
-    sh.keepalive = keepalive;
     sh.thmsize = theme.size();
 
     const igris::buffer iov[] = {{(char *)&sh + sizeof(node_subheader),

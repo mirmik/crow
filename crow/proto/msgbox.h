@@ -22,7 +22,7 @@ namespace crow
     public:
         msgbox();
 
-        crow::node_packet_ptr query(uint16_t rid,
+        crow::node_packet_ptr query(nodeid_t rid,
                                     const crow::hostaddr_view &addr,
                                     const igris::buffer data, uint8_t qos,
                                     uint16_t ackquant);

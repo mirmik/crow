@@ -12,8 +12,6 @@ namespace crow
 {
     class self_driven_gstuff : public crow::gateway
     {
-        sem_t sem;
-
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
         crow::compacted_packet *insend = nullptr;
         char *send_buffer = nullptr;

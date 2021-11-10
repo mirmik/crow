@@ -16,8 +16,8 @@
 #include <nos/print.h>
 
 bool crow::diagnostic_noack = false;
-uint16_t crow::debug_data_size = 28;
-unsigned int crow::total_travelled;
+uint16_t crow::debug_data_size = 60;
+unsigned int crow::total_travelled = 0;
 
 bool crow::retransling_allowed = false;
 
@@ -70,7 +70,7 @@ void crow::utilize(crow::packet *pack) { __crow_utilize(pack); }
 
 /*static crow::gateway *crow_find_target_gateway(crow::packet *pack)
 {
-    uint8_t gidx = *crow_packet_stageptr(pack);
+    uint8_t gidx = *crow::packet_stageptr(pack);
 
     crow::gateway * gate;
     dlist_for_each_entry(gate, &crow::gateway_list, lnk)

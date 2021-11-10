@@ -34,15 +34,14 @@ namespace crow
     {
         uint8_t rqos;
         uint16_t rackquant;
-        uint16_t keepalive;
         uint8_t thmsize;
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
     } __attribute__((packed));
 
     struct consume_subheader : public pubsub_subheader
     {
-        int datsize;
-        int thmsize;
+        uint8_t thmsize;
+        uint16_t datsize;
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
         igris::buffer message()
         {
@@ -54,7 +53,6 @@ namespace crow
     {
         uint8_t rqos;
         uint16_t rackquant;
-        uint16_t keepalive;
         uint8_t thmsize;
         uint8_t repthmsize;
         uint16_t datsize;

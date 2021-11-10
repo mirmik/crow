@@ -117,6 +117,14 @@ void crow::serial_gstuff::nblock_onestep()
     {
         char c = buf[i];
 
+        if (debug) 
+        {
+            debug_printhex_uint8(c); 
+            debug_putchar('\t'); 
+            debug_putchar(c); 
+            debug_print_newline();   
+        }
+
         if (rpack == NULL)
         {
             rpack = (crow::compacted_packet *)malloc(GSTUFF_MAXPACK_SIZE +

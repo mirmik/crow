@@ -9,7 +9,7 @@ void crow::request_node::incoming_packet(crow::packet *pack)
 }
 
 void crow::request_node::request(crow::hostaddr_view crowker_addr,
-                                 int crowker_node, igris::buffer theme,
+                                 nodeid_t crowker_node, igris::buffer theme,
                                  igris::buffer reptheme, igris::buffer data,
                                  uint8_t qos, uint16_t ackquant, uint8_t rqos,
                                  uint16_t rackquant)
@@ -32,7 +32,6 @@ void crow::request_node::request(igris::buffer data)
     sh.type = PubSubTypes::Request;
     sh.rqos = rqos;
     sh.rackquant = rackquant;
-    sh.keepalive = keepalive;
     sh.thmsize = theme.size();
     sh.datsize = data.size();
     sh.repthmsize = reply_theme.size();
