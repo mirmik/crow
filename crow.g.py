@@ -75,7 +75,6 @@ licant.modules.module("crow",
 licant.module("crow.crowker",
 	srcdir = "crow",
 	sources= [
-		"pubsub/crowker_support.cpp",
 		"brocker/crowker.cpp",
 		"brocker/theme.cpp",
 		"brocker/client.cpp",
