@@ -1,7 +1,9 @@
 #ifndef CROW_QOSBYTE_H
 #define CROW_QOSBYTE_H
 
+#undef round
 #include <cmath>
+#include <type_traits>
 
 namespace crow
 {
@@ -26,8 +28,6 @@ namespace crow
         void set_quality(uint8_t quality) { _qos = quality; }
     };
     static_assert(sizeof(qosbyte) == 1, "qosbyte wrong size");
-    static_assert(std::is_trivial<qosbyte>::value == true,
-                  "qosbyte is not trivial");
 }
 
 #endif

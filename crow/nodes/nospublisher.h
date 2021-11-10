@@ -12,7 +12,7 @@ namespace crow
         nospublisher() = default;
         nospublisher(igris::buffer theme, crow::hostaddr_view crowker_addr,
                      int crowker_node = CROWKER_SERVICE_BROCKER_NODE_NO)
-            : publisher_node(theme, crowker_addr, crowker_node)
+            : publisher_node(crowker_addr, crowker_node, theme)
         {
         }
 
