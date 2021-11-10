@@ -33,9 +33,9 @@ crow::compacted_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsi
 
     pack->header().flen = (uint16_t)(sizeof(crow::header_v1) + addrsize + datasize);
     pack->header().alen = addrsize;
-    pack->header().ackquant = 200;
+    pack->set_ackquant(200);
     pack->header().u.pflag = 0;
-    pack->header().qos = 0;
+    pack->set_quality(0);
     pack->set_stage(0);
 
     crow_packet_initialization(pack, ingate);
@@ -77,7 +77,7 @@ uint8_t *crow::compacted_packet::addrptr()
 
 uint8_t crow::compacted_packet::addrsize()
 {
-    return addrsize();
+    return _header.alen;
 }
 
 char *crow::compacted_packet::dataptr()

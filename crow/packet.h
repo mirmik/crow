@@ -11,6 +11,7 @@
 
 #include <crow/defs.h>
 #include <crow/hostaddr_view.h>
+#include <crow/qosbyte.h>
 
 #include <igris/buffer.h>
 #include <igris/container/pool.h>
@@ -54,7 +55,7 @@ namespace crow
         uint16_t ackquant; ///< Таймаут для пересылки пакета.
         uint16_t
             seqid; ///< Порядковый номер пакета. Присваивается отправителем.
-        uint8_t qos; ///< Поле качества обслуживания.
+        qosbyte qos; ///< Поле качества обслуживания.
     } __attribute__((packed));
 
     class packet
@@ -151,14 +152,14 @@ namespace crow
         }
 
         uint16_t full_length() override { return _header.flen; }
-        uint8_t quality() override { return _header.qos; }
-        uint16_t ackquant() override { return _header.ackquant; }
+        uint8_t quality() override { return _header.qos.quality(); }
+        uint16_t ackquant() override { return _header.qos.quant(); }
         uint8_t stage() override { return _header.stg; }
         uint8_t ack() override { return _header.u.f.ack; }
 
         virtual void set_type(uint8_t arg) { _header.u.f.type = arg; }
-        virtual void set_quality(uint8_t arg) { _header.qos = arg; }
-        virtual void set_ackquant(uint16_t arg) { _header.ackquant = arg; }
+        virtual void set_quality(uint8_t arg) { _header.qos.set_quality(arg); }
+        virtual void set_ackquant(uint16_t arg) { _header.qos.set_quant(arg); }
         virtual void set_stage(uint8_t arg) { _header.stg = arg; }
         virtual void set_seqid(uint16_t arg) { _header.seqid = arg; }
         virtual void set_ack(uint8_t arg) { _header.u.f.ack = arg; };
