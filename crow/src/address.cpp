@@ -43,11 +43,5 @@ namespace crow
 
 crow::hostaddr crow::crowker_address()
 {
-    if (getenv("CROWKER") == NULL)
-    {
-        printf("Crowker env is not defined.\r\n");
-        exit(0);
-    }
-
-    return crow::address(getenv("CROWKER"));
+    return crow::address(".12.127.0.0.1:10009"); // default crowker address
 }

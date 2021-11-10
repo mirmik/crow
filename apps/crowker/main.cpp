@@ -1,9 +1,7 @@
 #include <crow/gates/udpgate.h>
-//#include <crow/pubsub/pubsub.h>
 #include <crow/tower.h>
 #include <crow/address.h>
 #include <crow/select.h>
-//#include <crow/nodes/cli.h>
 #include <crow/nodes/crowker_pubsub_node.h>
 #include <crow/brocker/crowker_api.h>
 
@@ -202,8 +200,8 @@ int main(int argc, char *argv[])
 
 	if (udpport == -1)
 	{
-		printf("You should specify udp port.\n");
-		exit(-1);
+		printf("Use default udp port 10009.\n");
+		udpport = 10009;
 	}
 
 	if (crow::create_udpgate(CROW_UDPGATE_NO, udpport))
