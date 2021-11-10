@@ -21,8 +21,8 @@ application("runtests",
 
 	cxxstd="c++17",
 	ccstd="c11",
-	cxx_flags = "-g -Werror=all -Werror=pedantic -Wno-gnu-zero-variadic-macro-arguments",
-	cc_flags = "-g -Werror=all -Werror=pedantic -Wno-gnu-zero-variadic-macro-arguments",
+	cxx_flags = "-g -Werror=all -Werror=pedantic",
+	cc_flags = "-g -Werror=all -Werror=pedantic",
 
 	include_paths = ["."],
 	libs = ["igris", "nos", "pthread"],
