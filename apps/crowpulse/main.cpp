@@ -3,9 +3,9 @@
 
 #include <crow/tower.h>
 #include <crow/address.h>
-#include <crow/pubsub/pubsub.h>
-#include <crow/proto/channel.h>
-#include <crow/proto/acceptor.h>
+//#include <crow/pubsub/pubsub.h>
+//#include <crow/proto/channel.h>
+//#include <crow/proto/acceptor.h>
 
 #include <thread>
 #include <chrono>
@@ -16,7 +16,7 @@ using namespace std::chrono_literals;
 
 int main(int argc, char** argv) 
 {
-	if (argc != 3) 
+/*	if (argc != 3) 
 	{
 		nos::println("usage: crowpulse ADDRESS SLEEPTIME_MS");
 		exit(0);
@@ -33,5 +33,5 @@ int main(int argc, char** argv)
 		crow::publish(address, "pulse", nos::format("{}", i++), 0, 100);
 		crow::onestep();
 		std::this_thread::sleep_for(std::chrono::milliseconds(sleeptime));
-	}
+	}*/
 }

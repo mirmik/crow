@@ -1,5 +1,5 @@
 #include <crow/gates/udpgate.h>
-#include <crow/pubsub/pubsub.h>
+//#include <crow/pubsub/pubsub.h>
 #include <crow/tower.h>
 #include <crow/address.h>
 #include <crow/select.h>
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
 	crowker_api.crowker = crow::crowker::instance();
 	crowker_api.crowker_node = &pubsub_node;
 	pubsub_node.set_api(&crowker_api);
-	crow::pubsub_protocol.enable_crowker_subsystem();
+	//crow::pubsub_protocol.enable_crowker_subsystem();
 	pubsub_node.bind(CROWKER_SERVICE_BROCKER_NODE_NO);
 
 	const struct option long_options[] =

@@ -45,10 +45,6 @@ namespace crow
 
         void subscribe(const std::string &theme, client *cl);
 
-        void crow_subscribe(const crow::hostaddr_view &addr,
-                            const std::string &theme, uint8_t qos,
-                            uint16_t ackquant);
-
         void tcp_subscribe(const std::string &theme,
                            nos::inet::tcp_socket *sock);
 

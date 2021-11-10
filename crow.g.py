@@ -68,7 +68,7 @@ licant.modules.module("crow",
 		"crow.crowker",
 		"crow.chardev_gateway",
 		"crow.minimal",
-		"crow.protocol.pubsub",
+	#	"crow.protocol.pubsub",
 	]
 )
 
@@ -129,13 +129,13 @@ licant.module("crow.chardev_gateway",
 #####################################################################################
 ####################################PROTOCOLS########################################
 
-licant.module("crow.protocol.pubsub", "impl", default=True,
-	sources = ["crow/pubsub/pubsub.cpp"]
-)
+#licant.module("crow.protocol.pubsub", "impl", default=True,
+#	sources = ["crow/pubsub/pubsub.cpp"]
+#)
 
-licant.module("crow.protocol.pubsub", "stub",
-	defines = ["WITHOUT_CROW_PUBSUB=1"]
-)
+#licant.module("crow.protocol.pubsub", "stub",
+#	defines = ["WITHOUT_CROW_PUBSUB=1"]
+#)
 
 #####################################################################################
 

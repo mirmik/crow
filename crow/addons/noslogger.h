@@ -1,4 +1,4 @@
-#ifndef CROW_NOS_LOGGER_H
+/*#ifndef CROW_NOS_LOGGER_H
 #define CROW_NOS_LOGGER_H
 
 #include <nos/log/logger.h>
@@ -38,3 +38,4 @@ namespace crow
 } // namespace crow
 
 #endif
+*/

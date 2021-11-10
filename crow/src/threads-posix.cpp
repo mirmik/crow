@@ -91,7 +91,8 @@ void crow::spin_with_select()
         do
         {
             crow::onestep();
-        } while (crow::has_untravelled_now());
+        }
+        while (crow::has_untravelled_now());
 
         crow::select();
         read(unselect_pipe[0], unselect_read_buffer, 512);
@@ -157,7 +158,8 @@ int crow::start_spin_without_select()
     }
 
     _spin_runned_unbounded = true;
-    _thread = std::thread([]() {
+    _thread = std::thread([]()
+    {
         _spin_runned = true;
 
         while (1)
@@ -191,23 +193,12 @@ int crow::stop_spin(bool wait)
     return 0;
 }
 
-void crow::pubsub_protocol_cls::start_resubscribe_thread(int millis)
+void crow::spin_join()
 {
-    std::thread thr([=]() {
-        while (1)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(millis));
-            crow::pubsub_protocol.resubscribe_all();
-        }
-    });
-    thr.detach();
+    _thread.join();
 }
 
-void crow::start_resubscribe_thread(int millis)
+void crow::join_spin()
 {
-    crow::pubsub_protocol_cls::start_resubscribe_thread(millis);
+    _thread.join();
 }
-
-void crow::spin_join() { _thread.join(); }
-
-void crow::join_spin() { _thread.join(); }
