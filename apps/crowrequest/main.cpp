@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 				exit(0);
 
 			case 'd':
-				crow::diagnostic_setup(true, false);
+				crow::diagnostic_setup(true);
 				continue;
 
 			case '?':

@@ -34,11 +34,8 @@ namespace crow
     void enable_diagnostic();
     bool diagnostic_enabled();
 
-    // Включить трассировку аллокации.
-    void enable_live_diagnostic();
-
     // Включить диагностику прохождения, жизни пакетов
-    void diagnostic_setup(bool en, bool len = false);
+    void diagnostic_setup(bool en);
 
     // Отправить пакет.
     crow::packet_ptr send(const crow::hostaddr_view &addr, igris::buffer data,

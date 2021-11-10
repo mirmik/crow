@@ -58,7 +58,7 @@ int main(int argc, char ** argv)
 	bool debug = cliopts.get_option("debug");
 
 	if (debug)
-		crow::diagnostic_setup(true, false);
+		crow::diagnostic_setup(true);
 
 	if (argc == 1) 
 	{

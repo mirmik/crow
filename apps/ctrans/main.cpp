@@ -503,7 +503,6 @@ void print_help()
 	    "      --info\n"
 	    "      --debug\n"
 	    "      --debug-data-size\n"
-	    "      --vdebug\n"
 	    "      --gdebug\n"
 	    "\n"
 	    "Control option list:\n"
@@ -562,7 +561,6 @@ int main(int argc, char *argv[])
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
 		{"debug", no_argument, NULL, 'd'}, // Включает информацию о событиях башни.
 		{"dumpsize", required_argument, NULL, 's'}, // Включает информацию о событиях башни.
-		{"vdebug", no_argument, NULL, 'v'}, // Активирует информацию о времени жизни пакетов.
 		{"gdebug", no_argument, NULL, 'g'}, // Активирует информацию о вратах.
 		{NULL, 0, NULL, 0}
 	};
@@ -667,10 +665,6 @@ int main(int argc, char *argv[])
 			case 'd':
 				debug_mode = true;
 				crow::enable_diagnostic();
-				break;
-
-			case 'v':
-				crow::enable_live_diagnostic();
 				break;
 
 			case 'L':

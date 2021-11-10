@@ -162,7 +162,6 @@ int main(int argc, char *argv[])
 		{"tcp", required_argument, NULL, 't'},
 		{"debug", no_argument, NULL, 'd'}, // crow transport log
 		{"binfo", no_argument, NULL, 'b'}, // browker log
-		{"vdebug", no_argument, NULL, 'v'}, // vital packet log
 		{"netname", required_argument, NULL, 'n'},
 		{NULL, 0, NULL, 0}
 	};
@@ -189,10 +188,6 @@ int main(int argc, char *argv[])
 
 			case 'd':
 				crow::enable_diagnostic();
-				break;
-
-			case 'v':
-				crow::enable_live_diagnostic();
 				break;
 
 			case 'b':

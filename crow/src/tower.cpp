@@ -31,7 +31,6 @@ void (*crow::user_incoming_handler)(crow::packet *pack) = nullptr;
 void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
 
 static bool __diagnostic_enabled = false;
-bool __live_diagnostic_enabled = false;
 
 bool _in_incoming_handler = false;
 bool _in_undelivered_handler = false;
@@ -39,47 +38,19 @@ bool _in_undelivered_handler = false;
 bool crow::diagnostic_enabled() { return __diagnostic_enabled; }
 void crow::enable_diagnostic() { __diagnostic_enabled = true; }
 
-void crow::enable_live_diagnostic() { __live_diagnostic_enabled = true; }
-
-void crow::diagnostic_setup(bool en, bool len)
+void crow::diagnostic_setup(bool en)
 {
     __diagnostic_enabled = en;
-    __live_diagnostic_enabled = len;
 }
 
 static void __crow_utilize(crow::packet *pack)
 {
-    if (__live_diagnostic_enabled)
-    {
-        crow::diagnostic("utilz", pack);
-    }
-
     dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
     dlist_del(&pack->ulnk);
     crow_deallocate_packet(pack);
-
-    if (__live_diagnostic_enabled)
-    {
-        // nos::println("alive packages total:", crow_allocated_count);
-        // TODO : crow print function
-    }
 }
 
 void crow::utilize(crow::packet *pack) { __crow_utilize(pack); }
-
-/*static crow::gateway *crow_find_target_gateway(crow::packet *pack)
-{
-    uint8_t gidx = *crow::packet_stageptr(pack);
-
-    crow::gateway * gate;
-    dlist_for_each_entry(gate, &crow::gateway_list, lnk)
-    {
-        if (gate->id == gidx)
-            return gate;
-    }
-
-    return NULL;
-}*/
 
 void crow::release(crow::packet *pack)
 {
