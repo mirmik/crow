@@ -31,6 +31,7 @@ bool brocker_info = false;
 int udpport = -1;
 int tcpport = -1;
 bool quite = false;
+bool debug_mode = false;
 
 crow::crowker_api crowker_api;
 crow::crowker_pubsub_node pubsub_node;
@@ -185,6 +186,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'd':
+				debug_mode = 1;
 				crow::enable_diagnostic();
 				break;
 
@@ -200,7 +202,8 @@ int main(int argc, char *argv[])
 
 	if (udpport == -1)
 	{
-		printf("Use default udp port 10009.\n");
+		if (debug_mode)
+			printf("Use default udp port 10009.\n");
 		udpport = 10009;
 	}
 
