@@ -60,7 +60,7 @@ namespace crow
 
     class packet
     {
-    public:
+      public:
         struct dlist_head lnk =
             DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
         struct dlist_head ulnk =
@@ -83,7 +83,7 @@ namespace crow
             } f;
         } u;
 
-    public:
+      public:
         virtual void revert_gate(uint8_t gateindex) = 0;
         virtual void revert(igris::buffer *vec, size_t veclen) = 0;
 
@@ -127,10 +127,10 @@ namespace crow
 
     class compacted_packet : public packet
     {
-    public:
+      public:
         header_v1 _header;
 
-    public:
+      public:
         header_v1 &header() { return _header; }
 
         void revert_gate(uint8_t gateindex) override;
@@ -143,8 +143,8 @@ namespace crow
         uint16_t datasize() override;
 
         char *endptr() override;
-        uint8_t type() { return _header.u.f.type; }
-        uint16_t seqid() { return _header.seqid; }
+        uint8_t type() override { return _header.u.f.type; }
+        uint16_t seqid() override { return _header.seqid; }
 
         uint8_t *stageptr() override
         {
@@ -157,12 +157,12 @@ namespace crow
         uint8_t stage() override { return _header.stg; }
         uint8_t ack() override { return _header.u.f.ack; }
 
-        virtual void set_type(uint8_t arg) { _header.u.f.type = arg; }
-        virtual void set_quality(uint8_t arg) { _header.qos.set_quality(arg); }
-        virtual void set_ackquant(uint16_t arg) { _header.qos.set_quant(arg); }
-        virtual void set_stage(uint8_t arg) { _header.stg = arg; }
-        virtual void set_seqid(uint16_t arg) { _header.seqid = arg; }
-        virtual void set_ack(uint8_t arg) { _header.u.f.ack = arg; };
+        void set_type(uint8_t arg) override { _header.u.f.type = arg; }
+        void set_quality(uint8_t arg) override { _header.qos.set_quality(arg); }
+        void set_ackquant(uint16_t arg) override { _header.qos.set_quant(arg); }
+        void set_stage(uint8_t arg) override { _header.stg = arg; }
+        void set_seqid(uint16_t arg) override { _header.seqid = arg; }
+        void set_ack(uint8_t arg) override { _header.u.f.ack = arg; };
         void increment_stage(int i) override { _header.stg += i; }
         void increment_seqid(int i) override { _header.seqid += i; }
     };

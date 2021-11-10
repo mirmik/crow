@@ -14,13 +14,12 @@ namespace crow
         crow::hostaddr_view crowker_addr;
         nodeid_t crowker_node = CROWKER_SERVICE_BROCKER_NODE_NO;
 
-        int qos = 2;
-        int ackquant = 50;
-        int rqos = 2;
-        int rackquant = 50;
-        int keepalive = 60;
+        int qos = 0;
+        int ackquant = 0;
+        int rqos = 0;
+        int rackquant = 0;
 
-    public:
+      public:
         void request(crow::hostaddr_view crowker_addr, nodeid_t crowker_node,
                      igris::buffer theme, igris::buffer reptheme,
                      igris::buffer data, uint8_t qos, uint16_t ackquant,
@@ -29,7 +28,7 @@ namespace crow
         void request(igris::buffer data);
         crow::packet_ptr sync_request(igris::buffer data);
 
-    private:
+      private:
         void incoming_packet(crow::packet *pack) override;
     };
 }

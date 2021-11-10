@@ -3,9 +3,10 @@
 #include <crow/warn.h>
 #include <nos/print.h>
 
+static char answer [16];
+    
 void crow::service_node::incoming_packet(crow::packet *pack)
 {
-    static char answer [16];
     memset(answer, 0, 16);
     answer_buffer_size = 15;
     //char *answer = (char *)malloc(answer_buffer_size);

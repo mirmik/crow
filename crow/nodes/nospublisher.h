@@ -8,11 +8,16 @@ namespace crow
 {
     class nospublisher : public crow::publisher_node, public nos::ostream
     {
-    public:
+      public:
         nospublisher() = default;
-        nospublisher(igris::buffer theme, crow::hostaddr_view crowker_addr,
-                     int crowker_node = CROWKER_SERVICE_BROCKER_NODE_NO)
+        nospublisher(crow::hostaddr_view crowker_addr, int crowker_node,
+                     igris::buffer theme)
             : publisher_node(crowker_addr, crowker_node, theme)
+        {
+        }
+
+        nospublisher(crow::hostaddr_view crowker_addr, igris::buffer theme)
+            : nospublisher(crowker_addr, CROWKER_SERVICE_BROCKER_NODE_NO, theme)
         {
         }
 

@@ -19,11 +19,13 @@ namespace crow
     class hostaddr;
     class hostaddr_view
     {
-    public:
         const uint8_t *addr;
         size_t alen;
 
+      public:
         hostaddr_view() = default;
+        hostaddr_view(const hostaddr_view &h) = default;
+        hostaddr_view &operator=(const hostaddr_view &h) = default;
         hostaddr_view(const hostaddr &h);
         hostaddr_view(const igris::buffer &v);
         hostaddr_view(const uint8_t *addr, size_t alen);

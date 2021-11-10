@@ -15,7 +15,7 @@ namespace crow
     {
         std::vector<uint8_t> _addr;
 
-    public:
+      public:
         hostaddr() = default;
 
         const uint8_t *data() const { return _addr.data(); }
@@ -25,7 +25,7 @@ namespace crow
 
         hostaddr(const hostaddr_view &addr);
 
-        hostaddr(const hostaddr &addr) : _addr(addr._addr) {}
+        hostaddr(const hostaddr &addr) = default;
         hostaddr(hostaddr &&addr) : _addr(std::move(addr._addr)) {}
 
         hostaddr(std::vector<uint8_t> &&addr) : _addr(std::move(addr)) {}
@@ -44,11 +44,7 @@ namespace crow
             return *this;
         }
 
-        hostaddr &operator=(const hostaddr &addr)
-        {
-            _addr = addr._addr;
-            return *this;
-        }
+        hostaddr &operator=(const hostaddr &addr) = default;
 
         hostaddr &operator=(const std::vector<uint8_t> &addr)
         {
