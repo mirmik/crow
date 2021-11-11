@@ -9,7 +9,7 @@
 #include <crow/packet_ptr.h>
 #include <crow/tower.h>
 #include <crow/iter.h>
-#include <crow/nodes/request_node.h>
+#include <crow/nodes/requestor_node.h>
 #include <crow/nodes/subscriber_node.h>
 #include <crow/nodes/publisher_node.h>
 #include <crow/proto/node.h>
@@ -22,6 +22,8 @@ namespace py = pybind11;
 using ungil = py::call_guard<py::gil_scoped_release>;
 
 void register_subscriber_class(py::module & m);
+void register_publisher_class(py::module & m);
+void register_requestor_class(py::module & m);
 
 py::function incoming_handler_bind;
 void incoming_handler_bind_invoke(crow::packet *pack)
@@ -158,6 +160,8 @@ PYBIND11_MODULE(libcrow, m)
 	;
 
 	register_subscriber_class(m);
+	register_publisher_class(m);
+	register_requestor_class(m);
 	m.def("gates", &crow::gates);
 	m.def("nodes", &crow::nodes);
 }

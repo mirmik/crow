@@ -23,8 +23,9 @@ void crow::service_node::incoming_packet(crow::packet *pack)
     int anslen =
         dlg(message.data(), message.size(), answer, answer_buffer_size);
 
-    publish(pack->addr(), subheader.sid, reply_theme, {answer, anslen}, qos,
-            ackquant);
+    if (reply_theme != "__noanswer__")
+        publish(pack->addr(), subheader.sid, reply_theme, {answer, anslen}, qos,
+                ackquant);
 
     crow::release(pack);
 }

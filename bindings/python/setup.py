@@ -6,7 +6,6 @@ from setuptools import setup, Extension, Command
 from distutils.util import get_platform
 import os
 import glob
-
 import licant
 
 licant.include("nos", local_tunel=("pycrow/__tunels__/nos", "nos.g.py"))
@@ -17,13 +16,11 @@ licant.cxx_objects("crow-objects",
 		"crow",
 		"crow.udpgate",
 		"crow.crowker",
-
 		"nos",
 		"nos.inet",
 		"igris",
 		"igris.syslock",
 		"igris.dprint",
-
 		("igris.ctrobj", "linux")
 	] 
 )
@@ -49,7 +46,9 @@ class bdist_wheel(bdist_wheel_):
 
 pycrow_lib = Extension("pycrow.libcrow",
 	sources = [
+		"requestor.cpp",
 		"subscriber.cpp",
+		"publisher.cpp",
 		"pywrap.cpp",
 	] + crowopts["sources"],
 	extra_compile_args=['-fPIC', '-std=c++17'],

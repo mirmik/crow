@@ -43,7 +43,7 @@ licant.modules.module("crow.minimal",
 		"nodes/publisher_node.cpp",
 		"nodes/crowker_pubsub_node.cpp",
 		"nodes/service_node.cpp",
-		"nodes/request_node.cpp",
+		"nodes/requestor_node.cpp",
 	],
 	mdepends = ["crow.include", "crow.diagnostic"]
 )

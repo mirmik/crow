@@ -5,7 +5,7 @@
 #include <crow/proto/acceptor.h>
 #include <crow/nodes/publisher_node.h>
 #include <crow/nodes/subscriber_node.h>
-#include <crow/nodes/request_node.h>
+#include <crow/nodes/requestor_node.h>
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/address.h>
 #include <crow/select.h>
@@ -75,7 +75,7 @@ std::shared_ptr<crow::udpgate> udpgate;
 
 crow::publisher_node publish_node;
 crow::subscriber_node subscriber_node;
-crow::request_node request_node;
+crow::requestor_node requestor_node;
 
 enum class protoopt_e
 {
@@ -300,7 +300,7 @@ void send_do(const std::string message)
 
 		case protoopt_e::PROTOOPT_REQUEST:
 		{
-			request_node.request(
+			requestor_node.async_request(
 			    address,
 			    CROWKER_SERVICE_BROCKER_NODE_NO,
 			    theme,
@@ -458,7 +458,7 @@ int main(int argc, char *argv[])
 {
 	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
-	request_node.bind(CTRANS_DEFAULT_REQUEST_NODE);
+	requestor_node.bind(CTRANS_DEFAULT_requestor_node);
 	reply_theme = gen_random_string(10);
 
 	const struct option long_options[] =
