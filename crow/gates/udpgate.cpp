@@ -141,14 +141,7 @@ void crow::udpgate::send(crow::packet *pack)
     ipaddr.sin_port = *port;
     ipaddr.sin_addr.s_addr = *addr;
 
-    header_v1 header;
-    header.u.f.ack = pack->ack();
-    header.u.f.type = pack->type();
-    header.alen = pack->addrsize();
-    header.flen = pack->addrsize() + pack->datasize() + sizeof(header);
-    header.stg = pack->stage();
-    header.seqid = pack->seqid();
-    header.qos = crow::make_qosbyte(pack->quality(), pack->ackquant());
+    header_v1 header = pack->extract_header_v1();
 
     char buf[header.flen];
     memcpy(buf, &header, sizeof(header));
