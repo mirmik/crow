@@ -25,8 +25,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 
 	SUBCASE("0")
 	{
-		crow::send(addr, "data", 0, 0, 20);
-		
+		crow::send(addr, "data", 0, 0, 20);	
 		crow::onestep();
 		
 		CHECK_EQ(count, 1);

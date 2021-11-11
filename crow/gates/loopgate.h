@@ -15,12 +15,13 @@ namespace crow
 
         void send(crow::packet *pack) override
         {
-            crow::compacted_packet *copypack =
-                crow_allocate_packet(pack->addrsize() + pack->datasize());
-
-            memcpy((void *)copypack, (void *)pack,
-                   sizeof(crow::compacted_packet) + pack->addrsize() +
-                       pack->datasize());
+            crow::morph_packet *copypack = new crow::morph_packet;
+            copypack->parse_header(pack->extract_header_v1());
+            copypack->allocate_buffer(pack->addrsize(), pack->datasize());
+            memcpy((void *)copypack->addrptr(), pack->addrptr(),
+                   pack->addrsize());
+            memcpy((void *)copypack->dataptr(), pack->dataptr(),
+                   pack->datasize());
 
             crow_packet_initialization(copypack, this);
             copypack->revert_gate(id);

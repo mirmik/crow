@@ -18,8 +18,8 @@ namespace crow
             return std::round((float)(quant) / quant_const);
         }
 
-        uint16_t quant() { return _quant_code * quant_const; }
-        uint8_t quality() { return _qos; }
+        uint16_t quant() const { return _quant_code * quant_const; }
+        uint8_t quality() const { return _qos; }
 
         void set_quant(uint16_t quant) { _quant_code = quant_to_code(quant); }
         void set_quality(uint8_t quality) { _qos = quality; }

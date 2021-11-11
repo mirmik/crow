@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/uio.h>
 
 #include <memory>
 
@@ -28,21 +29,38 @@ void crow::udpgate::nblock_onestep()
     if (len <= 0)
         return;
 
-    size_t flen = header.flen;
+    //size_t flen = header.flen;
+
+    crow::morph_packet *block = nullptr;
+    //if (!block)
+    //    block = crow_allocate_packet(flen - sizeof(crow::header_v1));
 
     if (!block)
-        block = crow_allocate_packet(flen - sizeof(crow::header_v1));
-    //(crow::packet *) malloc(flen + sizeof(crow::packet) -
-    // sizeof(crow::header_v1));
+    {
+        block = new crow::morph_packet();
+        block->parse_header(header);
+        block->allocate_buffer(block->addrsize(), block->datasize());
+    }
 
-    len = recvfrom(sock, &block->header(), flen, 0, (struct sockaddr *)&sender,
-                   &sendsize);
+    struct iovec iov[] =
+    {
+        {&header, sizeof(header)},
+        {block->addrptr(), block->addrsize()},
+        {block->dataptr(), block->datasize()}
+    };
+
+    //recvmsg(sock, &msg, 0);
+    readv(sock, iov, 3);
+
+    //len = recvfrom(sock, &block->header(), flen, 0, (struct sockaddr *)&sender,
+    //               &sendsize);
 
     crow_packet_initialization(block, this);
 
     igris::buffer vec[3] = {{(char *)&id, 1},
-                            {(char *)&sender.sin_addr.s_addr, 4},
-                            {(char *)&sender.sin_port, 2}};
+        {(char *)&sender.sin_addr.s_addr, 4},
+        {(char *)&sender.sin_port, 2}
+    };
 
     block->revert(vec, 3);
 
@@ -134,8 +152,8 @@ void crow::udpgate::send(crow::packet *pack)
 
     char buf[header.flen];
     memcpy(buf, &header, sizeof(header));
-    memcpy(buf+sizeof(header), pack->addrptr(), pack->addrsize());
-    memcpy(buf+sizeof(header)+pack->addrsize(), pack->dataptr(), pack->datasize());
+    memcpy(buf + sizeof(header), pack->addrptr(), pack->addrsize());
+    memcpy(buf + sizeof(header) + pack->addrsize(), pack->dataptr(), pack->datasize());
 
     //sendto(sock, (const char *)&dynamic_cast<crow::compacted_packet *>(pack)->header(), pack->full_length(), 0,
     //       (struct sockaddr *)&ipaddr, iplen);
@@ -162,7 +180,7 @@ int crow::create_udpgate(uint8_t id, uint16_t port)
 }
 
 std::shared_ptr<crow::udpgate> crow::create_udpgate_safe(uint8_t id,
-                                                         uint16_t port)
+        uint16_t port)
 {
     int sts;
 

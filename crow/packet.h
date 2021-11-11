@@ -25,7 +25,12 @@
 namespace crow
 {
     class gateway;
+    class packet;
 }
+
+__BEGIN_DECLS
+void crow_deallocate_packet(crow::packet *pack);
+__END_DECLS
 
 namespace crow
 {
@@ -52,9 +57,8 @@ namespace crow
         uint8_t alen;  ///< Длина поля адреса.
         uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
         ///< знала, какую часть адреса обрабатывать.
-        uint16_t
-            seqid; ///< Порядковый номер пакета. Присваивается отправителем.
-        qosbyte qos; ///< Поле качества обслуживания.
+        uint16_t seqid; ///< Порядковый номер пакета.
+        qosbyte qos;    ///< Поле качества обслуживания.
     } __attribute__((packed));
 
     class packet
@@ -82,11 +86,9 @@ namespace crow
             } f;
         } u;
 
-        void (*_destruct)(packet *ptr);
-
     public:
-        virtual void revert_gate(uint8_t gateindex) = 0;
-        virtual void revert(igris::buffer *vec, size_t veclen) = 0;
+        void revert_gate(uint8_t gateindex);
+        void revert(igris::buffer *vec, size_t veclen);
 
         virtual uint8_t *addrptr() = 0;
         virtual uint8_t addrsize() = 0;
@@ -103,6 +105,8 @@ namespace crow
         virtual uint16_t seqid() = 0;
         virtual uint8_t ack() = 0;
 
+        virtual void set_addrsize(uint8_t) = 0;
+        virtual void set_datasize(uint16_t) = 0;
         virtual void set_type(uint8_t) = 0;
         virtual void set_quality(uint8_t) = 0;
         virtual void set_ackquant(uint16_t) = 0;
@@ -110,8 +114,38 @@ namespace crow
         virtual void set_seqid(uint16_t) = 0;
         virtual void set_ack(uint8_t) = 0;
 
-        virtual void increment_stage(int i) = 0;
-        virtual void increment_seqid(int i = 1) = 0;
+        void increment_stage(int i) { set_stage(stage() + i); }
+        void increment_seqid(int i) { set_seqid(seqid() + i); }
+
+        virtual void destruct() = 0;
+        virtual ~packet() = default;
+        virtual void self_init() = 0;
+
+        void parse_header(const header_v1 &h)
+        {
+            set_ack(h.u.f.ack);
+            set_type(h.u.f.type);
+            set_quality(h.qos.quality());
+            set_ackquant(h.qos.quant());
+            set_seqid(h.seqid);
+            set_stage(h.stg);
+            set_addrsize(h.alen);
+            set_datasize(h.flen - h.alen - sizeof(header_v1));
+        }
+
+        header_v1 extract_header_v1()
+        {
+            header_v1 h;
+            h.seqid = seqid();
+            h.u.f.ack = ack();
+            h.u.f.type = type();
+            h.qos.set_quality(quality());
+            h.qos.set_quant(ackquant());
+            h.stg = stage();
+            h.flen = datasize() + addrsize() + sizeof(header_v1);
+            h.alen = addrsize();
+            return h;
+        }
 
         crow::hostaddr_view addr() { return {addrptr(), addrsize()}; }
         igris::buffer data() { return {dataptr(), datasize()}; }
@@ -136,9 +170,6 @@ namespace crow
         char *_dptr = nullptr;
 
     public:
-        void revert_gate(uint8_t gateindex) override;
-        void revert(igris::buffer *vec, size_t veclen) override;
-
         uint8_t *addrptr() override { return _aptr; }
         uint8_t addrsize() override { return _alen; }
 
@@ -157,14 +188,14 @@ namespace crow
         uint8_t stage() { return _stage; }
         uint8_t ack() override { return _ack; }
 
+        void set_addrsize(uint8_t arg) override { _alen = arg; }
+        void set_datasize(uint16_t arg) override { _dlen = arg; }
         void set_type(uint8_t arg) override { _type = arg; }
         void set_quality(uint8_t arg) override { _quality = arg; }
         void set_ackquant(uint16_t arg) override { _ackcount = arg; }
         void set_stage(uint8_t arg) override { _stage = arg; }
         void set_seqid(uint16_t arg) override { _seqid = arg; }
         void set_ack(uint8_t arg) override { _ack = arg; }
-        void increment_stage(int i) override { _stage += i; }
-        void increment_seqid(int i) override { _seqid += i; }
 
         void invalidate() { free(_aptr); }
 
@@ -172,9 +203,20 @@ namespace crow
         {
             if (_aptr)
                 invalidate();
-            _aptr = (uint8_t *)malloc(alen + dlen);
+            _aptr = (uint8_t *)malloc(alen + dlen + 1);
             _dptr = (char *)(_aptr + alen);
+            *(_dptr + dlen) = 0;
         }
+
+        void destruct() override
+        {
+            invalidate();
+            delete this;
+        }
+
+        void self_init() override {}
+
+        ~morph_packet() = default;
     };
 
     class compacted_packet : public packet
@@ -184,9 +226,6 @@ namespace crow
 
     public:
         header_v1 &header() { return _header; }
-
-        void revert_gate(uint8_t gateindex) override;
-        void revert(igris::buffer *vec, size_t veclen) override;
 
         uint8_t *addrptr() override;
         uint8_t addrsize() override;
@@ -215,8 +254,16 @@ namespace crow
         void set_stage(uint8_t arg) override { _header.stg = arg; }
         void set_seqid(uint16_t arg) override { _header.seqid = arg; }
         void set_ack(uint8_t arg) override { _header.u.f.ack = arg; };
-        void increment_stage(int i) override { _header.stg += i; }
-        void increment_seqid(int i) override { _header.seqid += i; }
+
+        void set_addrsize(uint8_t arg) override { (void)arg; }
+        void set_datasize(uint16_t arg) override { (void)arg; }
+
+        void destruct() override { crow_deallocate_packet(this); }
+
+        void self_init() override
+        {
+            *((char *)(&header()) + full_length()) = 0;
+        }
     };
 }
 
@@ -224,8 +271,7 @@ extern int crow_allocated_count;
 
 __BEGIN_DECLS
 
-void crow_packet_initialization(crow::compacted_packet *pack,
-                                crow::gateway *ingate);
+void crow_packet_initialization(crow::packet *pack, crow::gateway *ingate);
 
 crow::compacted_packet *crow_create_packet(crow::gateway *ingate,
                                            uint8_t addrsize, size_t datasize);

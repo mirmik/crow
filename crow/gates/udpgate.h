@@ -13,7 +13,7 @@ namespace crow
     class udpgate : public gateway
     {
         int sock = 0;
-        crow::compacted_packet *block = nullptr;
+        crow::packet *block = nullptr;
         bool fastsend = CROW_FASTSEND_DEFAULT;
 
     public:

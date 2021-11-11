@@ -47,7 +47,7 @@ static void __crow_utilize(crow::packet *pack)
 {
     dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
     dlist_del(&pack->ulnk);
-    crow_deallocate_packet(pack);
+    pack->destruct();
 }
 
 void crow::utilize(crow::packet *pack) { __crow_utilize(pack); }
