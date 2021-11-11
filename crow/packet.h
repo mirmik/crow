@@ -89,10 +89,8 @@ namespace crow
 
         virtual uint8_t *addrptr() = 0;
         virtual uint8_t addrsize() = 0;
-
         virtual char *dataptr() = 0;
         virtual uint16_t datasize() = 0;
-
         virtual char *endptr() = 0;
         virtual uint8_t *stageptr() = 0;
 
@@ -111,7 +109,8 @@ namespace crow
         virtual void set_seqid(uint16_t) = 0;
         virtual void set_ack(uint8_t) = 0;
 
-        // virtual header_v1 &header() = 0;
+        virtual void increment_stage(int i) = 0;
+        virtual void increment_seqid(int i = 1) = 0;
 
         crow::hostaddr_view addr() { return {addrptr(), addrsize()}; }
         igris::buffer data() { return {dataptr(), datasize()}; }
@@ -120,9 +119,54 @@ namespace crow
         {
             return *reinterpret_cast<T *>(dataptr());
         }
+    };
 
-        virtual void increment_stage(int i) = 0;
-        virtual void increment_seqid(int i = 1) = 0;
+    class morph_packet : public packet
+    {
+        uint8_t _type;
+        uint8_t _ack;
+        uint8_t _stage;
+        uint16_t _ackquant;
+        uint8_t _quality;
+        uint8_t _alen;
+        uint16_t _dlen;
+        uint16_t _seqid;
+        uint8_t *_aptr;
+        char *_dptr;
+
+        void (*_destruct_buffers)(void *ptr);
+        void *_destruct_priv;
+
+    public:
+        void revert_gate(uint8_t gateindex) override;
+        void revert(igris::buffer *vec, size_t veclen) override;
+
+        uint8_t *addrptr() override { return _aptr; }
+        uint8_t addrsize() override { return _alen; }
+
+        char *dataptr() override { return _dptr; }
+        uint16_t datasize() override { return _dlen; }
+
+        char *endptr() override { return nullptr; }
+        uint8_t type() override { return _type; }
+        uint16_t seqid() override { return _seqid; }
+
+        uint8_t *stageptr() override { return addrptr() + stage(); }
+
+        uint16_t full_length() override { return 0; }
+        uint8_t quality() override { return _quality; }
+        uint16_t ackquant() { return _ackcount; }
+        uint8_t stage() { return _stage; }
+        uint8_t ack() override { return _ack; }
+
+        void set_type(uint8_t arg) override { _type = arg; }
+        void set_quality(uint8_t arg) override { _quality = arg; }
+        void set_ackquant(uint16_t arg) override { _ackcount = arg; }
+        void set_stage(uint8_t arg) override { _stage = arg; }
+        void set_seqid(uint16_t arg) override { _seqid = arg; }
+        void set_ack(uint8_t arg) override { _ack = arg; }
+        void increment_stage(int i) override { _stage += i; }
+        void increment_seqid(int i) override { _seqid += i; }
     };
 
     class compacted_packet : public packet
