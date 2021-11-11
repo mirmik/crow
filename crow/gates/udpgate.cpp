@@ -123,7 +123,23 @@ void crow::udpgate::send(crow::packet *pack)
     ipaddr.sin_port = *port;
     ipaddr.sin_addr.s_addr = *addr;
 
-    sendto(sock, (const char *)&dynamic_cast<crow::compacted_packet *>(pack)->header(), pack->full_length(), 0,
+    header_v1 header;
+    header.u.f.ack = pack->ack();
+    header.u.f.type = pack->type();
+    header.alen = pack->addrsize();
+    header.flen = pack->addrsize() + pack->datasize() + sizeof(header);
+    header.stg = pack->stage();
+    header.seqid = pack->seqid();
+    header.qos = crow::make_qosbyte(pack->quality(), pack->ackquant());
+
+    char buf[header.flen];
+    memcpy(buf, &header, sizeof(header));
+    memcpy(buf+sizeof(header), pack->addrptr(), pack->addrsize());
+    memcpy(buf+sizeof(header)+pack->addrsize(), pack->dataptr(), pack->datasize());
+
+    //sendto(sock, (const char *)&dynamic_cast<crow::compacted_packet *>(pack)->header(), pack->full_length(), 0,
+    //       (struct sockaddr *)&ipaddr, iplen);
+    sendto(sock, buf, pack->full_length(), 0,
            (struct sockaddr *)&ipaddr, iplen);
     crow::return_to_tower(pack, CROW_SENDED);
 }

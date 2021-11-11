@@ -52,7 +52,6 @@ namespace crow
         uint8_t alen;  ///< Длина поля адреса.
         uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
         ///< знала, какую часть адреса обрабатывать.
-        uint16_t ackquant; ///< Таймаут для пересылки пакета.
         uint16_t
             seqid; ///< Порядковый номер пакета. Присваивается отправителем.
         qosbyte qos; ///< Поле качества обслуживания.
@@ -82,6 +81,8 @@ namespace crow
                 uint8_t sended_to_gate : 1;
             } f;
         } u;
+
+        void (*_destruct)(packet *ptr);
 
     public:
         virtual void revert_gate(uint8_t gateindex) = 0;
@@ -123,19 +124,16 @@ namespace crow
 
     class morph_packet : public packet
     {
-        uint8_t _type;
-        uint8_t _ack;
-        uint8_t _stage;
-        uint16_t _ackquant;
-        uint8_t _quality;
-        uint8_t _alen;
-        uint16_t _dlen;
-        uint16_t _seqid;
-        uint8_t *_aptr;
-        char *_dptr;
-
-        void (*_destruct_buffers)(void *ptr);
-        void *_destruct_priv;
+        uint8_t _type = 0;
+        uint8_t _ack = 0;
+        uint8_t _stage = 0;
+        uint16_t _ackquant = 0;
+        uint8_t _quality = 0;
+        uint8_t _alen = 0;
+        uint16_t _dlen = 0;
+        uint16_t _seqid = 0;
+        uint8_t *_aptr = nullptr;
+        char *_dptr = nullptr;
 
     public:
         void revert_gate(uint8_t gateindex) override;
@@ -168,8 +166,12 @@ namespace crow
         void increment_stage(int i) override { _stage += i; }
         void increment_seqid(int i) override { _seqid += i; }
 
+        void invalidate() { free(_aptr); }
+
         void allocate_buffer(int alen, int dlen)
         {
+            if (_aptr)
+                invalidate();
             _aptr = (uint8_t *)malloc(alen + dlen);
             _dptr = (char *)(_aptr + alen);
         }
