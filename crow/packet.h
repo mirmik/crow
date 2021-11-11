@@ -167,6 +167,12 @@ namespace crow
         void set_ack(uint8_t arg) override { _ack = arg; }
         void increment_stage(int i) override { _stage += i; }
         void increment_seqid(int i) override { _seqid += i; }
+
+        void allocate_buffer(int alen, int dlen)
+        {
+            _aptr = (uint8_t *)malloc(alen + dlen);
+            _dptr = (char *)(_aptr + alen);
+        }
     };
 
     class compacted_packet : public packet
