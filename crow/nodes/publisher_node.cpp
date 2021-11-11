@@ -40,6 +40,10 @@ void crow::publisher_node::set_theme(igris::buffer theme)
     this->theme = theme;
 }
 
+void crow::publisher_node::set_address(crow::hostaddr_view addr)
+{
+    this->crowker_addr = addr;
+}
 
 crow::publisher_node::publisher_node(
     crow::hostaddr_view crowker_addr, int crowker_node, igris::buffer theme)

@@ -4,8 +4,20 @@
 import sys
 import pycrow
 
-pycrow.set_crowker(".12.109.173.108.206:10009")
-pycrow.subscribe("pulse", ack=2, handler=lambda packet: print(packet.data().decode("utf-8")))
+def foo(data):
+	print(data.decode("utf-8"))
+	pycrow.stop_spin(False)
 
-pycrow.create_udpgate(12, 10009)
-pycrow.spin()
+addr = pycrow.address(".12.127.0.0.1:10009")
+ugate = pycrow.udpgate()
+ugate.bind(12)
+ugate.open(10010)
+pycrow.start_spin()
+
+subs = pycrow.subscriber(foo)
+subs.subscribe(addr, "hello")
+
+pub = pycrow.publisher(addr, "hello")
+pub.publish("Test passed".encode("utf-8"))
+
+pycrow.join_spin()

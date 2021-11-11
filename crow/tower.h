@@ -75,8 +75,6 @@ namespace crow
     int start_spin();
     int start_spin_realtime(int abort_on_fault);
 
-    void start_resubscribe_thread(int millis);
-
     [[deprecated]] void spin_join();
     void join_spin();
 

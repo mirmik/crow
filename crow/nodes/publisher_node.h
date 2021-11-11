@@ -16,13 +16,11 @@ namespace crow
         int ackquant = 0;
 
     public:
+        publisher_node() = default;
+        publisher_node(const publisher_node &) = default;
         publisher_node(crow::hostaddr_view crowker_addr, int crowker_node,
                        igris::buffer theme);
         publisher_node(crow::hostaddr_view crowker_addr, igris::buffer theme);
-
-        publisher_node() = default;
-
-        publisher_node(const publisher_node &) = default;
 
         void publish(igris::buffer data);
         void publish(crow::hostaddr_view addr, int crowker_node,
@@ -30,6 +28,7 @@ namespace crow
                      int ackquant);
 
         void set_theme(igris::buffer theme);
+        void set_address(crow::hostaddr_view addr);
 
     private:
         void incoming_packet(crow::packet *pack) override

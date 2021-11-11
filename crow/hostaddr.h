@@ -15,12 +15,13 @@ namespace crow
     {
         std::vector<uint8_t> _addr;
 
-      public:
+    public:
         hostaddr() = default;
 
         const uint8_t *data() const { return _addr.data(); }
         size_t size() const { return _addr.size(); }
 
+        hostaddr(const std::string &str);
         hostaddr(const std::vector<uint8_t> &addr) : _addr(addr) {}
 
         hostaddr(const hostaddr_view &addr);

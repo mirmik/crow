@@ -1,5 +1,6 @@
 #include <crow/hostaddr.h>
 #include <crow/hostaddr_view.h>
+#include <crow/address.h>
 
 crow::hostaddr_view crow::hostaddr::view()
 {
@@ -12,3 +13,5 @@ crow::hostaddr::hostaddr(const crow::hostaddr_view &h)
 {
     _addr = std::vector<uint8_t>((uint8_t*)h.data(), (uint8_t*)h.data() + h.size());
 }
+
+crow::hostaddr::hostaddr(const std::string& str) : hostaddr(crow::address(str)) {}

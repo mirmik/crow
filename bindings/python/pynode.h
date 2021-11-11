@@ -7,19 +7,19 @@ namespace crow
         std::function<void(crow::node_packet_ptr)> incom;
         std::function<void(crow::node_packet_ptr)> undeliv;
 
-      public:
+    public:
         pynode_delegate(std::function<void(crow::node_packet_ptr)> incom,
                         std::function<void(crow::node_packet_ptr)> undeliv)
             : incom(incom), undeliv(undeliv)
         {
         }
 
-        void incoming_packet(crow_packet *pack) override
+        void incoming_packet(crow::packet *pack) override
         {
             incom(crow::node_packet_ptr(pack));
         }
 
-        void undelivered_packet(crow_packet *pack) override
+        void undelivered_packet(crow::packet *pack) override
         {
             undeliv(crow::node_packet_ptr(pack));
         }

@@ -2,6 +2,7 @@
 #include <pybind11/pybind11.h>
 
 #include <crow/nodes/subscriber_node.h>
+#include <crow/nodes/pubsub_defs.h>
 #include <crow/hostaddr.h>
 #include <pybind11/embed.h>
 
@@ -10,58 +11,94 @@
 
 namespace py = pybind11;
 
-/*
-class pybind_subscriber : public crow::subscriber
+#pragma GCC visibility push(hidden)
+class pybind_subscriber : public crow::abstract_subscriber_node
 {
-	std::function<void(crow::pubsub_packet_ptr)> delegate;
+	std::function<void(py::bytes)> delegate;
 	std::string theme;
 	crow::hostaddr addr;
-	    
+
 public:
-	pybind_subscriber(std::function<void(crow::pubsub_packet_ptr)>& foo)
+	pybind_subscriber(std::function<void(py::bytes)>& foo)
 		: delegate(foo)
 	{}
 
-	void newpack_handler(crow::pubsub_packet_ptr ptr) override
+	void incoming_packet(crow::packet * pack) override
 	{
-		delegate(ptr);
+		auto &s = pack->subheader<crow::pubsub_subheader>();
+
+		switch (s.type)
+		{
+			case crow::PubSubTypes::Consume:
+			{
+				auto &sh = pack->subheader<crow::consume_subheader>();
+				py::bytes data(
+					sh.message().data(), 
+					sh.message().size());
+				delegate(data);
+			};
+			break;
+
+			default:
+				break;
+		}
+
+		crow::release(pack);
 	}
 
 	void subscribe(
-	    const std::string& theme,
 	    const crow::hostaddr& addr,
-	    uint8_t qos,
-	    uint16_t ackquant,
-	    uint8_t rqos,
-	    uint16_t rackquant
+	    const std::string& theme
 	)
 	{
 		this->addr = addr;
 		this->theme = theme;
 
-		crow::subscriber::subscribe(
-			this->addr,
-			this->theme.c_str(),
-			qos, 
-			ackquant,
-			rqos,
-			rackquant
+		abstract_subscriber_node::subscribe(
+		    this->addr,
+		    this->theme.c_str()
 		);
 	}
 };
 
+class pybind_publisher : public crow::publisher_node
+{
+	std::string theme;
+	crow::hostaddr addr;
+
+public:
+	pybind_publisher(crow::hostaddr addr, std::string theme)
+		: crow::publisher_node()
+	{
+		this->addr = addr;
+		this-> theme = theme;
+		set_theme(this->theme);
+		set_address(this->addr);
+	}
+
+	void publish(
+	    const py::bytes& data
+	)
+	{
+		std::string info = data;
+		publisher_node::publish({ 
+			info.data(), 
+			info.size() });
+	}
+};
+#pragma GCC visibility pop
+
 void register_subscriber_class(py::module & m)
 {
 	py::class_<pybind_subscriber>(m, "subscriber")
-	.def(py::init<std::function<void(crow::pubsub_packet_ptr)>&>())
+	.def(py::init<std::function<void(py::bytes)>&>())
 	.def("subscribe", &pybind_subscriber::subscribe,
 	     py::arg("addr"),
-	     py::arg("theme"),
-	     py::arg("ack") = 0,
-	     py::arg("ackquant") = 0,
-	     py::arg("rack") = 0,
-	     py::arg("rackquant") = 0)
-	.def("resubscribe", &pybind_subscriber::resubscribe)
+	     py::arg("theme"))
+	;
+
+	py::class_<pybind_publisher>(m, "publisher")
+	.def(py::init<crow::hostaddr, std::string>(), py::arg("addr"), py::arg("theme"))
+	.def("publish", &pybind_publisher::publish, py::arg("data"))
 	;
 }
-*/

@@ -60,7 +60,7 @@ namespace crow
 
     class packet
     {
-      public:
+    public:
         struct dlist_head lnk =
             DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
         struct dlist_head ulnk =
@@ -83,7 +83,7 @@ namespace crow
             } f;
         } u;
 
-      public:
+    public:
         virtual void revert_gate(uint8_t gateindex) = 0;
         virtual void revert(igris::buffer *vec, size_t veclen) = 0;
 
@@ -113,7 +113,7 @@ namespace crow
 
         // virtual header_v1 &header() = 0;
 
-        igris::buffer addr() { return {addrptr(), addrsize()}; }
+        crow::hostaddr_view addr() { return {addrptr(), addrsize()}; }
         igris::buffer data() { return {dataptr(), datasize()}; }
 
         template <class T> T &subheader()
@@ -127,10 +127,10 @@ namespace crow
 
     class compacted_packet : public packet
     {
-      public:
+    public:
         header_v1 _header;
 
-      public:
+    public:
         header_v1 &header() { return _header; }
 
         void revert_gate(uint8_t gateindex) override;
