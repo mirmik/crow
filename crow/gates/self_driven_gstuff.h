@@ -3,6 +3,7 @@
 
 #include <crow/gateway.h>
 #include <crow/tower.h>
+#include <igris/iovec.h>
 #include <igris/protocols/gstuff.h>
 #include <igris/sync/semaphore.h>
 
@@ -13,7 +14,7 @@ namespace crow
     class self_driven_gstuff : public crow::gateway
     {
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
-        crow::compacted_packet *insend = nullptr;
+        crow::packet *insend = nullptr;
         char *send_buffer = nullptr;
         char *send_it = nullptr;
         char *send_eit = nullptr;
@@ -78,12 +79,16 @@ namespace crow
             if (dlist_empty(&to_send))
                 return;
 
-            insend = (crow::compacted_packet *)dlist_first_entry(
-                &to_send, crow::packet, lnk);
+            insend = dlist_first_entry(&to_send, crow::packet, lnk);
             dlist_del_init(&insend->lnk);
 
-            int size = gstuffing((const char *)&insend->header(),
-                                 insend->full_length(), send_buffer);
+            header_v1 header = insend->extract_header_v1();
+            struct iovec iov[] = {
+                {&header, sizeof(header)},
+                {insend->addrptr(), insend->addrsize()},
+                {insend->dataptr(), insend->datasize()},
+            };
+            int size = gstuffing_v(iov, 3, send_buffer);
 
             send_it = send_buffer;
             send_eit = send_buffer + size;

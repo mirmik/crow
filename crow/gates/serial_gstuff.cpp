@@ -24,8 +24,8 @@ void crow::serial_gstuff::newline_handler()
 }
 
 struct crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
-                                                       uint32_t baudrate,
-                                                       uint8_t id, bool debug)
+        uint32_t baudrate,
+        uint8_t id, bool debug)
 {
     int ret;
 
@@ -102,8 +102,16 @@ void crow::serial_gstuff::send(crow::packet *pack)
 {
     char buffer[512];
 
-    int len = gstuffing((char *)&dynamic_cast<compacted_packet*>(pack)->header(), pack->full_length(), buffer);
-    write(fd, buffer, len);
+    header_v1 header = pack->extract_header_v1();
+    struct iovec iov[] =
+    {
+        { &header, sizeof(header) },
+        { pack->addrptr(), pack->addrsize() },
+        { pack->dataptr(), pack->datasize() },
+    };
+    int size = gstuffing_v(iov, 3, buffer);
+
+    write(fd, buffer, size);
     crow::return_to_tower(pack, CROW_SENDED);
 }
 
@@ -117,19 +125,19 @@ void crow::serial_gstuff::nblock_onestep()
     {
         char c = buf[i];
 
-        if (debug) 
+        if (debug)
         {
-            debug_printhex_uint8(c); 
-            debug_putchar('\t'); 
-            debug_putchar(c); 
-            debug_print_newline();   
+            debug_printhex_uint8(c);
+            debug_putchar('\t');
+            debug_putchar(c);
+            debug_print_newline();
         }
 
         if (rpack == NULL)
         {
             rpack = (crow::compacted_packet *)malloc(GSTUFF_MAXPACK_SIZE +
-                                                 sizeof(crow::compacted_packet) -
-                                                 sizeof(crow::header_v1));
+                    sizeof(crow::compacted_packet) -
+                    sizeof(crow::header_v1));
             new (rpack) crow::compacted_packet;
             gstuff_autorecv_setbuf(&recver, (char *)&rpack->header(),
                                    GSTUFF_MAXPACK_SIZE);
@@ -139,16 +147,16 @@ void crow::serial_gstuff::nblock_onestep()
 
         switch (ret)
         {
-        case GSTUFF_CRC_ERROR:
-            crow::warn("warn: gstuff crc error");
-            break;
+            case GSTUFF_CRC_ERROR:
+                crow::warn("warn: gstuff crc error");
+                break;
 
-        case GSTUFF_NEWPACKAGE:
-            newline_handler();
-            break;
+            case GSTUFF_NEWPACKAGE:
+                newline_handler();
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 }

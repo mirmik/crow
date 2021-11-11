@@ -53,8 +53,10 @@ namespace crow
                 uint8_t type : 3; ///< Доп. инф. зависит от ситуации.
             } f;
         } u;
-        uint16_t flen;  ///< Полная длина пакета
-        uint8_t alen;   ///< Длина поля адреса.
+        uint16_t flen; ///< Полная длина пакета
+        uint8_t alen;  ///< Длина поля адреса.
+        uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
+        ///< знала, какую часть адреса обрабатывать.
         uint16_t seqid; ///< Порядковый номер пакета.
         qosbyte qos;    ///< Поле качества обслуживания.
     } __attribute__((packed));
@@ -126,7 +128,7 @@ namespace crow
             set_quality(h.qos.quality());
             set_ackquant(h.qos.quant());
             set_seqid(h.seqid);
-            set_stage(h.u.f.stg);
+            set_stage(h.stg);
             set_addrsize(h.alen);
             set_datasize(h.flen - h.alen - sizeof(header_v1));
         }
@@ -139,7 +141,7 @@ namespace crow
             h.u.f.type = type();
             h.qos.set_quality(quality());
             h.qos.set_quant(ackquant());
-            h.u.f.stg = stage();
+            h.stg = stage();
             h.flen = datasize() + addrsize() + sizeof(header_v1);
             h.alen = addrsize();
             return h;
@@ -237,19 +239,19 @@ namespace crow
 
         uint8_t *stageptr() override
         {
-            return (uint8_t *)(&_header + 1) + _header.u.f.stg;
+            return (uint8_t *)(&_header + 1) + _header.stg;
         }
 
         uint16_t full_length() override { return _header.flen; }
         uint8_t quality() override { return _header.qos.quality(); }
         uint16_t ackquant() override { return _header.qos.quant(); }
-        uint8_t stage() override { return _header.u.f.stg; }
+        uint8_t stage() override { return _header.stg; }
         uint8_t ack() override { return _header.u.f.ack; }
 
         void set_type(uint8_t arg) override { _header.u.f.type = arg; }
         void set_quality(uint8_t arg) override { _header.qos.set_quality(arg); }
         void set_ackquant(uint16_t arg) override { _header.qos.set_quant(arg); }
-        void set_stage(uint8_t arg) override { _header.u.f.stg = arg; }
+        void set_stage(uint8_t arg) override { _header.stg = arg; }
         void set_seqid(uint16_t arg) override { _header.seqid = arg; }
         void set_ack(uint8_t arg) override { _header.u.f.ack = arg; };
 

@@ -111,8 +111,7 @@ licant.modules.module("crow.udpgate",
 
 licant.modules.module("crow.serial_gstuff", 
 	sources=[
-		"crow/gates/serial_gstuff.cpp",
-		"crow/gates/serial_gstuff_v1.cpp"
+		"crow/gates/serial_gstuff.cpp"
 	], 
 	mdepends=[
 		#"igris.protocols.gstuff"

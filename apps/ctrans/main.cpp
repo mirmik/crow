@@ -1,5 +1,4 @@
 #include <crow/gates/serial_gstuff.h>
-#include <crow/gates/serial_gstuff_v1.h>
 #include <crow/gates/chardev_gateway.h>
 #include <crow/gates/chardev/serial_port_driver.h>
 #include <crow/gates/udpgate.h>
@@ -470,7 +469,6 @@ void console_listener()
 
 uint16_t udpport = 0;
 char *serial_port = NULL;
-char *serial_port_v1 = NULL;
 
 std::vector<crow::chardev_gateway *> cdev_gates;
 
@@ -531,7 +529,6 @@ int main(int argc, char *argv[])
 		{"udp", required_argument, NULL, 'u'}, // udp порт для 12-ого гейта.
 		{"cdev", required_argument, NULL, 'c'}, // serial...
 		{"serial", required_argument, NULL, 'S'}, // serial...
-		{"serial_v1", required_argument, NULL, 'C'}, // serial...
 
 		{"qos", required_argument, NULL, 'q'}, // qos отправляемых сообщений. 0 по умолчанию
 		{"type", required_argument, NULL, 't'}, // метка типа отправляемых сообщений
@@ -601,11 +598,6 @@ int main(int argc, char *argv[])
 			case 'S':
 				serial_port = (char *)malloc(strlen(optarg) + 1);
 				strcpy(serial_port, optarg);
-				break;
-
-			case 'C':
-				serial_port_v1 = (char *)malloc(strlen(optarg) + 1);
-				strcpy(serial_port_v1, optarg);
 				break;
 
 			case 'E':
@@ -739,14 +731,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (serial_port_v1 != NULL)
-	{
-		if (crow::create_serial_gstuff_v1(serial_port_v1, 115200, 42, gdebug) == NULL)
-		{
-			perror("serialgate open");
-			exit(-1);
-		}
-	}
 // Переопределение стандартного обработчика (Для возможности перехвата и api)
 	crow::user_incoming_handler = incoming_handler;
 
