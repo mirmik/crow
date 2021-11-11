@@ -1,6 +1,4 @@
 #include <crow/gates/serial_gstuff.h>
-#include <crow/gates/chardev_gateway.h>
-#include <crow/gates/chardev/serial_port_driver.h>
 #include <crow/gates/udpgate.h>
 #include <crow/tower.h>
 #include <crow/proto/channel.h>
@@ -391,63 +389,6 @@ crow::channel* acceptor_create_channel()
 	return ch;
 }
 
-void chardev_gateway_constructor(char * instruction)
-{
-	crow::chardev_protocol * protocol;
-	crow::chardev_driver *   driver;
-
-	auto parts = igris::split(instruction, ':');
-
-	if (parts.size() != 2)
-	{
-		nos::println("Usage: --cdev DRIVER[,DRVOPTS]:PROTOCOL[,PROTOOPT]");
-		exit(0);
-	}
-
-	auto drvargs = igris::split(parts[0], ',');
-	if (drvargs[0] == "serial")
-	{
-		if (drvargs.size() != 6)
-		{
-			nos::println("Usage: serial,PATH,BAUD,PARITY,DATABITS,STOPBITS:...");
-			exit(0);
-		}
-
-		auto * port_driver = new crow::serial_port_driver;
-
-		auto path = drvargs[1].c_str();
-		auto baud = std::stoi(drvargs[2]);
-		auto parity = drvargs[3][0];
-		auto databits = std::stoi(drvargs[4]);
-		auto stopbits = std::stoi(drvargs[5]);
-
-		int sts = port_driver->open(path, baud, parity, databits, stopbits);
-		nos::println(sts);
-
-		driver = port_driver;
-	}
-	else
-	{
-		nos::println("unresolved driver", drvargs[0]);
-		exit(0);
-	}
-
-	auto protoargs = igris::split(parts[1], ',');
-	if (protoargs[0] == "gstuff")
-	{
-		nos::println("construct gstuff protocol");
-	}
-	else
-	{
-		nos::println("unresolved protocol", protoargs[0]);
-		exit(0);
-	}
-
-	(void) protocol;
-	(void) driver;
-	//cdev_gates.emplace_back(driver, protocol, FULL_MESSAGE_SEND_STRATEGY);
-}
-
 void console_listener()
 {
 	std::string input;
@@ -469,8 +410,6 @@ void console_listener()
 
 uint16_t udpport = 0;
 char *serial_port = NULL;
-
-std::vector<crow::chardev_gateway *> cdev_gates;
 
 void print_help()
 {
@@ -699,10 +638,6 @@ int main(int argc, char *argv[])
 
 			case 'e':
 				pipelinecmd = optarg;
-				break;
-
-			case 'c':
-				chardev_gateway_constructor(optarg);
 				break;
 
 			case '?':

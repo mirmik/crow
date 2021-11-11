@@ -66,7 +66,6 @@ licant.modules.module("crow",
 		"crow.threads",
 		"crow.select",
 		"crow.crowker",
-		"crow.chardev_gateway",
 		"crow.minimal",
 	#	"crow.protocol.pubsub",
 	]
@@ -116,13 +115,6 @@ licant.modules.module("crow.serial_gstuff",
 	mdepends=[
 		#"igris.protocols.gstuff"
 	])
-
-licant.module("crow.chardev_gateway", 
-	sources = [
-		"crow/gates/chardev_gateway.cpp",
-		"crow/gates/chardev/chardev_protocol.cpp",
-	]
-)
 
 #####################################################################################
 ####################################PROTOCOLS########################################
