@@ -35,6 +35,12 @@ namespace crow
                                  const igris::buffer *vec, size_t veclen,
                                  uint8_t qos, uint16_t ackquant);
 
+    crow::packet_ptr node_send_vv(nodeid_t sid, nodeid_t rid,
+                                  const crow::hostaddr_view &addr,
+                                  const igris::buffer *vec1, size_t veclen1,
+                                  const igris::buffer *vec2, size_t veclen2,
+                                  uint8_t qos, uint16_t ackquant);
+
     struct node_subheader
     {
         nodeid_t sid;
@@ -115,6 +121,17 @@ namespace crow
             if (id == 0)
                 bind();
             return crow::node_send_v(id, rid, raddr, vdat, vlen, qos, ackquant);
+        }
+
+        crow::packet_ptr send_vv(nodeid_t rid, const crow::hostaddr_view &raddr,
+                                 const igris::buffer *vdat1, size_t vlen1,
+                                 const igris::buffer *vdat2, size_t vlen2,
+                                 uint8_t qos, uint16_t ackquant)
+        {
+            if (id == 0)
+                bind();
+            return crow::node_send_vv(id, rid, raddr, vdat1, vlen1, vdat2,
+                                      vlen2, qos, ackquant);
         }
 
         static crow::node_subheader *subheader(crow::packet *pack)

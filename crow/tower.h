@@ -50,6 +50,12 @@ namespace crow
                              const igris::buffer *vec2, size_t veclen2,
                              uint8_t type, uint8_t qos, uint16_t ackquant);
 
+    crow::packet_ptr send_vvv(const crow::hostaddr_view &addr,
+                              const igris::buffer *vec, size_t veclen,
+                              const igris::buffer *vec2, size_t veclen2,
+                              const igris::buffer *vec3, size_t veclen3,
+                              uint8_t type, uint8_t qos, uint16_t ackquant);
+
     // Эта функция вызывается вратами после обработки отсылаемого пакета.
     void return_to_tower(crow::packet *pack, uint8_t sts);
 

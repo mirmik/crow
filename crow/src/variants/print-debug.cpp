@@ -28,5 +28,5 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
     dpr((uint8_t)pack->_ackcount);
     dpr(",data:");
     debug_write(pack->dataptr(), 20 > pack->datasize() ? pack->datasize() : 20);
-    crow::warn(")");
+    dprln(")");
 }

@@ -1,6 +1,25 @@
 #include <crow/nodes/publisher_node.h>
 #include <crow/nodes/pubsub_defs.h>
 
+
+void crow::publisher_node::publish_v(igris::buffer * data, int len)
+{
+    crow::publish_subheader sh;
+
+    sh.type = PubSubTypes::Publish;
+    sh.thmsize = theme.size();
+
+    const igris::buffer iov[] =
+    {
+        {
+            (char *)&sh + sizeof(node_subheader),
+            sizeof(sh) - sizeof(node_subheader)
+        },
+    };
+
+    send_vv(crowker_node, crowker_addr, iov, std::size(iov), data, len, qos, ackquant);    
+}
+
 void crow::publisher_node::publish(igris::buffer data)
 {
     crow::publish_subheader sh;
@@ -47,10 +66,10 @@ void crow::publisher_node::set_address(crow::hostaddr_view addr)
 
 crow::publisher_node::publisher_node(
     crow::hostaddr_view crowker_addr, int crowker_node, igris::buffer theme)
-        : theme(theme), crowker_addr(crowker_addr), crowker_node(crowker_node)
+    : theme(theme), crowker_addr(crowker_addr), crowker_node(crowker_node)
 {}
 
 crow::publisher_node::publisher_node(
     crow::hostaddr_view crowker_addr, igris::buffer theme)
-        : theme(theme), crowker_addr(crowker_addr), crowker_node(CROWKER_SERVICE_BROCKER_NODE_NO)
+    : theme(theme), crowker_addr(crowker_addr), crowker_node(CROWKER_SERVICE_BROCKER_NODE_NO)
 {}
