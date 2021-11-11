@@ -19,9 +19,9 @@ application("runtests",
 	],
 	mdepends=["crow", "crow.udpgate"],
 
-	cxxstd="c++17",
+	cxxstd="gnu++17",
 	ccstd="c11",
-	cxx_flags = "-g -Werror=all -Werror=pedantic",
+	cxx_flags = "-g -Werror=all -Werror=pedantic -Wno-vla-extension",
 	cc_flags = "-g -Werror=all -Werror=pedantic",
 
 	include_paths = ["."],

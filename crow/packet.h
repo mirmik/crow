@@ -63,7 +63,7 @@ namespace crow
 
     class packet
     {
-    public:
+      public:
         struct dlist_head lnk =
             DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
         struct dlist_head ulnk =
@@ -86,7 +86,7 @@ namespace crow
             } f;
         } u;
 
-    public:
+      public:
         void revert_gate(uint8_t gateindex);
         void revert(igris::buffer *vec, size_t veclen);
 
@@ -161,7 +161,6 @@ namespace crow
         uint8_t _type = 0;
         uint8_t _ack = 0;
         uint8_t _stage = 0;
-        uint16_t _ackquant = 0;
         uint8_t _quality = 0;
         uint8_t _alen = 0;
         uint16_t _dlen = 0;
@@ -169,7 +168,7 @@ namespace crow
         uint8_t *_aptr = nullptr;
         char *_dptr = nullptr;
 
-    public:
+      public:
         uint8_t *addrptr() override { return _aptr; }
         uint8_t addrsize() override { return _alen; }
 
@@ -184,8 +183,8 @@ namespace crow
 
         uint16_t full_length() override { return 0; }
         uint8_t quality() override { return _quality; }
-        uint16_t ackquant() { return _ackcount; }
-        uint8_t stage() { return _stage; }
+        uint16_t ackquant() override { return _ackcount; }
+        uint8_t stage() override { return _stage; }
         uint8_t ack() override { return _ack; }
 
         void set_addrsize(uint8_t arg) override { _alen = arg; }
@@ -221,10 +220,10 @@ namespace crow
 
     class compacted_packet : public packet
     {
-    public:
+      public:
         header_v1 _header;
 
-    public:
+      public:
         header_v1 &header() { return _header; }
 
         uint8_t *addrptr() override;
