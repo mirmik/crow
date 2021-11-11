@@ -428,7 +428,7 @@ crow::packet_ptr crow_transport(crow::packet *pack)
     pack->set_stage(0);
     pack->set_ack(0);
     system_lock();
-    pack->increment_seqid();
+    pack->set_seqid(__seqcounter++);
     system_unlock();
 
     crow::packet_ptr ptr(pack);
