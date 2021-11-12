@@ -12,18 +12,19 @@
 
 #include <igris/util/string.h>
 #include <igris/util/dstring.h>
+#include <igris/osutil/timeouted_read.h>
 #include <igris/util/bug.h>
 #include <nos/fprint.h>
 
 #include <getopt.h>
-#include <pthread.h>
+#include <pthread.h>       
+#include <sys/ioctl.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <unistd.h>
 
 #include <string>
@@ -33,6 +34,7 @@
 
 bool debug_mode = false;
 crow::hostaddr address;
+volatile bool cancel_token = false;
 
 bool userqos = false;
 uint8_t qos = 0;
@@ -397,6 +399,11 @@ void console_listener()
 	while (1)
 	{
 		int len = read(DATAINPUT_FILENO, readbuf, 1024);
+		if (cancel_token) 
+			break;
+
+		if (len == 0) 
+			continue;
 
 		input = std::string(readbuf, len);
 		auto msgpair = input_do(input);
@@ -404,8 +411,6 @@ void console_listener()
 		if (msgpair.second)
 			send_do(msgpair.first);
 	}
-
-	exit(0);
 }
 
 uint16_t udpport = 0;
@@ -454,12 +459,19 @@ void print_help()
 	);
 }
 
+void signal_handler(int) 
+{
+	quick_exit(0);
+}
+
 int main(int argc, char *argv[])
 {
 	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
 	requestor_node.bind(CTRANS_DEFAULT_requestor_node);
 	reply_theme = gen_random_string(10);
+
+	signal(SIGINT, signal_handler);
 
 	const struct option long_options[] =
 	{
