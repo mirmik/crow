@@ -79,7 +79,7 @@ int crow::udpgate::open(uint16_t port)
     const int optVal = 1;
     const socklen_t optLen = sizeof(optVal);
 
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&optVal, optLen);
+//    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&optVal, optLen);
 
     if (sock < 0)
     {

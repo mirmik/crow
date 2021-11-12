@@ -20,7 +20,8 @@ application("ctrans",
 		"crow.serial_gstuff",
 	],
 	defines = defines,
-	cxx_flags = "-Wextra -Wall",
+	optimize = "-O3",
+	cxx_flags = "-flto -Wextra -Wall",
 	libs = ["pthread", "readline", "igris", "nos"],
 	cxxstd = "c++17"
 )
