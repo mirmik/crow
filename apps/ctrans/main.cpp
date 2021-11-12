@@ -471,8 +471,6 @@ int main(int argc, char *argv[])
 	requestor_node.bind(CTRANS_DEFAULT_requestor_node);
 	reply_theme = gen_random_string(10);
 
-	signal(SIGINT, signal_handler);
-
 	const struct option long_options[] =
 	{
 		{"help", no_argument, NULL, 'h'},
@@ -731,6 +729,7 @@ int main(int argc, char *argv[])
 
 	//START CROW
 	crow::start_spin();
+	signal(SIGINT, signal_handler);
 
 	if (channelno >= 0)
 	{
