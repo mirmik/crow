@@ -78,6 +78,7 @@ void crow::crowker::subscribe(const std::string &theme, client *cl)
     auto *thm = get_theme(theme);
     thm->timestamp_activity = crowker_eval_timestamp();
     cl->thms[thm].opts = nullptr;
+    cl->timestamp_activity = crowker_eval_timestamp();
 
     if (brocker_info)
         nos::fprintln("new subscribe(crow): t:{}", theme);

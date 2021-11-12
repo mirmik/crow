@@ -27,6 +27,7 @@ namespace crowker_implementation
     public:
         crow::crowker *context;
         std::unordered_map<theme *, themenote> thms;
+        int64_t timestamp_activity;
 
     public:
         // bool is_disconnected();

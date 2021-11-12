@@ -825,7 +825,7 @@ int main(int argc, char *argv[])
 				if (cancel_token)
 					return;
 			}
-		});
+		}).detach();
 	}
 
 	if (service_mode)
@@ -845,7 +845,7 @@ int main(int argc, char *argv[])
 				if (cancel_token)
 					return;
 			}
-		});
+		}).detach();
 	}
 
 	crow::join_spin();
