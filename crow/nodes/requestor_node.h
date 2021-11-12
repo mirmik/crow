@@ -3,6 +3,7 @@
 
 #include <crow/nodes/publisher_node.h>
 #include <crow/proto/node.h>
+#include <igris/event/delegate.h>
 
 namespace crow
 {
@@ -16,7 +17,9 @@ namespace crow
         int rqos = 0;
         int rackquant = 0;
 
-      public:
+        igris::delegate<void, igris::buffer> incoming;
+
+    public:
         requestor_node() = default;
         requestor_node(crow::hostaddr_view crowker_addr, igris::buffer theme,
                        igris::buffer reptheme);
@@ -31,7 +34,7 @@ namespace crow
 
         void async_request(igris::buffer data);
 
-        template <class... Args> crow::packet_ptr request(Args &&...data)
+        template <class... Args> crow::packet_ptr request(Args &&... data)
         {
             async_request(std::forward<Args>(data)...);
             int sts = waitevent();
@@ -42,8 +45,14 @@ namespace crow
         }
 
         void set_reply_theme(igris::buffer reply_theme);
+        requestor_node &
+        set_async_handle(igris::delegate<void, igris::buffer> incoming)
+        {
+            this->incoming = incoming;
+            return *this;
+        }
 
-      private:
+    private:
         void incoming_packet(crow::packet *pack) override;
     };
 }

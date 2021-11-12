@@ -90,6 +90,9 @@ void crow::spin_with_select()
         do
         {
             crow::onestep();
+
+            if (cancel_token)
+                break;
         }
         while (crow::has_untravelled_now());
 
@@ -167,6 +170,9 @@ int crow::start_spin_without_select()
                 break;
 
             crow::onestep();
+
+            if (cancel_token)
+                break;
             std::this_thread::sleep_for(std::chrono::microseconds(1));
         };
 
@@ -200,4 +206,9 @@ void crow::spin_join()
 void crow::join_spin()
 {
     _thread.join();
+}
+
+void crow::set_spin_cancel_token() 
+{
+    cancel_token = true;
 }

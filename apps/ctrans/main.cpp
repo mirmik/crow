@@ -5,6 +5,7 @@
 #include <crow/proto/acceptor.h>
 #include <crow/nodes/publisher_node.h>
 #include <crow/nodes/subscriber_node.h>
+#include <crow/nodes/service_node.h>
 #include <crow/nodes/requestor_node.h>
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/address.h>
@@ -17,7 +18,7 @@
 #include <nos/fprint.h>
 
 #include <getopt.h>
-#include <pthread.h>       
+#include <pthread.h>
 #include <sys/ioctl.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -49,7 +50,7 @@ bool echo = false;
 bool gdebug = false;
 bool info = false;
 bool subscribe_mode = false;
-bool subscribe2_mode = false;
+bool service_mode = false;
 bool request_mode = false;
 bool crowker_mode = false;
 
@@ -75,9 +76,34 @@ int DATAINPUT_FILENO = STDIN_FILENO;
 
 std::shared_ptr<crow::udpgate> udpgate;
 
-crow::publisher_node publish_node;
-crow::subscriber_node subscriber_node;
-crow::requestor_node requestor_node;
+void do_incom_data(igris::buffer);
+
+void subscriber_data_handle(igris::buffer incom_data)
+{
+	do_incom_data(incom_data);
+}
+
+int service_data_handle(char *cmd, int cmdlen, char * ans, int ansmax)
+{
+	do_incom_data({cmd, cmdlen});
+	snprintf(ans, ansmax, "HelloWorld");
+	return strlen(ans);
+}
+
+void service_data_handle(igris::buffer incom_data)
+{
+	do_incom_data(incom_data);
+}
+
+void requestor_data_handle(igris::buffer incom_data)
+{
+	do_incom_data(incom_data);
+}
+
+auto publish_node = crow::publisher_node();
+auto requestor_node = crow::requestor_node().set_async_handle(requestor_data_handle);
+auto subscriber_node = crow::subscriber_node(subscriber_data_handle);
+auto service_node = crow::service_node(service_data_handle);
 
 enum class protoopt_e
 {
@@ -156,25 +182,20 @@ std::string gen_random_string(const int len)
 
 void output_do(igris::buffer data, crow::packet* pack)
 {
+	int ret;
 	(void) pack;
-
-	if (api)
-	{
-		if (data == "exit\n")
-			exit(0);
-	}
 
 	switch (outformat)
 	{
 		case output_format::OUTPUT_RAW:
-			write(DATAOUTPUT_FILENO, data.data(), data.size());
+			ret = write(DATAOUTPUT_FILENO, data.data(), data.size());
 			break;
 
 		case output_format::OUTPUT_DSTRING:
 			// Вывод в stdout информацию пакета.
 			char buf[10000];
 			bytes_to_dstring(buf, data.data(), data.size());
-			write(DATAOUTPUT_FILENO, buf, strlen(buf));
+			ret = write(DATAOUTPUT_FILENO, buf, strlen(buf));
 			break;
 
 		default:
@@ -183,8 +204,16 @@ void output_do(igris::buffer data, crow::packet* pack)
 
 	if (nlout)
 	{
-		write(DATAOUTPUT_FILENO, "\n", 1);
+		ret = write(DATAOUTPUT_FILENO, "\n", 1);
 	}
+
+	if (ret < 0)
+		exit(0);
+}
+
+void do_incom_data(igris::buffer incom_data)
+{
+	output_do(incom_data, nullptr);
 }
 
 std::pair<std::string, bool> input_do(const std::string& data)
@@ -344,32 +373,13 @@ void incoming_handler(crow::packet *pack)
 		char *dp = pack->dataptr();
 		size_t ds = pack->datasize();
 
-		if (strncmp(dp, "exit\n", ds) == 0)
+		if (strncmp(dp, "remote_exit\n", ds) == 0)
 		{
-			raise(SIGINT);
+			quick_exit(0);
 		}
 	}
 
-	switch (pack->type())
-	{
-		case CROW_NODE_PROTOCOL:
-		{
-			if (subscribe2_mode || request_mode)
-			{
-				auto & subheader = pack->subheader<crow::consume_subheader>();
-				output_do(subheader.message(), pack);
-				return;
-			}
-
-			output_do(crow::node_data(pack), pack);
-			crow::release(pack);
-			return;
-		}
-
-		default:
-			output_do(pack->data(), pack);
-	}
-
+	output_do(pack->data(), pack);
 	crow::release(pack);
 }
 
@@ -399,10 +409,10 @@ void console_listener()
 	while (1)
 	{
 		int len = read(DATAINPUT_FILENO, readbuf, 1024);
-		if (cancel_token) 
+		if (cancel_token)
 			break;
 
-		if (len == 0) 
+		if (len == 0)
 			continue;
 
 		input = std::string(readbuf, len);
@@ -438,13 +448,14 @@ void print_help()
 	    "      --channel         (channel) connect to channel on nid\n"
 	    "      --node            (node)    send message to specified node\n"
 	    "      --listen-node     (node)    listen that node ids\n"
+	    "      --request      (node)      request crowker service\n"
 	    "      --subscribe      (node)    subscribe to crowker theme\n"
 	    "      --publish        (node)    publish to crowker theme\n"
 	    "\n"
 	    "Info option list:\n"
 	    "      --info\n"
 	    "      --debug\n"
-	    "      --debug-data-size\n"
+	    "      --dumpsize\n"
 	    "      --gdebug\n"
 	    "\n"
 	    "Control option list:\n"
@@ -459,7 +470,7 @@ void print_help()
 	);
 }
 
-void signal_handler(int) 
+void signal_handler(int)
 {
 	quick_exit(0);
 }
@@ -468,7 +479,8 @@ int main(int argc, char *argv[])
 {
 	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
-	requestor_node.bind(CTRANS_DEFAULT_requestor_node);
+	service_node.bind(CTRANS_DEFAULT_SERVICE_NODE);
+	requestor_node.bind(CTRANS_DEFAULT_REQUESTOR_NODE);
 	reply_theme = gen_random_string(10);
 
 	const struct option long_options[] =
@@ -482,7 +494,7 @@ int main(int argc, char *argv[])
 		{"qos", required_argument, NULL, 'q'}, // qos отправляемых сообщений. 0 по умолчанию
 		{"type", required_argument, NULL, 't'}, // метка типа отправляемых сообщений
 		{"ackquant", required_argument, NULL, 'A'}, // установка кванта ack
-		
+
 		{"noend", no_argument, NULL, 'x'}, // Блокирует добавление символа конца строки.
 		{"nlout", no_argument, NULL, 'N'}, // Блокирует добавление символа конца строки.
 		{"echo", no_argument, NULL, 'E'}, // Активирует функцию эха входящих пакетов.
@@ -502,6 +514,7 @@ int main(int argc, char *argv[])
 		{"subscribe", required_argument, NULL, 'K'},
 		{"publish", required_argument, NULL, 'L'},
 		{"request", required_argument, NULL, 'G'},
+		{"service", required_argument, NULL, 'Y'},
 		{"retransler", no_argument, NULL, 'R'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
@@ -614,9 +627,15 @@ int main(int argc, char *argv[])
 				crowker_mode = 1;
 				break;
 
+			case 'Y':
+				theme = optarg;
+				service_mode = 1;
+				crowker_mode = 1;
+				break;
+
 			case 'K':
 				theme = optarg;
-				subscribe2_mode = 1;
+				subscribe_mode = 1;
 				crowker_mode = 1;
 				break;
 
@@ -677,7 +696,7 @@ int main(int argc, char *argv[])
 	}
 
 // Переопределение стандартного обработчика (Для возможности перехвата и api)
-	crow::user_incoming_handler = incoming_handler;
+	crow::default_incoming_handler = incoming_handler;
 
 	if (noend)
 	{
@@ -787,10 +806,9 @@ int main(int argc, char *argv[])
 	if (!noconsole)
 	{
 		console_thread = std::thread(console_listener);
-		console_thread.detach();
 	}
 
-	if (subscribe2_mode)
+	if (subscribe_mode)
 	{
 		std::thread([]()
 		{
@@ -804,9 +822,32 @@ int main(int argc, char *argv[])
 				    qos, ackquant
 				);
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+				if (cancel_token)
+					return;
 			}
-		}).detach();
+		});
+	}
+
+	if (service_mode)
+	{
+		std::thread([]()
+		{
+			while (1)
+			{
+				service_node.subscribe(
+				    address,
+				    CROWKER_SERVICE_BROCKER_NODE_NO,
+				    theme.c_str(),
+				    qos, ackquant,
+				    qos, ackquant
+				);
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+				if (cancel_token)
+					return;
+			}
+		});
 	}
 
 	crow::join_spin();
+	quick_exit(0);
 }

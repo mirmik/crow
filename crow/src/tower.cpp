@@ -26,8 +26,7 @@ DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
 
 void (*crow::unsleep_handler)() = nullptr;
-void (*crow::user_type_handler)(crow::packet *pack) = nullptr;
-void (*crow::user_incoming_handler)(crow::packet *pack) = nullptr;
+void (*crow::default_incoming_handler)(crow::packet *pack) = nullptr;
 void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
 
 static bool __diagnostic_enabled = false;
@@ -154,14 +153,6 @@ static void crow_travel_error(crow::packet *pack)
 
 static void crow_incoming_handler(crow::packet *pack)
 {
-    if (crow::user_incoming_handler)
-    {
-        _in_incoming_handler = true;
-        crow::user_incoming_handler(pack);
-        _in_incoming_handler = false;
-        return;
-    }
-
     if (CROW_NODE_PROTOCOL == pack->type())
     {
         _in_incoming_handler = true;
@@ -170,10 +161,10 @@ static void crow_incoming_handler(crow::packet *pack)
         return;
     }
 
-    if (crow::user_type_handler)
+    if (crow::default_incoming_handler)
     {
         _in_incoming_handler = true;
-        crow::user_type_handler(pack);
+        crow::default_incoming_handler(pack);
         _in_incoming_handler = false;
         return;
     }

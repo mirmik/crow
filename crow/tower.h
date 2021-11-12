@@ -18,10 +18,8 @@ namespace crow
     extern bool diagnostic_noack;
     extern unsigned int total_travelled;
 
-    extern void (*user_incoming_handler)(crow::packet *pack);
-    extern void (*user_type_handler)(crow::packet *pack);
+    extern void (*default_incoming_handler)(crow::packet *pack);
     extern void (*undelivered_handler)(crow::packet *pack);
-
     extern void (*unsleep_handler)();
 
     extern bool retransling_allowed;
@@ -97,6 +95,8 @@ namespace crow
 
     int incomming_stage_count();
     int outers_stage_count();
+
+    void set_spin_cancel_token();
 }
 
 void crow_tower_release(crow::packet *pack);
