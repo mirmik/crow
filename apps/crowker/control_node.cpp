@@ -27,7 +27,7 @@ std::string get_themes()
 
 void init_control_node() 
 {
-	rpc.bind();
+	rpc.bind(2);
 
 	rpc.add_delegate("hello", igris::make_delegate(hello));
 	rpc.add_delegate("themes", igris::make_delegate(get_themes));

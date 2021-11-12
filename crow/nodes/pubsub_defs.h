@@ -66,10 +66,6 @@ namespace crow
             return {(char *)(this + 1) + thmsize + repthmsize, datsize};
         }
     } __attribute__((packed));
-
-    struct publish_and_subscribe_subheader : public pubsub_subheader
-    {
-    } __attribute__((packed));
 }
 
 #endif
