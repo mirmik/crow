@@ -26,7 +26,8 @@ void signal_sigint_handler(int sig)
     if (_spin_runned)
     {
         cancel_token = true;
-        write(crow::unselect_pipe[1], "A", 1);
+        int ret = write(crow::unselect_pipe[1], "A", 1);
+        (void) ret;
         if (_spin_runned_unbounded)
             _thread.join();
     }
@@ -54,13 +55,15 @@ void signal_sigint_handler(int sig)
 void crow::unselect()
 {
     char c = 42;
-    ::write(unselect_pipe[1], &c, 1);
+    int ret = ::write(unselect_pipe[1], &c, 1);
+    (void) ret;
 }
 
 void crow::unselect_init()
 {
     crow::add_unselect_to_fds = true;
-    ::pipe(unselect_pipe);
+    int ret = ::pipe(unselect_pipe);
+    (void) ret;
     igris::osutil::nonblock(unselect_pipe[0], true);
     crow::unsleep_handler = unselect;
 }
@@ -97,7 +100,8 @@ void crow::spin_with_select()
         while (crow::has_untravelled_now());
 
         crow::select();
-        read(unselect_pipe[0], unselect_read_buffer, 512);
+        int ret = read(unselect_pipe[0], unselect_read_buffer, 512);
+        (void) ret;
     };
 
     _spin_runned = false;
