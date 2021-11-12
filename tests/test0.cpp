@@ -21,7 +21,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 {
 	count = 0;
 	crow::total_travelled = 0;
-	crow::user_incoming_handler = incoming;
+	crow::default_incoming_handler = incoming;
 
 	SUBCASE("0")
 	{

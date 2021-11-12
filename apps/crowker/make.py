@@ -19,8 +19,8 @@ application("crowker",
 		"crow.crowker", 
 		"crow.udpgate"
 	],
-	optimize = "-O3",
-	cxx_flags = "-flto -Wextra -Wall",
+	optimize = "-O2",
+	cxx_flags = "-Wextra -Wall",
 	libs = ["pthread", "readline", "nos", "igris"]
 )
 

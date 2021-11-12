@@ -26,7 +26,7 @@ TEST_CASE("node0" * doctest::timeout(0.5))
 {
 	count = ucount = 0;
 	crow::total_travelled = 0;
-	crow::user_incoming_handler = nullptr;
+	crow::default_incoming_handler = nullptr;
 
 	SUBCASE("0")
 	{

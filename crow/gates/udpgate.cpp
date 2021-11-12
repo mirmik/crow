@@ -76,11 +76,6 @@ int crow::udpgate::open(uint16_t port)
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);
 
-    const int optVal = 1;
-    const socklen_t optLen = sizeof(optVal);
-
-//    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&optVal, optLen);
-
     if (sock < 0)
     {
         perror("udp socket open:");

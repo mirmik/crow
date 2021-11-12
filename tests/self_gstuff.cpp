@@ -16,7 +16,7 @@ int write(void * priv, const char * data, unsigned int size)
 TEST_CASE("self_driven_gstuff.output")
 {
 	crow::total_travelled = 0;
-	crow::user_incoming_handler = nullptr;
+	crow::default_incoming_handler = nullptr;
 
 	{
 		char buf[64];
@@ -52,7 +52,7 @@ TEST_CASE("self_driven_gstuff.output")
 TEST_CASE("self_driven_gstuff.input")
 {
 	crow::total_travelled = 0;
-	crow::user_incoming_handler = nullptr;
+	crow::default_incoming_handler = nullptr;
 	CHECK_EQ(crow::has_allocated(), false);
 
 	{
