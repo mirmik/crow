@@ -9,12 +9,6 @@ void crow::crowker_api::subscribe_on_theme(crow::hostaddr_view view, int nid,
     crowker_api_client::options_struct opt = {rqos, rackquant};
 
     auto key = std::make_pair(view, nid);
-
-    if (clients.count(key))
-    {
-        return;
-    }
-
     auto &client = clients[key];
 
     client.api = this;
