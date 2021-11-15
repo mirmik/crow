@@ -48,6 +48,10 @@ namespace crow
         void tcp_subscribe(const std::string &theme,
                            nos::inet::tcp_socket *sock);
 
+        void crow_subscribe(const crow::hostaddr_view &addr,
+                            const std::string &theme, uint8_t qos,
+                            uint16_t ackquant);
+
         void unlink_theme_client(crowker_implementation::theme *thm,
                                  crowker_implementation::client *sub);
 
