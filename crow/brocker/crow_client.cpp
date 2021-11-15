@@ -1,5 +1,5 @@
 /** @file */
-/*
+
 #include "crow_client.h"
 #include <crow/pubsub/pubsub.h>
 
@@ -17,4 +17,3 @@ void crowker_implementation::crow_client::publish(
                     {data.data(), data.size()}, copts->qos, copts->ackquant,
                     MESSAGE);
 }
-*/
