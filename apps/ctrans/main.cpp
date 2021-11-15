@@ -53,6 +53,7 @@ bool subscribe_mode = false;
 bool service_mode = false;
 bool request_mode = false;
 bool crowker_mode = false;
+bool TIMESTAMP_MODE = false;
 
 int acceptorno = -1;
 int channelno = -1;
@@ -184,6 +185,15 @@ void output_do(igris::buffer data, crow::packet* pack)
 {
 	int ret;
 	(void) pack;
+
+	if (TIMESTAMP_MODE) 
+	{
+		char buf[16];
+		int32_t time = crow::millis();
+		sprintf(buf, "%d:", time);
+		write(DATAOUTPUT_FILENO, buf, strlen(buf));
+	}
+
 
 	switch (outformat)
 	{
@@ -457,6 +467,7 @@ void print_help()
 	    "      --debug\n"
 	    "      --dumpsize\n"
 	    "      --gdebug\n"
+	    "      --timestamp\n"
 	    "\n"
 	    "Control option list:\n"
 	    "      --noconsole       disable console input\n"
@@ -501,6 +512,7 @@ int main(int argc, char *argv[])
 		{"api", no_argument, NULL, 'a'}, // Активирует удалённое управление.
 		{"noconsole", no_argument, NULL, 'n'}, // Отключает создание консоли.
 		{"pulse", required_argument, NULL, 'p'}, // Отключает программу по первой транзакции.
+		{"timestamp", no_argument, NULL, 'T'}, // Выводит метку времени прешедшего пакета.
 
 		{"rawout", no_argument, NULL, 'r'},
 		{"dbgout", no_argument, NULL, 'j'},
@@ -551,6 +563,10 @@ int main(int argc, char *argv[])
 
 			case 't':
 				type = (uint8_t)atoi(optarg);
+				break;
+
+			case 'T':
+				TIMESTAMP_MODE = true;
 				break;
 
 			case 'u':
