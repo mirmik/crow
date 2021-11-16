@@ -12,6 +12,7 @@
 #include <crow/tower.h>
 #include <crow/warn.h>
 #include <crow/proto/node.h>
+#include <crow/pubsub/pubsub.h>
 
 #include <nos/print.h>
 
@@ -290,21 +291,21 @@ static void crow_tower_incoming_ack_phase(crow::packet *pack)
 
     switch (pack->type())
     {
-    case G1_ACK_TYPE:
-        confirmed_utilize_from_outers(pack);
-        break;
+        case G1_ACK_TYPE:
+            confirmed_utilize_from_outers(pack);
+            break;
 
-    case G1_ACK21_TYPE:
-        confirmed_utilize_from_outers(pack);
-        crow_send_ack2(pack);
-        break;
+        case G1_ACK21_TYPE:
+            confirmed_utilize_from_outers(pack);
+            crow_send_ack2(pack);
+            break;
 
-    case G1_ACK22_TYPE:
-        qos_release_from_incoming(pack);
-        break;
+        case G1_ACK22_TYPE:
+            qos_release_from_incoming(pack);
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     system_lock();
@@ -555,10 +556,10 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_vvv(const crow::hostaddr_view &addr,
-                               const igris::buffer *vec, size_t veclen,
-                               const igris::buffer *vec2, size_t veclen2,
-                               const igris::buffer *vec3, size_t veclen3,
-                               uint8_t type, uint8_t qos, uint16_t ackquant)
+                                const igris::buffer *vec, size_t veclen,
+                                const igris::buffer *vec2, size_t veclen2,
+                                const igris::buffer *vec3, size_t veclen3,
+                                uint8_t type, uint8_t qos, uint16_t ackquant)
 {
     size_t dsize = 0;
     const igris::buffer *it;
@@ -687,6 +688,13 @@ void crow_undelivered(crow::packet *pack)
         return;
     }
 
+    else if (CROW_PUBSUB_PROTOCOL == pack->type())
+    {
+        _in_undelivered_handler = true;
+        crow::pubsub_protocol.undelivered(pack);
+        _in_undelivered_handler = false;
+        return;
+    }
 }
 
 static inline void crow_onestep_send_stage()
