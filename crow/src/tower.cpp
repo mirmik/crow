@@ -688,6 +688,7 @@ void crow_undelivered(crow::packet *pack)
         return;
     }
 
+#ifdef CROW_PUBSUB_PROTOCOL_SUPPORTED
     else if (CROW_PUBSUB_PROTOCOL == pack->type())
     {
         _in_undelivered_handler = true;
@@ -695,6 +696,7 @@ void crow_undelivered(crow::packet *pack)
         _in_undelivered_handler = false;
         return;
     }
+#endif
 }
 
 static inline void crow_onestep_send_stage()
