@@ -3,14 +3,13 @@
 #include <crow/warn.h>
 #include <nos/print.h>
 
-static char answer [16];
-    
 void crow::service_node::incoming_packet(crow::packet *pack)
 {
-    memset(answer, 0, 16);
-    answer_buffer_size = 15;
-    //char *answer = (char *)malloc(answer_buffer_size);
-    //memset(answer, 0, answer_buffer_size);
+    if (dynamic_answer_buffer)
+    {
+        answer_buffer = (char *)malloc(answer_buffer_size);
+        memset(answer_buffer, 0, answer_buffer_size);
+    }
 
     auto &subheader = pack->subheader<consume_subheader>();
     auto data = subheader.message();
@@ -21,11 +20,16 @@ void crow::service_node::incoming_packet(crow::packet *pack)
                                  data.size() - 1 - reply_theme_length};
 
     int anslen =
-        dlg(message.data(), message.size(), answer, answer_buffer_size);
+        dlg(message.data(), message.size(), answer_buffer, answer_buffer_size);
 
     if (reply_theme != "__noanswer__")
-        publish(pack->addr(), subheader.sid, reply_theme, {answer, anslen}, qos,
+        publish(pack->addr(), subheader.sid, reply_theme, {answer_buffer, anslen}, qos,
                 ackquant);
+
+    if (dynamic_answer_buffer)
+    {
+        free(answer_buffer);
+    }
 
     crow::release(pack);
 }

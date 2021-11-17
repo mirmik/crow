@@ -25,7 +25,7 @@ void register_subscriber_class(py::module & m);
 void register_publisher_class(py::module & m);
 void register_requestor_class(py::module & m);
 
-py::function incoming_handler_bind;
+/*py::function incoming_handler_bind;
 void incoming_handler_bind_invoke(crow::packet *pack)
 {
 	crow::packet_ptr control(pack);
@@ -37,7 +37,7 @@ void subscribe_handler_bind_invoke(crow::packet *pack)
 {
 	crow::packet_ptr control(pack);
 	subscribe_handler_bind(control);
-}
+}*/
 
 PYBIND11_MODULE(libcrow, m)
 {
@@ -101,15 +101,6 @@ PYBIND11_MODULE(libcrow, m)
 	m.def("crowker_address", &crow::crowker_address);
 
 	m.def("address", [](std::string str){ return crow::address(str); });
-
-	static int unused; // the capsule needs something to reference
-	py::capsule cleanup(&unused, [](void *)
-	{
-		user_incoming_handler = nullptr;
-		incoming_handler_bind.release();
-		subscribe_handler_bind.release();
-	});
-	m.add_object("_cleanup", cleanup);
 
 	m.def("diagnostic_setup", diagnostic_setup);
 	m.def("finish", finish);

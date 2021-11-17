@@ -9,8 +9,8 @@ namespace crow
 {
     class abstract_subscriber_node : public crow::publisher_node
     {
-        int rqos = 2;
-        int rackquant = 50;
+        int rqos = 0;
+        int rackquant = 0;
 
     public:
         abstract_subscriber_node() = default;

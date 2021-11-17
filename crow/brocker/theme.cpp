@@ -25,14 +25,14 @@ void crowker_implementation::theme::publish(const std::string &data)
         if (sub->thms.count(this))
             opts = sub->thms[this].opts;
 
-        if (crowker_eval_timestamp() - sub->timestamp_activity > 20000)
-        {
-            killme_list.push_back(sub);
-        }
-        else
-        {
+        //if (crowker_eval_timestamp() - sub->timestamp_activity > 20000)
+        //{
+        //    killme_list.push_back(sub);
+        //}
+        //else
+        //{
             sub->publish(name, {data.data(), data.size()}, opts);
-        }
+        //}
     }
 
     for (auto * sub : killme_list)
