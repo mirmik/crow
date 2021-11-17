@@ -35,7 +35,7 @@ licant.modules.module("crow.minimal",
 		"src/address.cpp",
 		"src/hostaddr_view.cpp",
 		"src/hostaddr.cpp",
-		"pubsub/*.cpp",
+		"pubsub/pubsub.cpp",
 		"proto/node.cpp",
 		"proto/node-sync.cpp",
 		"proto/channel.cpp",
@@ -81,6 +81,7 @@ licant.module("crow.crowker",
 		"brocker/crow_client.cpp",
 		"brocker/tcp_client.cpp",
 		"brocker/crowker_api.cpp",
+		"pubsub/crowker_support.cpp",
 	]
 )
 
