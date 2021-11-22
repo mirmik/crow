@@ -42,56 +42,6 @@ struct crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
         exit(0);
     }
 
-    struct termios tattr, orig;
-    ret = tcgetattr(g->fd, &orig);
-
-    if (ret < 0)
-    {
-        perror("serial::tcgetattr");
-        exit(0);
-    }
-
-    tattr = orig; /* copy original and then modify below */
-
-    /* input modes - clear indicated ones giving: no break, no CR to NL,
-       no parity check, no strip char, no start/stop output (sic) control */
-    tattr.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
-
-    /* output modes - clear giving: no post processing such as NL to CR+NL */
-    tattr.c_oflag &= ~(OPOST);
-
-    /* control modes - set 8 bit chars */
-    tattr.c_cflag |= (CS8);
-
-    /* local modes - clear giving: echoing off, canonical off (no erase with
-       backspace, ^U,...),  no extended functions, no signal chars (^Z,^C) */
-    tattr.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
-
-    /* control chars - set return condition: min number of bytes and timer */
-    tattr.c_cc[VMIN] = 0;
-    tattr.c_cc[VTIME] = 0; /* immediate - anything       */
-
-    if (baudrate == 115200)
-    {
-        cfsetispeed(&tattr, B115200);
-        cfsetospeed(&tattr, B115200);
-    }
-    else
-    {
-        BUG();
-    }
-
-    tattr.c_cflag &= ~(PARENB);
-    tattr.c_cflag &= ~(PARODD);
-
-    /* put terminal in raw mode after flushing */
-    ret = tcsetattr(g->fd, TCSAFLUSH, &tattr);
-
-    if (ret < 0)
-    {
-        perror("serial::tcsetattr");
-    }
-
     g->rpack = NULL;
     g->bind(id);
 
