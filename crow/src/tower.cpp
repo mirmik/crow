@@ -162,6 +162,14 @@ static void crow_incoming_handler(crow::packet *pack)
         return;
     }
 
+    if (CROW_PUBSUB_PROTOCOL == pack->type())
+    {
+        _in_incoming_handler = true;
+        crow::pubsub_protocol.incoming(pack);
+        _in_incoming_handler = false;
+        return;
+    }
+
     if (crow::default_incoming_handler)
     {
         _in_incoming_handler = true;

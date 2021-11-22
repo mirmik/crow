@@ -33,7 +33,10 @@ licant.cxx_shared_library(target,
 	cxx_flags = '-fPIC -Wall -pedantic',
 	cc_flags = '-fPIC -Wall -pedantic',
 	libs=["igris", "nos"],
-	defines = ["CROW_PUBSUB_PROTOCOL_SUPPORTED=1"]
+	defines = [
+		"CROW_PUBSUB_PROTOCOL_SUPPORTED=1",
+		"OLD_HEADER=1",
+	]
 )
 
 licant.fileset("apps", targets=[

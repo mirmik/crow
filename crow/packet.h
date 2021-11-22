@@ -39,6 +39,7 @@ namespace crow
         @details Заголовок пакета располагается в первых байтах пакета.
         за заголовком следует поле адреса переменной длины, а за ним данные.
     */
+#ifndef OLD_HEADER
     struct header_v1
     {
         union _u
@@ -60,10 +61,36 @@ namespace crow
         uint16_t seqid; ///< Порядковый номер пакета.
         qosbyte qos;    ///< Поле качества обслуживания.
     } __attribute__((packed));
+#else
+    struct header_v1
+    {
+        union _u
+        {
+            uint8_t pflag; ///< Флаги пакета
+            struct _f
+            {
+                uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
+                ///< передается в типе.
+                uint8_t RESERVED : 1;
+                uint8_t noexec : 1; ///< Флаг предотвращает исполнение пакета.
+                ///< Используется для запросов существования
+                uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
+            } f;
+        } u;
+        uint16_t flen; ///< Полная длина пакета
+        uint8_t alen;  ///< Длина поля адреса.
+        uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
+        ///< знала, какую часть адреса обрабатывать.
+        uint16_t ackquant; ///< Таймаут для пересылки пакета.
+        uint16_t
+            seqid; ///< Порядковый номер пакета. Присваивается отправителем.
+        uint8_t qos; ///< Поле качества обслуживания.
+    } __attribute__((packed));
+#endif
 
     class packet
     {
-      public:
+    public:
         struct dlist_head lnk =
             DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
         struct dlist_head ulnk =
@@ -86,7 +113,7 @@ namespace crow
             } f;
         } u;
 
-      public:
+    public:
         void revert_gate(uint8_t gateindex);
         void revert(igris::buffer *vec, size_t veclen);
 
@@ -125,8 +152,14 @@ namespace crow
         {
             set_ack(h.u.f.ack);
             set_type(h.u.f.type);
+
+#ifndef OLD_HEADER
             set_quality(h.qos.quality());
             set_ackquant(h.qos.quant());
+#else
+            set_quality(h.qos);
+            set_ackquant(h.ackquant);
+#endif
             set_seqid(h.seqid);
             set_stage(h.stg);
             set_addrsize(h.alen);
@@ -139,8 +172,13 @@ namespace crow
             h.seqid = seqid();
             h.u.f.ack = ack();
             h.u.f.type = type();
+#ifndef OLD_HEADER
             h.qos.set_quality(quality());
             h.qos.set_quant(ackquant());
+#else
+            h.qos = quality();
+            h.ackquant = ackquant();
+#endif
             h.stg = stage();
             h.flen = datasize() + addrsize() + sizeof(header_v1);
             h.alen = addrsize();
@@ -168,7 +206,7 @@ namespace crow
         uint8_t *_aptr = nullptr;
         char *_dptr = nullptr;
 
-      public:
+    public:
         uint8_t *addrptr() override { return _aptr; }
         uint8_t addrsize() override { return _alen; }
 
@@ -220,10 +258,10 @@ namespace crow
 
     class compacted_packet : public packet
     {
-      public:
+    public:
         header_v1 _header;
 
-      public:
+    public:
         header_v1 &header() { return _header; }
 
         uint8_t *addrptr() override;
@@ -242,14 +280,26 @@ namespace crow
         }
 
         uint16_t full_length() override { return _header.flen; }
+#ifndef OLD_HEADER
         uint8_t quality() override { return _header.qos.quality(); }
         uint16_t ackquant() override { return _header.qos.quant(); }
+#else
+        uint8_t quality() override { return _header.qos; }
+        uint16_t ackquant() override { return _header.ackquant; }
+#endif
         uint8_t stage() override { return _header.stg; }
         uint8_t ack() override { return _header.u.f.ack; }
 
         void set_type(uint8_t arg) override { _header.u.f.type = arg; }
+
+#ifndef OLD_HEADER
         void set_quality(uint8_t arg) override { _header.qos.set_quality(arg); }
         void set_ackquant(uint16_t arg) override { _header.qos.set_quant(arg); }
+#else
+        void set_quality(uint8_t arg) override { _header.qos = arg; }
+        void set_ackquant(uint16_t arg) override { _header.ackquant = arg; }
+#endif
+
         void set_stage(uint8_t arg) override { _header.stg = arg; }
         void set_seqid(uint16_t arg) override { _header.seqid = arg; }
         void set_ack(uint8_t arg) override { _header.u.f.ack = arg; };
