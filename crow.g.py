@@ -35,7 +35,7 @@ licant.modules.module("crow.minimal",
 		"src/address.cpp",
 		"src/hostaddr_view.cpp",
 		"src/hostaddr.cpp",
-		"pubsub/pubsub.cpp",
+		#"pubsub/pubsub.cpp",
 		"proto/node.cpp",
 		"proto/node-sync.cpp",
 		"proto/channel.cpp",
@@ -68,7 +68,7 @@ licant.modules.module("crow",
 		"crow.select",
 		"crow.crowker",
 		"crow.minimal",
-	#	"crow.protocol.pubsub",
+		"crow.protocol.pubsub",
 	]
 )
 
@@ -121,9 +121,9 @@ licant.modules.module("crow.serial_gstuff",
 #####################################################################################
 ####################################PROTOCOLS########################################
 
-#licant.module("crow.protocol.pubsub", "impl", default=True,
-#	sources = ["crow/pubsub/pubsub.cpp"]
-#)
+licant.module("crow.protocol.pubsub", "impl", default=True,
+	sources = ["crow/pubsub/pubsub.cpp"]
+)
 
 #licant.module("crow.protocol.pubsub", "stub",
 #	defines = ["WITHOUT_CROW_PUBSUB=1"]
