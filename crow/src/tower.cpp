@@ -162,6 +162,7 @@ static void crow_incoming_handler(crow::packet *pack)
         return;
     }
 
+#ifdef CROW_PUBSUB_PROTOCOL_SUPPORTED
     if (CROW_PUBSUB_PROTOCOL == pack->type())
     {
         _in_incoming_handler = true;
@@ -169,6 +170,7 @@ static void crow_incoming_handler(crow::packet *pack)
         _in_incoming_handler = false;
         return;
     }
+#endif
 
     if (crow::default_incoming_handler)
     {
