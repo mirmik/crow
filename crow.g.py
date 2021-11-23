@@ -1,9 +1,10 @@
 import licant.modules
 import licant
 
-#licant.module("crow.netkeep_crowker", 
-#	sources=["crow/src/netkeep_crowker.cpp"]
-#)
+licant.cli.add_argument("-o", "--oldheader", action="store_true", default=False)
+opts, args = licant.cli.parse()
+
+DEFINES = ["OLD_HEADER=1"] if opts.oldheader else [] 
 
 licant.module("crow.select", "impl",
 	sources=["crow/src/select.cpp"],
@@ -72,9 +73,8 @@ licant.modules.module("crow",
 	],
 
 	defines = [
-		"CROW_PUBSUB_PROTOCOL_SUPPORTED=1",
-		"OLD_HEADER=1",
-	]
+		"CROW_PUBSUB_PROTOCOL_SUPPORTED=1"
+	] + DEFINES
 )
 
 licant.module("crow.crowker",
