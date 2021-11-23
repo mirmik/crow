@@ -704,10 +704,24 @@ int main(int argc, char *argv[])
 
 	if (serial_port != NULL)
 	{
-		if (crow::create_serial_gstuff(serial_port, 115200, 42, gdebug) == NULL)
+		auto tokens = igris::split(std::string(serial_port), ':');
+		crow::serial_gstuff * gate = nullptr;
+
+		if ((gate = crow::create_serial_gstuff(
+				tokens[0].c_str(), 115200, 42, gdebug)) == NULL)
 		{
 			perror("serialgate open");
 			exit(-1);
+		}
+
+		if (gate) 
+		{
+			gate->setup_serial_port (
+				std::stoi(tokens[1]), 
+				tokens[2][0],
+				std::stoi(tokens[3]),
+				std::stoi(tokens[4])
+			);
 		}
 	}
 

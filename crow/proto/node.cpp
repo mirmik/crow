@@ -168,7 +168,7 @@ crow::node *crow::find_node(size_t id)
 void crow::bind_node_dynamic(crow::node *srv)
 {
     // Динамические порты располагаются в верхнем полупространстве.
-    static uint8_t counter = 1 << (sizeof(nodeid_t) * 8 - 1);
+    static nodeid_t counter = 1 << (sizeof(nodeid_t) * 8 - 1);
 
     system_lock();
     do

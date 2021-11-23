@@ -17,7 +17,11 @@
 
 namespace crow
 {
+#if OLD_HEADER
+    using nodeid_t = uint16_t;
+#else
     using nodeid_t = uint8_t;
+#endif
     class node;
 
     crow::packet_ptr node_send(nodeid_t sid, nodeid_t rid,

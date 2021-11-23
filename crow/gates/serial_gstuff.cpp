@@ -4,6 +4,7 @@
 #include <crow/tower.h>
 #include <crow/warn.h>
 
+#include <nos/io/serial_port.h>
 #include <igris/util/bug.h>
 
 #include <fcntl.h>
@@ -109,4 +110,11 @@ void crow::serial_gstuff::nblock_onestep()
                 break;
         }
     }
+}
+
+void crow::serial_gstuff::setup_serial_port(
+    int baud, char parity, int databits, int stopbits)
+{
+    nos::serial_port port(fd);
+    port.setup(baud, parity, databits, stopbits);
 }

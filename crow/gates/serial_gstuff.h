@@ -30,6 +30,8 @@ namespace crow
         void send(crow::packet *) override;
         void nblock_onestep() override;
         void finish() override {}
+        void setup_serial_port(int baud, char parity, int databits,
+                               int stopbits);
 
 #if CROW_ENABLE_WITHOUT_FDS
 #else

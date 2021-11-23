@@ -69,6 +69,11 @@ licant.modules.module("crow",
 		"crow.crowker",
 		"crow.minimal",
 		"crow.protocol.pubsub",
+	],
+
+	defines = [
+		"CROW_PUBSUB_PROTOCOL_SUPPORTED=1",
+		"OLD_HEADER=1",
 	]
 )
 
