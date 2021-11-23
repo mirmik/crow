@@ -8,6 +8,7 @@
 #include <crow/nodes/service_node.h>
 #include <crow/nodes/requestor_node.h>
 #include <crow/nodes/pubsub_defs.h>
+#include <crow/nodes/node_delegate.h>
 #include <crow/address.h>
 #include <crow/select.h>
 
@@ -101,6 +102,17 @@ void requestor_data_handle(igris::buffer incom_data)
 	do_incom_data(incom_data);
 }
 
+void raw_node_incom_handle(crow::node_packet_ptr incom_data)
+{
+	do_incom_data(incom_data.message());
+}
+
+void raw_node_undel_handle(crow::node_packet_ptr incom_data)
+{
+	(void) incom_data;	
+}
+
+auto raw_node = crow::node_delegate(raw_node_incom_handle, raw_node_undel_handle);
 auto publish_node = crow::publisher_node();
 auto requestor_node = crow::requestor_node().set_async_handle(requestor_data_handle);
 auto subscriber_node = crow::subscriber_node(subscriber_data_handle);
@@ -191,7 +203,8 @@ void output_do(igris::buffer data, crow::packet* pack)
 		char buf[16];
 		int32_t time = crow::millis();
 		sprintf(buf, "%d:", time);
-		write(DATAOUTPUT_FILENO, buf, strlen(buf));
+		int _ = write(DATAOUTPUT_FILENO, buf, strlen(buf));
+		(void) _;
 	}
 
 
@@ -488,6 +501,7 @@ void signal_handler(int)
 
 int main(int argc, char *argv[])
 {
+	raw_node.bind(1);
 	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
 	service_node.bind(CTRANS_DEFAULT_SERVICE_NODE);
