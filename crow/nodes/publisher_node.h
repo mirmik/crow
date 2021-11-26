@@ -31,6 +31,8 @@ namespace crow
         void set_theme(igris::buffer theme);
         void set_address(crow::hostaddr_view addr);
 
+        void set_qos(int _qos, int _ackquant) { qos = _qos; ackquant = _ackquant; }
+
     private:
         void incoming_packet(crow::packet *pack) override
         {

@@ -31,15 +31,14 @@ void crow::udpgate::nblock_onestep()
 
     //size_t flen = header.flen;
 
-    crow::morph_packet *block = nullptr;
+    crow::packet *block = nullptr;
     //if (!block)
     //    block = crow_allocate_packet(flen - sizeof(crow::header_v1));
 
     if (!block)
     {
-        block = new crow::morph_packet();
+        block = crow_allocate_packet(header.addrsize(), header.datasize());
         block->parse_header(header);
-        block->allocate_buffer(block->addrsize(), block->datasize());
     }
 
     struct iovec iov[] =

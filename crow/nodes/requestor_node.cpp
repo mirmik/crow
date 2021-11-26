@@ -90,3 +90,9 @@ void crow::requestor_node::set_reply_theme(igris::buffer reply_theme)
 {
     this->reply_theme = reply_theme;
 }
+
+void crow::requestor_node::undelivered_packet(crow::packet *pack)
+{
+    notify_one(-1);
+    crow::release(pack);
+}

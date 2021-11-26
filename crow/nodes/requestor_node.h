@@ -12,8 +12,6 @@ namespace crow
         dlist_head incoming_list = DLIST_HEAD_INIT(incoming_list);
         igris::buffer reply_theme;
 
-        int qos = 0;
-        int ackquant = 0;
         int rqos = 0;
         int rackquant = 0;
 
@@ -38,7 +36,11 @@ namespace crow
         {
             async_request(std::forward<Args>(data)...);
             int sts = waitevent();
-            (void)sts;
+            
+            if (sts != 0) 
+            {
+                return crow::packet_ptr(nullptr);
+            }
 
             auto *ptr = dlist_first_entry(&incoming_list, crow::packet, ulnk);
             return crow::packet_ptr(ptr);
@@ -52,8 +54,15 @@ namespace crow
             return *this;
         }
 
+        void set_rqos(int _rqos, int _rackquant) 
+        {
+            rqos = _rqos;
+            rackquant = _rackquant;
+        }
+
     private:
         void incoming_packet(crow::packet *pack) override;
+        void undelivered_packet(crow::packet *pack) override;
     };
 }
 
