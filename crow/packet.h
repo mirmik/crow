@@ -82,7 +82,7 @@ namespace crow
         ///< знала, какую часть адреса обрабатывать.
         uint16_t ackquant; ///< Таймаут для пересылки пакета.
         uint16_t
-        seqid; ///< Порядковый номер пакета. Присваивается отправителем.
+            seqid; ///< Порядковый номер пакета. Присваивается отправителем.
         uint8_t qos; ///< Поле качества обслуживания.
 
         uint16_t addrsize() { return flen - dlen - sizeof(header_v1); }
@@ -100,7 +100,7 @@ namespace crow
         ///< зависимых протоколов.
         crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
         uint16_t last_request_time; ///< время последней отправки
-        uint16_t _ackcount; ///< счетчик количества попыток отправки
+        uint16_t _ackcount = 0; ///< счетчик количества попыток отправки
         int8_t refs;
         union _u
         {
@@ -115,7 +115,16 @@ namespace crow
             } f;
         } u;
 
+        void (*destructor)(packet *);
+
     public:
+        void set_destructor(void (*destructor)(packet *))
+        {
+            this->destructor = destructor;
+        }
+
+        auto get_destructor() { return destructor; }
+
         void revert_gate(uint8_t gateindex);
         void revert(igris::buffer *vec, size_t veclen);
 
@@ -192,10 +201,7 @@ namespace crow
             return crow::hostaddr_view(addrptr(), addrsize());
         }
 
-        igris::buffer data()
-        {
-            return igris::buffer(dataptr(), datasize());
-        }
+        igris::buffer data() { return igris::buffer(dataptr(), datasize()); }
 
         template <class T> T &subheader()
         {
@@ -209,6 +215,7 @@ namespace crow
         uint8_t _ack = 0;
         uint8_t _stage = 0;
         uint8_t _quality = 0;
+        uint16_t _ackquant = 0;
         uint8_t _alen = 0;
         uint16_t _dlen = 0;
         uint16_t _seqid = 0;
@@ -230,7 +237,7 @@ namespace crow
 
         uint16_t full_length() override { return 0; }
         uint8_t quality() override { return _quality; }
-        uint16_t ackquant() override { return _ackcount; }
+        uint16_t ackquant() override { return _ackquant; }
         uint8_t stage() override { return _stage; }
         uint8_t ack() override { return _ack; }
 
@@ -238,14 +245,14 @@ namespace crow
         void set_datasize(uint16_t arg) override { _dlen = arg; }
         void set_type(uint8_t arg) override { _type = arg; }
         void set_quality(uint8_t arg) override { _quality = arg; }
-        void set_ackquant(uint16_t arg) override { _ackcount = arg; }
+        void set_ackquant(uint16_t arg) override { _ackquant = arg; }
         void set_stage(uint8_t arg) override { _stage = arg; }
         void set_seqid(uint16_t arg) override { _seqid = arg; }
         void set_ack(uint8_t arg) override { _ack = arg; }
 
-        void invalidate() 
-        { 
-            free(_aptr); 
+        void invalidate()
+        {
+            free(_aptr);
             _aptr = NULL;
         }
 
@@ -262,10 +269,7 @@ namespace crow
 
         void self_init() override {}
 
-        ~morph_packet() 
-        {
-            invalidate();
-        }
+        ~morph_packet() { invalidate(); }
     };
 
     class compacted_packet : public packet
@@ -324,11 +328,21 @@ namespace crow
             *((char *)(&header()) + full_length()) = 0;
         }
 
-        void invalidate() override 
+        void invalidate() override
         {
             // pass
         }
     };
+
+    /**
+     * Выделить память для пакета.
+     *
+     * Выделяет adlen + sizeof(crow::packet) байт
+     * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
+     */
+    crow::packet *allocate_packet(int alen, int dlen);
+    crow::compacted_packet *allocate_compacted_packet(int alen, int dlen);
+    crow::compacted_packet *allocate_compacted_packet(int adlen);
 }
 
 extern int crow_allocated_count;
@@ -337,19 +351,8 @@ __BEGIN_DECLS
 
 void crow_packet_initialization(crow::packet *pack, crow::gateway *ingate);
 
-crow::packet *crow_create_packet(crow::gateway *ingate,
-        uint8_t addrsize, size_t datasize);
-
-/**
- * Выделить память для пакета.
- *
- * Выделяет adlen + sizeof(crow::packet) байт
- * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
- */
-crow::packet *crow_allocate_packet(int alen, int dlen);
-
-///Вернуть память выделенную для пакета pack
-void crow_deallocate_packet(crow::packet *pack);
+crow::packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
+                                 size_t datasize);
 
 __END_DECLS
 

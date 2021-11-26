@@ -17,7 +17,7 @@ void crow::publisher_node::publish_v(igris::buffer * data, int len)
         },
     };
 
-    send_vv(crowker_node, crowker_addr, iov, std::size(iov), data, len, qos, ackquant);    
+    send_vv(crowker_node, crowker_addr, iov, std::size(iov), data, len, qos, ackquant);
 }
 
 void crow::publisher_node::publish(igris::buffer data)
@@ -66,10 +66,16 @@ void crow::publisher_node::set_address(crow::hostaddr_view addr)
 
 crow::publisher_node::publisher_node(
     crow::hostaddr_view crowker_addr, int crowker_node, igris::buffer theme)
-    : theme(theme), crowker_addr(crowker_addr), crowker_node(crowker_node)
+    :
+    crowker_addr(crowker_addr),
+    crowker_node(crowker_node),
+    theme(theme)
 {}
 
 crow::publisher_node::publisher_node(
     crow::hostaddr_view crowker_addr, igris::buffer theme)
-    : theme(theme), crowker_addr(crowker_addr), crowker_node(CROWKER_SERVICE_BROCKER_NODE_NO)
+    :
+    crowker_addr(crowker_addr),
+    crowker_node(CROWKER_SERVICE_BROCKER_NODE_NO),
+    theme(theme)
 {}

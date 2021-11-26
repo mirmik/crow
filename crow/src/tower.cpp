@@ -49,7 +49,7 @@ static void __crow_utilize(crow::packet *pack)
     dlist_del(&pack->ulnk);
     
     pack->invalidate();
-    crow_deallocate_packet(pack);
+    pack->destructor(pack);
 }
 
 void crow::utilize(crow::packet *pack) { __crow_utilize(pack); }

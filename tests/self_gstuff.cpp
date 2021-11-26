@@ -33,7 +33,7 @@ TEST_CASE("self_driven_gstuff.output")
 		pack->set_ackquant(0);
 
 		memcpy(pack->addrptr(), "\x01", 1);
-		memcpy(pack->addrptr(), "helloworld", 10);
+		memcpy(pack->dataptr(), "helloworld", 10);
 
 		CHECK_EQ(ccc, 0);
 		gate.send(pack);
@@ -49,7 +49,7 @@ TEST_CASE("self_driven_gstuff.output")
 	CHECK_EQ(crow_allocated_count, 0);
 }
 
-TEST_CASE("self_driven_gstuff.input")
+/*TEST_CASE("self_driven_gstuff.input")
 {
 	crow::total_travelled = 0;
 	crow::default_incoming_handler = nullptr;
@@ -87,4 +87,4 @@ TEST_CASE("self_driven_gstuff.input")
 	CHECK_EQ(crow::total_travelled, 1);
 	CHECK_EQ(crow::has_untravelled(), false);
 	CHECK_EQ(crow_allocated_count, 0);
-}
+}*/

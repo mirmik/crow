@@ -29,15 +29,11 @@ void crow::udpgate::nblock_onestep()
     if (len <= 0)
         return;
 
-    //size_t flen = header.flen;
-
     crow::packet *block = nullptr;
-    //if (!block)
-    //    block = crow_allocate_packet(flen - sizeof(crow::header_v1));
-
+    
     if (!block)
     {
-        block = crow_allocate_packet(header.addrsize(), header.datasize());
+        block = allocate_packet(header.addrsize(), header.datasize());
         block->parse_header(header);
     }
 
@@ -48,12 +44,7 @@ void crow::udpgate::nblock_onestep()
         {block->dataptr(), block->datasize()}
     };
 
-    //recvmsg(sock, &msg, 0);
     readv(sock, iov, 3);
-
-    //len = recvfrom(sock, &block->header(), flen, 0, (struct sockaddr *)&sender,
-    //               &sendsize);
-
     crow_packet_initialization(block, this);
 
     igris::buffer vec[3] = {{(char *)&id, 1},
@@ -142,8 +133,6 @@ void crow::udpgate::send(crow::packet *pack)
     memcpy(buf + sizeof(header), pack->addrptr(), pack->addrsize());
     memcpy(buf + sizeof(header) + pack->addrsize(), pack->dataptr(), pack->datasize());
 
-    //sendto(sock, (const char *)&dynamic_cast<crow::compacted_packet *>(pack)->header(), pack->full_length(), 0,
-    //       (struct sockaddr *)&ipaddr, iplen);
     sendto(sock, buf, pack->full_length(), 0,
            (struct sockaddr *)&ipaddr, iplen);
     crow::return_to_tower(pack, CROW_SENDED);

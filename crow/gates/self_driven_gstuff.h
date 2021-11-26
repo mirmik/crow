@@ -60,7 +60,7 @@ namespace crow
         void newline_handler()
         {
             crow::compacted_packet *pack = recvpack;
-            recvpack = NULL;
+            recvpack = nullptr;
             pack->revert_gate(this->id);
             crow_packet_initialization(pack, this);
             crow::nocontrol_travel(pack, false);
@@ -69,7 +69,8 @@ namespace crow
 
         void init_receiver()
         {
-            recvpack = crow_allocate_packet(received_maxpack_size);
+            assert(recvpack == nullptr);
+            recvpack = crow::allocate_compacted_packet(received_maxpack_size);
             gstuff_autorecv_setbuf(&recver, (char *)&recvpack->header(),
                                    received_maxpack_size);
         }
@@ -160,7 +161,7 @@ namespace crow
         {
             if (recvpack)
             {
-                crow_deallocate_packet(recvpack);
+                recvpack->destructor(recvpack);
                 recvpack = nullptr;
             }
         }

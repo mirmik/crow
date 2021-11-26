@@ -14,7 +14,7 @@ void crow::engage_packet_pool(void *zone, size_t zonesize, size_t elsize)
     _crow_packet_pool.init(zone, zonesize, elsize);
 }
 
-void crow_deallocate_packet(crow::packet *pack)
+static void crow_deallocate_packet(crow::packet *pack)
 {
     assert(pack);
 
@@ -39,6 +39,7 @@ crow::compacted_packet *crow_allocate_packet(size_t adlen)
         crow_allocated_count++;
 
     system_unlock();
+    pack->set_destructor(crow_deallocate_packet);
 
     return (crow::compacted_packet *)ret;
 }

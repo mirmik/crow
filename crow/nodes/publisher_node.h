@@ -1,22 +1,20 @@
 #ifndef CROW_NODE_PUBLISHER_H
 #define CROW_NODE_PUBLISHER_H
 
-#include <crow/proto/node.h>
 #include <crow/hostaddr.h>
+#include <crow/proto/node.h>
 
 namespace crow
 {
     class publisher_node : public crow::node
     {
     protected:
-        std::string theme;
+        crow::hostaddr crowker_addr;
         int crowker_node = CROWKER_SERVICE_BROCKER_NODE_NO;
-
         int qos = 0;
         int ackquant = 0;
 
-    public:
-        crow::hostaddr crowker_addr;
+        std::string theme;
 
     public:
         publisher_node() = default;
@@ -34,7 +32,11 @@ namespace crow
         void set_theme(igris::buffer theme);
         void set_address(crow::hostaddr_view addr);
 
-        void set_qos(int _qos, int _ackquant) { qos = _qos; ackquant = _ackquant; }
+        void set_qos(int _qos, int _ackquant)
+        {
+            qos = _qos;
+            ackquant = _ackquant;
+        }
 
     private:
         void incoming_packet(crow::packet *pack) override

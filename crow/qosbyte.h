@@ -2,6 +2,7 @@
 #define CROW_QOSBYTE_H
 
 #undef round
+#include <cassert>
 #include <cmath>
 #include <type_traits>
 
@@ -15,10 +16,12 @@ namespace crow
 
         static uint8_t quant_to_code(uint16_t quant)
         {
-            return std::round((float)(quant) / quant_const);
+            auto code = std::round((float)(quant) / quant_const);
+            assert(code >= 0);
+            return code;
         }
 
-        uint16_t quant() const { return _quant_code * quant_const; }
+        uint16_t quant() const { return _quant_code * quant_const + 4; }
         uint8_t quality() const { return _qos; }
 
         void set_quant(uint16_t quant) { _quant_code = quant_to_code(quant); }
