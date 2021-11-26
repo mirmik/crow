@@ -23,18 +23,18 @@ void crow_packet_initialization(crow::packet *pack, crow::gateway *ingate)
     pack->self_init();
 }
 
-crow::compacted_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
+crow::packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
                                  size_t datasize)
 {
-    crow::compacted_packet *pack = crow_allocate_packet(addrsize + datasize);
+    crow::packet *pack = crow_allocate_packet(addrsize, datasize);
 
     if (pack == nullptr)
         return nullptr;
 
-    pack->header().flen = (uint16_t)(sizeof(crow::header_v1) + addrsize + datasize);
-    pack->header().alen = addrsize;
+//    pack->header().flen = (uint16_t)(sizeof(crow::header_v1) + addrsize + datasize);
+//    pack->header().alen = addrsize;
     pack->set_ackquant(200);
-    pack->header().u.pflag = 0;
+//    pack->header().u.pflag = 0;
     pack->set_quality(0);
     pack->set_stage(0);
 

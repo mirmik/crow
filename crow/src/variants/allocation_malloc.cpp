@@ -16,18 +16,15 @@ void crow_deallocate_packet(crow::packet *pack)
 {
     if (pack)
         crow_allocated_count--;
-    free(pack);
+    delete pack;
 }
 
-crow::compacted_packet *crow_allocate_packet(size_t adlen)
+crow::packet *crow_allocate_packet(int alen, int dlen)
 {
     crow_allocated_count++;
 
-    // inc 1 for zero symbol
-    crow::compacted_packet *ret = (crow::compacted_packet *)
-        malloc(adlen + sizeof(crow::compacted_packet) + 1);
-    memset((void*)ret, 0, adlen + sizeof(crow::compacted_packet) +1);
-    new (ret) crow::compacted_packet;
-
-    return ret;
+    crow::morph_packet * pack = new crow::morph_packet;
+    pack->allocate_buffer(alen, dlen);
+    
+    return pack;
 }

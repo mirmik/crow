@@ -43,8 +43,8 @@ void crow::requestor_node::async_request(crow::hostaddr_view crowker_addr,
     this->rqos = rqos;
     this->ackquant = ackquant;
     this->rackquant = rackquant;
-    this->theme = theme;
-    this->reply_theme = reptheme;
+    this->theme = theme.to_string();
+    this->reply_theme = reptheme.to_string();
     async_request(data);
 }
 
@@ -63,9 +63,9 @@ void crow::requestor_node::async_request(igris::buffer data)
             (char *)&sh + sizeof(node_subheader),
             sizeof(sh) - sizeof(node_subheader)
         },
-        theme,
-        reply_theme,
-        data
+        { theme.data(), theme.size() },
+        { reply_theme.data(), reply_theme.size() },
+        { data.data(), data.size() }
     };
 
     send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
@@ -88,5 +88,11 @@ crow::requestor_node::requestor_node(
 
 void crow::requestor_node::set_reply_theme(igris::buffer reply_theme)
 {
-    this->reply_theme = reply_theme;
+    this->reply_theme = reply_theme.to_string();
+}
+
+void crow::requestor_node::undelivered_packet(crow::packet *pack)
+{
+    notify_one(-1);
+    crow::release(pack);
 }

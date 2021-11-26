@@ -47,7 +47,9 @@ static void __crow_utilize(crow::packet *pack)
 {
     dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
     dlist_del(&pack->ulnk);
-    pack->destruct();
+    
+    pack->invalidate();
+    crow_deallocate_packet(pack);
 }
 
 void crow::utilize(crow::packet *pack) { __crow_utilize(pack); }
@@ -143,13 +145,6 @@ crow::packet_ptr crow::travel(crow::packet *pack)
         unsleep_handler();
 
     return crow::packet_ptr(pack);
-}
-
-static void crow_travel_error(crow::packet *pack)
-{
-    system_lock();
-    __crow_utilize(pack);
-    system_unlock();
 }
 
 static void crow_incoming_handler(crow::packet *pack)
@@ -271,7 +266,14 @@ static void crow_tower_send_to_gate_phase(crow::packet *pack)
         if (__diagnostic_enabled)
             crow::diagnostic("wgate", pack);
 
-        crow_travel_error(pack);
+        if (pack->ingate == nullptr)
+        {
+            crow::warn("wrong gate in out packet");
+        }
+
+        system_lock();
+        __crow_utilize(pack);
+        system_unlock();
     }
     else
     {
@@ -416,7 +418,9 @@ static void crow_do_travel(crow::packet *pack)
 #endif
             }
 
-            crow_travel_error(pack);
+            system_lock();
+            __crow_utilize(pack);
+            system_unlock();
             return;
         }
 

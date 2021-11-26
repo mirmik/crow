@@ -28,10 +28,6 @@ namespace crow
     class packet;
 }
 
-__BEGIN_DECLS
-void crow_deallocate_packet(crow::packet *pack);
-__END_DECLS
-
 namespace crow
 {
     /**
@@ -60,6 +56,9 @@ namespace crow
         ///< знала, какую часть адреса обрабатывать.
         uint16_t seqid; ///< Порядковый номер пакета.
         qosbyte qos;    ///< Поле качества обслуживания.
+
+        uint16_t addrsize() { return alen; }
+        uint16_t datasize() { return flen - alen - sizeof(header_v1); }
     } __attribute__((packed));
 #else
     struct header_v1
@@ -83,8 +82,11 @@ namespace crow
         ///< знала, какую часть адреса обрабатывать.
         uint16_t ackquant; ///< Таймаут для пересылки пакета.
         uint16_t
-            seqid; ///< Порядковый номер пакета. Присваивается отправителем.
+        seqid; ///< Порядковый номер пакета. Присваивается отправителем.
         uint8_t qos; ///< Поле качества обслуживания.
+
+        uint16_t addrsize() { return flen - dlen - sizeof(header_v1); }
+        uint16_t datasize() { return dlen; }
     } __attribute__((packed));
 #endif
 
@@ -144,7 +146,7 @@ namespace crow
         void increment_stage(int i) { set_stage(stage() + i); }
         void increment_seqid(int i) { set_seqid(seqid() + i); }
 
-        virtual void destruct() = 0;
+        virtual void invalidate() = 0;
         virtual ~packet() = default;
         virtual void self_init() = 0;
 
@@ -185,8 +187,15 @@ namespace crow
             return h;
         }
 
-        crow::hostaddr_view addr() { return {addrptr(), addrsize()}; }
-        igris::buffer data() { return {dataptr(), datasize()}; }
+        crow::hostaddr_view addr()
+        {
+            return crow::hostaddr_view(addrptr(), addrsize());
+        }
+
+        igris::buffer data()
+        {
+            return igris::buffer(dataptr(), datasize());
+        }
 
         template <class T> T &subheader()
         {
@@ -234,10 +243,16 @@ namespace crow
         void set_seqid(uint16_t arg) override { _seqid = arg; }
         void set_ack(uint8_t arg) override { _ack = arg; }
 
-        void invalidate() { free(_aptr); }
+        void invalidate() 
+        { 
+            free(_aptr); 
+            _aptr = NULL;
+        }
 
         void allocate_buffer(int alen, int dlen)
         {
+            _alen = alen;
+            _dlen = dlen;
             if (_aptr)
                 invalidate();
             _aptr = (uint8_t *)malloc(alen + dlen + 1);
@@ -245,15 +260,12 @@ namespace crow
             *(_dptr + dlen) = 0;
         }
 
-        void destruct() override
-        {
-            invalidate();
-            delete this;
-        }
-
         void self_init() override {}
 
-        ~morph_packet() = default;
+        ~morph_packet() 
+        {
+            invalidate();
+        }
     };
 
     class compacted_packet : public packet
@@ -307,11 +319,14 @@ namespace crow
         void set_addrsize(uint8_t arg) override { (void)arg; }
         void set_datasize(uint16_t arg) override { (void)arg; }
 
-        void destruct() override { crow_deallocate_packet(this); }
-
         void self_init() override
         {
             *((char *)(&header()) + full_length()) = 0;
+        }
+
+        void invalidate() override 
+        {
+            // pass
         }
     };
 }
@@ -322,8 +337,8 @@ __BEGIN_DECLS
 
 void crow_packet_initialization(crow::packet *pack, crow::gateway *ingate);
 
-crow::compacted_packet *crow_create_packet(crow::gateway *ingate,
-                                           uint8_t addrsize, size_t datasize);
+crow::packet *crow_create_packet(crow::gateway *ingate,
+        uint8_t addrsize, size_t datasize);
 
 /**
  * Выделить память для пакета.
@@ -331,7 +346,7 @@ crow::compacted_packet *crow_create_packet(crow::gateway *ingate,
  * Выделяет adlen + sizeof(crow::packet) байт
  * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
  */
-crow::compacted_packet *crow_allocate_packet(size_t adlen);
+crow::packet *crow_allocate_packet(int alen, int dlen);
 
 ///Вернуть память выделенную для пакета pack
 void crow_deallocate_packet(crow::packet *pack);
