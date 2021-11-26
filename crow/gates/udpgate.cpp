@@ -133,7 +133,7 @@ void crow::udpgate::send(crow::packet *pack)
     memcpy(buf + sizeof(header), pack->addrptr(), pack->addrsize());
     memcpy(buf + sizeof(header) + pack->addrsize(), pack->dataptr(), pack->datasize());
 
-    sendto(sock, buf, pack->full_length(), 0,
+    sendto(sock, buf, header.flen, 0,
            (struct sockaddr *)&ipaddr, iplen);
     crow::return_to_tower(pack, CROW_SENDED);
 }

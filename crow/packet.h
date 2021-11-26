@@ -193,6 +193,7 @@ namespace crow
             h.stg = stage();
             h.flen = datasize() + addrsize() + sizeof(header_v1);
             h.alen = addrsize();
+            h.stg = stage();
             return h;
         }
 
