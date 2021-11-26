@@ -47,7 +47,7 @@ void crow::publisher_node::publish(crow::hostaddr_view addr, int crowker_node,
 {
     this->crowker_addr = addr;
     this->crowker_node = crowker_node;
-    this->theme = theme;
+    this->theme = theme.to_string();
     this->qos = qos;
     this->ackquant = ackquant;
 
@@ -56,7 +56,7 @@ void crow::publisher_node::publish(crow::hostaddr_view addr, int crowker_node,
 
 void crow::publisher_node::set_theme(igris::buffer theme)
 {
-    this->theme = theme;
+    this->theme = theme.to_string();
 }
 
 void crow::publisher_node::set_address(crow::hostaddr_view addr)

@@ -39,7 +39,7 @@ void crow::abstract_subscriber_node::subscribe(crow::hostaddr_view crowker_addr,
     this->rqos = rqos;
     this->ackquant = ackquant;
     this->rackquant = rackquant;
-    this->theme = theme;
+    this->theme = theme.to_string();;
     subscribe();
 }
 
@@ -63,7 +63,7 @@ void crow::abstract_subscriber_node::subscribe(crow::hostaddr_view crowker_addr,
                                                igris::buffer theme)
 {
     this->crowker_addr = crowker_addr;
-    this->theme = theme;
+    this->theme = theme.to_string();
 
     subscribe();
 }
