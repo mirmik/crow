@@ -79,8 +79,8 @@ namespace crow
             if (dlist_empty(&to_send))
                 return;
 
-            insend = dlist_first_entry(&to_send, crow::packet, lnk);
-            dlist_del_init(&insend->lnk);
+            insend = dlist_first_entry(&to_send, crow::packet, ulnk);
+            dlist_del_init(&insend->ulnk);
 
             header_v1 header = insend->extract_header_v1();
             struct iovec iov[] = {
@@ -129,7 +129,7 @@ namespace crow
         void send(crow::packet *pack) override
         {
             system_lock();
-            dlist_move(&pack->lnk, &to_send);
+            dlist_move(&pack->ulnk, &to_send);
             system_unlock();
 
             //            if (sem_trywait(&sem))
