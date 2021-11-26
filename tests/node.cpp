@@ -22,7 +22,7 @@ void undel(crow::node_packet_ptr)
 	ucount++;
 }
 
-TEST_CASE("node0" * doctest::timeout(0.5))
+TEST_CASE("node0" * doctest::timeout(2))
 {
 	count = ucount = 0;
 	crow::total_travelled = 0;
