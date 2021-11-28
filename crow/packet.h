@@ -92,7 +92,7 @@ namespace crow
 
     class packet
     {
-    public:
+      public:
         struct dlist_head lnk =
             DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
         struct dlist_head ulnk =
@@ -117,7 +117,7 @@ namespace crow
 
         void (*destructor)(packet *);
 
-    public:
+      public:
         void set_destructor(void (*destructor)(packet *))
         {
             this->destructor = destructor;
@@ -223,7 +223,7 @@ namespace crow
         uint8_t *_aptr = nullptr;
         char *_dptr = nullptr;
 
-    public:
+      public:
         uint8_t *addrptr() override { return _aptr; }
         uint8_t addrsize() override { return _alen; }
 
@@ -251,7 +251,7 @@ namespace crow
         void set_seqid(uint16_t arg) override { _seqid = arg; }
         void set_ack(uint8_t arg) override { _ack = arg; }
 
-        void invalidate()
+        void invalidate() override
         {
             free(_aptr);
             _aptr = NULL;
@@ -275,10 +275,10 @@ namespace crow
 
     class compacted_packet : public packet
     {
-    public:
+      public:
         header_v1 _header;
 
-    public:
+      public:
         header_v1 &header() { return _header; }
 
         uint8_t *addrptr() override;

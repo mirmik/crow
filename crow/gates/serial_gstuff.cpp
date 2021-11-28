@@ -28,8 +28,6 @@ struct crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
         uint32_t baudrate,
         uint8_t id, bool debug)
 {
-    int ret;
-
     crow::serial_gstuff *g = new crow::serial_gstuff;
 
     g->debug = debug;

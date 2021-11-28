@@ -23,7 +23,9 @@ void crowker_implementation::theme::publish(const std::string &data)
     {
         crowker_implementation::options *opts = nullptr;
         if (sub->thms.count(this))
+        {
             opts = sub->thms[this].opts;
+        }
 
         //if (crowker_eval_timestamp() - sub->timestamp_activity > 20000)
         //{
@@ -31,7 +33,7 @@ void crowker_implementation::theme::publish(const std::string &data)
         //}
         //else
         //{
-            sub->publish(name, {data.data(), data.size()}, opts);
+        sub->publish(name, {data.data(), data.size()}, opts);
         //}
     }
 
