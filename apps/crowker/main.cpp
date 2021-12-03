@@ -137,8 +137,10 @@ void print_help()
 	printf(
 	    "Usage: crowker [OPTION]...\n"
 	    "\n"
-		"Common option list:\n"
+	    "Common option list:\n"
 		"  -h, --help            print this page\n"
+		"  -d, --debug           enable debug mode\n"
+		"  -b, --binfo           enable info mode\n"
 		"\n"
 		"Gate`s option list:\n"
 		"  -u, --udp             set udp address (gate 12)\n"
@@ -221,11 +223,6 @@ int main(int argc, char *argv[])
 		thr.detach();
 	}
 
-	//control_node.bind(100);
 	init_control_node();
-
-//	auto * service_control_node = crow::crowker_service_control_node();
-//	service_control_node->bind(CROWKER_CONTROL_SERVICE_NID);
-
 	crow::spin_with_select();
 }
