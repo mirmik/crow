@@ -10,6 +10,7 @@ void crow::crowker_api::subscribe_on_theme(crow::hostaddr_view view, int nid,
 
     auto key = std::make_pair(view, nid);
     auto &client = clients[key];
+    client.set_confirmed(rqos != 0);
 
     client.api = this;
     client.addr = view;
@@ -48,4 +49,12 @@ void crow::crowker_api_client::publish(const std::string &theme,
 
     crowker_node->send_v(node, addr, iov, std::size(iov), opts.qos,
                          opts.ackquant);
+}
+
+void crow::crowker_api::undelivered_packet(crow::hostaddr_view addr, int node) 
+{
+    nos::println("undelivered packet");
+
+    auto& client = clients[std::make_pair(addr, node)];
+    client.detach_from_themes();
 }
