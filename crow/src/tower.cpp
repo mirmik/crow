@@ -831,9 +831,6 @@ void crow::onestep()
         gate->nblock_onestep();
     }
 
-    //crow::protocol *it;
-    //dlist_for_each_entry(it, &crow::protocols, lnk) { it->onestep(); }
-
     crow_onestep_send_stage();
     crow_onestep_outers_stage();
     crow_onestep_incoming_stage();
@@ -891,8 +888,8 @@ int64_t crow::get_minimal_timeout()
     // TODO : Ошибки в учёте переходов через uint16_t
 
     int64_t result;
-    int64_t i_finish;
-    int64_t o_finish;
+    int64_t i_finish = -1;
+    int64_t o_finish = -1;
     int64_t curtime = millis();
 
     if (!dlist_empty(&crow_incoming))
@@ -900,21 +897,13 @@ int64_t crow::get_minimal_timeout()
         crow::packet *i = dlist_first_entry(&crow_incoming, crow::packet, lnk);
         i_finish = i->last_request_time + i->ackquant();
     }
-    else
-    {
-        i_finish = -1;
-    }
-
+    
     if (!dlist_empty(&crow_outters))
     {
         crow::packet *o = dlist_first_entry(&crow_outters, crow::packet, lnk);
         o_finish = o->last_request_time + o->ackquant();
     }
-    else
-    {
-        o_finish = -1;
-    }
-
+    
     if (i_finish > 0 && o_finish > 0)
         result = (i_finish < o_finish ? i_finish : o_finish) - curtime;
 

@@ -4,15 +4,13 @@
 #define CROW_PUBSUB_H
 
 #include <assert.h>
-#include <crow/tower.h>
 
 #include <igris/buffer.h>
 #include <igris/event/delegate.h>
 #include <igris/sync/syslock.h>
 
-#include <igris/buffer.h>
-
-struct crow_theme;
+#include <crow/proto/protocol.h>
+#include <crow/tower.h>
 
 #define SUBSCRIBE 0
 #define PUBLISH 1
@@ -41,18 +39,18 @@ namespace crow
         igris::buffer theme() { return {(char *)(this + 1), thmsz}; }
     } __attribute__((packed));
 
-    class pubsub_protocol_cls
+    class pubsub_protocol_cls : public crow::protocol
     {
-    public:
+      public:
         struct dlist_head subscribers = DLIST_HEAD_INIT(subscribers);
         void (*incoming_handler)(crow::packet *);
         void (*undelivered_handler)(crow::packet *);
 
-    public:
+      public:
         pubsub_protocol_cls() {}
 
-        void incoming(crow::packet *pack);
-        void undelivered(crow::packet *pack);
+        void incoming(crow::packet *pack) override;
+        void undelivered(crow::packet *pack) override;
 
         static void start_resubscribe_thread(int millis);
         void resubscribe_all();
@@ -78,7 +76,7 @@ namespace crow
 
     class pubsub_packet_ptr : public packet_ptr
     {
-    public:
+      public:
         pubsub_packet_ptr(crow::packet *pack) : packet_ptr(pack) {}
 
         pubsub_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth.get())

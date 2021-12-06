@@ -3,6 +3,7 @@
 
 #include <crow/packet.h>
 #include <crow/packet_ptr.h>
+#include <crow/proto/protocol.h>
 #include <crow/tower.h>
 
 #include <igris/binreader.h>
@@ -72,7 +73,7 @@ namespace crow
 
     class node
     {
-    public:
+      public:
         struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
         struct dlist_head waitlnk =
             DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
@@ -145,7 +146,7 @@ namespace crow
 
         virtual ~node();
 
-    private:
+      private:
         virtual void incoming_packet(crow::packet *pack) = 0;
 
         virtual void undelivered_packet(crow::packet *pack)
@@ -157,12 +158,12 @@ namespace crow
         friend class node_protocol_cls;
     };
 
-    class node_protocol_cls /*: public crow::protocol*/
+    class node_protocol_cls : public crow::protocol
     {
-    private:
+      private:
         void send_node_error(crow::packet *pack, int errcode);
 
-    public:
+      public:
         void incoming(crow::packet *pack);
         void undelivered(crow::packet *pack);
 
@@ -187,7 +188,7 @@ namespace crow
 
     class node_packet_ptr : public packet_ptr
     {
-    public:
+      public:
         node_packet_ptr(crow::packet *pack_) : packet_ptr(pack_) {}
         node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
         node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}
