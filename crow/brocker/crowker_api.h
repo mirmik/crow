@@ -47,6 +47,7 @@ namespace crow
                                 uint16_t rackquant) override;
 
         void publish_to_theme(igris::buffer theme, igris::buffer data) override;
+        void undelivered_packet(crow::hostaddr_view, int node) override;
     };
 }
 

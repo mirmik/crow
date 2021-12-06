@@ -14,6 +14,8 @@ namespace crow
 
         virtual void publish_to_theme(igris::buffer theme,
                                       igris::buffer data) = 0;
+
+        virtual void undelivered_packet(crow::hostaddr_view, int node) = 0;
     };
 
     class crowker_pubsub_node : public crow::node
@@ -25,6 +27,7 @@ namespace crow
 
     private:
         void incoming_packet(crow::packet *) override;
+        void undelivered_packet(crow::packet *) override;
     };
 }
 
