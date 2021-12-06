@@ -1,6 +1,8 @@
 #ifndef CROW_PROTOCOL_H
 #define CROW_PROTOCOL_H
 
+#include <crow/packet.h>
+
 namespace crow
 {
     class protocol
