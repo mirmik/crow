@@ -29,11 +29,6 @@ namespace crow
                                const igris::buffer data, uint8_t qos,
                                uint16_t ackquant);
 
-    crow::packet_ptr node_send_special(nodeid_t sid, nodeid_t rid,
-                                       const crow::hostaddr_view &addr,
-                                       uint8_t type, const igris::buffer data,
-                                       uint8_t qos, uint16_t ackquant);
-
     crow::packet_ptr node_send_v(nodeid_t sid, nodeid_t rid,
                                  const crow::hostaddr_view &addr,
                                  const igris::buffer *vec, size_t veclen,
@@ -104,18 +99,6 @@ namespace crow
             if (id == 0)
                 bind();
             return crow::node_send(id, rid, raddr, data, qos, ackquant);
-        }
-
-        crow::packet_ptr send_special(nodeid_t rid,
-                                      const crow::hostaddr_view &raddr,
-                                      uint8_t type, const igris::buffer data,
-                                      uint8_t qos = CROW_DEFAULT_QOS,
-                                      uint16_t ackquant = CROW_DEFAULT_ACKQUANT)
-        {
-            if (id == 0)
-                bind();
-            return crow::node_send_special(id, rid, raddr, type, data, qos,
-                                           ackquant);
         }
 
         crow::packet_ptr send_v(nodeid_t rid, const crow::hostaddr_view &raddr,
