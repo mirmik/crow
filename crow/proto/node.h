@@ -85,6 +85,10 @@ namespace crow
         node_keepalive_timer keepalive_timer;
 
     public:
+        node() = default;
+        node(const node &) = delete;
+        node(node &&) = delete;
+
         int waitevent();
         void notify_one(int future);
         void notify_all(int future);

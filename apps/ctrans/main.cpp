@@ -109,11 +109,11 @@ void raw_node_undel_handle(crow::node_packet_ptr incom_data)
 	(void) incom_data;
 }
 
-auto raw_node = crow::node_delegate(raw_node_incom_handle, raw_node_undel_handle);
-auto publish_node = crow::publisher_node();
-auto requestor_node = crow::requestor_node().set_async_handle(requestor_data_handle);
-auto subscriber_node = crow::subscriber_node(subscriber_data_handle);
-auto service_node = crow::service_node(service_data_handle);
+crow::node_delegate raw_node(raw_node_incom_handle, raw_node_undel_handle);
+crow::publisher_node publish_node;
+crow::requestor_node requestor_node(requestor_data_handle);
+crow::subscriber_node subscriber_node(subscriber_data_handle);
+crow::service_node service_node(service_data_handle);
 
 enum class protoopt_e
 {
@@ -693,7 +693,8 @@ void parse_options(int argc, char **argv)
 				break;
 
 			case 0:
-				BUG();
+				nos::println("getopt error");
+				exit(-1);
 				break;
 		}
 	}
@@ -701,14 +702,14 @@ void parse_options(int argc, char **argv)
 
 int main(int argc, char *argv[])
 {
+	parse_options(argc, argv);
+
 	raw_node.bind(1);
 	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
 	service_node.bind(CTRANS_DEFAULT_SERVICE_NODE);
 	requestor_node.bind(CTRANS_DEFAULT_REQUESTOR_NODE);
 	reply_theme = gen_random_string(10);
-
-	parse_options(argc, argv);
 
 	udpgate = crow::create_udpgate_safe(CROW_UDPGATE_NO, udpport);
 	if (!udpgate->opened())

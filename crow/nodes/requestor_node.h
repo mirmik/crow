@@ -19,6 +19,10 @@ namespace crow
 
     public:
         requestor_node() = default;
+        requestor_node(igris::delegate<void, igris::buffer> incoming)
+        {
+            set_async_handle(incoming);
+        }
         requestor_node(crow::hostaddr_view crowker_addr, igris::buffer theme,
                        igris::buffer reptheme);
         requestor_node(crow::hostaddr_view crowker_addr, nodeid_t crowker_node,
@@ -36,8 +40,8 @@ namespace crow
         {
             async_request(std::forward<Args>(data)...);
             int sts = waitevent();
-            
-            if (sts != 0) 
+
+            if (sts != 0)
             {
                 return crow::packet_ptr(nullptr);
             }
@@ -54,7 +58,7 @@ namespace crow
             return *this;
         }
 
-        void set_rqos(int _rqos, int _rackquant) 
+        void set_rqos(int _rqos, int _rackquant)
         {
             rqos = _rqos;
             rackquant = _rackquant;
