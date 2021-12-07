@@ -17,12 +17,12 @@ namespace crow
 
         void incoming_packet(crow::packet *pack) override
         {
-            incom(crow::node_packet_ptr(pack));
+            incom(crow::node_packet_ptr(pack, this));
         }
 
         void undelivered_packet(crow::packet *pack) override
         {
-            undeliv(crow::node_packet_ptr(pack));
+            undeliv(crow::node_packet_ptr(pack, this));
         }
     };
 }

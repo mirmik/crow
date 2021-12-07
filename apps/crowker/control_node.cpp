@@ -1,34 +1,43 @@
-#include <crow/proto/rpc.h>
+#include <crow/nodes/node_delegate.h>
 #include <crow/brocker/crowker.h>
 #include <string>
 
-crow::rpc_node rpc;
+static void incoming(crow::node_packet_ptr pack)
+{
+	std::string ret;
+	auto& themes = crow::crowker::instance()->themes;
 
-int hello() 
+	for (auto& a : themes)
+	{
+		std::string s = nos::format("name:{} subs:{}\n",
+		                            a.first, 
+		                            a.second.subs.size());
+		ret.append(s);
+	}
+
+	pack.reply(ret);
+}
+
+static void undelivered(crow::node_packet_ptr pack)
+{
+	(void) pack;
+}
+
+crow::node_delegate control(incoming, undelivered);
+
+/*int hello()
 {
 	return 42;
 }
 
-std::string get_themes() 
+std::string get_themes()
 {
-	std::string ret;
+}*/
 
-	auto& themes = crow::crowker::instance()->themes;
-
-	for (auto& a : themes) 
-	{
-		std::string s = nos::format("name:{} subs:{} lasta:{} lastp:{}\n", 
-			a.first, a.second.subs.size(), a.second.timestamp_activity, a.second.timestamp_publish);
-		ret.append(s);
-	}
-
-	return ret;
-}
-
-void init_control_node() 
+void init_control_node()
 {
-	rpc.bind(2);
+	control.bind(2);
 
-	rpc.add_delegate("hello", igris::make_delegate(hello));
-	rpc.add_delegate("themes", igris::make_delegate(get_themes));
+	//rpc.add_delegate("hello", igris::make_delegate(hello));
+	//rpc.add_delegate("themes", igris::make_delegate(get_themes));
 }

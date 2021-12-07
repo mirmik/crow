@@ -32,8 +32,7 @@ crow::node_packet_ptr crow::msgbox::receive()
     dlist_del_init(&pack->ulnk);
 
     sem_post(&message_lock);
-
-    return pack;
+    return crow::node_packet_ptr(pack, this);
 }
 
 crow::packet_ptr crow::msgbox::reply(crow::node_packet_ptr msg,

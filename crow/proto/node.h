@@ -198,10 +198,22 @@ namespace crow
 
     class node_packet_ptr : public packet_ptr
     {
+        node *_node;
+
     public:
-        node_packet_ptr(crow::packet *pack_) : packet_ptr(pack_) {}
-        node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
-        node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}
+        node_packet_ptr(crow::packet *pack_, node *node_)
+            : packet_ptr(pack_), _node(node_)
+        {
+        }
+        node_packet_ptr(const crow::packet_ptr &oth, node *node_)
+            : packet_ptr(oth), _node(node_)
+        {
+        }
+        node_packet_ptr(crow::packet_ptr &&oth, node *node_)
+            : packet_ptr(std::move(oth)), _node(node_)
+        {
+        }
+        node_packet_ptr(std::nullptr_t) : packet_ptr(nullptr), _node(nullptr) {}
 
         int rid()
         {
@@ -209,7 +221,19 @@ namespace crow
             return h->rid;
         }
 
+        int sid()
+        {
+            auto *h = node::subheader(pack);
+            return h->sid;
+        }
+
         igris::buffer message() { return node_data(pack); }
+
+        void reply(igris::buffer rep)
+        {
+            _node->send(sid(), pack->addr(), rep, pack->quality(),
+                        pack->ackquant());
+        }
     };
 } // namespace crow
 

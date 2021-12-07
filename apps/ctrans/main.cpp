@@ -53,12 +53,15 @@ bool subscribe_mode = false;
 bool service_mode = false;
 bool request_mode = false;
 bool crowker_mode = false;
+bool exit_on_receive = false;
+bool crowker_control_request_mode = false;
 bool TIMESTAMP_MODE = false;
 
 int acceptorno = -1;
 int channelno = -1;
 int nodeno = -1;
 std::string nodename = "";
+std::string crowker_control_request_command;
 
 crow::channel channel;
 crow::channel * reverse_channel;
@@ -171,7 +174,6 @@ std::string outformat_tostr()
 	return std::string();
 }
 
-
 std::string gen_random_string(const int len)
 {
 	std::string tmp_s;
@@ -233,6 +235,11 @@ void output_do(igris::buffer data, crow::packet* pack)
 void do_incom_data(igris::buffer incom_data)
 {
 	output_do(incom_data, nullptr);
+	if (exit_on_receive)
+	{
+		crow::stop_spin(false);
+		cancel_token = true;
+	}
 }
 
 std::pair<std::string, bool> input_do(const std::string& data)
@@ -470,6 +477,7 @@ void print_help()
 	    "      --request      (node)      request crowker service\n"
 	    "      --subscribe      (node)    subscribe to crowker theme\n"
 	    "      --publish        (node)    publish to crowker theme\n"
+	    "      --themes        \n"
 	    "\n"
 	    "Info option list:\n"
 	    "      --info\n"
@@ -530,6 +538,7 @@ void parse_options(int argc, char **argv)
 		{"publish", required_argument, NULL, 'L'},
 		{"request", required_argument, NULL, 'G'},
 		{"service", required_argument, NULL, 'Y'},
+		{"themes", no_argument, NULL, 'm'},
 		{"retransler", no_argument, NULL, 'R'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
@@ -663,6 +672,14 @@ void parse_options(int argc, char **argv)
 				request_mode = 1;
 				protoopt = protoopt_e::PROTOOPT_REQUEST;
 				crowker_mode = 1;
+				break;
+
+			case 'm':
+				crowker_mode = 1;
+				crowker_control_request_mode = 1;
+				crowker_control_request_command = "themes";
+				exit_on_receive = 1;
+				noconsole = 1;
 				break;
 
 			case 'w':
@@ -870,6 +887,13 @@ int main(int argc, char *argv[])
 		    qos, ackquant
 		);
 		service_node.install_keepalive(2000);
+	}
+
+	if (crowker_control_request_mode)
+	{
+		raw_node.send(2, address,
+		              crowker_control_request_command,
+		              qos, ackquant);
 	}
 
 	// Создание консольного ввода, если необходимо.
