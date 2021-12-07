@@ -662,27 +662,6 @@ void crow::return_to_tower(crow::packet *pack, uint8_t sts)
     system_unlock();
 }
 
-void crow::onestep_travel_only()
-{
-    system_lock();
-
-    while (1)
-    {
-        bool empty = dlist_empty(&crow_travelled);
-
-        if (empty)
-            break;
-
-        crow::packet *pack =
-            dlist_first_entry(&crow_travelled, crow::packet, lnk);
-        dlist_del_init(&pack->lnk);
-
-        crow_do_travel(pack);
-    }
-
-    system_unlock();
-}
-
 void crow_undelivered(crow::packet *pack)
 {
     pack->u.f.undelivered = 1;
