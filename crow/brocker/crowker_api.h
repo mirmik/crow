@@ -41,6 +41,14 @@ namespace crow
         crowker_pubsub_node *crowker_node;
         crow::crowker *crowker;
 
+        std::vector<crowker_implementation::client *> get_clients()
+        {
+            std::vector<crowker_implementation::client *> ret;
+            for (auto &pair : clients)
+                ret.push_back(&pair.second);
+            return ret;
+        }
+
     public:
         void subscribe_on_theme(crow::hostaddr_view, int nid,
                                 igris::buffer theme, uint8_t rqos,

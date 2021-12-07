@@ -156,6 +156,7 @@ int main(int argc, char *argv[])
 	pubsub_node.set_api(&crowker_api);
 	crow::pubsub_protocol.enable_crowker_subsystem();
 	pubsub_node.bind(CROWKER_SERVICE_BROCKER_NODE_NO);
+	crow::crowker::instance()->add_api(&crowker_api);
 
 	const struct option long_options[] =
 	{
