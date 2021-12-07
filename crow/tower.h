@@ -61,9 +61,6 @@ namespace crow
     void release(crow::packet *pack);
     void utilize(crow::packet *pack);
 
-    // Взятие отметки времени.
-    uint16_t millis();
-
     void onestep();
     void onestep_travel_only();
 

@@ -5,6 +5,7 @@
 #include <crow/packet.h>
 #include <crow/packet_ptr.h>
 #include <crow/proto/protocol.h>
+#include <crow/select.h>
 #include <crow/tower.h>
 
 #include <igris/binreader.h>
@@ -143,8 +144,12 @@ namespace crow
 
         void install_keepalive(int64_t interval)
         {
-            crow::keepalive_timer_manager.plan(keepalive_timer, millis(),
-                                               interval);
+            crow::keepalive_timer_manager.plan(
+                (igris::managed_timer_base<
+                    igris::timer_spec<decltype(millis())>> &)keepalive_timer,
+                millis(), interval);
+
+            crow::unselect();
         }
 
     private:

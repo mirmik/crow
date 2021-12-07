@@ -878,7 +878,7 @@ int64_t crow::get_minimal_timeout()
 
     auto update_candidate = [&](int64_t candidate) 
     {
-        if (mininterval < candidate) 
+        if (mininterval > candidate) 
             mininterval = candidate;
     };
 

@@ -198,7 +198,7 @@ void output_do(igris::buffer data, crow::packet* pack)
 	if (TIMESTAMP_MODE)
 	{
 		char buf[16];
-		int32_t time = crow::millis();
+		auto time = millis();
 		sprintf(buf, "%d:", time);
 		int _ = write(DATAOUTPUT_FILENO, buf, strlen(buf));
 		(void) _;
@@ -496,15 +496,8 @@ void signal_handler(int)
 	quick_exit(0);
 }
 
-int main(int argc, char *argv[])
+void parse_options(int argc, char **argv)
 {
-	raw_node.bind(1);
-	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
-	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
-	service_node.bind(CTRANS_DEFAULT_SERVICE_NODE);
-	requestor_node.bind(CTRANS_DEFAULT_REQUESTOR_NODE);
-	reply_theme = gen_random_string(10);
-
 	const struct option long_options[] =
 	{
 		{"help", no_argument, NULL, 'h'},
@@ -705,6 +698,18 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
+}
+
+int main(int argc, char *argv[])
+{
+	raw_node.bind(1);
+	publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
+	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
+	service_node.bind(CTRANS_DEFAULT_SERVICE_NODE);
+	requestor_node.bind(CTRANS_DEFAULT_REQUESTOR_NODE);
+	reply_theme = gen_random_string(10);
+
+	parse_options(argc, argv);
 
 	udpgate = crow::create_udpgate_safe(CROW_UDPGATE_NO, udpport);
 	if (!udpgate->opened())

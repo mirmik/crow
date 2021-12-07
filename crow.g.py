@@ -64,7 +64,6 @@ licant.modules.module("crow",
 
 	mdepends = [
 		"crow.allocator",
-		"crow.time",
 		"crow.threads",
 		"crow.select",
 		"crow.crowker",
@@ -106,9 +105,6 @@ licant.modules.module("crow.allocator", "malloc",
 
 licant.modules.module("crow.allocator", "pool", 
 	sources=["crow/src/variants/allocation_pool.cpp"])
-
-licant.modules.module("crow.time", "chrono", 
-	sources=["crow/src/variants/stdtime.cpp"], default=True)
 
 #######################################GATES#########################################
 
