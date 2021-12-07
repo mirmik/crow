@@ -18,11 +18,6 @@ namespace crow
 
     public:
         publisher_node() = default;
-        publisher_node(const publisher_node &) = default;
-        publisher_node(publisher_node &&) = default;
-
-        publisher_node &operator=(const publisher_node &) = default;
-        publisher_node &operator=(publisher_node &&) = default;
 
         publisher_node(crow::hostaddr_view crowker_addr, int crowker_node,
                        igris::buffer theme);
