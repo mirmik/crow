@@ -174,6 +174,7 @@ crow::node::~node()
         notify_all(-1);
 
     dlist_del(&lnk);
+    keepalive_timer.unplan();
 
     system_unlock();
 }
