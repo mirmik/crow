@@ -44,8 +44,15 @@ void crow::udpgate::nblock_onestep()
         {block->dataptr(), block->datasize()}
     };
 
-    readv(sock, iov, 3);
-    crow_packet_initialization(block, this);
+    len = readv(sock, iov, 3);
+    if (len <= 0) 
+    {
+        crow::deallocate_packet(block);
+        block = nullptr;
+        return;
+    }
+
+    crow::packet_initialization(block, this);
 
     igris::buffer vec[3] = {{(char *)&id, 1},
         {(char *)&sender.sin_addr.s_addr, 4},

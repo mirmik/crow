@@ -197,10 +197,9 @@ void output_do(igris::buffer data, crow::packet* pack)
 
 	if (TIMESTAMP_MODE)
 	{
-		char buf[16];
 		auto time = millis();
-		sprintf(buf, "%d:", time);
-		int _ = write(DATAOUTPUT_FILENO, buf, strlen(buf));
+		auto str = std::to_string(time);
+		int _ = write(DATAOUTPUT_FILENO, str.data(), str.size());
 		(void) _;
 	}
 

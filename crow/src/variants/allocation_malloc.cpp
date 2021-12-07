@@ -12,7 +12,7 @@
 
 int crow_allocated_count = 0;
 
-static void crow_deallocate_packet(crow::packet *pack)
+void crow::deallocate_packet(crow::packet *pack)
 {
     if (pack)
         crow_allocated_count--;
@@ -25,7 +25,7 @@ crow::packet *crow::allocate_packet(int alen, int dlen)
 
     crow::morph_packet * pack = new crow::morph_packet;
     pack->allocate_buffer(alen, dlen);
-    pack->set_destructor(crow_deallocate_packet);
+    pack->set_destructor(crow::deallocate_packet);
     
     return pack;
 }

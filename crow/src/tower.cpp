@@ -43,23 +43,21 @@ void crow::diagnostic_setup(bool en)
     __diagnostic_enabled = en;
 }
 
-static void __crow_utilize(crow::packet *pack)
+void crow::utilize(crow::packet *pack)
 {
     dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
     dlist_del(&pack->ulnk);
-    
+
     pack->invalidate();
     pack->destructor(pack);
 }
-
-void crow::utilize(crow::packet *pack) { __crow_utilize(pack); }
 
 void crow::release(crow::packet *pack)
 {
     system_lock();
 
     if (pack->u.f.released_by_tower && pack->refs == 0)
-        __crow_utilize(pack);
+        crow::utilize(pack);
     else
         pack->u.f.released_by_world = true;
 
@@ -75,7 +73,7 @@ void crow_tower_release(crow::packet *pack)
     dlist_del_init(&pack->lnk);
 
     if (pack->u.f.released_by_world && pack->refs == 0)
-        __crow_utilize(pack);
+        crow::utilize(pack);
     else
         pack->u.f.released_by_tower = true;
 
@@ -187,7 +185,7 @@ static void crow_incoming_handler(crow::packet *pack)
 
 static void crow_send_ack(crow::packet *pack)
 {
-    crow::packet *ack = crow_create_packet(NULL, pack->addrsize(), 0);
+    crow::packet *ack = crow::create_packet(NULL, pack->addrsize(), 0);
 
     assert(pack);
     assert(ack);
@@ -205,7 +203,7 @@ static void crow_send_ack(crow::packet *pack)
 
 static void crow_send_ack2(crow::packet *pack)
 {
-    crow::packet *ack = crow_create_packet(NULL, pack->addrsize(), 0);
+    crow::packet *ack = crow::create_packet(NULL, pack->addrsize(), 0);
 
     assert(pack);
     assert(ack);
@@ -272,7 +270,7 @@ static void crow_tower_send_to_gate_phase(crow::packet *pack)
         }
 
         system_lock();
-        __crow_utilize(pack);
+        crow::utilize(pack);
         system_unlock();
     }
     else
@@ -321,7 +319,7 @@ static void crow_tower_incoming_ack_phase(crow::packet *pack)
     }
 
     system_lock();
-    __crow_utilize(pack);
+    crow::utilize(pack);
     system_unlock();
 }
 
@@ -370,7 +368,7 @@ static void crow_do_travel(crow::packet *pack)
                         // Пакет уже фигурирует как принятый, поэтому
                         // отбрасываем его.
                         system_lock();
-                        __crow_utilize(pack);
+                        crow::utilize(pack);
                         system_unlock();
 
                         return;
@@ -419,7 +417,7 @@ static void crow_do_travel(crow::packet *pack)
             }
 
             system_lock();
-            __crow_utilize(pack);
+            crow::utilize(pack);
             system_unlock();
             return;
         }
@@ -464,7 +462,7 @@ crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
                             const igris::buffer data, uint8_t type, uint8_t qos,
                             uint16_t ackquant)
 {
-    crow::packet *pack = crow_create_packet(NULL, addr.size(), data.size());
+    crow::packet *pack = crow::create_packet(NULL, addr.size(), data.size());
     if (pack == nullptr)
     {
         crow::warn("cannot create packet");
@@ -494,7 +492,7 @@ crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
         dsize += it->size();
     }
 
-    crow::packet *pack = crow_create_packet(NULL, addr.size(), dsize);
+    crow::packet *pack = crow::create_packet(NULL, addr.size(), dsize);
     if (pack == nullptr)
         return nullptr;
 
@@ -539,7 +537,7 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
         dsize += it->size();
     }
 
-    crow::packet *pack = crow_create_packet(NULL, addr.size(), dsize);
+    crow::packet *pack = crow::create_packet(NULL, addr.size(), dsize);
     if (pack == nullptr)
         return nullptr;
 
@@ -600,7 +598,7 @@ crow::packet_ptr crow::send_vvv(const crow::hostaddr_view &addr,
         dsize += it->size();
     }
 
-    crow::packet *pack = crow_create_packet(NULL, addr.size(), dsize);
+    crow::packet *pack = crow::create_packet(NULL, addr.size(), dsize);
     if (pack == nullptr)
         return nullptr;
 
@@ -648,7 +646,7 @@ void crow::return_to_tower(crow::packet *pack, uint8_t sts)
     if (pack->ingate != NULL)
     {
         //Пакет был отправлен, и он нездешний. Уничтожить.
-        __crow_utilize(pack);
+        crow::utilize(pack);
     }
     else
     {
@@ -786,7 +784,7 @@ static inline void crow_onestep_incoming_stage()
             if (pack->_ackcount == 0)
             {
                 pack->u.f.undelivered = 1;
-                __crow_utilize(pack);
+                crow::utilize(pack);
             }
             else
             {
@@ -802,7 +800,7 @@ static inline void crow_onestep_incoming_stage()
     system_unlock();
 }
 
-void crow_onestep_keepalive_stage() 
+void crow_onestep_keepalive_stage()
 {
     crow::keepalive_timer_manager.exec(millis());
 }
@@ -876,15 +874,15 @@ int64_t crow::get_minimal_timeout()
     int64_t mininterval = std::numeric_limits<int64_t>::max();
     int64_t curtime = millis();
 
-    auto update_candidate = [&](int64_t candidate) 
+    auto update_candidate = [&](int64_t candidate)
     {
-        if (mininterval > candidate) 
+        if (mininterval > candidate)
             mininterval = candidate;
     };
 
-    if (!keepalive_timer_manager.empty()) 
+    if (!keepalive_timer_manager.empty())
     {
-        update_candidate(keepalive_timer_manager.minimal_interval(curtime));   
+        update_candidate(keepalive_timer_manager.minimal_interval(curtime));
     }
 
     if (!dlist_empty(&crow_incoming))
@@ -892,17 +890,17 @@ int64_t crow::get_minimal_timeout()
         crow::packet *i = dlist_first_entry(&crow_incoming, crow::packet, lnk);
         update_candidate(i->last_request_time + i->ackquant() - curtime);
     }
-    
+
     if (!dlist_empty(&crow_outters))
     {
         crow::packet *o = dlist_first_entry(&crow_outters, crow::packet, lnk);
         update_candidate(o->last_request_time + o->ackquant() - curtime);
     }
-    
+
     if (mininterval == std::numeric_limits<int64_t>::max())
         return -1;
 
-    else if (mininterval < 0) 
+    else if (mininterval < 0)
         return 0;
 
     else

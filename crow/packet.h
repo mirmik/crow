@@ -92,7 +92,7 @@ namespace crow
 
     class packet
     {
-      public:
+    public:
         struct dlist_head lnk =
             DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
         struct dlist_head ulnk =
@@ -117,7 +117,7 @@ namespace crow
 
         void (*destructor)(packet *);
 
-      public:
+    public:
         void set_destructor(void (*destructor)(packet *))
         {
             this->destructor = destructor;
@@ -223,7 +223,7 @@ namespace crow
         uint8_t *_aptr = nullptr;
         char *_dptr = nullptr;
 
-      public:
+    public:
         uint8_t *addrptr() override { return _aptr; }
         uint8_t addrsize() override { return _alen; }
 
@@ -275,10 +275,10 @@ namespace crow
 
     class compacted_packet : public packet
     {
-      public:
+    public:
         header_v1 _header;
 
-      public:
+    public:
         header_v1 &header() { return _header; }
 
         uint8_t *addrptr() override;
@@ -342,20 +342,15 @@ namespace crow
      * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
      */
     crow::packet *allocate_packet(int alen, int dlen);
+    void deallocate_packet(crow::packet *pack);
     crow::compacted_packet *allocate_compacted_packet(int alen, int dlen);
     crow::compacted_packet *allocate_compacted_packet(int adlen);
+    void packet_initialization(crow::packet *pack, crow::gateway *ingate);
+    crow::packet *create_packet(crow::gateway *ingate, uint8_t addrsize,
+                                size_t datasize);
 }
 
 extern int crow_allocated_count;
-
-__BEGIN_DECLS
-
-void crow_packet_initialization(crow::packet *pack, crow::gateway *ingate);
-
-crow::packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
-                                 size_t datasize);
-
-__END_DECLS
 
 namespace crow
 {

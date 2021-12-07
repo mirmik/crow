@@ -20,7 +20,7 @@ void crow::serial_gstuff::newline_handler()
 
     block->revert_gate(id);
 
-    crow_packet_initialization(block, this);
+    crow::packet_initialization(block, this);
     crow::nocontrol_travel(block, false);
 }
 
@@ -59,8 +59,8 @@ void crow::serial_gstuff::send(crow::packet *pack)
         { pack->dataptr(), pack->datasize() },
     };
     int size = gstuffing_v(iov, 3, buffer);
-
-    write(fd, buffer, size);
+    auto _ = write(fd, buffer, size);
+    (void) _;
     crow::return_to_tower(pack, CROW_SENDED);
 }
 

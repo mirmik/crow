@@ -62,7 +62,7 @@ namespace crow
             crow::compacted_packet *pack = recvpack;
             recvpack = nullptr;
             pack->revert_gate(this->id);
-            crow_packet_initialization(pack, this);
+            crow::packet_initialization(pack, this);
             crow::nocontrol_travel(pack, false);
             init_receiver();
         }

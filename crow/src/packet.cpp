@@ -12,7 +12,7 @@
 
 #include <igris/compiler.h>
 
-void crow_packet_initialization(crow::packet *pack, crow::gateway *ingate)
+void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
 {
     dlist_init(&pack->lnk);
     dlist_init(&pack->ulnk);
@@ -23,7 +23,7 @@ void crow_packet_initialization(crow::packet *pack, crow::gateway *ingate)
     pack->self_init();
 }
 
-crow::packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
+crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
                                  size_t datasize)
 {
     crow::packet *pack = crow::allocate_packet(addrsize, datasize);
@@ -38,7 +38,7 @@ crow::packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
     pack->set_quality(0);
     pack->set_stage(0);
 
-    crow_packet_initialization(pack, ingate);
+    crow::packet_initialization(pack, ingate);
 
     return pack;
 }

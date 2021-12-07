@@ -23,7 +23,7 @@ namespace crow
             memcpy((void *)copypack->dataptr(), pack->dataptr(),
                    pack->datasize());
 
-            crow_packet_initialization(copypack, this);
+            crow::packet_initialization(copypack, this);
             copypack->revert_gate(id);
 
             crow::return_to_tower(pack, 0);
