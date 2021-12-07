@@ -16,6 +16,8 @@ namespace crow
                                       igris::buffer data) = 0;
 
         virtual void undelivered_packet(crow::hostaddr_view, int node) = 0;
+        virtual void client_beam(crow::hostaddr_view, int nid,
+                                 igris::buffer name) = 0;
     };
 
     class crowker_pubsub_node : public crow::node

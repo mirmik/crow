@@ -1,5 +1,6 @@
 #include <crow/print.h>
 #include <crow/tower.h>
+#include <crow/proto/node.h>
 
 #include <igris/string/hexascii_string.h>
 #include <igris/util/dstring.h>
@@ -37,6 +38,15 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
                        pack->datasize() > crow::debug_data_size
                            ? crow::debug_data_size
                            : pack->datasize()));
+
+    if (pack->type() == CROW_NODE_PROTOCOL) 
+    {
+        nos::fprint(
+        ", sid:{}, "
+        "rid:{}",
+        crow::node_protocol_cls::sid(pack), crow::node_protocol_cls::rid(pack)
+        ); 
+    }
 
     if (postfix_points)
         nos::println("...)");

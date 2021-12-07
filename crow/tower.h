@@ -6,6 +6,7 @@
 #include <crow/defs.h>
 #include <crow/gateway.h>
 #include <crow/packet_ptr.h>
+#include <igris/event/delegate.h>
 
 #define CROW_SENDED 0
 #define CROW_WRONG_ADDRESS -1
@@ -20,7 +21,7 @@ namespace crow
 
     extern void (*default_incoming_handler)(crow::packet *pack);
     extern void (*undelivered_handler)(crow::packet *pack);
-    extern void (*unsleep_handler)();
+    extern igris::delegate<void> unsleep_handler;
 
     extern bool retransling_allowed;
 

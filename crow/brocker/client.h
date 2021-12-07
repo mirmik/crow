@@ -25,6 +25,7 @@ namespace crowker_implementation
     class client
     {
     public:
+        std::string name;
         crow::crowker *context;
         std::unordered_map<theme *, themenote> thms;
         int64_t timestamp_activity;
@@ -39,6 +40,10 @@ namespace crowker_implementation
         void set_confirmed(bool en) { confirmation = en; }
 
         bool is_confirmed() const { return confirmation; }
+        void set_name(igris::buffer name)
+        {
+            this->name = std::string(name.data(), name.size());
+        }
 
         void detach_from_themes()
         {

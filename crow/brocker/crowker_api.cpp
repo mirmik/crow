@@ -58,3 +58,11 @@ void crow::crowker_api::undelivered_packet(crow::hostaddr_view addr, int node)
     auto& client = clients[std::make_pair(addr, node)];
     client.detach_from_themes();
 }
+
+void crow::crowker_api::client_beam(crow::hostaddr_view view, int nid, igris::buffer name) 
+{
+    auto key = std::make_pair(view, nid);
+    auto &client = clients[key];
+    client.set_name(name);    
+    
+}

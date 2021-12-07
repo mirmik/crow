@@ -22,6 +22,14 @@ namespace crowker_implementation
             return &allsubs[addr];
         }
 
+        static std::vector<client *> clients()
+        {
+            std::vector<client *> ret;
+            for (auto &pair : allsubs)
+                ret.push_back(&pair.second);
+            return ret;
+        }
+
         void publish(const std::string &theme, const std::string &data,
                      options *opts) override;
     };

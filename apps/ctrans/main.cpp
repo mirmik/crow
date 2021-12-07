@@ -9,6 +9,7 @@
 #include <crow/nodes/requestor_node.h>
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/nodes/node_delegate.h>
+#include <crow/nodes/beam.h>
 #include <crow/address.h>
 #include <crow/select.h>
 
@@ -49,6 +50,7 @@ bool noend = false;
 bool echo = false;
 bool gdebug = false;
 bool info = false;
+bool beam_mode = false;
 bool subscribe_mode = false;
 bool service_mode = false;
 bool request_mode = false;
@@ -117,6 +119,7 @@ crow::publisher_node publish_node;
 crow::requestor_node requestor_node(requestor_data_handle);
 crow::subscriber_node subscriber_node(subscriber_data_handle);
 crow::service_node service_node(service_data_handle);
+crow::beam beam;
 
 enum class protoopt_e
 {
@@ -478,6 +481,7 @@ void print_help()
 	    "      --subscribe      (node)    subscribe to crowker theme\n"
 	    "      --publish        (node)    publish to crowker theme\n"
 	    "      --themes        \n"
+	    "      --beam        \n"
 	    "\n"
 	    "Info option list:\n"
 	    "      --info\n"
@@ -538,7 +542,8 @@ void parse_options(int argc, char **argv)
 		{"publish", required_argument, NULL, 'L'},
 		{"request", required_argument, NULL, 'G'},
 		{"service", required_argument, NULL, 'Y'},
-		{"themes", no_argument, NULL, 'm'},
+		{"crowcli", required_argument, NULL, 'm'},
+		{"beam", required_argument, NULL, 'b'},
 		{"retransler", no_argument, NULL, 'R'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
@@ -677,9 +682,16 @@ void parse_options(int argc, char **argv)
 			case 'm':
 				crowker_mode = 1;
 				crowker_control_request_mode = 1;
-				crowker_control_request_command = "themes";
+				crowker_control_request_command = optarg;
 				exit_on_receive = 1;
 				noconsole = 1;
+				break;
+
+			case 'b':
+				beam_mode = 1;
+				noconsole = 1;
+				crowker_mode = 1;
+				beam.set_client_name(optarg);
 				break;
 
 			case 'w':
@@ -726,6 +738,7 @@ int main(int argc, char *argv[])
 	subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
 	service_node.bind(CTRANS_DEFAULT_SERVICE_NODE);
 	requestor_node.bind(CTRANS_DEFAULT_REQUESTOR_NODE);
+	beam.bind(CTRANS_DEFAULT_BEAM_NODE);
 	reply_theme = gen_random_string(10);
 
 	udpgate = crow::create_udpgate_safe(CROW_UDPGATE_NO, udpport);
@@ -891,9 +904,16 @@ int main(int argc, char *argv[])
 
 	if (crowker_control_request_mode)
 	{
-		raw_node.send(2, address,
+		raw_node.send(CROWKER_CONTROL_BROCKER_NODE_NO, address,
 		              crowker_control_request_command,
 		              qos, ackquant);
+	}
+
+	if (beam_mode)
+	{
+		beam.set_crowker_address(address);
+		beam.install_keepalive(2000);
+		beam.keepalive_handle();
 	}
 
 	// Создание консольного ввода, если необходимо.

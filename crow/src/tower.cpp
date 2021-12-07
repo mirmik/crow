@@ -6,6 +6,7 @@
 
 #include <igris/sync/syslock.h>
 #include <igris/time/systime.h>
+#include <igris/event/delegate.h>
 
 #include <crow/gateway.h>
 #include <crow/print.h>
@@ -26,7 +27,7 @@ DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
 
-void (*crow::unsleep_handler)() = nullptr;
+igris::delegate<void> crow::unsleep_handler;
 void (*crow::default_incoming_handler)(crow::packet *pack) = nullptr;
 void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
 

@@ -65,6 +65,16 @@ namespace crow
             crowker_implementation::tcp_client::allsubs.erase(addr);
         }
 
+        std::vector<client *> clients()
+        {
+            std::vector<client *> ret;
+            for (auto *client : crowker_implementation::crow_client::clients())
+                ret.push_back(client);
+            for (auto *client : crowker_implementation::tcp_client::clients())
+                ret.push_back(client);
+            return ret;
+        }
+
     private:
         crowker() = default;
     };

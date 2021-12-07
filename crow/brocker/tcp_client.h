@@ -25,6 +25,14 @@ namespace crowker_implementation
 
         void publish(const std::string &theme, const std::string &data,
                      options *opts) override;
+
+        static std::vector<client *> clients()
+        {
+            std::vector<client *> ret;
+            for (auto &pair : allsubs)
+                ret.push_back(&pair.second);
+            return ret;
+        }
     };
 }
 
