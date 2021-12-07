@@ -802,6 +802,11 @@ static inline void crow_onestep_incoming_stage()
     system_unlock();
 }
 
+void crow_onestep_keepalive_stage() 
+{
+    crow::keepalive_timer_manager.exec(millis());
+}
+
 void crow::onestep()
 {
     crow::gateway *gate;
@@ -811,6 +816,7 @@ void crow::onestep()
     }
 
     crow_onestep_send_stage();
+    crow_onestep_keepalive_stage();
     crow_onestep_outers_stage();
     crow_onestep_incoming_stage();
 }
@@ -866,37 +872,39 @@ int64_t crow::get_minimal_timeout()
 {
     // TODO : Ошибки в учёте переходов через uint16_t
 
-    int64_t result;
-    int64_t i_finish = -1;
-    int64_t o_finish = -1;
+    //int64_t result;
+    int64_t mininterval = std::numeric_limits<int64_t>::max();
     int64_t curtime = millis();
+
+    auto update_candidate = [&](int64_t candidate) 
+    {
+        if (mininterval < candidate) 
+            mininterval = candidate;
+    };
+
+    if (!keepalive_timer_manager.empty()) 
+    {
+        update_candidate(keepalive_timer_manager.minimal_interval(curtime));   
+    }
 
     if (!dlist_empty(&crow_incoming))
     {
         crow::packet *i = dlist_first_entry(&crow_incoming, crow::packet, lnk);
-        i_finish = i->last_request_time + i->ackquant();
+        update_candidate(i->last_request_time + i->ackquant() - curtime);
     }
     
     if (!dlist_empty(&crow_outters))
     {
         crow::packet *o = dlist_first_entry(&crow_outters, crow::packet, lnk);
-        o_finish = o->last_request_time + o->ackquant();
+        update_candidate(o->last_request_time + o->ackquant() - curtime);
     }
     
-    if (i_finish > 0 && o_finish > 0)
-        result = (i_finish < o_finish ? i_finish : o_finish) - curtime;
-
-    else if (o_finish > 0)
-        result = o_finish - curtime;
-
-    else if (i_finish > 0)
-        result = i_finish - curtime;
-
-    else
+    if (mininterval == std::numeric_limits<int64_t>::max())
         return -1;
 
-    if (result < 0)
+    else if (mininterval < 0) 
         return 0;
 
-    return result;
+    else
+        return mininterval;
 }

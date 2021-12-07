@@ -177,3 +177,9 @@ crow::node::~node()
 
     system_unlock();
 }
+
+void crow::node_keepalive_timer::execute()  
+{
+    node& n = *mcast_out(this, node, keepalive_timer);
+    n.keepalive_handle();
+}

@@ -1,6 +1,7 @@
 #ifndef CROW_NODE_H
 #define CROW_NODE_H
 
+#include <crow/keepalive.h>
 #include <crow/packet.h>
 #include <crow/packet_ptr.h>
 #include <crow/proto/protocol.h>
@@ -9,6 +10,8 @@
 #include <igris/binreader.h>
 #include <igris/datastruct/dlist.h>
 #include <igris/sync/syslock.h>
+
+#include <stdint.h>
 
 #define CROW_NODEPACK_COMMON 0
 #define CROW_NODEPACK_ERROR 1
@@ -64,14 +67,23 @@ namespace crow
                              pack->datasize() - sizeof(node_subheader));
     }
 
+    class node_keepalive_timer : public igris::managed_timer_base<
+                                     igris::timer_spec<decltype(millis())>>
+    {
+        void execute() override;
+    };
+
     class node
     {
-      public:
+    public:
         struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
         struct dlist_head waitlnk =
             DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
         nodeid_t id = 0;
 
+        node_keepalive_timer keepalive_timer;
+
+    public:
         int waitevent();
         void notify_one(int future);
         void notify_all(int future);
@@ -127,7 +139,15 @@ namespace crow
 
         virtual ~node();
 
-      private:
+        virtual void keepalive_handle() {}
+
+        void install_keepalive(int64_t interval)
+        {
+            crow::keepalive_timer_manager.plan(keepalive_timer, millis(),
+                                               interval);
+        }
+
+    private:
         virtual void incoming_packet(crow::packet *pack) = 0;
 
         virtual void undelivered_packet(crow::packet *pack)
@@ -141,10 +161,10 @@ namespace crow
 
     class node_protocol_cls : public crow::protocol
     {
-      private:
+    private:
         void send_node_error(crow::packet *pack, int errcode);
 
-      public:
+    public:
         void incoming(crow::packet *pack);
         void undelivered(crow::packet *pack);
 
@@ -169,7 +189,7 @@ namespace crow
 
     class node_packet_ptr : public packet_ptr
     {
-      public:
+    public:
         node_packet_ptr(crow::packet *pack_) : packet_ptr(pack_) {}
         node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
         node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}

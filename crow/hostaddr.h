@@ -17,19 +17,19 @@ namespace crow
 
     public:
         hostaddr() = default;
+        hostaddr(const hostaddr &addr) = default;
+        hostaddr(hostaddr &&addr) = default;
+        hostaddr &operator=(const hostaddr &addr) = default;
+        hostaddr &operator=(hostaddr &&addr) = default;
 
         const uint8_t *data() const { return _addr.data(); }
         size_t size() const { return _addr.size(); }
 
-        hostaddr(const std::string &str);
         hostaddr(const std::vector<uint8_t> &addr) : _addr(addr) {}
-
-        hostaddr(const hostaddr_view &addr);
-
-        hostaddr(const hostaddr &addr) = default;
-        hostaddr(hostaddr &&addr) : _addr(std::move(addr._addr)) {}
-
         hostaddr(std::vector<uint8_t> &&addr) : _addr(std::move(addr)) {}
+
+        hostaddr(const std::string &str);
+        hostaddr(const hostaddr_view &addr);
 
         hostaddr(uint8_t *addr, size_t len) : _addr(addr, addr + len) {}
 
@@ -38,14 +38,6 @@ namespace crow
             _addr = std::move(addr);
             return *this;
         }
-
-        hostaddr &operator=(hostaddr &&addr)
-        {
-            _addr = std::move(addr._addr);
-            return *this;
-        }
-
-        hostaddr &operator=(const hostaddr &addr) = default;
 
         hostaddr &operator=(const std::vector<uint8_t> &addr)
         {

@@ -39,6 +39,8 @@ namespace crow
             incoming_handler = incoming;
         }
 
+        void keepalive_handle() override { subscribe(); }
+
     private:
         void incoming_packet(crow::packet *) override;
     };

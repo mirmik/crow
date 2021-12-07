@@ -6,7 +6,8 @@
 
 namespace crow
 {
-    igris::timer_manager<igris::timer_spec<decltype(millis())>> timemanager;
+    extern igris::timer_manager<igris::timer_spec<decltype(millis())>>
+        keepalive_timer_manager;
 }
 
 #endif

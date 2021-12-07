@@ -19,7 +19,6 @@
 #include <nos/fprint.h>
 
 #include <getopt.h>
-#include <pthread.h>
 #include <sys/ioctl.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -71,8 +70,6 @@ std::string theme;
 std::string pipelinecmd;
 std::string reply_theme = ":unchanged:";
 
-std::thread console_thread;
-
 int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
@@ -109,7 +106,7 @@ void raw_node_incom_handle(crow::node_packet_ptr incom_data)
 
 void raw_node_undel_handle(crow::node_packet_ptr incom_data)
 {
-	(void) incom_data;	
+	(void) incom_data;
 }
 
 auto raw_node = crow::node_delegate(raw_node_incom_handle, raw_node_undel_handle);
@@ -198,7 +195,7 @@ void output_do(igris::buffer data, crow::packet* pack)
 	int ret;
 	(void) pack;
 
-	if (TIMESTAMP_MODE) 
+	if (TIMESTAMP_MODE)
 	{
 		char buf[16];
 		int32_t time = crow::millis();
@@ -722,19 +719,19 @@ int main(int argc, char *argv[])
 		crow::serial_gstuff * gate = nullptr;
 
 		if ((gate = crow::create_serial_gstuff(
-				tokens[0].c_str(), 115200, 42, gdebug)) == NULL)
+		                tokens[0].c_str(), 115200, 42, gdebug)) == NULL)
 		{
 			perror("serialgate open");
 			exit(-1);
 		}
 
-		if (gate) 
+		if (gate)
 		{
 			gate->setup_serial_port (
-				std::stoi(tokens[1]), 
-				tokens[2][0],
-				std::stoi(tokens[3]),
-				std::stoi(tokens[4])
+			    std::stoi(tokens[1]),
+			    tokens[2][0],
+			    std::stoi(tokens[3]),
+			    std::stoi(tokens[4])
 			);
 		}
 	}
@@ -846,50 +843,34 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 
-	// Создание консольного ввода, если необходимо.
-	if (!noconsole)
-	{
-		console_thread = std::thread(console_listener);
-	}
-
 	if (subscribe_mode)
 	{
-		std::thread([]()
-		{
-			while (1)
-			{
-				subscriber_node.subscribe(
-				    address,
-				    CROWKER_SERVICE_BROCKER_NODE_NO,
-				    theme.c_str(),
-				    qos, ackquant,
-				    qos, ackquant
-				);
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-				if (cancel_token)
-					return;
-			}
-		}).detach();
+		subscriber_node.subscribe(
+		    address,
+		    CROWKER_SERVICE_BROCKER_NODE_NO,
+		    theme.c_str(),
+		    qos, ackquant,
+		    qos, ackquant
+		);
+		subscriber_node.install_keepalive(2000);
 	}
 
 	if (service_mode)
 	{
-		std::thread([]()
-		{
-			while (1)
-			{
-				service_node.subscribe(
-				    address,
-				    CROWKER_SERVICE_BROCKER_NODE_NO,
-				    theme.c_str(),
-				    qos, ackquant,
-				    qos, ackquant
-				);
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-				if (cancel_token)
-					return;
-			}
-		}).detach();
+		service_node.subscribe(
+		    address,
+		    CROWKER_SERVICE_BROCKER_NODE_NO,
+		    theme.c_str(),
+		    qos, ackquant,
+		    qos, ackquant
+		);
+		service_node.install_keepalive(2000);
+	}
+
+	// Создание консольного ввода, если необходимо.
+	if (!noconsole)
+	{
+		console_listener();
 	}
 
 	crow::join_spin();
