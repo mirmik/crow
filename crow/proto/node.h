@@ -5,7 +5,6 @@
 #include <crow/packet.h>
 #include <crow/packet_ptr.h>
 #include <crow/proto/protocol.h>
-#include <crow/select.h>
 #include <crow/tower.h>
 
 #include <igris/binreader.h>

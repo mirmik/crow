@@ -4,7 +4,6 @@
 #include <chrono>
 #include <thread>
 
-#include <crow/select.h>
 #include <crow/asyncio.h>
 
 #include <igris/osutil/fd.h>
