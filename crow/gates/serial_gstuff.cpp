@@ -92,6 +92,7 @@ void crow::serial_gstuff::read_handler(int)
                     sizeof(crow::compacted_packet) -
                     sizeof(crow::header_v1));
             new (rpack) crow::compacted_packet;
+            rpack->destructor = +[](crow::packet*pack){free(pack);};
             gstuff_autorecv_setbuf(&recver, (char *)&rpack->header(),
                                    GSTUFF_MAXPACK_SIZE);
         }
