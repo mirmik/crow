@@ -17,6 +17,10 @@
 
 #include <nos/print.h>
 
+#ifdef CROW_USE_ASYNCIO
+#include <crow/asyncio.h>
+#endif
+
 bool crow::diagnostic_noack = false;
 uint16_t crow::debug_data_size = 60;
 unsigned int crow::total_travelled = 0;
@@ -141,7 +145,13 @@ crow::packet_ptr crow::travel(crow::packet *pack)
     system_unlock();
 
     if (unsleep_handler)
+    {
         unsleep_handler();
+    }
+
+#ifdef CROW_USE_ASYNCIO
+    crow::asyncio.unsleep();
+#endif
 
     return crow::packet_ptr(pack);
 }
@@ -441,7 +451,14 @@ crow::packet_ptr crow_transport(crow::packet *pack)
 
     // Делаем unsleep, чтобы перерасчитать таймауты.
     if (crow::unsleep_handler && pack->quality() != 0)
+    {
         crow::unsleep_handler();
+
+#ifdef CROW_USE_ASYNCIO
+        crow::asyncio.unsleep();
+#endif
+    }
+
 
     return ptr;
 }
@@ -808,11 +825,13 @@ void crow_onestep_keepalive_stage()
 
 void crow::onestep()
 {
+    #ifndef CROW_USE_ASYNCIO
     crow::gateway *gate;
     dlist_for_each_entry(gate, &crow::gateway_list, lnk)
     {
         gate->nblock_onestep();
     }
+    #endif
 
     crow_onestep_send_stage();
     crow_onestep_keepalive_stage();

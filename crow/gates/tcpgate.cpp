@@ -1,8 +1,8 @@
 #include <crow/gates/tcpgate.h>
-
+#include <nos/inet/tcp_socket.h>
 
 std::shared_ptr<crow::tcpgate> crow::create_tcpgate_safe(uint8_t id,
-        uint16_t port)
+                uint16_t port)
 {
 	int sts;
 
@@ -26,6 +26,10 @@ int crow::tcpgate::open(uint16_t port)
 	if (sts)
 		return sts;
 
+	sts = server.listen();
+	if (sts)
+		return sts;
+
 	server.nonblock(true);
 
 	return sts;
@@ -42,12 +46,16 @@ void crow::tcpgate::close()
 }
 
 
-void crow::tcpgate::send(crow::packet *) 
+void crow::tcpgate::send(crow::packet * pack)
 {
-	nos::println("tcp send");
-}
+    uint32_t *addr = (uint32_t *)(pack->stageptr() + 1);
+    uint16_t *port = (uint16_t *)(pack->stageptr() + 5);
 
-void crow::tcpgate::nblock_onestep() 
-{
-	nos::println("tcp onestep");
+    nos::inet::tcp_socket sock;
+    sock.init();
+    sock.connect(*addr, *port);
+
+    nos::println("connect success");
+
+
 }

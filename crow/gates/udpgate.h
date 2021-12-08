@@ -3,6 +3,7 @@
 #ifndef CROW_GATES_UDPGATE_H
 #define CROW_GATES_UDPGATE_H
 
+#include <crow/asyncio.h>
 #include <crow/defs.h>
 #include <crow/gateway.h>
 #include <igris/container/unbounded_array.h>
@@ -16,12 +17,12 @@ namespace crow
         int sock = 0;
         igris::unbounded_array<uint8_t> receive_buffer;
 
-      public:
+    public:
         udpgate() {}
         udpgate(uint16_t port) { open(port); }
 
         void send(crow::packet *) override;
-        void nblock_onestep() override;
+        void read_handler(int fd);
 
         bool opened() { return sock > 0; }
 
@@ -33,11 +34,6 @@ namespace crow
         {
             return gateway::bind(gate_no);
         }
-
-#if CROW_ENABLE_WITHOUT_FDS
-#else
-        int get_fd() override { return sock; }
-#endif
 
         ~udpgate() override { close(); }
     };

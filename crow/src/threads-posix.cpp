@@ -5,6 +5,7 @@
 #include <thread>
 
 #include <crow/select.h>
+#include <crow/asyncio.h>
 
 #include <igris/osutil/fd.h>
 #include <igris/osutil/realtime.h>
@@ -17,17 +18,14 @@ static std::thread _thread;
 bool _spin_runned = false;
 bool _spin_runned_unbounded = false;
 
-int crow::unselect_pipe[2];
-
 struct sigaction new_action, sigkill_old_action, sigint_old_action;
 
 void signal_sigint_handler(int sig)
 {
     if (_spin_runned)
     {
+        crow::asyncio.cancel();
         cancel_token = true;
-        int ret = write(crow::unselect_pipe[1], "A", 1);
-        (void) ret;
         if (_spin_runned_unbounded)
             _thread.join();
     }
@@ -37,54 +35,15 @@ void signal_sigint_handler(int sig)
         exit(0);
 }
 
-/*void signal_sigkill_handler(int sig)
-{
-    if (_spin_runned)
-    {
-        cancel_token = true;
-        write(crow::unselect_pipe[1], "A", 1);
-        if (_spin_runned_unbounded)
-            _thread.join();
-    }
-    if (sigkill_old_action.sa_handler)
-        sigkill_old_action.sa_handler(sig);
-    else
-        exit(0);
-}*/
-
-void crow::unselect()
-{
-    char c = 42;
-    int ret = ::write(unselect_pipe[1], &c, 1);
-    (void) ret;
-}
-
-void crow::unselect_init()
-{
-    crow::add_unselect_to_fds = true;
-    int ret = ::pipe(unselect_pipe);
-    (void) ret;
-    igris::osutil::nonblock(unselect_pipe[0], true);
-    crow::unsleep_handler = unselect;
-}
-
 void crow::spin_with_select()
 {
     _spin_runned = true;
-
-    crow::unselect_init();
-    crow::select_collect_fds();
-
-    //    sigaction(SIGKILL, NULL, &sigkill_old_action);
-    //    signal(SIGKILL, signal_sigkill_handler);
 
     sigaction(SIGINT, NULL, &sigint_old_action);
     signal(SIGINT, signal_sigint_handler);
 
     while (1)
     {
-        char unselect_read_buffer[512];
-
         if (cancel_token)
         {
             break;
@@ -99,9 +58,8 @@ void crow::spin_with_select()
         }
         while (crow::has_untravelled_now());
 
-        crow::select();
-        int ret = read(unselect_pipe[0], unselect_read_buffer, 512);
-        (void) ret;
+        int64_t timeout = crow::get_minimal_timeout();
+        asyncio.step(timeout);
     };
 
     _spin_runned = false;
@@ -194,7 +152,7 @@ int crow::stop_spin(bool wait)
     }
 
     cancel_token = true;
-    crow::unselect();
+    asyncio.cancel();
 
     if (wait)
         _thread.join();
@@ -212,7 +170,7 @@ void crow::join_spin()
     _thread.join();
 }
 
-void crow::set_spin_cancel_token() 
+void crow::set_spin_cancel_token()
 {
     cancel_token = true;
 }

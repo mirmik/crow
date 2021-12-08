@@ -15,7 +15,7 @@
 
 #include <memory>
 
-void crow::udpgate::nblock_onestep()
+void crow::udpgate::read_handler(int fd) 
 {
     crow::header_v1 header;
 
@@ -64,7 +64,7 @@ void crow::udpgate::nblock_onestep()
     crow::packet *pack = block;
     block = NULL;
 
-    crow::nocontrol_travel(pack, true);
+    crow::nocontrol_travel(pack, true);    
 }
 
 int crow::udpgate::open(uint16_t port)
@@ -105,6 +105,9 @@ int crow::udpgate::open(uint16_t port)
     int flags = fcntl(sock, F_GETFL);
     flags |= O_NONBLOCK;
     fcntl(sock, F_SETFL, flags);
+
+    crow::asyncio.add_iotask(sock, SelectType::READ, 
+        igris::make_delegate(&udpgate::read_handler, this));
 
     return ret;
 }

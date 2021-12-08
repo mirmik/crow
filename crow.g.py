@@ -7,12 +7,13 @@ opts, args = licant.cli.parse()
 DEFINES = ["OLD_HEADER=1"] if opts.oldheader else [] 
 
 licant.module("crow.select", "impl",
-	sources=["crow/src/select.cpp"],
-	defines = ["CROW_WITHOUT_SELECT_FDS=0"], default=True
+	sources=["crow/src/asyncio.cpp"],
+	defines = ["CROW_USE_ASYNCIO=1"], 
+	default=True
 )
 
 licant.module("crow.select", "stub",
-	defines = ["CROW_WITHOUT_SELECT_FDS=1"]
+	defines = []
 )
 
 licant.module("crow.diagnostic", "nos",

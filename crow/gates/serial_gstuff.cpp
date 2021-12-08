@@ -3,6 +3,7 @@
 #include <crow/gates/serial_gstuff.h>
 #include <crow/tower.h>
 #include <crow/warn.h>
+#include <crow/asyncio.h>
 
 #include <nos/io/serial_port.h>
 #include <igris/util/bug.h>
@@ -44,6 +45,9 @@ struct crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
     g->rpack = NULL;
     g->bind(id);
 
+    crow::asyncio.add_iotask(g->fd, SelectType::READ, 
+        igris::make_delegate(&serial_gstuff::read_handler, g));
+
     return g;
 }
 
@@ -64,7 +68,7 @@ void crow::serial_gstuff::send(crow::packet *pack)
     crow::return_to_tower(pack, CROW_SENDED);
 }
 
-void crow::serial_gstuff::nblock_onestep()
+void crow::serial_gstuff::read_handler(int)
 {
 #define GSTUFF_MAXPACK_SIZE 512
     char buf[1024];
