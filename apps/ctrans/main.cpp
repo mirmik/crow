@@ -1,5 +1,6 @@
 #include <crow/gates/serial_gstuff.h>
 #include <crow/gates/udpgate.h>
+#include <crow/gates/tcpgate.h>
 #include <crow/tower.h>
 #include <crow/proto/channel.h>
 #include <crow/proto/acceptor.h>
@@ -79,6 +80,7 @@ int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
 std::shared_ptr<crow::udpgate> udpgate;
+std::shared_ptr<crow::tcpgate> tcpgate;
 
 void do_incom_data(igris::buffer);
 
@@ -328,59 +330,59 @@ void send_do(const std::string message)
 			break;
 
 		case protoopt_e::PROTOOPT_PUBLISH_NODE:
-		{
-			publish_node.publish(
-			    address,
-			    CROWKER_SERVICE_BROCKER_NODE_NO,
-			    theme.c_str(),
-			    message,
-			    qos, ackquant);
-		}
-		break;
+			{
+				publish_node.publish(
+				    address,
+				    CROWKER_SERVICE_BROCKER_NODE_NO,
+				    theme.c_str(),
+				    message,
+				    qos, ackquant);
+			}
+			break;
 
 		case protoopt_e::PROTOOPT_CHANNEL:
-		{
-			int ret = channel.send(message.data(), message.size());
-
-			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
 			{
-				nos::println("Channel is not connected");
+				int ret = channel.send(message.data(), message.size());
+
+				if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+				{
+					nos::println("Channel is not connected");
+				}
 			}
-		}
-		break;
+			break;
 
 		case protoopt_e::PROTOOPT_NODE:
-		{
-			crow::node_send(1, nodeno,
-			                address,
-			{message.data(), message.size()},
-			qos, ackquant);
-		}
-		break;
+			{
+				crow::node_send(1, nodeno,
+				                address,
+				{message.data(), message.size()},
+				qos, ackquant);
+			}
+			break;
 
 		case protoopt_e::PROTOOPT_REQUEST:
-		{
-			requestor_node.async_request(
-			    address,
-			    CROWKER_SERVICE_BROCKER_NODE_NO,
-			    theme,
-			    reply_theme,
-			{message.data(), message.size()},
-			qos, ackquant, qos, ackquant
-			);
-		}
-		break;
+			{
+				requestor_node.async_request(
+				    address,
+				    CROWKER_SERVICE_BROCKER_NODE_NO,
+				    theme,
+				    reply_theme,
+				{message.data(), message.size()},
+				qos, ackquant, qos, ackquant
+				);
+			}
+			break;
 
 		case protoopt_e::PROTOOPT_REVERSE_CHANNEL:
-		{
-			int ret = reverse_channel->send(message.data(), message.size());
-
-			if (ret == CROW_CHANNEL_ERR_NOCONNECT)
 			{
-				nos::println("Channel is not connected");
+				int ret = reverse_channel->send(message.data(), message.size());
+
+				if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+				{
+					nos::println("Channel is not connected");
+				}
 			}
-		}
-		break;
+			break;
 	}
 }
 
@@ -453,6 +455,7 @@ void console_listener()
 }
 
 uint16_t udpport = 0;
+uint16_t tcpport = 0;
 char *serial_port = NULL;
 
 void print_help()
@@ -465,6 +468,7 @@ void print_help()
 	    "\n"
 	    "Gate`s option list:\n"
 	    "  -u, --udp             set udp address (gate 12)\n"
+	    "  -c, --tcp             set tcp address (gate 13)\n"
 	    "  -S, --serial          make gate on serial device\n"
 	    "\n"
 	    "Package settings option list:\n"
@@ -514,7 +518,7 @@ void parse_options(int argc, char **argv)
 		{"help", no_argument, NULL, 'h'},
 
 		{"udp", required_argument, NULL, 'u'}, // udp порт для 12-ого гейта.
-		{"cdev", required_argument, NULL, 'c'}, // serial...
+		{"tcp", required_argument, NULL, 'c'}, // udp порт для 12-ого гейта.
 		{"serial", required_argument, NULL, 'S'}, // serial...
 
 		{"qos", required_argument, NULL, 'q'}, // qos отправляемых сообщений. 0 по умолчанию
@@ -590,6 +594,10 @@ void parse_options(int argc, char **argv)
 				udpport = (uint16_t)atoi(optarg);
 				break;
 
+			case 'c':
+				tcpport = (uint16_t)atoi(optarg);
+				break;
+
 			case 'S':
 				serial_port = (char *)malloc(strlen(optarg) + 1);
 				strcpy(serial_port, optarg);
@@ -628,14 +636,14 @@ void parse_options(int argc, char **argv)
 				break;
 
 			case 'U':
-			{
-				auto lst = igris::split(optarg, ',');
-				for (auto a : lst)
 				{
-					listened_nodes.push_back(atoi(a.data()));
+					auto lst = igris::split(optarg, ',');
+					for (auto a : lst)
+					{
+						listened_nodes.push_back(atoi(a.data()));
+					}
 				}
-			}
-			break;
+				break;
 
 			case 'g':
 				gdebug = true;
@@ -746,6 +754,16 @@ int main(int argc, char *argv[])
 	{
 		perror("udpgate open");
 		exit(-1);
+	}
+
+	if (tcpport)
+	{
+		tcpgate = crow::create_tcpgate_safe(CROW_TCPGATE_NO, tcpport);
+		if (!tcpgate->opened())
+		{
+			perror("tcpgate open");
+			exit(-1);
+		}
 	}
 
 	if (serial_port != NULL)

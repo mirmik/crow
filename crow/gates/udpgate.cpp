@@ -64,7 +64,7 @@ void crow::udpgate::nblock_onestep()
     crow::packet *pack = block;
     block = NULL;
 
-    crow::nocontrol_travel(pack, fastsend);
+    crow::nocontrol_travel(pack, true);
 }
 
 int crow::udpgate::open(uint16_t port)
@@ -135,12 +135,12 @@ void crow::udpgate::send(crow::packet *pack)
 
     header_v1 header = pack->extract_header_v1();
 
-    char buf[header.flen];
-    memcpy(buf, &header, sizeof(header));
-    memcpy(buf + sizeof(header), pack->addrptr(), pack->addrsize());
-    memcpy(buf + sizeof(header) + pack->addrsize(), pack->dataptr(), pack->datasize());
+    if (receive_buffer.size() < header.flen) receive_buffer.resize(header.flen);
+    memcpy(receive_buffer.data(), &header, sizeof(header));
+    memcpy(receive_buffer.data() + sizeof(header), pack->addrptr(), pack->addrsize());
+    memcpy(receive_buffer.data() + sizeof(header) + pack->addrsize(), pack->dataptr(), pack->datasize());
 
-    sendto(sock, buf, header.flen, 0,
+    sendto(sock, receive_buffer.data(), header.flen, 0,
            (struct sockaddr *)&ipaddr, iplen);
     crow::return_to_tower(pack, CROW_SENDED);
 }

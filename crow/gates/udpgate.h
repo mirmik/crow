@@ -5,6 +5,7 @@
 
 #include <crow/defs.h>
 #include <crow/gateway.h>
+#include <igris/container/unbounded_array.h>
 #include <memory>
 
 namespace crow
@@ -13,7 +14,7 @@ namespace crow
     class udpgate : public gateway
     {
         int sock = 0;
-        bool fastsend = CROW_FASTSEND_DEFAULT;
+        igris::unbounded_array<uint8_t> receive_buffer;
 
       public:
         udpgate() {}
@@ -27,7 +28,6 @@ namespace crow
         int open(uint16_t port = 0);
         void close();
         void finish() override { close(); }
-        void set_fastsend_policy(bool en) { fastsend = en; }
 
         int bind(int gate_no = CROW_UDPGATE_NO)
         {

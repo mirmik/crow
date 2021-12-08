@@ -52,7 +52,7 @@ namespace crow
 {
     class gateway
     {
-    public:
+      public:
         struct dlist_head lnk; ///< встроенное поле списка.
         uint8_t id;            ///< номер врат.
 
@@ -63,6 +63,8 @@ namespace crow
         int bind(int gateno);
 #if !CROW_ENABLE_WITHOUT_FDS
         virtual int get_fd() { return -1; }
+        virtual std::vector<int> get_fds() { return {get_fd()}; }
+        virtual bool need_update_fds() { return false; }
 #endif
 
         gateway() { dlist_init(&lnk); }

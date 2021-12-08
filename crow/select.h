@@ -13,6 +13,7 @@ namespace crow
     void select();
     void unselect();
     void unselect_init();
+    bool select_need_to_update_fds();
 }
 
 #endif
