@@ -26,7 +26,7 @@ TEST_CASE("self_driven_gstuff.output")
 		gate.init(buf, write, NULL, 100);
 		gate.bind(13);
 
-		auto * pack = crow_create_packet(nullptr, 1, 10);
+		auto * pack = crow::create_packet(nullptr, 1, 10);
 
 		pack->set_type(0 & 0x1F);
 		pack->set_quality(0);

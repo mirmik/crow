@@ -58,6 +58,7 @@ namespace crow
 
         virtual void send(crow::packet *) = 0;
         virtual void finish() = 0;
+        virtual void nblock_onestep() {}
 
         int bind(int gateno);
 
