@@ -5,39 +5,38 @@
 #ifndef _Included_crow_Crow
 #define _Included_crow_Crow
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-/*
- * Class:     crow_Crow
- * Method:    diagnostic
- * Signature: (ZZ)V
- */
-JNIEXPORT void JNICALL Java_crow_Crow_diagnostic
-  (JNIEnv *, jclass, jboolean, jboolean);
+    /*
+     * Class:     crow_Crow
+     * Method:    diagnostic
+     * Signature: (Z)V
+     */
+    JNIEXPORT void JNICALL Java_crow_Crow_diagnostic(JNIEnv *, jclass,
+                                                     jboolean);
 
-/*
- * Class:     crow_Crow
- * Method:    start_spin
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_crow_Crow_start_1spin
-  (JNIEnv *, jclass);
+    /*
+     * Class:     crow_Crow
+     * Method:    start_spin
+     * Signature: ()V
+     */
+    JNIEXPORT void JNICALL Java_crow_Crow_start_1spin(JNIEnv *, jclass);
 
-/*
- * Class:     crow_Crow
- * Method:    join_spin
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_crow_Crow_join_1spin
-  (JNIEnv *, jclass);
+    /*
+     * Class:     crow_Crow
+     * Method:    join_spin
+     * Signature: ()V
+     */
+    JNIEXPORT void JNICALL Java_crow_Crow_join_1spin(JNIEnv *, jclass);
 
-/*
- * Class:     crow_Crow
- * Method:    create_udpgate
- * Signature: (II)V
- */
-JNIEXPORT void JNICALL Java_crow_Crow_create_1udpgate
-  (JNIEnv *, jclass, jint, jint);
+    /*
+     * Class:     crow_Crow
+     * Method:    create_udpgate
+     * Signature: (II)V
+     */
+    JNIEXPORT void JNICALL Java_crow_Crow_create_1udpgate(JNIEnv *, jclass,
+                                                          jint, jint);
 
 #ifdef __cplusplus
 }
