@@ -25,6 +25,12 @@ jobs:
 
     - uses: actions/checkout@v2
 
+    - name: Setup dependencies
+      run: |
+        sudo apt-get install -y g++-11 clang-12
+        sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/${{matrix.compiler.CXX}} 100
+        sudo update-alternatives --install /usr/bin/cc  cc  /usr/bin/${{matrix.compiler.CC}} 100
+
     - name: Install igris library
       run: |
         git clone https://github.com/mirmik/igris
