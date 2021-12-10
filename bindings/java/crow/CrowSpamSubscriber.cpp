@@ -15,14 +15,14 @@ JavaVM * g_vm;
 
 void spam_subscriber_helper(
     void * privarg,
-    std::string_view data)
+    igris::buffer data)
 {
 	JNIEnv * env;
 	int getEnvStat = g_vm->GetEnv((void **)&env, JNI_VERSION_1_6);
 	if (getEnvStat == JNI_EDETACHED)
 	{
 		std::cout << "GetEnv: not attached" << std::endl;
-		if (g_vm->AttachCurrentThread(&env, NULL) != 0)
+		if (g_vm->AttachCurrentThread((void**)&env, NULL) != 0)
 		{
 			std::cout << "Failed to attach" << std::endl;
 		}

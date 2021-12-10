@@ -2,18 +2,18 @@
 #define CROW_NODEADDR_H
 
 #include <crow/address.h>
-#include <crow/types.h>
+#include <crow/proto/node.h>
 #include <vector>
 
 namespace crow
 {
     class nodeaddr
     {
-    public:
+      public:
         std::vector<uint8_t> naddr;
         nodeid_t nid;
 
-    public:
+      public:
         crow::hostaddr_view hostaddr() const
         {
             return {naddr.data(), naddr.size()};

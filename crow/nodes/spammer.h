@@ -85,13 +85,12 @@ namespace crow
 
         void incoming_packet(crow::packet *pack) override
         {
+            crow::node_packet_ptr npack(pack, this);
             auto time = std::chrono::system_clock::now();
 
             std::vector<uint8_t> addr(pack->addrptr(),
                                       pack->addrptr() + pack->addrsize());
-            targets[nodeaddr{addr, node::sid(pack)}] = record{time};
-
-            crow::release(pack);
+            targets[nodeaddr{addr, (nodeid_t)npack.sid()}] = record{time};
         }
 
         int count_of_subscribers() { return targets.size(); }
@@ -122,8 +121,8 @@ namespace crow
 
         void incoming_packet(crow::packet *pack) override
         {
-            dlg(node::message(pack));
-            crow::release(pack);
+            crow::node_packet_ptr npack(pack, this);
+            dlg(npack.message());
         }
     };
 }

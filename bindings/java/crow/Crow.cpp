@@ -5,9 +5,9 @@
 #include <crow/gates/udpgate.h>
 
 JNIEXPORT void JNICALL Java_crow_Crow_diagnostic
-(JNIEnv *, jclass, jboolean trans, jboolean vital)
+(JNIEnv *, jclass, jboolean trans)
 {
-	crow::diagnostic_setup(trans, vital);
+	crow::diagnostic_setup(trans);
 }
 
 JNIEXPORT void JNICALL Java_crow_Crow_start_1spin

@@ -14,6 +14,6 @@ set(SOURCE_FILES
 	CrowSpamSubscriber.cpp
 )
 
-link_libraries(crowjni crow)
-
 add_library(crowjni SHARED ${SOURCE_FILES})
+target_link_libraries(crowjni crow)
+
