@@ -12,6 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(SOURCE_FILES 
 	crow/Crow.cpp
 	crow/CrowSpamSubscriber.cpp
+	crow/CrowNode.cpp
+	crow/CrowPublisher.cpp
 )
 add_library(crowjni SHARED ${SOURCE_FILES})
 
