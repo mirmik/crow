@@ -7,6 +7,10 @@ set(CMAKE_CC_STANDARD 11)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCROW_USE_ASYNCIO=1")
 
+if (${STATIC_LIBS})
+	set(CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++")
+endif()
+
 set (PLATFORM_SOURCES )
 
 if (WIN32 OR WIN64)
@@ -41,11 +45,19 @@ file(GLOB SOURCES_TEST
 set(CROW_SOURCES ${SOURCES} PARENT_SCOPE)
 
 add_library(crow SHARED ${SOURCES} ${PLATFORM_SOURCES})
-target_include_directories(crow PRIVATE .)
+target_include_directories(crow PRIVATE . ${ADDITIONAL_INCLUDES_IGRIS} ${ADDITIONAL_INCLUDES_NOS})
 
-add_executable(crow_test ${SOURCES_TEST})
-target_include_directories(crow_test PRIVATE . tests)
-target_link_libraries(crow_test igris nos pthread)
+target_link_directories(crow PUBLIC 
+	${IGRIS_LIBRARY_PATH}/build-android
+	${NOS_LIBRARY_PATH}/build-android
+)
+target_link_libraries(crow igris nos)
+
+if (NOT DEFINED WITHOUT_TESTS)
+	add_executable(crow_test ${SOURCES_TEST})
+	target_include_directories(crow_test PRIVATE . tests)
+	target_link_libraries(crow_test igris nos pthread)
+endif()
 
 if (UNIX AND NOT APPLE)
 	install(TARGETS ${PROJECT_NAME}

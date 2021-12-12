@@ -1,16 +1,21 @@
 package crow;
 
 public class Crow {
-	static {
+	static void loadLibrary(String name) 
+	{
 		try {
-		//	System.loadLibrary("igris");
-		//	System.loadLibrary("nos");
-		//    System.loadLibrary("crow");
-			System.load("/home/mirmik/project/crow/bindings/java/crow/libcrowjni.so");
+			System.loadLibrary(name);
 		} catch (UnsatisfiedLinkError e) {
-			System.err.println("Native code library failed to load.\n" + e);
+			System.err.println("Native code library failed to load.\n" + name + "\n" + e);
 			System.exit(1);
 		}
+	}
+
+	static {
+		System.loadLibrary("igris");
+		System.loadLibrary("nos");
+		System.loadLibrary("crow");
+		System.loadLibrary("crowjni");
 	}
 
 	public native static void diagnostic(boolean trans);
