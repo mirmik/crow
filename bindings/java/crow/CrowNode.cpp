@@ -1,5 +1,5 @@
 #include <jni.h>
-#include "CrowNode.h"
+#include "crow_CrowNode.h"
 #include <crow/tower.h>
 #include <crow/proto/node.h>
 
@@ -22,4 +22,11 @@ extern "C" JNIEXPORT void JNICALL Java_crow_CrowNode_bind
 {
 	auto sub = getObject(env, jobj);
 	sub->bind(id);
+}
+
+JNIEXPORT void JNICALL Java_crow_CrowNode_bind__
+(JNIEnv * env, jobject jobj)
+{
+	auto sub = getObject(env, jobj);
+	sub->bind();
 }

@@ -13,7 +13,14 @@ extern "C"
      * Method:    bind
      * Signature: (I)V
      */
-    JNIEXPORT void JNICALL Java_crow_CrowNode_bind(JNIEnv *, jobject, jint);
+    JNIEXPORT void JNICALL Java_crow_CrowNode_bind__I(JNIEnv *, jobject, jint);
+
+    /*
+     * Class:     crow_CrowNode
+     * Method:    bind
+     * Signature: ()V
+     */
+    JNIEXPORT void JNICALL Java_crow_CrowNode_bind__(JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

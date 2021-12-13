@@ -1,7 +1,8 @@
 #include <jni.h>
 #include <iostream>
-#include "CrowSpamSubscriber.h"
+#include "crow_CrowSpamSubscriber.h"
 
+#include "Crow_library.h"
 #include <crow/tower.h>
 #include <crow/nodes/spammer.h>
 
@@ -10,8 +11,6 @@ struct envobj
 	JNIEnv * env;
 	jobject obj;
 };
-
-JavaVM * g_vm;
 
 void spam_subscriber_helper(
     void * privarg,
@@ -97,9 +96,6 @@ static crow::spam_subscriber *getObject(JNIEnv *env, jobject self)
 extern "C" JNIEXPORT jlong JNICALL Java_crow_CrowSpamSubscriber_nativeNew
 (JNIEnv * env, jobject obj)
 {
-	env->GetJavaVM(&g_vm);
-	//auto eo = new envobj { env, obj };
-
 	auto ptr = new crow::spam_subscriber(
 	    igris::make_delegate(spam_subscriber_helper, env->NewGlobalRef(obj)));
 

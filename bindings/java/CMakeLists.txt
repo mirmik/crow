@@ -9,12 +9,11 @@ find_package(JNI REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
+file(GLOB SRC_FILES crow/*.cpp)
 set(SOURCE_FILES 
-	crow/Crow.cpp
-	crow/CrowSpamSubscriber.cpp
-	crow/CrowNode.cpp
-	crow/CrowPublisher.cpp
+	${SRC_FILES}
 )
+
 add_library(crowjni SHARED ${SOURCE_FILES})
 
 target_include_directories(

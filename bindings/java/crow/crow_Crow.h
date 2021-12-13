@@ -10,6 +10,13 @@ extern "C"
 #endif
     /*
      * Class:     crow_Crow
+     * Method:    init_crow_library
+     * Signature: ()V
+     */
+    JNIEXPORT void JNICALL Java_crow_Crow_init_1crow_1library(JNIEnv *, jclass);
+
+    /*
+     * Class:     crow_Crow
      * Method:    diagnostic
      * Signature: (Z)V
      */
