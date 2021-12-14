@@ -39,6 +39,21 @@ extern "C"
 
     /*
      * Class:     crow_Crow
+     * Method:    stop_spin
+     * Signature: (Z)V
+     */
+    JNIEXPORT void JNICALL Java_crow_Crow_stop_1spin(JNIEnv *, jclass,
+                                                     jboolean);
+
+    /*
+     * Class:     crow_Crow
+     * Method:    warn
+     * Signature: (Ljava/lang/String;)V
+     */
+    JNIEXPORT void JNICALL Java_crow_Crow_warn(JNIEnv *, jclass, jstring);
+
+    /*
+     * Class:     crow_Crow
      * Method:    create_udpgate
      * Signature: (II)V
      */

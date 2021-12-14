@@ -12,5 +12,5 @@ public class CrowSubscriber extends CrowPublisher {
 	}
 	native private long nativeNew();
 
-	native public void subscribe(String thmname);
+	native public void subscribe();
 }

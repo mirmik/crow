@@ -8,7 +8,7 @@
 JNIEXPORT jlong JNICALL Java_crow_CrowPublisher_nativeNew
 (JNIEnv * env, jobject obj)
 {
-	auto ptr = new crow::publisher();
+	auto ptr = new crow::publisher_node();
 	return (jlong) ptr;
 }
 

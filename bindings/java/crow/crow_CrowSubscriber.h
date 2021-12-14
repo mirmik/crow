@@ -19,10 +19,10 @@ extern "C"
     /*
      * Class:     crow_CrowSubscriber
      * Method:    subscribe
-     * Signature: (Ljava/lang/String;)V
+     * Signature: ()V
      */
-    JNIEXPORT void JNICALL Java_crow_CrowSubscriber_subscribe(JNIEnv *, jobject,
-                                                              jstring);
+    JNIEXPORT void JNICALL Java_crow_CrowSubscriber_subscribe(JNIEnv *,
+                                                              jobject);
 
 #ifdef __cplusplus
 }

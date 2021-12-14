@@ -2,11 +2,13 @@
 #include <crow/nodes/subscriber_node.h>
 #include "Crow_library.h"
 #include <iostream>
+#include "util.h"
 
 void subscriber_callback_helper(
     void * privarg,
     igris::buffer data)
 {
+	std::cout << "subscriber_callback_helper" << std::endl;
 	JNIEnv * env;
 	int getEnvStat = g_vm->GetEnv((void **)&env, JNI_VERSION_1_6);
 	if (getEnvStat == JNI_EDETACHED)
@@ -37,8 +39,8 @@ void subscriber_callback_helper(
 	}
 
 	auto jb = env->NewByteArray(data.size());
-	env->SetByteArrayRegion(jb, 0, 
-		data.size(), (const jbyte *)data.data());
+	env->SetByteArrayRegion(jb, 0,
+	                        data.size(), (const jbyte *)data.data());
 
 	env->CallVoidMethod((jobject)privarg, g_mid, jb);
 
@@ -50,8 +52,15 @@ void subscriber_callback_helper(
 JNIEXPORT jlong JNICALL Java_crow_CrowSubscriber_nativeNew
 (JNIEnv * env, jobject obj)
 {
-	auto ptr = new crow::subscriber(
+	auto ptr = new crow::subscriber_node(
 	    igris::make_delegate(subscriber_callback_helper, env->NewGlobalRef(obj)));
 
 	return (jlong) ptr;
+}
+
+JNIEXPORT void JNICALL Java_crow_CrowSubscriber_subscribe
+(JNIEnv * env, jobject obj)
+{
+	auto * self = getObject<crow::subscriber_node>(env, obj);
+	self->subscribe();
 }
