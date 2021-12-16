@@ -16,7 +16,6 @@ namespace crow
     {
         nos::inet::tcp_server server;
         std::map<nos::inet::netaddr, nos::inet::tcp_socket> sockets;
-        bool need_update_fds = true;
 
     public:
         tcpgate() {}
