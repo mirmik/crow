@@ -64,7 +64,7 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 			goto clean;
 
 		buf[3] = 0;
-		thmsize = atoi32(buf + 1, 10, nullptr);
+		thmsize = strtol(buf + 1, nullptr, 10);
 
 		if (thmsize == 0)
 			goto clean;
@@ -88,7 +88,7 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 				break;
 
 			buf[6] = 0;
-			datasize = atoi32(buf, 10, nullptr);
+			datasize = strtol(buf, nullptr, 10);
 			if (datasize == 0) goto clean;
 
 			ret = client.recv(buf, datasize, MSG_WAITALL);
