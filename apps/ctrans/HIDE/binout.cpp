@@ -87,8 +87,8 @@ void output_binary(igris::buffer data, crow::packet* pack)
 	if (data.size() != binout_size)
 	{
 		nos::println("WARN: wrong_size");
-		PRINT(binout_size);
-		PRINT(data.size());
+
+
 		nos::print_dump(data);
 		crow::diagnostic("binmode", pack);
 		return;

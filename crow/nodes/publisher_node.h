@@ -23,6 +23,12 @@ namespace crow
                        igris::buffer theme);
         publisher_node(crow::hostaddr_view crowker_addr, igris::buffer theme);
 
+        void init(crow::hostaddr_view crowker_addr, igris::buffer theme) 
+        {
+            set_theme(theme);
+            set_address(crowker_addr);
+        }
+
         void publish(igris::buffer data);
         void publish_v(igris::buffer *data, int len);
         void publish(crow::hostaddr_view addr, int crowker_node,

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <string.h>
+#include <limits>
 
 #include <igris/sync/syslock.h>
 #include <igris/time/systime.h>
