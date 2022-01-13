@@ -480,11 +480,11 @@ void print_help()
 	    "      --channel         (channel) connect to channel on nid\n"
 	    "      --node            (node)    send message to specified node\n"
 	    "      --listen-node     (node)    listen that node ids\n"
-	    "      --request      (node)      request crowker service\n"
-	    "      --subscribe      (node)    subscribe to crowker theme\n"
-	    "      --publish        (node)    publish to crowker theme\n"
-	    "      --themes        \n"
-	    "      --beam        \n"
+	    "      --request         (node)      request crowker service\n"
+	    "      --subscribe       (node)    subscribe to crowker theme\n"
+	    "      --publish         (node)    publish to crowker theme\n"
+		"      --beam            (node)    \n"
+	    "      --control         (node)    link to crowker control cli\n"
 	    "\n"
 	    "Info option list:\n"
 	    "      --info\n"
@@ -548,6 +548,7 @@ void parse_options(int argc, char **argv)
 		{"crowcli", required_argument, NULL, 'm'},
 		{"beam", required_argument, NULL, 'b'},
 		{"retransler", no_argument, NULL, 'R'},
+		{"control", no_argument, NULL, 'Q'},
 
 		{"info", no_argument, NULL, 'i'}, // Выводит информацию о имеющихся гейтах и режимах.
 		{"debug", no_argument, NULL, 'd'}, // Включает информацию о событиях башни.
@@ -616,6 +617,12 @@ void parse_options(int argc, char **argv)
 
 			case 'i':
 				info = true;
+				break;
+				
+			case 'Q':
+				crowker_mode = true;
+				protoopt = protoopt_e::PROTOOPT_NODE;
+				nodeno = CROWKER_CONTROL_BROCKER_NODE_NO;
 				break;
 
 			case 'R':
