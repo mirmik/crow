@@ -7,30 +7,25 @@ namespace crow
 {
     class service_node : public crow::abstract_subscriber_node
     {
-        igris::delegate<int, char *, int, char *, int> dlg;
-        char *answer_buffer = nullptr;
-        int answer_buffer_size = 256;
-        bool dynamic_answer_buffer = true;
+        using delegate = igris::delegate<void, char *, int, service_node&>;
+        delegate dlg;
+        crow::packet * curpack;
 
     public:
         service_node() = default;
-
-        service_node(igris::delegate<int, char *, int, char *, int> dlg)
-            : dlg(dlg)
-        {
-        }
-
-        void set_handle(igris::delegate<int, char *, int, char *, int> dlg)
+        service_node(const delegate& dlg) : dlg(dlg) {}
+        
+        void set_handle(const delegate& dlg) 
         {
             this->dlg = dlg;
         }
 
-        void init(igris::delegate<int, char *, int, char *, int> dlg,
-                  int ansbufsize)
+        void init(const delegate& dlg)
         {
             this->dlg = dlg;
-            answer_buffer_size = ansbufsize;
         }
+
+        void reply(const char * data, size_t size) const;
 
     private:
         void incoming_packet(crow::packet *) override;
