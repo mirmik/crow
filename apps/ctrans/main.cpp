@@ -95,14 +95,14 @@ int service_data_handle(char *cmd, int cmdlen, char * ans, int ansmax)
 	return strlen(ans);
 }
 
-void service_data_handle(igris::buffer incom_data)
+void requestor_data_handle(igris::buffer incom_data)
 {
 	do_incom_data(incom_data);
 }
 
-void requestor_data_handle(igris::buffer incom_data)
+void service_data_handle(char* data, int len, crow::service_node&)
 {
-	do_incom_data(incom_data);
+	do_incom_data({data, len});
 }
 
 void raw_node_incom_handle(crow::node_packet_ptr incom_data)

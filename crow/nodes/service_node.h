@@ -25,7 +25,7 @@ namespace crow
             this->dlg = dlg;
         }
 
-        void reply(const char * data, size_t size) const;
+        void reply(const char * data, size_t size);
 
     private:
         void incoming_packet(crow::packet *) override;

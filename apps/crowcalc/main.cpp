@@ -42,11 +42,9 @@ double func_div(double a, double b)
 	return a / b;
 }
 
-int foo(char *, int, char * ans, int) 
+void foo(char *, int, crow::service_node& srv) 
 {
-	nos::println("foo");
-	sprintf(ans, "HelloWorld\r\n");
-	return strlen(ans);
+	srv.reply("HelloWorld", 10);
 }
 
 int main(int argc, char ** argv)
