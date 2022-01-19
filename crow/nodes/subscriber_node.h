@@ -13,6 +13,10 @@ namespace crow
         int rackquant = 0;
 
     public:
+        abstract_subscriber_node(crow::hostaddr_view addr, int node,
+                       igris::buffer theme) : publisher_node(addr, node, theme) {}
+        abstract_subscriber_node(crow::hostaddr_view addr, igris::buffer theme) : publisher_node(addr, theme) {}
+
         abstract_subscriber_node() = default;
         void
         set_brocker_address(crow::hostaddr_view crowker_addr,
@@ -24,6 +28,10 @@ namespace crow
                        uint8_t rqos, uint16_t rackquant);
 
         void subscribe(crow::hostaddr_view crowker_addr, igris::buffer theme);
+        void keepalive_handle() override 
+        { 
+            subscribe(); 
+        }
     };
 
     class subscriber_node : public crow::abstract_subscriber_node
@@ -38,8 +46,6 @@ namespace crow
         {
             incoming_handler = incoming;
         }
-
-        void keepalive_handle() override { subscribe(); }
 
     private:
         void incoming_packet(crow::packet *) override;

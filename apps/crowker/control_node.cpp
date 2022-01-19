@@ -4,60 +4,57 @@
 #include <igris/shell/rshell_executor.h>
 #include <string>
 
+#include <nos/shell/argv.h>
+#include <nos/shell/executor.h>
+
 extern crow::crowker_api crowker_api;
 
-static int themes(int, char **, char * ans, int ansmax) 
+static int themes(const nos::argv&, nos::ostream& os) 
 {	
-	int sz = 0;
-	nos::buffer_writer writer(ans, ansmax);
-	std::string ret;
-
 	auto& themes = crow::crowker::instance()->themes;
-	if (themes.size() == 0)
-		return nos::println_to(writer, "No one theme here yet.");
+	if (themes.size() == 0) 
+	{
+		os.println("No one theme here yet.");
+		return 0;
+	}
 
 	for (auto& a : themes)
 	{
 		std::string s = nos::format("name:{} subs:{}\n",
 		                            a.first,
 		                            a.second.subs.size());
-		sz += nos::print_to(writer, s);
+		os.print(s);
 	}
-
-	return sz;
+	return 0;
 }
 
-static int clients(int, char **, char * ans, int ansmax) 
+static int clients(const nos::argv&, nos::ostream& os) 
 {
-	int sz = 0;
-	nos::buffer_writer writer(ans, ansmax);
-	std::string ret;
-
 	auto clients = crow::crowker::instance()->clients();
-	if (clients.size() == 0)
-		return nos::println_to(writer, "No one theme here yet.");
+	if (clients.size() == 0) 
+	{
+		os.println("No one theme here yet.");
+		return 0;
+	}
 
 	for (auto& a : clients)
 	{
 		std::string s = nos::format("name:{}\n", a->name);
-		sz += nos::print_to(writer, s);
+		os.print(s);
 	}
-
-	return sz;
+	return 0;
 }
 
-rshell_command cmds[] = {
-	{"clients", clients, "crowker clients"},
-	{"themes", themes, "crowker themes"},
-	{NULL, NULL, 0}
-};
-igris::rshell_executor_onelevel executor(cmds);
+nos::executor executor({
+	nos::command{"clients", "crowker clients", clients},
+	{"themes", "crowker themes", themes}
+});
 
 static void incoming(crow::node_packet_ptr pack)
 {
-	char buf[128];
-	executor.execute(pack.message().data(), pack.message().size(), buf, 128);	
-	pack.reply({buf, strlen(buf)});
+	nos::string_buffer answer;
+	executor.execute(nos::tokens(pack.message().data()), answer);	
+	pack.reply({answer.str().data(), answer.str().size()});
 }
 
 static void undelivered(crow::node_packet_ptr pack)

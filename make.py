@@ -31,8 +31,8 @@ licant.cxx_shared_library(target,
 
 	cxxstd="c++17",
 	optimize = "-O2",
-	cxx_flags = '-fPIC -Wall -pedantic',
-	cc_flags = '-fPIC -Wall -pedantic',
+	cxx_flags = '-fPIC -Wall -pedantic -g',
+	cc_flags = '-fPIC -Wall -pedantic -g',
 	libs=["igris", "nos"],
 )
 

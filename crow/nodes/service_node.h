@@ -14,7 +14,15 @@ namespace crow
     public:
         service_node() = default;
         service_node(const delegate& dlg) : dlg(dlg) {}
-        
+        service_node(
+            const crow::hostaddr_view& addr,
+            const igris::buffer& theme,
+            const delegate& dlg)
+            : abstract_subscriber_node(addr, theme), dlg(dlg)
+        {
+            set_theme(theme);
+        }
+
         void set_handle(const delegate& dlg) 
         {
             this->dlg = dlg;
