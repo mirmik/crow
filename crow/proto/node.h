@@ -81,8 +81,6 @@ namespace crow
             DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
         nodeid_t id = 0;
 
-        node_keepalive_timer keepalive_timer;
-
     public:
         node() = default;
         node(const node &) = delete;
@@ -143,18 +141,6 @@ namespace crow
 
         virtual ~node();
 
-        virtual void keepalive_handle() {}
-
-        void install_keepalive(int64_t interval)
-        {
-            crow::keepalive_timer_manager.plan(
-                (igris::managed_timer_base<
-                    igris::timer_spec<decltype(millis())>> &)keepalive_timer,
-                millis(), interval);
-
-            crow::unsleep_handler();
-        }
-
     private:
         virtual void incoming_packet(crow::packet *pack) = 0;
 
@@ -165,6 +151,24 @@ namespace crow
         }
 
         friend class node_protocol_cls;
+    };
+
+    class alived_object
+    {
+    public:
+        node_keepalive_timer keepalive_timer;
+
+        virtual void keepalive_handle() {}
+
+        void install_keepalive(int64_t interval)
+        {
+            crow::keepalive_timer_manager.plan(
+                (igris::managed_timer_base<
+                    igris::timer_spec<decltype(millis())>> &)keepalive_timer,
+                millis(), interval);
+
+            crow::unsleep_handler();
+        };
     };
 
     class node_protocol_cls : public crow::protocol

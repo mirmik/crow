@@ -7,7 +7,7 @@
 
 namespace crow
 {
-    class abstract_subscriber_node : public crow::publisher_node
+    class abstract_subscriber_node : public crow::publisher_node, public crow::alived_object
     {
         int rqos = 0;
         int rackquant = 0;
