@@ -184,6 +184,6 @@ crow::alived_object::~alived_object()
 
 void crow::node_keepalive_timer::execute()  
 {
-    alive_node& n = *mcast_out(this, alived_object, keepalive_timer);
+    alived_object& n = *mcast_out(this, alived_object, keepalive_timer);
     n.keepalive_handle();
 }

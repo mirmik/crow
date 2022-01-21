@@ -7,7 +7,7 @@
 
 static int a = 0;
 
-class test_keepalive_node : public  crow::node 
+class test_keepalive_node : public  crow::node, public crow::alived_object 
 {
 	void keepalive_handle() override 
 	{

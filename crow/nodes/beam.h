@@ -5,7 +5,7 @@
 
 namespace crow
 {
-    class beam : public crow::node
+    class beam : public crow::node, public crow::alived_object
     {
         std::string client_name;
         crow::hostaddr crowker;
