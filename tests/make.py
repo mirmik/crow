@@ -5,9 +5,7 @@ from licant.cxx_modules import application
 from licant.modules import submodule, module
 from licant.libs import include
 
-licant.include("crow")
-#licant.include("linalg")
-#licant.include("igris")
+licant.include("crow", "../crow.g.py")
 
 tests_c = [
 ]

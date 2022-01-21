@@ -169,6 +169,8 @@ namespace crow
 
             crow::unsleep_handler();
         };
+
+        virtual ~alived_object();
     };
 
     class node_protocol_cls : public crow::protocol

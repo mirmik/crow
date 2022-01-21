@@ -169,18 +169,21 @@ void crow::bind_node_dynamic(crow::node *srv)
 crow::node::~node()
 {
     system_lock();
-
     if (!dlist_empty(&waitlnk))
         notify_all(-1);
-
     dlist_del(&lnk);
-    keepalive_timer.unplan();
+    system_unlock();
+}
 
+crow::alived_object::~alived_object() 
+{
+    system_lock();
+    keepalive_timer.unplan();
     system_unlock();
 }
 
 void crow::node_keepalive_timer::execute()  
 {
-    alive_node& n = *mcast_out(this, alive_node, keepalive_timer);
+    alive_node& n = *mcast_out(this, alived_object, keepalive_timer);
     n.keepalive_handle();
 }
