@@ -12,6 +12,8 @@ void crow::service_node::incoming_packet(crow::packet *pack)
     auto message = igris::buffer{data.data() + 1 + reply_theme_length,
                                  data.size() - 1 - reply_theme_length};
     dlg(message.data(), message.size(), *this);
+    
+    // release after reply
     crow::release(pack);
 }
 
