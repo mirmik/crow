@@ -4,6 +4,7 @@
 #include <crow/nodes/publisher_node.h>
 #include <crow/proto/node.h>
 #include <igris/event/delegate.h>
+#include <nos/print.h>
 
 namespace crow
 {

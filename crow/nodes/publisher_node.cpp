@@ -22,23 +22,7 @@ void crow::publisher_node::publish_v(igris::buffer * data, int len)
 
 void crow::publisher_node::publish(igris::buffer data)
 {
-    crow::publish_subheader sh;
-
-    sh.type = PubSubTypes::Publish;
-    sh.thmsize = theme.size();
-    sh.datsize = data.size();
-
-    const igris::buffer iov[] =
-    {
-        {
-            (char *)&sh + sizeof(node_subheader),
-            sizeof(sh) - sizeof(node_subheader)
-        },
-        theme,
-        data,
-    };
-
-    send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
+    publish(crowker_addr, crowker_node, theme, data, qos, ackquant);
 }
 
 void crow::publisher_node::publish(crow::hostaddr_view addr, int crowker_node,
