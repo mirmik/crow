@@ -23,6 +23,8 @@ namespace crow
         set_brocker_address(crow::hostaddr_view crowker_addr,
                             int crowker_node = CROWKER_SERVICE_BROCKER_NODE_NO);
 
+        void set_rqos(int rqos, int rackquant) { this->rqos = rqos; this->rackquant = rackquant; }
+
         void subscribe();
         void subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
                        igris::buffer theme, uint8_t qos, uint16_t ackquant,

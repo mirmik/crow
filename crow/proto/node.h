@@ -160,7 +160,7 @@ namespace crow
 
         virtual void keepalive_handle() {}
 
-        void install_keepalive(int64_t interval)
+        void install_keepalive(int64_t interval, bool immediate_call=true)
         {
             crow::keepalive_timer_manager.plan(
                 (igris::managed_timer_base<
@@ -168,6 +168,11 @@ namespace crow
                 millis(), interval);
 
             crow::unsleep_handler();
+
+            if (immediate_call) 
+            {
+                keepalive_handle();
+            }
         };
 
         virtual ~alived_object();
