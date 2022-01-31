@@ -12,7 +12,9 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
         case PubSubTypes::Publish:
         {
             auto &sh = pack->subheader<publish_subheader>();
-            api->publish_to_theme(sh.theme(), sh.message());
+            auto message = sh.message();
+            api->publish_to_theme(sh.theme(), std::make_shared<std::string>(
+                message.data(), message.size()));
         };
         break;
 
@@ -31,9 +33,10 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
                                     sh.rackquant);
 
             uint8_t len = sh.reply_theme().size();
-            std::string msg = nos::format("{}{}{}", igris::buffer(&len, 1),
-                                          sh.reply_theme(), sh.message());
-
+            auto msg = std::make_shared<std::string>(nos::format("{}{}{}", 
+                igris::buffer(&len, 1),
+                sh.reply_theme(), 
+                sh.message()));
             api->publish_to_theme(sh.theme(), msg);
         };
         break;

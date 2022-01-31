@@ -22,9 +22,9 @@ void crow::crowker_api::subscribe_on_theme(crow::hostaddr_view view, int nid,
 }
 
 void crow::crowker_api::publish_to_theme(igris::buffer theme,
-        igris::buffer data)
+        const std::shared_ptr<std::string>& data)
 {
-    crowker->publish(theme.to_string(), data.to_string());
+    crowker->publish(theme.to_string(), data);
 }
 
 crow::crowker_api_client::~crowker_api_client() {}

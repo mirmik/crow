@@ -57,7 +57,7 @@ namespace crow
         void client_beam(crow::hostaddr_view, int nid,
                          igris::buffer name) override;
 
-        void publish_to_theme(igris::buffer theme, igris::buffer data) override;
+        void publish_to_theme(igris::buffer theme, const std::shared_ptr<std::string>& data) override;
         void undelivered_packet(crow::hostaddr_view, int node) override;
     };
 }

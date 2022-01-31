@@ -15,7 +15,7 @@ int64_t crowker_eval_timestamp()
     return millis;
 }
 
-void crowker_implementation::theme::publish(const std::string &data)
+void crowker_implementation::theme::publish(const std::shared_ptr<std::string>& data)
 {
     std::vector<client *> killme_list;
 
@@ -34,7 +34,7 @@ void crowker_implementation::theme::publish(const std::string &data)
         }
         else
         {
-            sub->publish(name, {data.data(), data.size()}, opts);
+            sub->publish(name, {data->data(), data->size()}, opts);
         }
     }
 

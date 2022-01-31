@@ -6,7 +6,7 @@
 #include <igris/util/dstring.h>
 #include <nos/fprint.h>
 
-void crow::crowker::publish(const std::string &theme, const std::string &data)
+void crow::crowker::publish(const std::string &theme, const std::shared_ptr<std::string> &data)
 {
     auto *thm = get_theme(theme);
     thm->publish(data);
@@ -14,7 +14,7 @@ void crow::crowker::publish(const std::string &theme, const std::string &data)
     if (brocker_info || log_publish)
     {
         nos::fprintln("publish: t:{} s:{} d:{}", theme, thm->count_clients(),
-                      igris::dstring(data));
+                      igris::dstring(*data));
     }
 }
 

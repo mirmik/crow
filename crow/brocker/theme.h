@@ -6,6 +6,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <deque>
 
 #include <nos/print.h>
 
@@ -43,7 +44,7 @@ namespace crowker_implementation
             subs.erase(sub);
         }
 
-        void publish(const std::string &data);
+        void publish(const std::shared_ptr<std::string>& data);
     };
 }
 

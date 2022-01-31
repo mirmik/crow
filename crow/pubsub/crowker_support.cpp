@@ -16,7 +16,7 @@ void incoming_crowker_handler(crow::packet *pack)
     {
         auto &shps_d = pack->subheader<crow::subheader_pubsub_data>();
         auto theme = shps_d.theme().to_string();
-        auto data = shps_d.data().to_string();
+        auto data = std::make_shared<std::string>(shps_d.data().data(), shps_d.data().size());
         crow::crowker::instance()->publish(theme, data);
     }
     break;

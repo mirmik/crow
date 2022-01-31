@@ -95,7 +95,7 @@ void tcp_client_listener(nos::inet::tcp_socket client)
 			if (ret <= 0)
 				break;
 
-			data = std::string(buf, datasize);
+			auto data = std::make_shared<std::string>(buf, datasize);
 
 			crow::crowker::instance()->publish(theme, data);
 			continue;

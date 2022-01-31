@@ -35,7 +35,7 @@ namespace crow
         theme *get_theme(const std::string &name);
         void add_api(crowker_api *api) { apivec.push_back(api); }
 
-        void publish(const std::string &theme, const std::string &data);
+        void publish(const std::string &theme, const std::shared_ptr<std::string> &data);
 
         static crowker *instance()
         {

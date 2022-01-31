@@ -2,6 +2,7 @@
 #define CROW_NODES_CROWKER_PUBSUB_NODE_H
 
 #include <crow/proto/node.h>
+#include <memory>
 
 namespace crow
 {
@@ -13,7 +14,7 @@ namespace crow
                                         uint16_t rackquant) = 0;
 
         virtual void publish_to_theme(igris::buffer theme,
-                                      igris::buffer data) = 0;
+                                      const std::shared_ptr<std::string>& data) = 0;
 
         virtual void undelivered_packet(crow::hostaddr_view, int node) = 0;
         virtual void client_beam(crow::hostaddr_view, int nid,
