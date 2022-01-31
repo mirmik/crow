@@ -4,6 +4,7 @@
 #include <igris/shell/rshell_executor.h>
 #include <string>
 
+#include <igris/util/dstring.h>
 #include <nos/shell/argv.h>
 #include <nos/shell/executor.h>
 
@@ -45,9 +46,44 @@ static int clients(const nos::argv&, nos::ostream& os)
 	return 0;
 }
 
+static int last_messages(const nos::argv& argv, nos::ostream& os) 
+{
+	std::vector<std::shared_ptr<std::string>> messages;
+
+	if (argv.size() < 2) 
+	{
+		nos::println_to(os, "Usage: last THEME [SIZE]");
+		return -1;
+	}
+
+	size_t size = 1;
+	if (argv.size() >= 3) 
+	{
+		size = (size_t)atoi(argv[2].data());
+	}
+
+	auto& name = argv[1];
+	auto& themes = crow::crowker::instance()->themes;
+	auto& theme = themes[{name.data(), name.size()}];
+
+	{
+		std::lock_guard <std::mutex> lock(theme.mtx);
+		if (size > theme.last_messages.size())
+			size = theme.last_messages.size();
+		for (size_t i = 0; i < size; ++i) 
+		{
+			if (theme.last_messages[i])
+				nos::println_to(os, igris::dstring(*theme.last_messages[i]));
+		}
+	}
+	return 0;
+}
+
+
 nos::executor executor({
 	nos::command{"clients", "crowker clients", clients},
-	{"themes", "crowker themes", themes}
+	nos::command{"themes", "crowker themes", themes},
+	nos::command{"last", "get latest theme messages", last_messages}
 });
 
 static void incoming(crow::node_packet_ptr pack)

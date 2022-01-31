@@ -6,9 +6,11 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <mutex>
 #include <deque>
 
 #include <nos/print.h>
+#include <igris/container/cyclic_buffer.h>
 
 namespace crowker_implementation
 {
@@ -21,6 +23,9 @@ namespace crowker_implementation
         std::set<client *> subs;
         int64_t timestamp_publish;
         int64_t timestamp_activity;
+
+        std::mutex mtx;
+        igris::cyclic_buffer<std::shared_ptr<std::string>> last_messages {1};
 
       public:
         size_t count_clients() { return subs.size(); }

@@ -19,6 +19,11 @@ void crowker_implementation::theme::publish(const std::shared_ptr<std::string>& 
 {
     std::vector<client *> killme_list;
 
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        last_messages.push(data);
+    }
+
     for (auto *sub : subs)
     {
         crowker_implementation::options *opts = nullptr;
