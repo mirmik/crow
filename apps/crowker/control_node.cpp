@@ -79,11 +79,34 @@ static int last_messages(const nos::argv& argv, nos::ostream& os)
 	return 0;
 }
 
+static int set_queue_size(const nos::argv& argv, nos::ostream& os) 
+{
+	if (argv.size() < 3) 
+	{
+		nos::println_to(os, "Usage: queue-size THEME [SIZE]");
+		return -1;
+	}
+
+	size_t size = 1;
+	if (argv.size() >= 3) 
+	{
+		size = (size_t)atoi(argv[2].data());
+	}
+
+	auto& name = argv[1];
+	auto& themes = crow::crowker::instance()->themes;
+	auto& theme = themes[{name.data(), name.size()}];
+
+	theme.last_messages.resize(size);
+	return 0;
+}
+
 
 nos::executor executor({
 	nos::command{"clients", "crowker clients", clients},
 	nos::command{"themes", "crowker themes", themes},
-	nos::command{"last", "get latest theme messages", last_messages}
+	nos::command{"last", "get latest theme messages", last_messages},
+	nos::command{"queue-size", "set_queue_size", set_queue_size}
 });
 
 static void incoming(crow::node_packet_ptr pack)
