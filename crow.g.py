@@ -17,7 +17,7 @@ licant.module("crow.select", "stub",
 )
 
 licant.module("crow.diagnostic", "nos",
-	sources=["crow/src/variants/print.cpp"],
+	sources=["crow/src/variants/crow_print.cpp"],
 	default = True
 )
 
