@@ -60,6 +60,7 @@ void crow::utilize(crow::packet *pack)
 
 void crow::release(crow::packet *pack)
 {
+    assert(pack);
     system_lock();
 
     if (pack->u.f.released_by_tower && pack->refs == 0)

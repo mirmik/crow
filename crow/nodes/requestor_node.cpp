@@ -1,24 +1,43 @@
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/nodes/requestor_node.h>
 #include <nos/print.h>
+#include <igris/util/bug.h>
+
+
+const char * crow::pubsub_type_to_string(PubSubTypes type) 
+{
+    switch (type) 
+    {
+        case PubSubTypes::Consume: return "consume";
+        case PubSubTypes::Request: return "request";
+        case PubSubTypes::Subscribe: return "subscribe";
+        case PubSubTypes::Publish: return "publish";
+    }
+    return "undefined";
+}
 
 void crow::requestor_node::incoming_packet(crow::packet *pack)
 {
+    auto &s = pack->subheader<pubsub_subheader>();
+    nos::println("requestor_node::incoming_packet");
     if (incoming.armed())
     {
-        auto &s = pack->subheader<pubsub_subheader>();
-
         switch (s.type)
         {
             case PubSubTypes::Consume:
             {
                 auto &sh = pack->subheader<consume_subheader>();
+                nos::println("consume");
                 incoming(sh.message());
             };
             break;
 
-            default:
-                break;
+            default: 
+            {
+                nos::println(pubsub_type_to_string(s.type));
+                BUG();
+            }
+            break;
         }
 
         crow::release(pack);
@@ -26,9 +45,12 @@ void crow::requestor_node::incoming_packet(crow::packet *pack)
 
     else
     {
+        nos::println("notify_one");
+        nos::println(pubsub_type_to_string(s.type));
         dlist_move(&pack->ulnk, &incoming_list);
         notify_one(0);
     }
+    nos::println("requestor_node::incoming_packet ... exit");
 }
 
 void crow::requestor_node::async_request(crow::hostaddr_view crowker_addr,
@@ -93,6 +115,7 @@ void crow::requestor_node::set_reply_theme(igris::buffer reply_theme)
 
 void crow::requestor_node::undelivered_packet(crow::packet *pack)
 {
+    BUG();
     notify_one(-1);
     crow::release(pack);
 }
