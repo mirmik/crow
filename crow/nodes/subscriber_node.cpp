@@ -65,3 +65,21 @@ void crow::abstract_subscriber_node::set_brocker_address(
 	this->crowker_addr = crowker_addr;
 	this->crowker_node = crowker_node;
 }
+
+void crow::abstract_subscriber_node::subscribe_v2(crow::hostaddr_view crowker_addr,
+                       igris::buffer theme, uint8_t request_latest) 
+{
+    crow::subscribe_subheader_v2 sh;
+
+    sh.type = PubSubTypes::Subscribe_v2;
+    sh.rqos = rqos;
+    sh.rackquant = rackquant;
+    sh.thmsize = theme.size();
+    sh.request_latest = request_latest;
+
+    const igris::buffer iov[] = {{(char *)&sh + sizeof(node_subheader),
+                                  sizeof(sh) - sizeof(node_subheader)},
+                                 theme};
+
+    send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);    
+}

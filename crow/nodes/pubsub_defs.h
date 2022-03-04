@@ -8,10 +8,11 @@ namespace crow
 {
     enum class PubSubTypes : uint8_t
     {
-        Publish,
-        Subscribe,
-        Consume,
-        Request
+        Publish      = 0,
+        Subscribe    = 1,
+        Consume      = 2,
+        Request      = 3,
+        Subscribe_v2 = 4,
     };
 
     struct pubsub_subheader : public node_subheader
@@ -35,6 +36,15 @@ namespace crow
         uint8_t rqos;
         uint16_t rackquant;
         uint8_t thmsize;
+        igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
+    } __attribute__((packed));
+
+    struct subscribe_subheader_v2 : public pubsub_subheader
+    {
+        uint8_t rqos;
+        uint16_t rackquant;
+        uint8_t thmsize;
+        uint8_t request_latest;
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
     } __attribute__((packed));
 

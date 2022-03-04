@@ -24,7 +24,7 @@ TEST_CASE("keepalive")
 
 	//std::this_thread::sleep_for(std::chrono::microseconds(450));
 	int64_t start = millis();
-	while(millis() - start < 47) 
+	while(millis() - start < 45) 
 	{
 		crow::onestep();
 	}
