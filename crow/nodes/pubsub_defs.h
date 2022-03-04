@@ -15,6 +15,8 @@ namespace crow
         Subscribe_v2 = 4,
     };
 
+    const char * pubsub_type_to_string(PubSubTypes type);
+
     struct pubsub_subheader : public node_subheader
     {
         PubSubTypes type;
