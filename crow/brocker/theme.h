@@ -9,6 +9,7 @@
 #include <mutex>
 #include <deque>
 
+#include <crow/defs.h>
 #include <nos/print.h>
 #include <igris/container/cyclic_buffer.h>
 
@@ -21,13 +22,15 @@ namespace crowker_implementation
       public:
         std::string name;
         std::set<client *> subs;
-        int64_t timestamp_publish;
-        int64_t timestamp_activity;
+        int64_t timestamp_publish = 0;
+        int64_t timestamp_activity = 0;
 
         std::mutex mtx;
-        igris::cyclic_buffer<std::shared_ptr<std::string>> last_messages {1};
+        igris::cyclic_buffer<std::shared_ptr<std::string>> last_messages { CROW_DEFAULT_QUEUE_SIZE };
 
       public:
+        theme(size_t queue_size);
+
         size_t count_clients() { return subs.size(); }
 
         bool link_client(client *sub)

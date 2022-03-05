@@ -1,8 +1,9 @@
 /** @file */
 
+#include <utility>
+#include <crow/defs.h>
 #include <crow/brocker/crowker.h>
 #include <crow/hostaddr_view.h>
-
 #include <igris/util/dstring.h>
 #include <nos/fprint.h>
 
@@ -22,11 +23,12 @@ crowker_implementation::theme *crow::crowker::get_theme(const std::string &name)
 {
     if (themes.count(name))
     {
-        return &themes[name];
+        return &themes.at(name);
     }
     else
     {
-        crowker_implementation::theme *thm = &themes[name];
+        auto it = themes.emplace(std::make_pair(name, CROW_DEFAULT_QUEUE_SIZE));
+        auto* thm = &((it.first)->second);
         thm->name = name;
         return thm;
     }

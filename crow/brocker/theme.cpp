@@ -6,6 +6,12 @@
 #include <chrono>
 #include <nos/print.h>
 
+
+crowker_implementation::theme::theme(size_t queue_size) 
+{
+    last_messages.resize(queue_size);
+}
+
 int64_t crowker_eval_timestamp()
 {
     auto now = std::chrono::system_clock::now();

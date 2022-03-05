@@ -64,9 +64,13 @@ static int last_messages(const nos::argv& argv, nos::ostream& os)
 
 	auto& name = argv[1];
 	auto& themes = crow::crowker::instance()->themes;
-	auto& theme = themes[{name.data(), name.size()}];
 
+	auto theme_pair = themes.find({name.data(), name.size()});
+	if (theme_pair == themes.end())
+		return 0;
+	else
 	{
+		auto& theme = theme_pair->second;
 		std::lock_guard <std::mutex> lock(theme.mtx);
 		if (size > theme.last_messages.size())
 			size = theme.last_messages.size();
@@ -86,18 +90,18 @@ static int set_queue_size(const nos::argv& argv, nos::ostream& os)
 		nos::println_to(os, "Usage: queue-size THEME [SIZE]");
 		return -1;
 	}
-
 	size_t size = 1;
 	if (argv.size() >= 3) 
 	{
 		size = (size_t)atoi(argv[2].data());
 	}
-
 	auto& name = argv[1];
 	auto& themes = crow::crowker::instance()->themes;
-	auto& theme = themes[{name.data(), name.size()}];
-
-	theme.last_messages.resize(size);
+	auto theme_pair = themes.find({name.data(), name.size()});
+	if (theme_pair == themes.end())
+		return 0;
+	
+	theme_pair->second.last_messages.resize(size);
 	return 0;
 }
 

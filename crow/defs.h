@@ -34,4 +34,6 @@
 #define CROW_DEFAULT_ACKQUANT 50
 #endif
 
+#define CROW_DEFAULT_QUEUE_SIZE 1000
+
 #endif
