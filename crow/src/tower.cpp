@@ -132,12 +132,18 @@ static void add_to_incoming_list(crow::packet *pack)
 {
     pack->last_request_time = millis();
     dlist_move_sorted(pack, &crow_incoming, lnk, crow_time_comparator);
+#ifdef CROW_USE_ASYNCIO
+    crow::asyncio.unsleep();
+#endif
 }
 
 static void add_to_outters_list(crow::packet *pack)
 {
     pack->last_request_time = millis();
     dlist_move_sorted(pack, &crow_outters, lnk, crow_time_comparator);
+#ifdef CROW_USE_ASYNCIO
+    crow::asyncio.unsleep();
+#endif    
 }
 
 crow::packet_ptr crow::travel(crow::packet *pack)
@@ -735,7 +741,7 @@ static inline void crow_onestep_send_stage()
     system_unlock();
 }
 
-static inline void crow_onestep_outers_stage()
+void crow_onestep_outers_stage()
 {
     crow::packet *pack;
     crow::packet *n;
@@ -776,7 +782,7 @@ static inline void crow_onestep_outers_stage()
     system_unlock();
 }
 
-static inline void crow_onestep_incoming_stage()
+void crow_onestep_incoming_stage()
 {
     crow::packet *pack;
     crow::packet *n;
