@@ -1,10 +1,11 @@
 import licant.modules
 import licant
 
-licant.cli.add_argument("-o", "--oldheader", action="store_true", default=False)
-opts, args = licant.cli.parse()
-
-DEFINES = ["OLD_HEADER=1"] if opts.oldheader else [] 
+DEFINES = []
+if __name__ == "__main__":
+	licant.cli.add_argument("-o", "--oldheader", action="store_true", default=False)
+	opts, args = licant.cli.parse()
+	DEFINES = ["OLD_HEADER=1"] if opts.oldheader else [] 
 
 licant.module("crow.select", "impl",
 	sources=["crow/src/asyncio.cpp"],
