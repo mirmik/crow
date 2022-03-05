@@ -144,11 +144,11 @@ PYBIND11_MODULE(libcrow, m)
 
 	m.def("get_gateway", &crow::get_gateway);
 
-	py::class_<crow::crowker>(m, "crowker")
-	.def("instance", &crow::crowker::instance, py::return_value_policy::reference)
-	.def("publish", &crow::crowker::publish)
-	.def("set_info_mode", &crow::crowker::set_info_mode)
-	;
+	//py::class_<crow::crowker>(m, "crowker")
+	//.def("instance", &crow::crowker::instance, py::return_value_policy::reference)
+	//.def("publish", &crow::crowker::publish)
+	//.def("set_info_mode", &crow::crowker::set_info_mode)
+	//;
 
 	register_subscriber_class(m);
 	register_publisher_class(m);

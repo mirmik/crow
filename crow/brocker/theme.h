@@ -30,6 +30,7 @@ namespace crowker_implementation
 
       public:
         theme(size_t queue_size);
+        theme(const theme&) = delete;
 
         size_t count_clients() { return subs.size(); }
 
