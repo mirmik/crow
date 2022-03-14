@@ -56,6 +56,7 @@ namespace crow
             dlist_add(&lnk, &pubsub_protocol.subscribers);
             system_unlock();
         }
+        virtual ~subscriber() = default;
 
         void subscribe(const crow::hostaddr_view &addr, const char *theme,
                        uint8_t qos, uint16_t ackquant, uint8_t rqos,
