@@ -13,7 +13,7 @@ namespace crow
 
     class hostaddr
     {
-        std::vector<uint8_t> _addr;
+        std::vector<uint8_t> _addr = {};
 
     public:
         hostaddr() = default;

@@ -14,17 +14,17 @@ namespace crow
     public:
         struct options_struct
         {
-            uint8_t qos;
-            uint16_t ackquant;
+            uint8_t qos=0;
+            uint16_t ackquant=0;
         };
 
-        crowker_api *api;
-        crowker_pubsub_node *crowker_node;
+        crowker_api *api=nullptr;
+        crowker_pubsub_node *crowker_node=nullptr;
 
-        crow::hostaddr addr;
-        int node;
+        crow::hostaddr addr={};
+        int node=-1;
 
-        std::map<std::string, options_struct> options;
+        std::map<std::string, options_struct> options={};
 
     public:
         void publish(const std::string &theme, const std::string &data,
@@ -35,11 +35,11 @@ namespace crow
 
     class crowker_api : public crowker_pubsub_node_api
     {
-        std::map<std::pair<crow::hostaddr, int>, crowker_api_client> clients;
+        std::map<std::pair<crow::hostaddr, int>, crowker_api_client> clients={};
 
     public:
-        crowker_pubsub_node *crowker_node;
-        crow::crowker *crowker;
+        crowker_pubsub_node *crowker_node=nullptr;
+        crow::crowker *crowker=nullptr;
 
         std::vector<crowker_implementation::client *> get_clients()
         {

@@ -45,13 +45,16 @@ namespace crow
 
     class rshell_cli_node : public rshell_cli_node_base
     {
-        igris::rshell_executor *_executor;
+        igris::rshell_executor *_executor = nullptr;
 
     public:
         rshell_cli_node() {}
         rshell_cli_node(igris::rshell_executor *executor) : _executor(executor)
         {
         }
+
+        rshell_cli_node(const rshell_cli_node&) = default;
+        rshell_cli_node& operator=(const rshell_cli_node&) = default;
 
         void set_executor(igris::rshell_executor *executor)
         {

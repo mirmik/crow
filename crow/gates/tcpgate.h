@@ -14,8 +14,8 @@ namespace crow
 {
     class tcpgate : public gateway
     {
-        nos::inet::tcp_server server;
-        std::map<nos::inet::netaddr, nos::inet::tcp_socket> sockets;
+        nos::inet::tcp_server server={};
+        std::map<nos::inet::netaddr, nos::inet::tcp_socket> sockets={};
 
     public:
         tcpgate() {}

@@ -10,12 +10,12 @@ namespace crow
     class requestor_node : public crow::publisher_node
     {
         dlist_head incoming_list = DLIST_HEAD_INIT(incoming_list);
-        std::string reply_theme;
+        std::string reply_theme={};
 
         int rqos = 0;
         int rackquant = 0;
 
-        igris::delegate<void, igris::buffer> incoming;
+        igris::delegate<void, igris::buffer> incoming={};
 
     public:
         requestor_node() = default;

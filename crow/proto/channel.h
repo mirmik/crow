@@ -32,13 +32,13 @@ namespace crow
     public:
         using incoming_handler_t = void (*)(crow::channel *, crow::packet *);
 
-        dlist_head lnk;
-        nodeid_t rid;
+        dlist_head lnk = DLIST_HEAD_INIT(lnk);
+        nodeid_t rid = 0;
         void *raddr_ptr = nullptr;
         size_t raddr_len = 0;
         size_t raddr_cap = 0;
-        uint8_t qos;
-        uint16_t ackquant;
+        uint8_t qos = 0;
+        uint16_t ackquant = 0;
         uint16_t fid = 0;
         union _u
         {
@@ -49,14 +49,17 @@ namespace crow
                 uint8_t dynamic_addr : 1;
                 uint8_t naive_listener : 1;
             } f;
-        } u;
-        incoming_handler_t incoming_handler;
+        } u = {};
+        incoming_handler_t incoming_handler = {};
 
         channel() : lnk(DLIST_HEAD_INIT(lnk)){};
         channel(incoming_handler_t incoming_handler)
             : lnk(DLIST_HEAD_INIT(lnk)), incoming_handler(incoming_handler)
         {
         }
+
+        channel(const channel&) = default;
+        channel& operator=(const channel&) = default;
 
         void init(int id, incoming_handler_t incoming_handler)
         {

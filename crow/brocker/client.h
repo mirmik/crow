@@ -24,10 +24,10 @@ namespace crowker_implementation
     class client
     {
     public:
-        std::string name;
-        crow::crowker *context;
-        std::unordered_map<theme *, themenote> thms;
-        int64_t timestamp_activity;
+        std::string name={};
+        crow::crowker *context=nullptr;
+        std::unordered_map<theme *, themenote> thms={};
+        int64_t timestamp_activity={};
         bool confirmation = false;
 
     public:

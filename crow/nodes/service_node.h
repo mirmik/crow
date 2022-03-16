@@ -8,8 +8,8 @@ namespace crow
     class service_node : public crow::abstract_subscriber_node
     {
         using delegate = igris::delegate<void, char *, int, service_node&>;
-        delegate dlg;
-        crow::packet * curpack;
+        delegate dlg = {};
+        crow::packet * curpack = nullptr;
 
     public:
         service_node() = default;
@@ -22,6 +22,9 @@ namespace crow
         {
             set_theme(theme);
         }
+
+        service_node(const service_node&) = delete;
+        service_node& operator=(const service_node&) = delete;
 
         void set_handle(const delegate& dlg) 
         {
