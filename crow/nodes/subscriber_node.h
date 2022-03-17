@@ -43,7 +43,7 @@ namespace crow
 
     class subscriber_node : public crow::abstract_subscriber_node
     {
-        igris::delegate<void, igris::buffer> incoming_handler;
+        igris::delegate<void, igris::buffer> incoming_handler = {};
 
     public:
         subscriber_node() = default;
