@@ -20,7 +20,6 @@ const char * crow::pubsub_type_to_string(PubSubTypes type)
 void crow::requestor_node::incoming_packet(crow::packet *pack)
 {
     auto &s = pack->subheader<pubsub_subheader>();
-    nos::println("requestor_node::incoming_packet");
     if (incoming.armed())
     {
         switch (s.type)
@@ -28,7 +27,6 @@ void crow::requestor_node::incoming_packet(crow::packet *pack)
             case PubSubTypes::Consume:
             {
                 auto &sh = pack->subheader<consume_subheader>();
-                nos::println("consume");
                 incoming(sh.message());
             };
             break;
@@ -46,12 +44,9 @@ void crow::requestor_node::incoming_packet(crow::packet *pack)
 
     else
     {
-        nos::println("notify_one");
-        nos::println(pubsub_type_to_string(s.type));
         dlist_move(&pack->ulnk, &incoming_list);
         notify_one(0);
     }
-    nos::println("requestor_node::incoming_packet ... exit");
 }
 
 void crow::requestor_node::async_request(crow::hostaddr_view crowker_addr,
