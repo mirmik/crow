@@ -54,7 +54,11 @@ void crow::msgbox::incoming_packet(crow::packet *pack)
     notify_one(0);
 }
 
-void crow::msgbox::undelivered_packet(crow::packet *pack) { notify_one(-1); }
+void crow::msgbox::undelivered_packet(crow::packet *pack) 
+{ 
+    (void) pack;
+    notify_one(-1); 
+}
 
 crow::msgbox::~msgbox()
 {
