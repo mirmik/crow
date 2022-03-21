@@ -17,6 +17,8 @@
 
 void crow::udpgate::read_handler(int fd) 
 {
+    (void) fd; // only one
+    
     crow::header_v1 header;
 
     struct sockaddr_in sender;
