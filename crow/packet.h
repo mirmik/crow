@@ -49,13 +49,13 @@ namespace crow
                 uint8_t stg : 3;
                 uint8_t type : 3; ///< Доп. инф. зависит от ситуации.
             } f;
-        } u;
-        uint16_t flen; ///< Полная длина пакета
-        uint8_t alen;  ///< Длина поля адреса.
-        uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
+        } u = {};
+        uint16_t flen=0; ///< Полная длина пакета
+        uint8_t alen=0;  ///< Длина поля адреса.
+        uint8_t stg=0; ///< Поле стадии. Используется для того, чтобы цепочка врат
         ///< знала, какую часть адреса обрабатывать.
-        uint16_t seqid; ///< Порядковый номер пакета.
-        qosbyte qos;    ///< Поле качества обслуживания.
+        uint16_t seqid=0; ///< Порядковый номер пакета.
+        qosbyte qos={};    ///< Поле качества обслуживания.
 
         uint16_t addrsize() { return alen; }
         uint16_t datasize() { return flen - alen - sizeof(header_v1); }
@@ -65,7 +65,7 @@ namespace crow
     {
         union _u
         {
-            uint8_t pflag; ///< Флаги пакета
+            uint8_t pflag=0; ///< Флаги пакета
             struct _f
             {
                 uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
@@ -75,15 +75,15 @@ namespace crow
                 ///< Используется для запросов существования
                 uint8_t type : 5; ///< Доп. инф. зависит от ситуации.
             } f;
-        } u;
-        uint16_t flen; ///< Полная длина пакета
-        uint8_t alen;  ///< Длина поля адреса.
-        uint8_t stg; ///< Поле стадии. Используется для того, чтобы цепочка врат
+        } u={};
+        uint16_t flen=0; ///< Полная длина пакета
+        uint8_t alen=0;  ///< Длина поля адреса.
+        uint8_t stg=0; ///< Поле стадии. Используется для того, чтобы цепочка врат
         ///< знала, какую часть адреса обрабатывать.
-        uint16_t ackquant; ///< Таймаут для пересылки пакета.
+        uint16_t ackquant=0; ///< Таймаут для пересылки пакета.
         uint16_t
-            seqid; ///< Порядковый номер пакета. Присваивается отправителем.
-        uint8_t qos; ///< Поле качества обслуживания.
+            seqid=0; ///< Порядковый номер пакета. Присваивается отправителем.
+        uint8_t qos=0; ///< Поле качества обслуживания.
 
         uint16_t addrsize() { return flen - dlen - sizeof(header_v1); }
         uint16_t datasize() { return dlen; }
@@ -98,10 +98,10 @@ namespace crow
         struct dlist_head ulnk =
             DLIST_HEAD_INIT(ulnk); ///< Для подключения в список пользователя и
         ///< зависимых протоколов.
-        crow::gateway *ingate; ///< gate, которым пакет прибыл в систему.
-        uint16_t last_request_time; ///< время последней отправки
+        crow::gateway *ingate=nullptr; ///< gate, которым пакет прибыл в систему.
+        uint16_t last_request_time=0; ///< время последней отправки
         uint16_t _ackcount = 0; ///< счетчик количества попыток отправки
-        int8_t refs;
+        int8_t refs=0;
         union _u
         {
             uint8_t flags = 0; ///< Местные флаги
@@ -113,9 +113,9 @@ namespace crow
                 uint8_t undelivered : 1;
                 uint8_t sended_to_gate : 1;
             } f;
-        } u;
+        } u={};
 
-        void (*destructor)(packet *);
+        void (*destructor)(packet *)=nullptr;
 
     public:
         void set_destructor(void (*destructor)(packet *))
@@ -276,7 +276,7 @@ namespace crow
     class compacted_packet : public packet
     {
     public:
-        header_v1 _header;
+        header_v1 _header={};
 
     public:
         header_v1 &header() { return _header; }

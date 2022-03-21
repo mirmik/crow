@@ -18,13 +18,11 @@ namespace crow
         char *send_buffer = nullptr;
         char *send_it = nullptr;
         char *send_eit = nullptr;
-
         int received_maxpack_size = 48;
         crow::compacted_packet *recvpack = nullptr;
-        struct gstuff_autorecv recver;
-
-        int (*write_callback)(void *, const char *data, unsigned int size);
-        void *write_privdata;
+        struct gstuff_autorecv recver = {};
+        int (*write_callback)(void *, const char *data, unsigned int size) = nullptr;
+        void *write_privdata = nullptr;
 
     public:
         void init(char *send_buffer,

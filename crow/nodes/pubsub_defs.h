@@ -19,13 +19,13 @@ namespace crow
 
     struct pubsub_subheader : public node_subheader
     {
-        PubSubTypes type;
+        PubSubTypes type={};
     } __attribute__((packed));
 
     struct publish_subheader : public pubsub_subheader
     {
-        uint8_t thmsize;
-        uint16_t datsize;
+        uint8_t thmsize=0;
+        uint16_t datsize=0;
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
         igris::buffer message()
         {
@@ -35,25 +35,25 @@ namespace crow
 
     struct subscribe_subheader : public pubsub_subheader
     {
-        uint8_t rqos;
-        uint16_t rackquant;
-        uint8_t thmsize;
+        uint8_t rqos=0;
+        uint16_t rackquant=0;
+        uint8_t thmsize=0;
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
     } __attribute__((packed));
 
     struct subscribe_subheader_v2 : public pubsub_subheader
     {
-        uint8_t rqos;
-        uint16_t rackquant;
-        uint8_t thmsize;
-        uint8_t request_latest;
+        uint8_t rqos=0;
+        uint16_t rackquant=0;
+        uint8_t thmsize=0;
+        uint8_t request_latest=0;
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
     } __attribute__((packed));
 
     struct consume_subheader : public pubsub_subheader
     {
-        uint8_t thmsize;
-        uint16_t datsize;
+        uint8_t thmsize=0;
+        uint16_t datsize=0;
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
         igris::buffer message()
         {
@@ -63,11 +63,11 @@ namespace crow
 
     struct request_subheader : public pubsub_subheader
     {
-        uint8_t rqos;
-        uint16_t rackquant;
-        uint8_t thmsize;
-        uint8_t repthmsize;
-        uint16_t datsize;
+        uint8_t rqos=0;
+        uint16_t rackquant=0;
+        uint8_t thmsize=0;
+        uint8_t repthmsize=0;
+        uint16_t datsize=0;
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
         igris::buffer reply_theme()
         {

@@ -23,9 +23,8 @@ namespace crow
     class crowker
     {
     public:
-        // std::set<std::shared_ptr<client>> clients;
-        std::map<std::string, crowker_implementation::theme> themes;
-        std::vector<crowker_api *> apivec;
+        std::map<std::string, crowker_implementation::theme> themes={};
+        std::vector<crowker_api *> apivec={};
         bool brocker_info = false;
         bool log_publish = false;
 

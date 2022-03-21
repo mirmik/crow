@@ -20,10 +20,10 @@ namespace crow
     {
         struct record
         {
-            std::chrono::time_point<std::chrono::system_clock> last_subscribe;
+            std::chrono::time_point<std::chrono::system_clock> last_subscribe = {};
         };
 
-        std::map<nodeaddr, record> targets;
+        std::map<nodeaddr, record> targets = {};
 
         std::chrono::milliseconds timeout = 5000ms;
         uint8_t qos = 0;
@@ -98,9 +98,9 @@ namespace crow
 
     class spam_subscriber : public crow::node
     {
-        igris::delegate<void, igris::buffer> dlg;
-        std::vector<uint8_t> addr;
-        int nid;
+        igris::delegate<void, igris::buffer> dlg = {};
+        std::vector<uint8_t> addr = {};
+        int nid = {};
 
       public:
         spam_subscriber(igris::delegate<void, igris::buffer> dlg) : dlg(dlg) {}

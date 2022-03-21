@@ -9,12 +9,12 @@ namespace crow
     class publisher_node : public crow::node
     {
     protected:
-        crow::hostaddr crowker_addr;
+        crow::hostaddr crowker_addr={};
         int crowker_node = CROWKER_SERVICE_BROCKER_NODE_NO;
         int qos = 0;
         int ackquant = 0;
 
-        std::string theme;
+        std::string theme={};
 
     public:
         publisher_node() = default;

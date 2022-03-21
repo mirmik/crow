@@ -63,7 +63,7 @@ namespace crow
 
     class rpc_node : public crow::node
     {
-        std::unordered_map<std::string, remote_function_basic *> rfuncmap;
+        std::unordered_map<std::string, remote_function_basic *> rfuncmap = {};
 
       public:
         void bind(int node_no = CROW_RPC_NODE_NO) { node::bind(node_no); }
@@ -88,7 +88,7 @@ namespace crow
     class rpc_requestor_node : public crow::node
     {
       public:
-        crow::packet *incpack;
+        crow::packet *incpack = nullptr;
 
       public:
         template <class Ret, class... Args>

@@ -21,21 +21,21 @@ namespace crow
 {
     struct subheader_pubsub
     {
-        uint8_t type;
-        uint8_t thmsz;
+        uint8_t type=0;
+        uint8_t thmsz=0;
     } __attribute__((packed));
 
     struct subheader_pubsub_data : public subheader_pubsub
     {
-        uint16_t datsz;
+        uint16_t datsz=0;
         igris::buffer theme() { return {(char *)(this + 1), thmsz}; }
         igris::buffer data() { return {(char *)(this + 1) + thmsz, datsz}; }
     } __attribute__((packed));
 
     struct subheader_pubsub_control : public subheader_pubsub
     {
-        uint8_t qos;
-        uint16_t ackquant;
+        uint8_t qos=0;
+        uint16_t ackquant=0;
         igris::buffer theme() { return {(char *)(this + 1), thmsz}; }
     } __attribute__((packed));
 
@@ -43,8 +43,8 @@ namespace crow
     {
       public:
         struct dlist_head subscribers = DLIST_HEAD_INIT(subscribers);
-        void (*incoming_handler)(crow::packet *);
-        void (*undelivered_handler)(crow::packet *);
+        void (*incoming_handler)(crow::packet *)=nullptr;
+        void (*undelivered_handler)(crow::packet *)=nullptr;
 
       public:
         pubsub_protocol_cls() {}

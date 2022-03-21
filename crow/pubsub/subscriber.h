@@ -10,17 +10,17 @@ namespace crow
     class subscriber
     {
     public:
-        dlist_head lnk;
+        dlist_head lnk = DLIST_HEAD_INIT(lnk);
 
     public:
-        crow::hostaddr_view addr;
-        const char *theme;
-        uint8_t qos;
-        uint16_t ackquant;
-        uint8_t rqos;
-        uint16_t rackquant;
+        crow::hostaddr_view addr={};
+        const char *theme=nullptr;
+        uint8_t qos=0;
+        uint16_t ackquant=0;
+        uint8_t rqos=0;
+        uint16_t rackquant=0;
 
-        igris::delegate<void, crow::pubsub_packet_ptr> dlg;
+        igris::delegate<void, crow::pubsub_packet_ptr> dlg={};
 
     public:
         subscriber() = default;
@@ -28,6 +28,9 @@ namespace crow
             : dlg(dlg)
         {
         }
+
+        subscriber(const subscriber&) = delete;
+        subscriber& operator=(const subscriber&) = delete;
 
         virtual void newpack_handler(crow::pubsub_packet_ptr pack)
         {
@@ -56,6 +59,7 @@ namespace crow
             dlist_add(&lnk, &pubsub_protocol.subscribers);
             system_unlock();
         }
+        virtual ~subscriber() = default;
 
         void subscribe(const crow::hostaddr_view &addr, const char *theme,
                        uint8_t qos, uint16_t ackquant, uint8_t rqos,

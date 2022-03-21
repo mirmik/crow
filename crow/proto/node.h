@@ -44,8 +44,8 @@ namespace crow
 
     struct node_subheader
     {
-        nodeid_t sid;
-        nodeid_t rid;
+        nodeid_t sid=0;
+        nodeid_t rid=0;
         union _u
         {
             uint8_t flags = 0;
@@ -54,7 +54,7 @@ namespace crow
                 uint8_t reserved : 4;
                 uint8_t type : 4;
             } f;
-        } u;
+        } u={};
     } __attribute__((packed));
 
     crow::node *find_node(size_t id);
@@ -156,7 +156,7 @@ namespace crow
     class alived_object
     {
     public:
-        node_keepalive_timer keepalive_timer;
+        node_keepalive_timer keepalive_timer={};
 
         virtual void keepalive_handle() {}
 
@@ -208,22 +208,27 @@ namespace crow
 
     class node_packet_ptr : public packet_ptr
     {
-        node *_node;
+        node *_node = nullptr;
 
     public:
         node_packet_ptr(crow::packet *pack_, node *node_)
             : packet_ptr(pack_), _node(node_)
         {
         }
+        
         node_packet_ptr(const crow::packet_ptr &oth, node *node_)
             : packet_ptr(oth), _node(node_)
         {
         }
+
         node_packet_ptr(crow::packet_ptr &&oth, node *node_)
             : packet_ptr(std::move(oth)), _node(node_)
         {
         }
+        
         node_packet_ptr(std::nullptr_t) : packet_ptr(nullptr), _node(nullptr) {}
+        node_packet_ptr(const node_packet_ptr&) = default;
+        node_packet_ptr& operator= (const node_packet_ptr&) = default;
 
         int rid()
         {
@@ -237,7 +242,10 @@ namespace crow
             return h->sid;
         }
 
-        igris::buffer message() { return node_data(pack); }
+        igris::buffer message() 
+        { 
+            return node_data(pack); 
+        }
 
         void reply(igris::buffer rep)
         {

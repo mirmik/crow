@@ -11,7 +11,7 @@ namespace crow
     class packet_ptr
     {
     protected:
-        crow::packet *pack;
+        crow::packet *pack = nullptr;
 
     public:
         packet_ptr(crow::packet *pack_) : pack(pack_)

@@ -20,12 +20,12 @@ namespace crowker_implementation
     class theme
     {
       public:
-        std::string name;
-        std::set<client *> subs;
+        std::string name={};
+        std::set<client *> subs={};
         int64_t timestamp_publish = 0;
         int64_t timestamp_activity = 0;
 
-        std::mutex mtx;
+        std::mutex mtx={};
         igris::cyclic_buffer<std::shared_ptr<std::string>> last_messages { CROW_DEFAULT_QUEUE_SIZE };
 
       public:

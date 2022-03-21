@@ -18,15 +18,15 @@ namespace crow
 {
     struct serial_gstuff : public crow::gateway
     {
-        int fd;
+        int fd=-1;
 
-        crow::compacted_packet *rpack;
-        bool debug;
+        crow::compacted_packet *rpack=nullptr;
+        bool debug=false;
 
-        struct gstuff_autorecv recver;
+        struct gstuff_autorecv recver={};
 
+    public:
         void newline_handler();
-
         void send(crow::packet *) override;
         void read_handler(int);
         void finish() override {}

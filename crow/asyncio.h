@@ -26,15 +26,15 @@ namespace crow
     {
         struct record
         {
-            int fd;
-            SelectType type;
-            igris::delegate<void, int> handler;
+            int fd=-1;
+            SelectType type={};
+            igris::delegate<void, int> handler={};
         };
 
         bool cancel_token = false;
-        int unsleep_pipe[2];
-        std::unordered_map<int, record> dict;
-        std::vector<int> fds;
+        int unsleep_pipe[2]={-1,-1};
+        std::unordered_map<int, record> dict={};
+        std::vector<int> fds={};
 
     public:
         asyncio_manager() { unsleep_subsystem_init(); }
