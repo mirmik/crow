@@ -352,7 +352,7 @@ void send_do(const std::string message)
 
 		case protoopt_e::PROTOOPT_NODE:
 			{
-				crow::node_send(1, nodeno,
+				crow::node::send(1, nodeno,
 				                address,
 				{message.data(), message.size()},
 				qos, ackquant);

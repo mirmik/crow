@@ -24,7 +24,7 @@ namespace crow
         crow::packet_ptr send(int rid, igris::buffer addr, const char *data,
                               size_t len, uint8_t qos, uint16_t ackquant)
         {
-            return node_send(id, rid, addr, igris::buffer(data, len), qos,
+            return crow::node::send(id, rid, addr, igris::buffer(data, len), qos,
                              ackquant);
         }
 

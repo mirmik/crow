@@ -13,7 +13,7 @@ void crow::rshell_cli_node_base::incoming_packet(crow::packet *pack)
 
     if (anslen > 0)
     {
-        node_send(id, sh->sid,
+        crow::node::send(id, sh->sid,
                   igris::buffer(pack->addrptr(),
                                 pack->addrsize()),
                   igris::buffer(ansbuf, anslen), 2, 200);

@@ -86,7 +86,7 @@ void crow::requestor_node::async_request(igris::buffer data)
         { data.data(), data.size() }
     };
 
-    send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
+    node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
 }
 
 crow::requestor_node::requestor_node(

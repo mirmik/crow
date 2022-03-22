@@ -24,7 +24,7 @@ namespace crow
 
         void keepalive_handle() override
         {
-            send(nodeno, crowker, client_name, 0, 0);
+            node::send(nodeno, crowker, client_name, 0, 0);
         }
 
         void incoming_packet(crow::packet *pack) override

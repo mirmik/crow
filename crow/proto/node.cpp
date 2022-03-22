@@ -11,10 +11,10 @@
 DLIST_HEAD(crow::nodes_list);
 crow::node_protocol_cls crow::node_protocol;
 
-crow::packet_ptr crow::node_send(nodeid_t sid, nodeid_t rid,
+crow::packet_ptr crow::node::send(nodeid_t sid, nodeid_t rid,
                                  const crow::hostaddr_view &addr,
                                  const igris::buffer data, uint8_t qos,
-                                 uint16_t ackquant)
+                                 uint16_t ackquant, bool async)
 {
     crow::node_subheader sh;
     sh.sid = sid;
@@ -24,13 +24,13 @@ crow::packet_ptr crow::node_send(nodeid_t sid, nodeid_t rid,
     const igris::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
                                   {(char *)data.data(), data.size()}};
 
-    return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant);
+    return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant, async);
 }
 
-crow::packet_ptr crow::node_send_v(nodeid_t sid, nodeid_t rid,
+crow::packet_ptr crow::node::send_v(nodeid_t sid, nodeid_t rid,
                                    const crow::hostaddr_view &addr,
                                    const igris::buffer *vec, size_t veclen,
-                                   uint8_t qos, uint16_t ackquant)
+                                   uint8_t qos, uint16_t ackquant, bool async)
 {
     crow::node_subheader sh;
     sh.sid = sid;
@@ -40,14 +40,14 @@ crow::packet_ptr crow::node_send_v(nodeid_t sid, nodeid_t rid,
     const igris::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
 
     return crow::send_vv(addr, iov, 1, vec, veclen, CROW_NODE_PROTOCOL, qos,
-                         ackquant);
+                         ackquant, async);
 }
 
-crow::packet_ptr crow::node_send_vv(nodeid_t sid, nodeid_t rid,
+crow::packet_ptr crow::node::send_vv(nodeid_t sid, nodeid_t rid,
                                    const crow::hostaddr_view &addr,
                                    const igris::buffer *vec1, size_t veclen1,
                                    const igris::buffer *vec2, size_t veclen2,
-                                   uint8_t qos, uint16_t ackquant)
+                                   uint8_t qos, uint16_t ackquant, bool async)
 {
     crow::node_subheader sh;
     sh.sid = sid;
@@ -57,7 +57,7 @@ crow::packet_ptr crow::node_send_vv(nodeid_t sid, nodeid_t rid,
     const igris::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
 
     return crow::send_vvv(addr, iov, 1, vec1, veclen1, vec2, veclen2, 
-        CROW_NODE_PROTOCOL, qos, ackquant);
+        CROW_NODE_PROTOCOL, qos, ackquant, async);
 }
 
 void crow::node_protocol_cls::send_node_error(crow::packet *pack,
@@ -73,7 +73,7 @@ void crow::node_protocol_cls::send_node_error(crow::packet *pack,
                                   {(char *)&errcode, sizeof(errcode)}};
 
     crow::send_v({pack->addrptr(), pack->addrsize()}, iov,
-                 2, CROW_NODE_PROTOCOL, 0, pack->ackquant());
+                 2, CROW_NODE_PROTOCOL, 0, pack->ackquant(), true);
 }
 
 void crow::node_protocol_cls::incoming(crow::packet *pack)

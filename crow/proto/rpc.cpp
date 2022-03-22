@@ -31,7 +31,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
             {(char *)&status, 1},
         };
 
-        crow::node_send_v(
+        crow::node::send_v(
             nsh->rid, nsh->sid,
             {pack->addrptr(), pack->addrsize()}, vdata, 1,
             0, 10);
@@ -49,7 +49,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
 
         igris::buffer vdata[] = {{(char *)&status, 1}, outdata};
 
-        crow::node_send_v(
+        crow::node::send_v(
             nsh->rid, nsh->sid,
             {pack->addrptr(), pack->addrsize()}, vdata, 2,
             0, 10);
@@ -66,7 +66,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
         writer.dump(status);
         igris::serialize(writer, outdata);
 
-        crow::node_send(nsh->rid, nsh->sid,
+        crow::node::send(nsh->rid, nsh->sid,
                         {pack->addrptr(), pack->addrsize()},
                         senddata, 0, 0);
     }
@@ -79,7 +79,7 @@ void crow::rpc_node::incoming_packet(crow::packet *pack)
             {(char *)&status, 1},
         };
 
-        crow::node_send_v(
+        crow::node::send_v(
             nsh->rid, nsh->sid,
             {pack->addrptr(), pack->addrsize()}, vdata, 1,
             0, 10);
