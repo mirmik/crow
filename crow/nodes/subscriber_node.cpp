@@ -47,6 +47,20 @@ void crow::abstract_subscriber_node::subscribe(crow::hostaddr_view crowker_addr,
     node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
 }
 
+void crow::abstract_subscriber_node::init_subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
+   igris::buffer theme, uint8_t qos, uint16_t ackquant,
+   uint8_t rqos, uint16_t rackquant) 
+{
+    this->crowker_addr = crowker_addr;
+    this->crowker_node = crowker_node;
+    this->theme = { theme.data(), theme.size() };
+    this->qos = qos;
+    this->ackquant = ackquant;
+    this->rqos = rqos;
+    this->rackquant = rackquant;    
+}
+
+
 void crow::abstract_subscriber_node::subscribe()
 {
     subscribe(crowker_addr, crowker_node, theme, qos, ackquant, rqos, rackquant);

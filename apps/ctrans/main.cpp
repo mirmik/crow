@@ -904,7 +904,7 @@ int main(int argc, char *argv[])
 
 	if (subscribe_mode)
 	{
-		subscriber_node.subscribe(
+		subscriber_node.init_subscribe(
 		    address,
 		    CROWKER_SERVICE_BROCKER_NODE_NO,
 		    theme.c_str(),
@@ -916,7 +916,7 @@ int main(int argc, char *argv[])
 
 	if (service_mode)
 	{
-		service_node.subscribe(
+		service_node.init_subscribe(
 		    address,
 		    CROWKER_SERVICE_BROCKER_NODE_NO,
 		    theme.c_str(),

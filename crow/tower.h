@@ -93,6 +93,7 @@ namespace crow
 
     int incomming_stage_count();
     int outers_stage_count();
+    void unsleep();
 
     void set_spin_cancel_token();
 }

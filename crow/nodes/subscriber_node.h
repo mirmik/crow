@@ -31,6 +31,10 @@ namespace crow
                        igris::buffer theme, uint8_t qos, uint16_t ackquant,
                        uint8_t rqos, uint16_t rackquant);
 
+        void init_subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
+                       igris::buffer theme, uint8_t qos, uint16_t ackquant,
+                       uint8_t rqos, uint16_t rackquant);
+
         void subscribe_v2(crow::hostaddr_view crowker_addr,
                        igris::buffer theme, uint8_t get_latest);
 

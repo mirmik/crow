@@ -167,7 +167,7 @@ namespace crow
                     igris::timer_spec<decltype(millis())>> &)keepalive_timer,
                 millis(), interval);
 
-            crow::unsleep_handler();
+            crow::unsleep();
 
             if (immediate_call) 
             {
