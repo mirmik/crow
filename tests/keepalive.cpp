@@ -6,12 +6,17 @@
 #include <chrono>
 
 static int a = 0;
+static int b = 0;
 
 class test_keepalive_node : public  crow::node, public crow::alived_object 
 {
+	int* ptr = nullptr;
+public:
+	test_keepalive_node(int* ptr) : ptr(ptr) {} 
+
 	void keepalive_handle() override 
 	{
-		a++;
+		(*ptr)++;
 	}
 
 	void incoming_packet(crow::packet*) override {}
@@ -19,10 +24,11 @@ class test_keepalive_node : public  crow::node, public crow::alived_object
 
 TEST_CASE("keepalive") 
 {
-	test_keepalive_node n;
-	n.install_keepalive(10);
+	test_keepalive_node an(&a);
+	test_keepalive_node bn(&b);
+	an.install_keepalive(10);
+	bn.install_keepalive(20);
 
-	//std::this_thread::sleep_for(std::chrono::microseconds(450));
 	int64_t start = millis();
 	while(millis() - start < 45) 
 	{
@@ -30,4 +36,5 @@ TEST_CASE("keepalive")
 	}
 
 	CHECK_EQ(a, 5);
+	CHECK_EQ(b, 3);
 }
