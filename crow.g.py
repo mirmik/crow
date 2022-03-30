@@ -34,7 +34,7 @@ licant.modules.module("crow.minimal",
 		"src/packet_ptr.cpp",
 		"src/tower.cpp",
 		"src/gateway.cpp",
-		"src/hexer.c",
+		"src/hexer.cpp",
 		"src/address.cpp",
 		"src/hostaddr_view.cpp",
 		"src/hostaddr.cpp",
@@ -42,7 +42,7 @@ licant.modules.module("crow.minimal",
 		"proto/keepalive.cpp",
 		"proto/node-sync.cpp",
 		"proto/channel.cpp",
-		"nodes/rshell_cli_node.cpp",
+		#"nodes/rshell_cli_node.cpp",
 		"nodes/subscriber_node.cpp",
 		"nodes/publisher_node.cpp",
 		"nodes/service_node.cpp",
@@ -56,11 +56,11 @@ licant.modules.module("crow",
 	sources = [
 		"src/iter.cpp",
 		"proto/acceptor.cpp",
-		"proto/socket.cpp",
-		"proto/msgbox.cpp",
+		#"proto/socket.cpp",
+		#"proto/msgbox.cpp",
 		"proto/channel-sync.cpp",		
 		#"proto/rpc.cpp",
-		"addons/noslogger.cpp",
+		#"addons/noslogger.cpp",
 	],
 
 	mdepends = [
@@ -124,17 +124,9 @@ licant.modules.module("crow.serial_gstuff",
 		#"igris.protocols.gstuff"
 	])
 
-#####################################################################################
-####################################PROTOCOLS########################################
-
 licant.module("crow.protocol.pubsub", "impl", default=True,
-	sources = ["crow/pubsub/pubsub.cpp"]
+	sources = [
+		"crow/pubsub/pubsub.cpp"
+	]
 )
 
-#licant.module("crow.protocol.pubsub", "stub",
-#	defines = ["WITHOUT_CROW_PUBSUB=1"]
-#)
-
-#####################################################################################
-
-licant.module("crow.crowker.service_node", sources=["crow/brocker/service.cpp"])
