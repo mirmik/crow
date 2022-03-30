@@ -27,11 +27,28 @@ crow::subscriber_node::subscriber_node(
 {
 }
 
-void crow::abstract_subscriber_node::subscribe(crow::hostaddr_view crowker_addr,
-                                               int crowker_node,
-                                               igris::buffer theme, uint8_t qos,
-                                               uint16_t ackquant, uint8_t rqos,
-                                               uint16_t rackquant)
+void crow::abstract_subscriber_node::init_subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
+   igris::buffer theme, uint8_t qos, uint16_t ackquant,
+   uint8_t rqos, uint16_t rackquant) 
+{
+    this->crowker_addr = crowker_addr;
+    this->crowker_node = crowker_node;
+    this->theme = { theme.data(), theme.size() };
+    this->qos = qos;
+    this->ackquant = ackquant;
+    this->rqos = rqos;
+    this->rackquant = rackquant;    
+}
+
+void crow::abstract_subscriber_node::set_brocker_address(
+	crow::hostaddr_view crowker_addr,
+    int crowker_node) 
+{
+	this->crowker_addr = crowker_addr;
+	this->crowker_node = crowker_node;
+}
+
+void crow::abstract_subscriber_node::subscribe()
 {
     crow::subscribe_subheader sh;
 
@@ -47,41 +64,7 @@ void crow::abstract_subscriber_node::subscribe(crow::hostaddr_view crowker_addr,
     node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
 }
 
-void crow::abstract_subscriber_node::init_subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
-   igris::buffer theme, uint8_t qos, uint16_t ackquant,
-   uint8_t rqos, uint16_t rackquant) 
-{
-    this->crowker_addr = crowker_addr;
-    this->crowker_node = crowker_node;
-    this->theme = { theme.data(), theme.size() };
-    this->qos = qos;
-    this->ackquant = ackquant;
-    this->rqos = rqos;
-    this->rackquant = rackquant;    
-}
-
-
-void crow::abstract_subscriber_node::subscribe()
-{
-    subscribe(crowker_addr, crowker_node, theme, qos, ackquant, rqos, rackquant);
-}
-
-void crow::abstract_subscriber_node::subscribe(crow::hostaddr_view crowker_addr,
-                                               igris::buffer theme)
-{
-    subscribe(crowker_addr, crowker_node, theme, qos, ackquant, rqos, rackquant);
-}
-
-void crow::abstract_subscriber_node::set_brocker_address(
-	crow::hostaddr_view crowker_addr,
-    int crowker_node) 
-{
-	this->crowker_addr = crowker_addr;
-	this->crowker_node = crowker_node;
-}
-
-void crow::abstract_subscriber_node::subscribe_v2(crow::hostaddr_view crowker_addr,
-                       igris::buffer theme, bool updates, uint32_t request_latest) 
+void crow::abstract_subscriber_node::subscribe_v2(bool updates, uint32_t request_latest) 
 {
     crow::subscribe_subheader_v2 sh;
 
@@ -98,3 +81,4 @@ void crow::abstract_subscriber_node::subscribe_v2(crow::hostaddr_view crowker_ad
 
     node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);    
 }
+

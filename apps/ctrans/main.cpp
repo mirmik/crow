@@ -42,6 +42,7 @@ bool userqos = false;
 uint8_t qos = 0;
 uint8_t type = 0;
 uint16_t ackquant = 200;
+unsigned int latest = 0;
 
 bool api = false;
 bool noconsole = false;
@@ -52,6 +53,7 @@ bool gdebug = false;
 bool info = false;
 bool beam_mode = false;
 bool subscribe_mode = false;
+bool latest_mode = false;
 bool service_mode = false;
 bool request_mode = false;
 bool crowker_mode = false;
@@ -542,6 +544,7 @@ void parse_options(int argc, char **argv)
 		{"pipeline", required_argument, NULL, 'e'},
 
 		{"subscribe", required_argument, NULL, 'K'},
+		{"latest", required_argument, NULL, 'D'},
 		{"publish", required_argument, NULL, 'L'},
 		{"request", required_argument, NULL, 'G'},
 		{"service", required_argument, NULL, 'Y'},
@@ -684,6 +687,11 @@ void parse_options(int argc, char **argv)
 				theme = optarg;
 				subscribe_mode = 1;
 				crowker_mode = 1;
+				break;
+
+			case 'D':
+				latest = atoi(optarg);
+				latest_mode = 1;
 				break;
 
 			case 'G':
@@ -912,6 +920,19 @@ int main(int argc, char *argv[])
 		    qos, ackquant
 		);
 		subscriber_node.install_keepalive(2000);
+	}
+
+	if (subscribe_mode && latest_mode)
+	{
+		subscriber_node.init_subscribe(
+		    address,
+		    CROWKER_SERVICE_BROCKER_NODE_NO,
+		    theme.c_str(),
+		    qos, ackquant,
+		    qos, ackquant
+		);
+		subscriber_node.subscribe_v2(true, latest);
+		subscriber_node.install_keepalive(2000, false);
 	}
 
 	if (service_mode)

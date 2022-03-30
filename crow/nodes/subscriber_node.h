@@ -27,18 +27,12 @@ namespace crow
         void set_rqos(int rqos, int rackquant) { this->rqos = rqos; this->rackquant = rackquant; }
 
         void subscribe();
-        void subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
-                       igris::buffer theme, uint8_t qos, uint16_t ackquant,
-                       uint8_t rqos, uint16_t rackquant);
+        void subscribe_v2(bool updates, uint32_t get_latest);
 
         void init_subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
                        igris::buffer theme, uint8_t qos, uint16_t ackquant,
                        uint8_t rqos, uint16_t rackquant);
 
-        void subscribe_v2(crow::hostaddr_view crowker_addr,
-                       igris::buffer theme, bool updates, uint32_t get_latest);
-
-        void subscribe(crow::hostaddr_view crowker_addr, igris::buffer theme);
         void keepalive_handle() override 
         { 
             subscribe(); 

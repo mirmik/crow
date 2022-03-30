@@ -122,6 +122,9 @@ void crow::crowker::send_latest(const std::string& theme, client* cl, uint32_t c
     cl->thms[thm].opts = nullptr;
     cl->timestamp_activity = crowker_eval_timestamp();
 
+    if (count_of_latest == 0)
+        return;
+    
     std::vector<std::shared_ptr<std::string>> latest_messages = 
         thm->get_latest(count_of_latest);
     for (auto& msg : latest_messages) 
