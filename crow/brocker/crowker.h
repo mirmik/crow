@@ -45,7 +45,8 @@ namespace crow
             return _instance;
         }
 
-        void subscribe(const std::string &theme, client *cl);
+        void subscribe(const std::string &theme, client* cl);
+        void send_latest(const std::string& theme, client* cl, uint32_t count_of_latest);
 
         void tcp_subscribe(const std::string &theme,
                            nos::inet::tcp_socket *sock);

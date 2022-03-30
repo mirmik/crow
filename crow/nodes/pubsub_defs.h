@@ -46,7 +46,14 @@ namespace crow
         uint8_t rqos=0;
         uint16_t rackquant=0;
         uint8_t thmsize=0;
-        uint8_t request_latest=0;
+        union cmd_u {
+            uint32_t all = 0;
+            struct 
+            {
+                uint8_t subscribe_on_updates : 1;
+                uint32_t request_latest : 31;
+            } f;
+        } cmd = {};
         igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
     } __attribute__((packed));
 

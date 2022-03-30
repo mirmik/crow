@@ -91,7 +91,6 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
 void crow::crowker::tcp_subscribe(const std::string &theme,
                                   nos::inet::tcp_socket *sock)
 {
-
     auto *thm = get_theme(theme);
     auto *sub = crowker_implementation::tcp_client::get(sock->getaddr());
     sub->context = this;
@@ -113,5 +112,20 @@ void crow::crowker::unlink_theme_client(crowker_implementation::theme *thm,
     if (thm->count_clients() == 0)
     {
         themes.erase(thm->name);
+    }
+}
+
+void crow::crowker::send_latest(const std::string& theme, client* cl, uint32_t count_of_latest) 
+{
+    auto *thm = get_theme(theme);
+    thm->timestamp_activity = crowker_eval_timestamp();
+    cl->thms[thm].opts = nullptr;
+    cl->timestamp_activity = crowker_eval_timestamp();
+
+    std::vector<std::shared_ptr<std::string>> latest_messages = 
+        thm->get_latest(count_of_latest);
+    for (auto& msg : latest_messages) 
+    {
+        cl->publish(theme, *msg, nullptr);
     }
 }

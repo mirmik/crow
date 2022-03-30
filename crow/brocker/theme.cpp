@@ -3,6 +3,7 @@
 #include "theme.h"
 #include "client.h"
 #include <igris/dprint.h>
+#include <igris/math.h>
 #include <chrono>
 #include <nos/print.h>
 
@@ -19,6 +20,17 @@ int64_t crowker_eval_timestamp()
     auto millis =
         std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     return millis;
+}
+
+std::vector<std::shared_ptr<std::string>> crowker_implementation::theme::get_latest(uint32_t count) 
+{
+    std::vector<std::shared_ptr<std::string>> arr;
+    uint32_t size = __MIN__(count, last_messages.size());
+    for (size_t i = 0; i < size; ++i) 
+    {
+        arr.push_back(last_messages[i]);
+    }
+    return arr;
 }
 
 void crowker_implementation::theme::publish(const std::shared_ptr<std::string>& data)

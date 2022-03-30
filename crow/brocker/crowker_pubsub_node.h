@@ -41,6 +41,10 @@ namespace crow
         void subscribe_on_theme(crow::hostaddr_view, int nid,
                                 igris::buffer theme, uint8_t rqos,
                                 uint16_t rackquant) override;
+        void subscribe_on_theme_v2(crow::hostaddr_view, int nid,
+                                igris::buffer theme, uint8_t rqos,
+                                uint16_t rackquant, bool subscribe_on_updates, 
+                                uint32_t request_latest) override;
         void client_beam(crow::hostaddr_view, int nid,
                          igris::buffer name) override;
         void undelivered_packet_handle(crow::hostaddr_view, int node) override;

@@ -36,7 +36,7 @@ namespace crow
                        uint8_t rqos, uint16_t rackquant);
 
         void subscribe_v2(crow::hostaddr_view crowker_addr,
-                       igris::buffer theme, uint8_t get_latest);
+                       igris::buffer theme, bool updates, uint32_t get_latest);
 
         void subscribe(crow::hostaddr_view crowker_addr, igris::buffer theme);
         void keepalive_handle() override 

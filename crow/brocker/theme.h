@@ -32,7 +32,12 @@ namespace crowker_implementation
         theme(size_t queue_size);
         theme(const theme&) = delete;
 
-        size_t count_clients() { return subs.size(); }
+        size_t count_clients() 
+        { 
+            return subs.size(); 
+        }
+
+        std::vector<std::shared_ptr<std::string>> get_latest(uint32_t count);
 
         bool link_client(client *sub)
         {
@@ -45,7 +50,10 @@ namespace crowker_implementation
             return false;
         }
 
-        bool has_client(client *sub) { return subs.count(sub); }
+        bool has_client(client *sub) 
+        { 
+            return subs.count(sub); 
+        }
 
         void unlink_client(client *sub)
         {

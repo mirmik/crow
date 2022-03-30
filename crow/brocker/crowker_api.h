@@ -12,6 +12,11 @@ namespace crow
         virtual void subscribe_on_theme(crow::hostaddr_view, int nid,
                                         igris::buffer theme, uint8_t rqos,
                                         uint16_t rackquant) = 0;
+        virtual void subscribe_on_theme_v2(crow::hostaddr_view, int nid,
+                                        igris::buffer theme, uint8_t rqos,
+                                        uint16_t rackquant,
+                                        bool subscribe_to_updates,
+                                        uint32_t request_latest) = 0;
 
         virtual void undelivered_packet_handle(crow::hostaddr_view, int node) = 0;
         virtual void client_beam(crow::hostaddr_view, int nid,

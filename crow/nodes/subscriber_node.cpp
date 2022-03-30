@@ -81,7 +81,7 @@ void crow::abstract_subscriber_node::set_brocker_address(
 }
 
 void crow::abstract_subscriber_node::subscribe_v2(crow::hostaddr_view crowker_addr,
-                       igris::buffer theme, uint8_t request_latest) 
+                       igris::buffer theme, bool updates, uint32_t request_latest) 
 {
     crow::subscribe_subheader_v2 sh;
 
@@ -89,7 +89,8 @@ void crow::abstract_subscriber_node::subscribe_v2(crow::hostaddr_view crowker_ad
     sh.rqos = rqos;
     sh.rackquant = rackquant;
     sh.thmsize = theme.size();
-    sh.request_latest = request_latest;
+    sh.cmd.f.subscribe_on_updates = updates;
+    sh.cmd.f.request_latest = request_latest;
 
     const igris::buffer iov[] = {{(char *)&sh + sizeof(node_subheader),
                                   sizeof(sh) - sizeof(node_subheader)},
