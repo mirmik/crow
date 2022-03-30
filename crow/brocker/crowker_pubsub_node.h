@@ -6,21 +6,7 @@
 
 namespace crow
 {
-    class crowker_pubsub_node_api
-    {
-    public:
-        virtual void subscribe_on_theme(crow::hostaddr_view, int nid,
-                                        igris::buffer theme, uint8_t rqos,
-                                        uint16_t rackquant) = 0;
-
-        virtual void publish_to_theme(igris::buffer theme,
-                                      const std::shared_ptr<std::string>& data) = 0;
-
-        virtual void undelivered_packet(crow::hostaddr_view, int node) = 0;
-        virtual void client_beam(crow::hostaddr_view, int nid,
-                                 igris::buffer name) = 0;
-        virtual ~crowker_pubsub_node_api() = default;
-    };
+    class crowker_pubsub_node_api;
 
     class crowker_pubsub_node : public crow::node
     {

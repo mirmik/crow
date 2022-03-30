@@ -19,12 +19,12 @@ int64_t crowker_eval_timestamp();
 
 namespace crow
 {
-    class crowker_api;
+    class crowker_pubsub_node_api;
     class crowker
     {
     public:
         std::map<std::string, crowker_implementation::theme> themes={};
-        std::vector<crowker_api *> apivec={};
+        std::vector<crowker_pubsub_node_api *> apivec={};
         bool brocker_info = false;
         bool log_publish = false;
 
@@ -32,7 +32,7 @@ namespace crow
         void set_info_mode(bool en) { brocker_info = en; }
 
         theme *get_theme(const std::string &name);
-        void add_api(crowker_api *api) { apivec.push_back(api); }
+        void add_api(crowker_pubsub_node_api *api) { apivec.push_back(api); }
 
         void publish(const std::string &theme, const std::shared_ptr<std::string> &data);
 

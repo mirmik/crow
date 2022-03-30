@@ -33,6 +33,25 @@ namespace crow
         ~crowker_api_client();
     };
 
+    class crowker_pubsub_node_api
+    {
+    public:
+        virtual void subscribe_on_theme(crow::hostaddr_view, int nid,
+                                        igris::buffer theme, uint8_t rqos,
+                                        uint16_t rackquant) = 0;
+
+        virtual void publish_to_theme(igris::buffer theme,
+                                      const std::shared_ptr<std::string>& data) = 0;
+
+        virtual void undelivered_packet(crow::hostaddr_view, int node) = 0;
+        virtual void client_beam(crow::hostaddr_view, int nid,
+                                 igris::buffer name) = 0;
+        virtual ~crowker_pubsub_node_api() = default;
+
+        virtual std::vector<crowker_implementation::client *> get_clients() = 0;
+    };
+
+
     class crowker_api : public crowker_pubsub_node_api
     {
         std::map<std::pair<crow::hostaddr, int>, crowker_api_client> clients={};
@@ -41,7 +60,7 @@ namespace crow
         crowker_pubsub_node *crowker_node=nullptr;
         crow::crowker *crowker=nullptr;
 
-        std::vector<crowker_implementation::client *> get_clients()
+        std::vector<crowker_implementation::client *> get_clients() override
         {
             std::vector<crowker_implementation::client *> ret;
             for (auto &pair : clients)
