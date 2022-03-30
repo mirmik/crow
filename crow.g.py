@@ -59,7 +59,7 @@ licant.modules.module("crow",
 		"proto/socket.cpp",
 		"proto/msgbox.cpp",
 		"proto/channel-sync.cpp",		
-		"proto/rpc.cpp",
+		#"proto/rpc.cpp",
 		"addons/noslogger.cpp",
 	],
 
