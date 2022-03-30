@@ -8,8 +8,6 @@
 #include <nos/shell/argv.h>
 #include <nos/shell/executor.h>
 
-extern crow::crowker_api crowker_api;
-
 static int themes(const nos::argv&, nos::ostream& os) 
 {	
 	auto& themes = crow::crowker::instance()->themes;
@@ -126,9 +124,9 @@ static void undelivered(crow::node_packet_ptr pack)
 }
 
 
-static void incoming_beam(crow::node_packet_ptr pack)
+static void incoming_beam(crow::node_packet_ptr)
 {
-	crowker_api.client_beam(pack->addr(), pack.sid(), pack.message());
+//	crowker_api.client_beam(pack->addr(), pack.sid(), pack.message());
 }
 
 crow::node_delegate control(incoming, undelivered);

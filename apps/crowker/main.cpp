@@ -33,7 +33,7 @@ int tcpport = -1;
 bool quite = false;
 bool debug_mode = false;
 
-crow::crowker_api crowker_api;
+//crow::crowker_api crowker_api;
 crow::crowker_pubsub_node pubsub_node;
 
 void tcp_client_listener(nos::inet::tcp_socket client)
@@ -150,12 +150,9 @@ void print_help()
 
 int main(int argc, char *argv[])
 {
-	crowker_api.crowker = crow::crowker::instance();
-	crowker_api.crowker_node = &pubsub_node;
-	pubsub_node.set_api(&crowker_api);
 	crow::pubsub_protocol.enable_crowker_subsystem();
 	pubsub_node.bind(CROWKER_SERVICE_BROCKER_NODE_NO);
-	crow::crowker::instance()->add_api(&crowker_api);
+	crow::crowker::instance()->add_api(&pubsub_node);
 
 	const struct option long_options[] =
 	{

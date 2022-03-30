@@ -14,7 +14,7 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
         {
             auto &sh = pack->subheader<publish_subheader>();
             auto message = sh.message();
-            api->publish_to_theme(sh.theme(), std::make_shared<std::string>(
+            publish_to_theme(sh.theme(), std::make_shared<std::string>(
                 message.data(), message.size()));
         };
         break;
@@ -22,7 +22,7 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
         case PubSubTypes::Subscribe:
         {
             auto &sh = pack->subheader<subscribe_subheader>();
-            api->subscribe_on_theme(pack->addr(), sh.sid, sh.theme(), sh.rqos,
+            subscribe_on_theme(pack->addr(), sh.sid, sh.theme(), sh.rqos,
                                     sh.rackquant);
         };
         break;
@@ -30,7 +30,7 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
         case PubSubTypes::Request:
         {
             auto &sh = pack->subheader<request_subheader>();
-            api->subscribe_on_theme(pack->addr(), sh.sid, sh.reply_theme(), sh.rqos,
+            subscribe_on_theme(pack->addr(), sh.sid, sh.reply_theme(), sh.rqos,
                                     sh.rackquant);
 
             uint8_t len = sh.reply_theme().size();
@@ -38,7 +38,7 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
                 igris::buffer(&len, 1),
                 sh.reply_theme(), 
                 sh.message()));
-            api->publish_to_theme(sh.theme(), msg);
+            publish_to_theme(sh.theme(), msg);
         };
         break;
 
@@ -52,6 +52,78 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
 void crow::crowker_pubsub_node::undelivered_packet(crow::packet * pack) 
 {
     auto node = crow::node_protocol_cls::rid(pack);
-    api->undelivered_packet(pack->addr(), node);
+    undelivered_packet_handle(pack->addr(), node);
     crow::release(pack);
+}
+
+
+void crow::crowker_pubsub_node::subscribe_on_theme(crow::hostaddr_view view, int nid,
+        igris::buffer theme, uint8_t rqos,
+        uint16_t rackquant)
+{
+    node_client::options_struct opt = {rqos, rackquant};
+
+    auto key = std::make_pair(view, nid);
+    auto &client = clients[key];
+    client.set_confirmed(rqos != 0);
+
+    client.api = this;
+    client.addr = view;
+    client.node = nid;
+    client.crowker_node = this;
+
+    client.options[theme.to_string()] = opt;
+    crow::crowker::instance()->subscribe(theme.to_string(), &client);
+}
+
+void crow::crowker_pubsub_node::undelivered_packet_handle(
+    crow::hostaddr_view addr, int node)
+{
+    auto& client = clients[std::make_pair(addr, node)];
+    client.detach_from_themes();
+}
+
+void crow::crowker_pubsub_node::client_beam(
+    crow::hostaddr_view view, int nid, igris::buffer name)
+{
+    auto key = std::make_pair(view, nid);
+    auto &client = clients[key];
+    client.set_name(name);
+
+}
+
+crow::crowker_pubsub_node::node_client::~node_client() {}
+
+void crow::crowker_pubsub_node::node_client::publish(const std::string &theme,
+                                       const std::string &data,
+                                       crowker_implementation::options *)
+{
+    const auto &opts = options[theme];
+    crow::consume_subheader sh;
+
+    sh.type = PubSubTypes::Consume;
+    sh.thmsize = theme.size();
+    sh.datsize = data.size();
+
+    const igris::buffer iov[] =
+    {
+        {
+            (char *)&sh + sizeof(node_subheader),
+            sizeof(sh) - sizeof(node_subheader)
+        },
+        theme,
+        data,
+    };
+
+    crowker_node->send_v(node, addr, iov, std::size(iov), opts.qos,
+                         opts.ackquant);
+}
+
+std::vector<crowker_implementation::client *> 
+crow::crowker_pubsub_node::get_clients()
+{
+    std::vector<crowker_implementation::client *> ret;
+    for (auto &pair : clients)
+        ret.push_back(&pair.second);
+    return ret;
 }
