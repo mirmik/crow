@@ -1,4 +1,5 @@
 #include <crow/brocker/crowker_api.h>
+#include <crow/brocker/crowker_pubsub_node.h>
 #include <crow/nodes/pubsub_defs.h>
 #include <igris/util/bug.h>
 
