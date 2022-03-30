@@ -3,7 +3,7 @@
 
 #include <crow/brocker/client.h>
 #include <crow/brocker/crowker.h>
-#include <crow/nodes/crowker_pubsub_node.h>
+#include <crow/brocker/crowker_pubsub_node.h>
 
 namespace crow
 {

@@ -61,7 +61,6 @@ licant.modules.module("crow",
 		"proto/channel-sync.cpp",		
 		"proto/rpc.cpp",
 		"addons/noslogger.cpp",
-		"nodes/crowker_pubsub_node.cpp",
 	],
 
 	mdepends = [
@@ -88,6 +87,7 @@ licant.module("crow.crowker",
 		"brocker/tcp_client.cpp",
 		"brocker/crowker_api.cpp",
 		"pubsub/crowker_support.cpp",
+		"brocker/crowker_pubsub_node.cpp",
 	]
 )
 
