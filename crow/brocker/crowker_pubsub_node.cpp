@@ -2,6 +2,7 @@
 #include <crow/brocker/crowker_api.h>
 #include <crow/nodes/pubsub_defs.h>
 
+#include <igris/util/bug.h>
 #include <nos/fprint.h>
 
 void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
@@ -52,10 +53,18 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
         };
         break;
 
-        default:
-            break;
-    }
+        case PubSubTypes::Consume:
+        {
+        }
+        break;
 
+        case PubSubTypes::Unsubscribe:
+        {
+            auto &sh = pack->subheader<subscribe_subheader>();
+            unsubscribe_from_theme(pack->addr(), sh.sid, sh.theme());    
+        }
+        break;
+    }
     crow::release(pack);
 }
 
@@ -97,6 +106,12 @@ void crow::crowker_pubsub_node::subscribe_on_theme_v2(crow::hostaddr_view view, 
 
     if (subscribe_to_updates)
         crow::crowker::instance()->subscribe(theme.to_string(), &client);
+}
+
+void crow::crowker_pubsub_node::unsubscribe_from_theme(crow::hostaddr_view view, int nid,
+        igris::buffer theme)
+{
+    BUG();
 }
 
 void crow::crowker_pubsub_node::undelivered_packet_handle(
