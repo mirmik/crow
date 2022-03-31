@@ -14,6 +14,7 @@
 #include <crow/tower.h>
 #include <crow/warn.h>
 #include <crow/proto/node.h>
+#include <crow/pubsub/pubsub.h>
 
 #include <nos/print.h>
 
@@ -171,6 +172,16 @@ static void crow_incoming_handler(crow::packet *pack)
         _in_incoming_handler = false;
         return;
     }
+
+#ifdef CROW_PUBSUB_PROTOCOL_SUPPORTED
+    if (CROW_PUBSUB_PROTOCOL == pack->type())
+    {
+        _in_incoming_handler = true;
+        crow::pubsub_protocol.incoming(pack);
+        _in_incoming_handler = false;
+        return;
+    }
+#endif
 
     if (crow::default_incoming_handler)
     {
@@ -700,6 +711,16 @@ void crow_undelivered(crow::packet *pack)
         _in_undelivered_handler = false;
         return;
     }
+
+#ifdef CROW_PUBSUB_PROTOCOL_SUPPORTED
+    else if (CROW_PUBSUB_PROTOCOL == pack->type())
+    {
+        _in_undelivered_handler = true;
+        crow::pubsub_protocol.undelivered(pack);
+        _in_undelivered_handler = false;
+        return;
+    }
+#endif
 }
 
 static inline void crow_onestep_send_stage()

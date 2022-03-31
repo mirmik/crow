@@ -8,6 +8,8 @@
 #include <string>
 
 #include "theme.h"
+
+#include "crow_client.h"
 #include "tcp_client.h"
 #include <crow/hostaddr.h>
 
@@ -55,6 +57,11 @@ namespace crow
 
         void unlink_theme_client(crowker_implementation::theme *thm,
                                  crowker_implementation::client *sub);
+
+        void erase_crow_client(const std::string &addr)
+        {
+            crowker_implementation::crow_client::allsubs.erase(addr);
+        }
 
         void erase_tcp_client(const nos::inet::netaddr &addr)
         {
