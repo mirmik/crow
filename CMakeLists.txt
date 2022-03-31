@@ -12,6 +12,7 @@ file(GLOB SOURCES
 	crow/src/variants/crow_print.cpp
 	crow/src/variants/warn.cpp
 	crow/src/variants/stdtime.cpp
+	crow/pubsub/*.cpp
 	crow/nodes/*.cpp
 	crow/proto/*.cpp
 	crow/gates/*.cpp
