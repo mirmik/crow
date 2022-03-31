@@ -7,8 +7,7 @@
 
 namespace crow
 {
-    [[deprecated]]
-    class subscriber
+    class [[deprecated]] subscriber
     {
     public:
         dlist_head lnk = DLIST_HEAD_INIT(lnk);
