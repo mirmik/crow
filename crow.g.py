@@ -47,6 +47,7 @@ licant.modules.module("crow.minimal",
 		"nodes/publisher_node.cpp",
 		"nodes/service_node.cpp",
 		"nodes/requestor_node.cpp",
+		"nodes/spammer.cpp",
 	],
 	mdepends = ["crow.include", "crow.diagnostic"]
 )

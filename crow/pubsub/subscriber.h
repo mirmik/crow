@@ -7,6 +7,7 @@
 
 namespace crow
 {
+    [[deprecated]]
     class subscriber
     {
     public:
