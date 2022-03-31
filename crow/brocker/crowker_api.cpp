@@ -6,8 +6,6 @@
 std::vector<client *> crow::crowker::clients()
 {
     std::vector<client *> ret;
-    for (auto *client : crowker_implementation::crow_client::clients())
-        ret.push_back(client);
     for (auto *client : crowker_implementation::tcp_client::clients())
         ret.push_back(client);
     for (auto * api : apivec)

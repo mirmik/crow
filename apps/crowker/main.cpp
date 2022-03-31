@@ -13,7 +13,6 @@
 #include <thread>
 
 #include <crow/brocker/crowker.h>
-#include <crow/pubsub/pubsub.h>
 #include "control_node.h"
 
 #include <nos/print.h>
@@ -150,7 +149,6 @@ void print_help()
 
 int main(int argc, char *argv[])
 {
-	crow::pubsub_protocol.enable_crowker_subsystem();
 	pubsub_node.bind(CROWKER_SERVICE_BROCKER_NODE_NO);
 	crow::crowker::instance()->add_api(&pubsub_node);
 

@@ -47,47 +47,6 @@ void crow::crowker::subscribe(const std::string &theme, client *cl)
         nos::fprintln("new subscribe(crow): t:{}", theme);
 }
 
-void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
-                                   const std::string &theme, uint8_t qos,
-                                   uint16_t ackquant)
-{
-    std::string saddr{(char *)addr.data(), (size_t)addr.size()};
-    auto *thm = get_theme(theme);
-    thm->timestamp_activity = crowker_eval_timestamp();
-
-    auto *sub = crowker_implementation::crow_client::get(saddr);
-    sub->context = this;
-
-    // TODO: Перенести. Незачем перезаписывать адресс каждый раз.
-    sub->addr = saddr;
-
-    if (!thm->has_client(sub))
-    {
-        thm->link_client(sub);
-        crowker_implementation::options *&opts = sub->thms[thm].opts;
-        opts = new crowker_implementation::crow_options{qos, ackquant};
-
-        if (brocker_info)
-            nos::fprintln("new subscribe(crow): a:{} q:{} c:{} t:{}",
-                          igris::dstring(addr.data(), addr.size()), qos,
-                          ackquant, theme);
-    }
-    else
-    {
-        crowker_implementation::crow_options *opts =
-            static_cast<crowker_implementation::crow_options *>(
-                sub->thms[thm].opts);
-        if (opts->qos != qos || opts->ackquant != ackquant)
-        {
-            opts->qos = qos;
-            opts->ackquant = ackquant;
-            nos::fprintln("change subscribe(crow): a:{} q:{} c:{} t:{}",
-                          igris::dstring(addr.data(), addr.size()), qos,
-                          ackquant, theme);
-        }
-    }
-}
-
 void crow::crowker::tcp_subscribe(const std::string &theme,
                                   nos::inet::tcp_socket *sock)
 {
