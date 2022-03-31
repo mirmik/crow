@@ -64,6 +64,22 @@ void crow::abstract_subscriber_node::subscribe()
     node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
 }
 
+void crow::abstract_subscriber_node::unsubscribe()
+{
+    crow::subscribe_subheader sh;
+
+    sh.type = PubSubTypes::Unsubscribe;
+    sh.rqos = rqos;
+    sh.rackquant = rackquant;
+    sh.thmsize = theme.size();
+
+    const igris::buffer iov[] = {{(char *)&sh + sizeof(node_subheader),
+                                  sizeof(sh) - sizeof(node_subheader)},
+                                 theme};
+
+    node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
+}
+
 void crow::abstract_subscriber_node::subscribe_v2(bool updates, uint32_t request_latest) 
 {
     crow::subscribe_subheader_v2 sh;

@@ -28,6 +28,7 @@ namespace crow
 
         void subscribe();
         void subscribe_v2(bool updates, uint32_t get_latest);
+        void unsubscribe();
 
         void init_subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
                        igris::buffer theme, uint8_t qos, uint16_t ackquant,

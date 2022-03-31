@@ -13,6 +13,7 @@ namespace crow
         Consume      = 2,
         Request      = 3,
         Subscribe_v2 = 4,
+        Unsubscribe  = 5,
     };
 
     const char * pubsub_type_to_string(PubSubTypes type);

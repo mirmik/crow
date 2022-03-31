@@ -11,6 +11,7 @@ const char * crow::pubsub_type_to_string(PubSubTypes type)
         case PubSubTypes::Consume: return "consume";
         case PubSubTypes::Request: return "request";
         case PubSubTypes::Subscribe: return "subscribe";
+        case PubSubTypes::Unsubscribe: return "subscribe";
         case PubSubTypes::Subscribe_v2: return "subscribe_v2";
         case PubSubTypes::Publish: return "publish";
     }
