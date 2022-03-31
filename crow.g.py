@@ -47,7 +47,6 @@ licant.modules.module("crow.minimal",
 		"nodes/publisher_node.cpp",
 		"nodes/service_node.cpp",
 		"nodes/requestor_node.cpp",
-		"nodes/spammer.cpp",
 	],
 	mdepends = ["crow.include", "crow.diagnostic"]
 )
@@ -62,6 +61,7 @@ licant.modules.module("crow",
 		"proto/channel-sync.cpp",		
 		#"proto/rpc.cpp",
 		#"addons/noslogger.cpp",
+		"nodes/spammer.cpp",
 	],
 
 	mdepends = [
