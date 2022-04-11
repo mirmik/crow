@@ -98,6 +98,7 @@ static void confirmed_utilize_from_outers(crow::packet *pack)
                         pack->addrsize()))
         {
             it->u.f.confirmed = 1;
+            crow::node_protocol.delivered(it);
             crow_tower_release(it);
             return;
         }

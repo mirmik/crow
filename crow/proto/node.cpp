@@ -130,6 +130,24 @@ void crow::node_protocol_cls::undelivered(crow::packet *pack)
     crow::release(pack);
 }
 
+void crow::node_protocol_cls::delivered(crow::packet *pack)
+{
+    crow::node_subheader *sh =
+        (crow::node_subheader *)pack->dataptr();
+
+    crow::node *srvs;
+    dlist_for_each_entry(srvs, &crow::nodes_list, lnk)
+    {
+        if (srvs->id == sh->sid)
+        {
+            srvs->delivered_packet(pack);
+            return;
+        }
+    }
+
+    crow::release(pack);
+}
+
 void crow::__link_node(crow::node *srv, uint16_t id)
 {
     srv->id = id;

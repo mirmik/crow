@@ -28,8 +28,8 @@ namespace crow
 
     struct node_subheader
     {
-        nodeid_t sid=0;
-        nodeid_t rid=0;
+        nodeid_t sid = 0;
+        nodeid_t rid = 0;
         union _u
         {
             uint8_t flags = 0;
@@ -38,7 +38,7 @@ namespace crow
                 uint8_t reserved : 4;
                 uint8_t type : 4;
             } f;
-        } u={};
+        } u = {};
     } __attribute__((packed));
 
     crow::node *find_node(size_t id);
@@ -59,13 +59,13 @@ namespace crow
 
     class node
     {
-    public:
+      public:
         struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
         struct dlist_head waitlnk =
             DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
         nodeid_t id = 0;
 
-    public:
+      public:
         node() = default;
         node(const node &) = delete;
         node(node &&) = delete;
@@ -91,7 +91,8 @@ namespace crow
         crow::packet_ptr send(nodeid_t rid, const crow::hostaddr_view &raddr,
                               const igris::buffer data,
                               uint8_t qos = CROW_DEFAULT_QOS,
-                              uint16_t ackquant = CROW_DEFAULT_ACKQUANT, bool async=false)
+                              uint16_t ackquant = CROW_DEFAULT_ACKQUANT,
+                              bool async = false)
         {
             if (id == 0)
                 bind();
@@ -100,39 +101,43 @@ namespace crow
 
         crow::packet_ptr send_v(nodeid_t rid, const crow::hostaddr_view &raddr,
                                 const igris::buffer *vdat, size_t vlen,
-                                uint8_t qos, uint16_t ackquant, bool async=false)
+                                uint8_t qos, uint16_t ackquant,
+                                bool async = false)
         {
             if (id == 0)
                 bind();
-            return crow::node::send_v(id, rid, raddr, vdat, vlen, qos, ackquant, async);
+            return crow::node::send_v(id, rid, raddr, vdat, vlen, qos, ackquant,
+                                      async);
         }
 
         crow::packet_ptr send_vv(nodeid_t rid, const crow::hostaddr_view &raddr,
                                  const igris::buffer *vdat1, size_t vlen1,
                                  const igris::buffer *vdat2, size_t vlen2,
-                                 uint8_t qos, uint16_t ackquant, bool async=false)
+                                 uint8_t qos, uint16_t ackquant,
+                                 bool async = false)
         {
             if (id == 0)
                 bind();
             return crow::node::send_vv(id, rid, raddr, vdat1, vlen1, vdat2,
-                                      vlen2, qos, ackquant, async);
+                                       vlen2, qos, ackquant, async);
         }
 
         static crow::packet_ptr send(nodeid_t sid, nodeid_t rid,
-                               const crow::hostaddr_view &addr,
-                               const igris::buffer data, uint8_t qos,
-                               uint16_t ackquant, bool async=false);
+                                     const crow::hostaddr_view &addr,
+                                     const igris::buffer data, uint8_t qos,
+                                     uint16_t ackquant, bool async = false);
 
         static crow::packet_ptr send_v(nodeid_t sid, nodeid_t rid,
-                                 const crow::hostaddr_view &addr,
-                                 const igris::buffer *vec, size_t veclen,
-                                 uint8_t qos, uint16_t ackquant, bool async=false);
+                                       const crow::hostaddr_view &addr,
+                                       const igris::buffer *vec, size_t veclen,
+                                       uint8_t qos, uint16_t ackquant,
+                                       bool async = false);
 
-        static crow::packet_ptr send_vv(nodeid_t sid, nodeid_t rid,
-                                  const crow::hostaddr_view &addr,
-                                  const igris::buffer *vec1, size_t veclen1,
-                                  const igris::buffer *vec2, size_t veclen2,
-                                  uint8_t qos, uint16_t ackquant, bool async=false);
+        static crow::packet_ptr
+        send_vv(nodeid_t sid, nodeid_t rid, const crow::hostaddr_view &addr,
+                const igris::buffer *vec1, size_t veclen1,
+                const igris::buffer *vec2, size_t veclen2, uint8_t qos,
+                uint16_t ackquant, bool async = false);
 
         static crow::node_subheader *subheader(crow::packet *pack)
         {
@@ -141,7 +146,7 @@ namespace crow
 
         virtual ~node();
 
-    private:
+      private:
         virtual void incoming_packet(crow::packet *pack) = 0;
 
         virtual void undelivered_packet(crow::packet *pack)
@@ -150,17 +155,22 @@ namespace crow
             crow::release(pack);
         }
 
+        virtual void delivered_packet(crow::packet *pack)
+        {
+            crow::release(pack);
+        }
+
         friend class node_protocol_cls;
     };
 
     class alived_object
     {
-    public:
-        node_keepalive_timer keepalive_timer={};
+      public:
+        node_keepalive_timer keepalive_timer = {};
 
         virtual void keepalive_handle() {}
 
-        void install_keepalive(int64_t interval, bool immediate_call=true)
+        void install_keepalive(int64_t interval, bool immediate_call = true)
         {
             crow::keepalive_timer_manager.plan(
                 (igris::managed_timer_base<
@@ -169,7 +179,7 @@ namespace crow
 
             crow::unsleep();
 
-            if (immediate_call) 
+            if (immediate_call)
             {
                 keepalive_handle();
             }
@@ -180,12 +190,13 @@ namespace crow
 
     class node_protocol_cls : public crow::protocol
     {
-    private:
+      private:
         void send_node_error(crow::packet *pack, int errcode);
 
-    public:
+      public:
         void incoming(crow::packet *pack);
         void undelivered(crow::packet *pack);
+        void delivered(crow::packet *pack);
 
         node_protocol_cls() /*: protocol(CROW_NODE_PROTOCOL)*/ {}
 
@@ -210,12 +221,12 @@ namespace crow
     {
         node *_node = nullptr;
 
-    public:
+      public:
         node_packet_ptr(crow::packet *pack_, node *node_)
             : packet_ptr(pack_), _node(node_)
         {
         }
-        
+
         node_packet_ptr(const crow::packet_ptr &oth, node *node_)
             : packet_ptr(oth), _node(node_)
         {
@@ -225,10 +236,10 @@ namespace crow
             : packet_ptr(std::move(oth)), _node(node_)
         {
         }
-        
+
         node_packet_ptr(std::nullptr_t) : packet_ptr(nullptr), _node(nullptr) {}
-        node_packet_ptr(const node_packet_ptr&) = default;
-        node_packet_ptr& operator= (const node_packet_ptr&) = default;
+        node_packet_ptr(const node_packet_ptr &) = default;
+        node_packet_ptr &operator=(const node_packet_ptr &) = default;
 
         int rid()
         {
@@ -242,10 +253,7 @@ namespace crow
             return h->sid;
         }
 
-        igris::buffer message() 
-        { 
-            return node_data(pack); 
-        }
+        igris::buffer message() { return node_data(pack); }
 
         void reply(igris::buffer rep)
         {
