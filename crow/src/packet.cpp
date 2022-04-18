@@ -27,19 +27,12 @@ crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
                                  size_t datasize)
 {
     crow::packet *pack = crow::allocate_packet(addrsize, datasize);
-
     if (pack == nullptr)
         return nullptr;
-
-//    pack->header().flen = (uint16_t)(sizeof(crow::header_v1) + addrsize + datasize);
-//    pack->header().alen = addrsize;
     pack->set_ackquant(200);
-//    pack->header().u.pflag = 0;
     pack->set_quality(0);
     pack->set_stage(0);
-
     crow::packet_initialization(pack, ingate);
-
     return pack;
 }
 
