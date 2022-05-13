@@ -70,12 +70,10 @@ licant.modules.module("crow",
 		"crow.select",
 		"crow.crowker",
 		"crow.minimal",
-		"crow.protocol.pubsub",
+	#	"crow.protocol.pubsub",
 	],
 
-	defines = [
-		"CROW_PUBSUB_PROTOCOL_SUPPORTED=1"
-	] + DEFINES
+	defines = [] + DEFINES
 )
 
 licant.module("crow.crowker",
@@ -87,7 +85,6 @@ licant.module("crow.crowker",
 		"brocker/crow_client.cpp",
 		"brocker/tcp_client.cpp",
 		"brocker/crowker_api.cpp",
-		"pubsub/crowker_support.cpp",
 		"brocker/crowker_pubsub_node.cpp",
 	]
 )
@@ -127,7 +124,9 @@ licant.modules.module("crow.serial_gstuff",
 
 licant.module("crow.protocol.pubsub", "impl", default=True,
 	sources = [
-		"crow/pubsub/pubsub.cpp"
-	]
+		"crow/pubsub/pubsub.cpp",
+		"pubsub/crowker_support.cpp",
+	],
+	defines = ["CROW_PUBSUB_PROTOCOL_SUPPORTED=1"]
 )
 

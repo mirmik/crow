@@ -150,7 +150,9 @@ void print_help()
 
 int main(int argc, char *argv[])
 {
+#ifdef CROW_PUBSUB_PROTOCOL_SUPPORTED
 	crow::pubsub_protocol.enable_crowker_subsystem();
+#endif
 	pubsub_node.bind(CROWKER_SERVICE_BROCKER_NODE_NO);
 	crow::crowker::instance()->add_api(&pubsub_node);
 

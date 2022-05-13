@@ -30,6 +30,17 @@ namespace crow
             set_address(crowker_addr);
         }
 
+        void init(
+            crow::hostaddr_view crowker_addr, 
+            igris::buffer theme, int _qos, int _ackquant
+        ) 
+        {
+            set_theme(theme);
+            set_address(crowker_addr);
+            set_qos(_qos, _ackquant);
+        }
+
+
         void publish(igris::buffer data);
         void publish_v(igris::buffer *data, int len);
         void publish(crow::hostaddr_view addr, int crowker_node,

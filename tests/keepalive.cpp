@@ -10,13 +10,13 @@ static int b = 0;
 
 class test_keepalive_node : public  crow::node, public crow::alived_object 
 {
-	int* ptr = nullptr;
+	int& ptr;
 public:
-	test_keepalive_node(int* ptr) : ptr(ptr) {} 
+	test_keepalive_node(int& ptr) : ptr(ptr) {} 
 
 	void keepalive_handle() override 
 	{
-		(*ptr)++;
+		ptr++;
 	}
 
 	void incoming_packet(crow::packet*) override {}
@@ -24,8 +24,8 @@ public:
 
 TEST_CASE("keepalive") 
 {
-	test_keepalive_node an(&a);
-	test_keepalive_node bn(&b);
+	test_keepalive_node an(a);
+	test_keepalive_node bn(b);
 	an.install_keepalive(10);
 	bn.install_keepalive(20);
 
