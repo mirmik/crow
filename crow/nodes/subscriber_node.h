@@ -33,6 +33,13 @@ namespace crow
         void init_subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
                        igris::buffer theme, uint8_t qos, uint16_t ackquant,
                        uint8_t rqos, uint16_t rackquant);
+        
+        void init_subscribe(crow::hostaddr_view crowker_addr,
+                       igris::buffer theme, uint8_t qos, uint16_t ackquant,
+                       uint8_t rqos, uint16_t rackquant) 
+        {
+            init_subscribe(crowker_addr, CROWKER_SERVICE_BROCKER_NODE_NO, theme, qos, ackquant, rqos, rackquant);
+        }
 
         void keepalive_handle() override 
         { 
@@ -56,8 +63,6 @@ namespace crow
     private:
         void incoming_packet(crow::packet *) override;
     };
-
-    using subscriber = subscriber_node;
 }
 
 #endif
