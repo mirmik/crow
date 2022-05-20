@@ -1,7 +1,7 @@
 #include <crow/nodes/subscriber_node.h>
 #include <doctest/doctest.h>
 
-void foo(igris::buffer data) 
+void foo(igris::buffer data, crow::subscriber_node&) 
 {
 	(void) data;
 }
