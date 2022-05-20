@@ -1,4 +1,5 @@
 #include <crow/nodes/node_delegate.h>
+#include <crow/nodes/service_node.h>
 #include <crow/brocker/crowker.h>
 #include <crow/brocker/crowker_api.h>
 #include <igris/shell/rshell_executor.h>
@@ -22,6 +23,24 @@ static int themes(const nos::argv&, nos::ostream& os)
 		std::string s = nos::format("name:{} subs:{}\n",
 		                            a.first,
 		                            a.second.subs.size());
+		os.print(s);
+	}
+	return 0;
+}
+
+static int theme_names(const nos::argv&, nos::ostream& os) 
+{	
+	auto& themes = crow::crowker::instance()->themes;
+	if (themes.size() == 0) 
+	{
+		os.println("No one theme here yet.");
+		return 0;
+	}
+
+	for (auto& a : themes)
+	{
+		std::string s = nos::format("{}\n",
+		                            a.first);
 		os.print(s);
 	}
 	return 0;
@@ -107,6 +126,7 @@ static int set_queue_size(const nos::argv& argv, nos::ostream& os)
 nos::executor executor({
 	nos::command{"clients", "crowker clients", clients},
 	nos::command{"themes", "crowker themes", themes},
+	nos::command{"theme-names", "crowker themes, only names", theme_names},
 	nos::command{"last", "get latest theme messages", last_messages},
 	nos::command{"queue-size", "set_queue_size", set_queue_size}
 });
@@ -129,11 +149,21 @@ static void incoming_beam(crow::node_packet_ptr)
 //	crowker_api.client_beam(pack->addr(), pack.sid(), pack.message());
 }
 
+static void control_handler(char * data, int, crow::service_node& node) 
+{
+	nos::string_buffer answer;
+	executor.execute(nos::tokens(data), answer);	
+	node.reply({answer.str().data(), answer.str().size()});	
+}
+
 crow::node_delegate control(incoming, undelivered);
 crow::node_delegate beamsocket(incoming_beam, undelivered);
+crow::service_node control_service(control_handler);
 
 void init_control_node()
 {
 	control.bind(CROWKER_CONTROL_BROCKER_NODE_NO);
 	beamsocket.bind(CROWKER_BEAMSOCKET_BROCKER_NODE_NO);
+	control_service.init(crow::hostaddr(""), "crowker/control");
+	control_service.subscribe();
 }
