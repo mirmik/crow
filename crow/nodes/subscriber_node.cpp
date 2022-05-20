@@ -10,7 +10,7 @@ void crow::subscriber_node::incoming_packet(crow::packet *pack)
     case PubSubTypes::Consume:
     {
         auto &sh = pack->subheader<consume_subheader>();
-        incoming_handler(sh.message());
+        incoming_handler(sh.message(), *this);
     };
     break;
 
@@ -22,7 +22,7 @@ void crow::subscriber_node::incoming_packet(crow::packet *pack)
 }
 
 crow::subscriber_node::subscriber_node(
-    igris::delegate<void, igris::buffer> incoming)
+    delegate incoming)
     : incoming_handler(incoming)
 {
 }

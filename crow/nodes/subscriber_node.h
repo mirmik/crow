@@ -21,6 +21,7 @@ namespace crow
             : publisher_node(addr, node, theme)
         {
         }
+
         abstract_subscriber_node(crow::hostaddr_view addr, igris::buffer theme)
             : publisher_node(addr, theme)
         {
@@ -58,22 +59,21 @@ namespace crow
 
     class subscriber_node : public crow::abstract_subscriber_node
     {
-        igris::delegate<void, igris::buffer> incoming_handler = {};
+        using delegate =
+            igris::delegate<void, igris::buffer, subscriber_node &>;
+        delegate incoming_handler = {};
 
       public:
         subscriber_node() = default;
-        subscriber_node(igris::delegate<void, igris::buffer> incoming);
+        subscriber_node(delegate incoming);
         subscriber_node(crow::hostaddr_view crowker_addr, igris::buffer theme,
-                        igris::delegate<void, igris::buffer> incoming)
+                        delegate incoming)
             : abstract_subscriber_node(crowker_addr, theme),
               incoming_handler(incoming)
         {
         }
 
-        void set_handle(igris::delegate<void, igris::buffer> incoming)
-        {
-            incoming_handler = incoming;
-        }
+        void set_handle(delegate incoming) { incoming_handler = incoming; }
 
       private:
         void incoming_packet(crow::packet *) override;
