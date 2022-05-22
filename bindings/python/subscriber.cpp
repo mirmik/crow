@@ -54,10 +54,11 @@ public:
 		this->addr = addr;
 		this->theme = theme;
 
-		abstract_subscriber_node::subscribe(
+		abstract_subscriber_node::init_subscribe(
 		    this->addr,
-		    this->theme.c_str()
+		    this->theme.c_str(), 2,50,2,50
 		);
+		abstract_subscriber_node::subscribe();
 	}
 };
 #pragma GCC visibility pop

@@ -127,12 +127,12 @@ PYBIND11_MODULE(libcrow, m)
 	     > ())
 	;
 
-	py::class_<crow::msgbox, crow::node>(m, "msgbox")
+	/*py::class_<crow::msgbox, crow::node>(m, "msgbox")
 		.def(py::init<>())
 		.def("query", &crow::msgbox::query, ungil())
 		.def("receive", &crow::msgbox::receive, ungil())
 		.def("reply", &crow::msgbox::reply, ungil())
-	;
+	;*/
 
 	m.def("fully_empty", &crow::fully_empty);
 

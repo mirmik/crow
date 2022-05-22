@@ -14,18 +14,10 @@ namespace py = pybind11;
 #pragma GCC visibility push(hidden)
 class pybind_publisher : public crow::publisher_node
 {
-	std::string theme;
-	crow::hostaddr addr;
-
 public:
 	pybind_publisher(crow::hostaddr addr, std::string theme)
-		: crow::publisher_node()
-	{
-		this->addr = addr;
-		this-> theme = theme;
-		set_theme(this->theme);
-		set_address(this->addr);
-	}
+		: crow::publisher_node(addr, theme)
+	{}
 
 	void publish(
 	    const py::bytes& data
@@ -44,5 +36,7 @@ void register_publisher_class(py::module & m)
 	py::class_<pybind_publisher>(m, "publisher")
 	.def(py::init<crow::hostaddr, std::string>(), py::arg("addr"), py::arg("theme"))
 	.def("publish", &pybind_publisher::publish, py::arg("data"))
+	.def("publish_timestamped_float", &pybind_publisher::publish_timestamped_float, py::arg("ts"), py::arg("data"))
+	.def("publish_timestamped_double", &pybind_publisher::publish_timestamped_double, py::arg("ts"), py::arg("data"))
 	;
 }
