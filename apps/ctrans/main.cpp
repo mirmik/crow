@@ -205,7 +205,7 @@ void output_do(igris::buffer data, crow::packet* pack)
 
 	if (TIMESTAMP_MODE)
 	{
-		auto time = millis();
+		auto time = igris::millis();
 		auto str = std::to_string(time);
 		int _ = write(DATAOUTPUT_FILENO, str.data(), str.size());
 		(void) _;
