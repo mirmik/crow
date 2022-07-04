@@ -12,6 +12,8 @@
 
 #include <signal.h>
 
+using namespace std::chrono_literals;
+
 static bool cancel_token = false;
 static std::thread _thread;
 bool _spin_runned = false;
@@ -82,11 +84,12 @@ int crow::start_spin_with_select()
 {
     if (_spin_runned)
     {
-        return -1;
+        throw std::runtime_error("spin thread double start");
     }
 
     cancel_token = false;
     _spin_runned_unbounded = true;
+    _spin_runned = true;
     _thread = std::thread(spin_with_select);
 
     return 0;
@@ -96,11 +99,12 @@ int crow::start_spin_with_select_realtime(int abort_on_fault)
 {
     if (_spin_runned)
     {
-        return -1;
+        throw std::runtime_error("spin thread double start");
     }
 
     cancel_token = false;
     _spin_runned_unbounded = true;
+    _spin_runned = true;
     _thread = std::thread(spin_with_select_realtime, abort_on_fault);
 
     return 0;
@@ -147,15 +151,20 @@ int crow::stop_spin(bool wait)
 {
     if (!_spin_runned)
     {
-        return -1;
+        throw std::runtime_error("thread is not started");
     }
 
     cancel_token = true;
     asyncio.cancel();
 
     if (wait)
+    try 
+    {
         _thread.join();
+    }
+    catch (...) {}
     _spin_runned_unbounded = false;
+    std::this_thread::sleep_for(100ms);
     return 0;
 }
 

@@ -6,6 +6,8 @@
 #include <thread>
 #include <chrono>
 
+using namespace std::chrono_literals;
+
 static auto waddr = crow::address(".12.127.0.0.1:10098");
 static auto addr = crow::address(".99");
 static auto addr2 = crow::address(".99.99");
@@ -40,6 +42,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		CHECK_EQ(packptr->refs, 1);
 	
 		crow::onestep();
+		std::this_thread::sleep_for(10ms);
 		CHECK_EQ(packptr->refs, 1);
 
 		CHECK_EQ(count, 1);
@@ -55,6 +58,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		CHECK_EQ(packptr->refs, 1);
 	
 		crow::onestep();
+		std::this_thread::sleep_for(10ms);
 		CHECK_EQ(packptr->refs, 1);
 
 		CHECK_EQ(count, 3);
@@ -67,6 +71,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		crow::send(addr2, "data", 0, 0, 20);
 
 		crow::onestep();
+		std::this_thread::sleep_for(10ms);
 
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::has_untravelled(), false);
@@ -91,6 +96,7 @@ TEST_CASE("test0" * doctest::timeout(0.5))
 		crow::send(addr, "data", 0, 2, 20);
 
 		crow::onestep();
+		std::this_thread::sleep_for(10ms);
 
 		CHECK_EQ(count, 1);
 		CHECK_EQ(crow::total_travelled, 6); // pack * 2 + ack * 2 + ack2 * 2

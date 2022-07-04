@@ -79,7 +79,7 @@ namespace crow
 
         void step(int64_t timeout_ms)
         {
-            if (cancel_token)
+            if (cancel_token) 
                 return;
 
             fd_set read_fds;
