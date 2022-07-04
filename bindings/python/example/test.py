@@ -3,7 +3,10 @@
 import pycrow
 
 pycrow.start_client()
+sub = pycrow.rxsubscribe("lalala2")
 
-pycrow.publish("lalala", "enc".encode("utf-8"))
+sub.subscribe(lambda x : print(x))
 
+while True:
+	pass
 pycrow.stop_client()
