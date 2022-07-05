@@ -10,7 +10,7 @@
 #include <igris/osutil/realtime.h>
 #include <unistd.h>
 
-#include <signal.h>
+//#include <signal.h>
 
 using namespace std::chrono_literals;
 
@@ -19,29 +19,9 @@ static std::thread _thread;
 bool _spin_runned = false;
 bool _spin_runned_unbounded = false;
 
-struct sigaction new_action, sigkill_old_action, sigint_old_action;
-
-void signal_sigint_handler(int sig)
-{
-    if (_spin_runned)
-    {
-        crow::asyncio.cancel();
-        cancel_token = true;
-        if (_spin_runned_unbounded)
-            _thread.join();
-    }
-    if (sigint_old_action.sa_handler)
-        sigint_old_action.sa_handler(sig);
-    else
-        exit(0);
-}
-
 void crow::spin_with_select()
 {
     _spin_runned = true;
-
-    sigaction(SIGINT, NULL, &sigint_old_action);
-    signal(SIGINT, signal_sigint_handler);
 
     while (1)
     {
