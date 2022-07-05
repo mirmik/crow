@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(crow)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CC_STANDARD 11)
 
 file(GLOB HEADERS 
 	crow/*.h
@@ -43,10 +41,16 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 		set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS")
 	endif()
-
+	
 	add_library(crow SHARED ${SOURCES} ${PLATFORM_SOURCES})
 	target_include_directories(crow PRIVATE . ${ADDITIONAL_INCLUDES_IGRIS} 	${ADDITIONAL_INCLUDES_NOS})
-	
+
+	if (WIN32) 
+		target_include_directories(crow PRIVATE . "C:/Program Files (x86)/igris/include")
+		target_include_directories(crow PRIVATE . "C:/Program Files (x86)/nos/include")
+	endif()
+
+
 	target_link_directories(crow PUBLIC 
 		${IGRIS_LIBRARY_PATH}/build-android
 		${NOS_LIBRARY_PATH}/build-android
