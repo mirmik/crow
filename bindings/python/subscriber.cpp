@@ -67,6 +67,7 @@ void register_subscriber_class(py::module & m)
 {
 	py::class_<pybind_subscriber>(m, "subscriber")
 	.def(py::init<std::function<void(py::bytes)>&>())
+	.def("install_keepalive", &pybind_subscriber::install_keepalive)
 	.def("subscribe", &pybind_subscriber::subscribe,
 	     py::arg("addr"),
 	     py::arg("theme"))
