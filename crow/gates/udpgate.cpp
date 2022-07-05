@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #ifdef __WIN32__
-#include <winsock.h>
+//#include <winsock.h>
 #include <winsock2.h>
 #define SHUT_RDWR 2
 #else
@@ -100,6 +100,7 @@ int crow::udpgate::open(uint16_t port)
     if (sock < 0)
     {
         perror("udp socket open:");
+        printf("code %d", sock);
         exit(0);
     }
 

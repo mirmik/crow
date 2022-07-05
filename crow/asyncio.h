@@ -19,6 +19,7 @@ using socklen_t = int32_t;
 #include <igris/math.h>
 #include <igris/osutil/fd.h>
 
+#include <nos/util/osutil.h>
 #include <nos/print.h>
 
 namespace crow
@@ -70,7 +71,7 @@ namespace crow
         {
             int ret = ::pipe(unsleep_pipe);
             (void)ret;
-            igris::osutil::nonblock(unsleep_pipe[0], true);
+            nos::osutil::nonblock(unsleep_pipe[0], true);
             add_iotask(
                 unsleep_pipe[0], SelectType::READ,
                 igris::make_delegate(&asyncio_manager::unsleep_handler, this));

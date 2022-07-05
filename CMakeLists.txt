@@ -36,7 +36,7 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	set( CMAKE_VERBOSE_MAKEFILE on )
 	set(CMAKE_CXX_STANDARD 20)
 	set(CMAKE_CC_STANDARD 11)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCROW_USE_ASYNCIO=1")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCROW_USE_ASYNCIO=1 -g")
 	
 	if (${STATIC_LIBS})
 		set(CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++")
@@ -52,12 +52,6 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	add_library(crow SHARED ${SOURCES} ${PLATFORM_SOURCES})
 	target_include_directories(crow PRIVATE . ${ADDITIONAL_INCLUDES_IGRIS} 	${ADDITIONAL_INCLUDES_NOS})
 
-	if (WIN32) 
-		target_include_directories(crow PRIVATE . "C:/Program Files (x86)/igris/include")
-		target_include_directories(crow PRIVATE . "C:/Program Files (x86)/nos/include")
-	endif()
-
-
 	target_link_directories(crow PUBLIC 
 		${IGRIS_LIBRARY_PATH}/build-android
 		${NOS_LIBRARY_PATH}/build-android
@@ -68,6 +62,20 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 		add_executable(crow_test ${SOURCES_TEST})
 		target_include_directories(crow_test PRIVATE . tests)
 		target_link_libraries(crow_test igris nos pthread)
+	endif()
+	
+	if (WIN32) 
+		target_include_directories(crow PRIVATE . "C:/Program Files (x86)/igris/include")
+		target_include_directories(crow PRIVATE . "C:/Program Files (x86)/nos/include")
+		target_link_directories(crow PRIVATE . "C:/Program Files (x86)/igris/bin")
+		target_link_directories(crow PRIVATE . "C:/Program Files (x86)/nos/bin")
+		target_link_libraries(crow ws2_32)
+
+		target_include_directories(crow_test PRIVATE . "C:/Program Files (x86)/igris/include")
+		target_include_directories(crow_test PRIVATE . "C:/Program Files (x86)/nos/include")
+		target_link_directories(crow_test PRIVATE . "C:/Program Files (x86)/igris/bin")
+		target_link_directories(crow_test PRIVATE . "C:/Program Files (x86)/nos/bin")
+		target_link_libraries(crow_test ws2_32)
 	endif()
 	
 	if (UNIX AND NOT APPLE)
