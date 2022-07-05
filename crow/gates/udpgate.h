@@ -16,7 +16,8 @@ namespace crow
     {
         int sock = 0;
         igris::unbounded_array<uint8_t> receive_buffer={};
-
+        igris::unbounded_array<uint8_t> send_buffer={};
+        
     public:
         udpgate() {}
         udpgate(uint16_t port) { open(port); }

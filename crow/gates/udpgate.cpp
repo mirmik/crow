@@ -4,15 +4,24 @@
 #include <crow/tower.h>
 
 #include <fcntl.h>
+#include <unistd.h>
+
+#ifdef __WIN32__
+#include <winsock.h>
+#include <winsock2.h>
+#define SHUT_RDWR 2
+#else
 #include <netinet/in.h>
 #include <netinet/ip.h>
+#include <sys/socket.h>
+#include <sys/uio.h>
+#endif
+
 #include <stdio.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <sys/types.h>
-#include <unistd.h>
-#include <sys/uio.h>
 
+#include <nos/util/osutil.h>
 #include <memory>
 
 void crow::udpgate::read_handler(int fd) 
@@ -22,11 +31,11 @@ void crow::udpgate::read_handler(int fd)
     crow::header_v1 header;
 
     struct sockaddr_in sender;
-    socklen_t sendsize = sizeof(sender);
+    socklen_t sender_socksize = sizeof(sender);
     memset(&sender, 0, sizeof(sender));
 
-    ssize_t len = recvfrom(sock, &header, sizeof(crow::header_v1), MSG_PEEK,
-                           (struct sockaddr *)&sender, &sendsize);
+    ssize_t len = recvfrom(sock, (char*)&header, sizeof(crow::header_v1), MSG_PEEK,
+                           (struct sockaddr *)&sender, &sender_socksize);
 
     if (len <= 0)
         return;
@@ -39,14 +48,27 @@ void crow::udpgate::read_handler(int fd)
         block->parse_header(header);
     }
 
-    struct iovec iov[] =
-    {
-        {&header, sizeof(header)},
-        {block->addrptr(), block->addrsize()},
-        {block->dataptr(), block->datasize()}
-    };
+    size_t package_size = sizeof(header) + block->addrsize() + block->datasize();
+    if (receive_buffer.size() < package_size)
+        receive_buffer.resize(package_size);
+        
+    len = recvfrom(sock, (char*)receive_buffer.data(), package_size, 0,
+                           (struct sockaddr *)&sender, &sender_socksize);
 
-    len = readv(sock, iov, 3);
+    //struct iovec iov[] =
+    //{
+    //    {&header, sizeof(header)},
+    //    {block->addrptr(), block->addrsize()},
+    //  {block->dataptr(), block->datasize()}
+    //};
+    memcpy(block->addrptr(), 
+        (char*)receive_buffer.data() + sizeof(header), 
+        block->addrsize());
+    memcpy(block->addrptr(), 
+        (char*)receive_buffer.data() + sizeof(header) + block->addrsize(), 
+        block->datasize());
+
+    //len = readv(sock, iov, 3);
     if (len <= 0) 
     {
         crow::deallocate_packet(block);
@@ -104,9 +126,10 @@ int crow::udpgate::open(uint16_t port)
         ret = 0;
     }
 
-    int flags = fcntl(sock, F_GETFL);
-    flags |= O_NONBLOCK;
-    fcntl(sock, F_SETFL, flags);
+    nos::osutil::nonblock(sock, true);
+    //int flags = fcntl(sock, F_GETFL);
+    //flags |= O_NONBLOCK;
+    //fcntl(sock, F_SETFL, flags);
 
     crow::asyncio.add_iotask(sock, SelectType::READ, 
         igris::make_delegate(&udpgate::read_handler, this));
@@ -140,12 +163,12 @@ void crow::udpgate::send(crow::packet *pack)
 
     header_v1 header = pack->extract_header_v1();
 
-    if (receive_buffer.size() < header.flen) receive_buffer.resize(header.flen);
-    memcpy(receive_buffer.data(), &header, sizeof(header));
-    memcpy(receive_buffer.data() + sizeof(header), pack->addrptr(), pack->addrsize());
-    memcpy(receive_buffer.data() + sizeof(header) + pack->addrsize(), pack->dataptr(), pack->datasize());
+    if (send_buffer.size() < header.flen) send_buffer.resize(header.flen);
+    memcpy(send_buffer.data(), &header, sizeof(header));
+    memcpy(send_buffer.data() + sizeof(header), pack->addrptr(), pack->addrsize());
+    memcpy(send_buffer.data() + sizeof(header) + pack->addrsize(), pack->dataptr(), pack->datasize());
 
-    sendto(sock, receive_buffer.data(), header.flen, 0,
+    sendto(sock, (char*)send_buffer.data(), header.flen, 0,
            (struct sockaddr *)&ipaddr, iplen);
     crow::return_to_tower(pack, CROW_SENDED);
 }

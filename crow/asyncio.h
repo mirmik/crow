@@ -4,9 +4,16 @@
 #include <stdint.h>
 #include <unordered_map>
 #include <vector>
-
-#include <sys/select.h>
 #include <unistd.h>
+
+#ifdef __WIN32__
+#include <winsock2.h>
+#define pipe(ptr) _pipe(ptr, 1024, 0)
+using suseconds_t = int32_t;
+using socklen_t = int32_t;
+#else
+#include <sys/select.h>
+#endif
 
 #include <igris/event/delegate.h>
 #include <igris/math.h>

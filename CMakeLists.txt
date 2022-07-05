@@ -15,10 +15,17 @@ file(GLOB SOURCES
 	crow/pubsub/*.cpp
 	crow/nodes/*.cpp
 	crow/proto/*.cpp
-	crow/gates/*.cpp
+	crow/gates/udpgate.cpp
 	crow/gates/chardev/*.cpp
 	crow/brocker/*.cpp
 )
+
+if(!WIN32)
+file(GLOB SOURCES 
+	${SOURCES}
+	crow/gates/serial_gstuff.cpp	
+)	
+endif()
 
 file(GLOB SOURCES_TEST 
 	${SOURCES}
