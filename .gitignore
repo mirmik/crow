@@ -221,3 +221,6 @@ crow_test
 
 doxygen/html
 doxygen/latex
+
+.ninja*
+build.ninja
