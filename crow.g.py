@@ -130,3 +130,6 @@ licant.module("crow.protocol.pubsub", "impl", default=True,
 	defines = ["CROW_PUBSUB_PROTOCOL_SUPPORTED=1"]
 )
 
+licant.module("crow.realtime_threads",
+	defines = ["CROW_REALTIME_THREADS=1"]
+)
