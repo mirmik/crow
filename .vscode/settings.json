@@ -1,3 +1,10 @@
 {
-    "cmake.configureOnOpen": true
+    "cmake.configureOnOpen": true,
+
+    /** Enable format on save */
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        /** Pyformat use it's own code action to  */
+        "source.organizeImports": true
+    }
 }
