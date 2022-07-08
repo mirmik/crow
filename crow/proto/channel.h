@@ -58,8 +58,8 @@ namespace crow
         {
         }
 
-        channel(const channel&) = default;
-        channel& operator=(const channel&) = default;
+        channel(const channel&) = delete;
+        channel& operator=(const channel&) = delete;
 
         void init(int id, incoming_handler_t incoming_handler)
         {
