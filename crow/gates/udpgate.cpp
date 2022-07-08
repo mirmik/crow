@@ -21,55 +21,44 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include <nos/util/osutil.h>
 #include <memory>
+#include <nos/util/osutil.h>
 
-void crow::udpgate::read_handler(int fd) 
+void crow::udpgate::read_handler(int fd)
 {
-    (void) fd; // only one
-    
+    (void)fd; // only one
+
     crow::header_v1 header;
 
     struct sockaddr_in sender;
     socklen_t sender_socksize = sizeof(sender);
     memset(&sender, 0, sizeof(sender));
 
-    ssize_t len = recvfrom(sock, (char*)&header, sizeof(crow::header_v1), MSG_PEEK,
-                           (struct sockaddr *)&sender, &sender_socksize);
+    ssize_t len =
+        recvfrom(sock, (char *)&header, sizeof(crow::header_v1), MSG_PEEK,
+                 (struct sockaddr *)&sender, &sender_socksize);
 
     if (len <= 0)
         return;
 
-    crow::packet *block = nullptr;
-    
-    if (!block)
-    {
-        block = allocate_packet(header.addrsize(), header.datasize());
-        block->parse_header(header);
-    }
+    crow::packet *block = allocate_packet(header.addrsize(), header.datasize());
+    block->parse_header(header);
 
-    size_t package_size = sizeof(header) + block->addrsize() + block->datasize();
+    size_t package_size =
+        sizeof(header) + block->addrsize() + block->datasize();
     if (receive_buffer.size() < package_size)
         receive_buffer.resize(package_size);
-        
-    len = recvfrom(sock, (char*)receive_buffer.data(), package_size, 0,
-                           (struct sockaddr *)&sender, &sender_socksize);
 
-    //struct iovec iov[] =
-    //{
-    //    {&header, sizeof(header)},
-    //    {block->addrptr(), block->addrsize()},
-    //  {block->dataptr(), block->datasize()}
-    //};
-    memcpy(block->addrptr(), 
-        (char*)receive_buffer.data() + sizeof(header), 
-        block->addrsize());
-    memcpy(block->addrptr(), 
-        (char*)receive_buffer.data() + sizeof(header) + block->addrsize(), 
-        block->datasize());
+    len = recvfrom(sock, (char *)receive_buffer.data(), package_size, 0,
+                   (struct sockaddr *)&sender, &sender_socksize);
 
-    //len = readv(sock, iov, 3);
-    if (len <= 0) 
+    memcpy(block->addrptr(), (char *)receive_buffer.data() + sizeof(header),
+           block->addrsize());
+    memcpy(block->dataptr(),
+           (char *)receive_buffer.data() + sizeof(header) + block->addrsize(),
+           block->datasize());
+
+    if (len <= 0)
     {
         crow::deallocate_packet(block);
         block = nullptr;
@@ -79,16 +68,15 @@ void crow::udpgate::read_handler(int fd)
     crow::packet_initialization(block, this);
 
     igris::buffer vec[3] = {{(char *)&id, 1},
-        {(char *)&sender.sin_addr.s_addr, 4},
-        {(char *)&sender.sin_port, 2}
-    };
+                            {(char *)&sender.sin_addr.s_addr, 4},
+                            {(char *)&sender.sin_port, 2}};
 
     block->revert(vec, 3);
 
     crow::packet *pack = block;
     block = NULL;
 
-    crow::nocontrol_travel(pack, true);    
+    crow::nocontrol_travel(pack, true);
 }
 
 int crow::udpgate::open(uint16_t port)
@@ -128,11 +116,8 @@ int crow::udpgate::open(uint16_t port)
     }
 
     nos::osutil::nonblock(sock, true);
-    //int flags = fcntl(sock, F_GETFL);
-    //flags |= O_NONBLOCK;
-    //fcntl(sock, F_SETFL, flags);
-
-    crow::asyncio.add_iotask(sock, SelectType::READ, 
+    crow::asyncio.add_iotask(
+        sock, SelectType::READ,
         igris::make_delegate(&udpgate::read_handler, this));
 
     return ret;
@@ -164,12 +149,15 @@ void crow::udpgate::send(crow::packet *pack)
 
     header_v1 header = pack->extract_header_v1();
 
-    if (send_buffer.size() < header.flen) send_buffer.resize(header.flen);
+    if (send_buffer.size() < header.flen)
+        send_buffer.resize(header.flen);
     memcpy(send_buffer.data(), &header, sizeof(header));
-    memcpy(send_buffer.data() + sizeof(header), pack->addrptr(), pack->addrsize());
-    memcpy(send_buffer.data() + sizeof(header) + pack->addrsize(), pack->dataptr(), pack->datasize());
+    memcpy(send_buffer.data() + sizeof(header), pack->addrptr(),
+           pack->addrsize());
+    memcpy(send_buffer.data() + sizeof(header) + pack->addrsize(),
+           pack->dataptr(), pack->datasize());
 
-    sendto(sock, (char*)send_buffer.data(), header.flen, 0,
+    sendto(sock, (char *)send_buffer.data(), header.flen, 0,
            (struct sockaddr *)&ipaddr, iplen);
     crow::return_to_tower(pack, CROW_SENDED);
 }
@@ -192,7 +180,7 @@ int crow::create_udpgate(uint8_t id, uint16_t port)
 }
 
 std::shared_ptr<crow::udpgate> crow::create_udpgate_safe(uint8_t id,
-        uint16_t port)
+                                                         uint16_t port)
 {
     int sts;
 
