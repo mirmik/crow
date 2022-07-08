@@ -4,14 +4,22 @@
 #include <stdint.h>
 #include <unordered_map>
 #include <vector>
-
-#include <sys/select.h>
 #include <unistd.h>
+
+#ifdef __WIN32__
+#include <winsock2.h>
+#define pipe(ptr) _pipe(ptr, 1024, 0)
+using suseconds_t = int32_t;
+using socklen_t = int32_t;
+#else
+#include <sys/select.h>
+#endif
 
 #include <igris/event/delegate.h>
 #include <igris/math.h>
 #include <igris/osutil/fd.h>
 
+#include <nos/util/osutil.h>
 #include <nos/print.h>
 
 namespace crow
@@ -63,7 +71,7 @@ namespace crow
         {
             int ret = ::pipe(unsleep_pipe);
             (void)ret;
-            igris::osutil::nonblock(unsleep_pipe[0], true);
+            nos::osutil::nonblock(unsleep_pipe[0], true);
             add_iotask(
                 unsleep_pipe[0], SelectType::READ,
                 igris::make_delegate(&asyncio_manager::unsleep_handler, this));

@@ -4,6 +4,7 @@
 import licant
 import licant.install
 import shutil
+import sys
 import os
 
 licant.include("crow", "crow.g.py")
@@ -17,15 +18,18 @@ install_directory_path = '/usr/lib/'
 install_library_path = os.path.join(install_directory_path, target) 
 install_library_link = os.path.join(install_directory_path, 'libcrow.so')
 
-licant.cxx_shared_library(target,
-	mdepends = 
-	[
+modules = [
 		"crow",
 		"crow.crowker",
 		"crow.udpgate",
 		"crow.tcpgate",
-		"crow.serial_gstuff"
-	],
+		"crow.serial_gstuff",
+	]
+if sys.platform != "win32":
+	modules.extend(["crow.realtime_threads"])
+
+licant.cxx_shared_library(target,
+	mdepends = modules,
 
 	cxxstd="c++17",
 	optimize = "-O2",

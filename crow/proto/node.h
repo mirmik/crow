@@ -52,7 +52,7 @@ namespace crow
     }
 
     class node_keepalive_timer : public igris::managed_timer_base<
-                                     igris::timer_spec<decltype(millis())>>
+                                     igris::timer_spec<decltype(igris::millis())>>
     {
         void execute() override;
     };
@@ -174,8 +174,8 @@ namespace crow
         {
             crow::keepalive_timer_manager.plan(
                 (igris::managed_timer_base<
-                    igris::timer_spec<decltype(millis())>> &)keepalive_timer,
-                millis(), interval);
+                    igris::timer_spec<decltype(igris::millis())>> &)keepalive_timer,
+                igris::millis(), interval);
 
             crow::unsleep();
 

@@ -131,14 +131,14 @@ bool crow_time_comparator(crow::packet *a, crow::packet *b)
 
 static void add_to_incoming_list(crow::packet *pack)
 {
-    pack->last_request_time = millis();
+    pack->last_request_time = igris::millis();
     dlist_move_sorted(pack, &crow_incoming, lnk, crow_time_comparator);
     crow::unsleep();
 }
 
 static void add_to_outters_list(crow::packet *pack)
 {
-    pack->last_request_time = millis();
+    pack->last_request_time = igris::millis();
     dlist_move_sorted(pack, &crow_outters, lnk, crow_time_comparator);
     crow::unsleep();
 }
@@ -754,7 +754,7 @@ void crow_onestep_outers_stage()
     crow::packet *pack;
     crow::packet *n;
 
-    uint16_t curtime = millis();
+    uint16_t curtime = igris::millis();
 
     system_lock();
     if (dlist_empty(&crow_outters))
@@ -795,7 +795,7 @@ void crow_onestep_incoming_stage()
     crow::packet *pack;
     crow::packet *n;
 
-    uint16_t curtime = millis();
+    uint16_t curtime = igris::millis();
 
     system_lock();
     if (dlist_empty(&crow_incoming))
@@ -836,7 +836,7 @@ void crow_onestep_incoming_stage()
 
 void crow_onestep_keepalive_stage()
 {
-    crow::keepalive_timer_manager.exec(millis());
+    crow::keepalive_timer_manager.exec(igris::millis());
 }
 
 void crow::onestep()
@@ -908,7 +908,7 @@ int64_t crow::get_minimal_timeout()
 
     //int64_t result;
     int64_t mininterval = std::numeric_limits<int64_t>::max();
-    int64_t curtime = millis();
+    int64_t curtime = igris::millis();
 
     auto update_candidate = [&](int64_t candidate)
     {

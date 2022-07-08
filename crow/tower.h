@@ -38,22 +38,26 @@ namespace crow
 
     // Отправить пакет.
     crow::packet_ptr send(const crow::hostaddr_view &addr, igris::buffer data,
-                          uint8_t type, uint8_t qos, uint16_t ackquant, bool async=false);
+                          uint8_t type, uint8_t qos, uint16_t ackquant,
+                          bool async = false);
 
     crow::packet_ptr send_v(const crow::hostaddr_view &addr,
                             const igris::buffer *vec, size_t veclen,
-                            uint8_t type, uint8_t qos, uint16_t ackquant, bool async=false);
+                            uint8_t type, uint8_t qos, uint16_t ackquant,
+                            bool async = false);
 
     crow::packet_ptr send_vv(const crow::hostaddr_view &addr,
                              const igris::buffer *vec, size_t veclen,
                              const igris::buffer *vec2, size_t veclen2,
-                             uint8_t type, uint8_t qos, uint16_t ackquant, bool async=false);
+                             uint8_t type, uint8_t qos, uint16_t ackquant,
+                             bool async = false);
 
     crow::packet_ptr send_vvv(const crow::hostaddr_view &addr,
                               const igris::buffer *vec, size_t veclen,
                               const igris::buffer *vec2, size_t veclen2,
                               const igris::buffer *vec3, size_t veclen3,
-                              uint8_t type, uint8_t qos, uint16_t ackquant, bool async=false);
+                              uint8_t type, uint8_t qos, uint16_t ackquant,
+                              bool async = false);
 
     // Эта функция вызывается вратами после обработки отсылаемого пакета.
     void return_to_tower(crow::packet *pack, uint8_t sts);
@@ -67,15 +71,11 @@ namespace crow
 
     void spin();
     void spin_with_select();
-    void spin_with_select_realtime(int abort_on_fault);
 
     int stop_spin(bool wait = true);
     int start_spin_with_select();
-    int start_spin_with_select_realtime(int abort_on_fault);
     int start_spin_without_select();
-
     int start_spin();
-    int start_spin_realtime(int abort_on_fault);
 
     [[deprecated]] void spin_join();
     void join_spin();
@@ -96,6 +96,10 @@ namespace crow
     void unsleep();
 
     void set_spin_cancel_token();
+
+    void spin_with_select_realtime(int abort_on_fault);
+    int start_spin_with_select_realtime(int abort_on_fault);
+    int start_spin_realtime(int abort_on_fault);
 }
 
 void crow_tower_release(crow::packet *pack);

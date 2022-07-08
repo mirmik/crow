@@ -15,7 +15,8 @@ namespace crow
     class udpgate : public gateway
     {
         int sock = 0;
-        igris::unbounded_array<uint8_t> receive_buffer={};
+        igris::unbounded_array<uint8_t> receive_buffer = {};
+        igris::unbounded_array<uint8_t> send_buffer = {};
 
     public:
         udpgate() {}

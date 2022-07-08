@@ -29,8 +29,8 @@ TEST_CASE("keepalive")
 	an.install_keepalive(10);
 	bn.install_keepalive(20);
 
-	int64_t start = millis();
-	while(millis() - start < 45) 
+	int64_t start = igris::millis();
+	while(igris::millis() - start < 45) 
 	{
 		crow::onestep();
 	}
