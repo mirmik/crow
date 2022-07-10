@@ -3,7 +3,6 @@
 #ifndef CROW_GATES_UDPGATE_H
 #define CROW_GATES_UDPGATE_H
 
-#include <crow/asyncio.h>
 #include <crow/defs.h>
 #include <crow/gateway.h>
 #include <igris/container/unbounded_array.h>
