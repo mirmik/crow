@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 
-import struct
+import time
 
 import pycrow
-from pycrow.rxcrow import rxpublish, rxsubscribe
+from pycrow.rxcrow import rxpublish
 
-from rxsignal import rxinterval, rxprint
+from rxsignal import rxinterval
 
 pycrow.start_client()
-pycrow.diagnostic_setup(True)
-
-t = rxinterval(1)
-rxprint(t)
-
-rxpublish("pulse", t.map(lambda t: struct.pack("!i", t)))
+rxpublish("pulse", rxinterval(1).map(lambda t: (str(t)+"\n").encode("utf-8")))
 
 while True:
-    pass
+    time.sleep(1)

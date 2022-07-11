@@ -24,6 +24,10 @@
 #include <memory>
 #include <nos/util/osutil.h>
 
+#ifdef CROW_USE_ASYNCIO
+#include <crow/asyncio.h>
+#endif
+
 void crow::udpgate::read_handler(int fd)
 {
     (void)fd; // only one
@@ -116,9 +120,12 @@ int crow::udpgate::open(uint16_t port)
     }
 
     nos::osutil::nonblock(sock, true);
+
+#ifdef CROW_USE_ASYNCIO
     crow::asyncio.add_iotask(
         sock, SelectType::READ,
         igris::make_delegate(&udpgate::read_handler, this));
+#endif
 
     return ret;
 }
