@@ -20,7 +20,7 @@ namespace crow
         char *send_eit = nullptr;
         int received_maxpack_size = 48;
         crow::compacted_packet *recvpack = nullptr;
-        struct gstuff_autorecv recver = {};
+        gstuff_autorecv recver = {};
         int (*write_callback)(void *, const char *data, unsigned int size) = nullptr;
         void *write_privdata = nullptr;
 
@@ -43,7 +43,7 @@ namespace crow
         void newdata(char c)
         {
             int status;
-            status = gstuff_autorecv_newchar(&recver, c);
+            status = recver.newchar(c);
             switch (status)
             {
             case GSTUFF_NEWPACKAGE:
@@ -69,8 +69,7 @@ namespace crow
         {
             assert(recvpack == nullptr);
             recvpack = crow::allocate_compacted_packet(received_maxpack_size);
-            gstuff_autorecv_setbuf(&recver, (char *)&recvpack->header(),
-                                   received_maxpack_size);
+            recver.setbuf((uint8_t *)&recvpack->header(), received_maxpack_size);
         }
 
         void start_send()

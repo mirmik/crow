@@ -94,11 +94,10 @@ void crow::serial_gstuff::read_handler(int)
                     sizeof(crow::header_v1));
             new (rpack) crow::compacted_packet;
             rpack->destructor = +[](crow::packet*pack){free(pack);};
-            gstuff_autorecv_setbuf(&recver, (char *)&rpack->header(),
-                                   GSTUFF_MAXPACK_SIZE);
+            recver.setbuf((uint8_t *)&rpack->header(), GSTUFF_MAXPACK_SIZE);
         }
 
-        int ret = gstuff_autorecv_newchar(&recver, c);
+        int ret = recver.newchar(c);
 
         switch (ret)
         {

@@ -21,9 +21,8 @@ namespace crow
         int fd=-1;
 
         crow::compacted_packet *rpack=nullptr;
-        bool debug=false;
-
-        struct gstuff_autorecv recver={};
+        bool debug=false; 
+        gstuff_autorecv recver = {};
 
     public:
         void newline_handler();
