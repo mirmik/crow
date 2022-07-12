@@ -6,6 +6,7 @@
 #include <igris/iovec.h>
 #include <igris/protocols/gstuff.h>
 #include <igris/sync/semaphore.h>
+#include <igris/util/crc.h>
 
 #include <nos/print.h>
 
@@ -15,26 +16,39 @@ namespace crow
     {
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
         crow::packet *insend = nullptr;
-        char *send_buffer = nullptr;
-        char *send_it = nullptr;
-        char *send_eit = nullptr;
+        /// Максимальная длина пакета, какой мы готовы принять.
         int received_maxpack_size = 48;
         crow::compacted_packet *recvpack = nullptr;
         gstuff_autorecv recver = {};
-        int (*write_callback)(void *, const char *data, unsigned int size) = nullptr;
-        void *write_privdata = nullptr;
+
+        int (*write_callback)(void *,
+                              const char *data,
+                              unsigned int size) = nullptr;
+        int (*room_callback)(void *) = nullptr;
+        void *priv = nullptr;
+
+        uint8_t send_state = 0;
+        uint8_t data_state = 0;
+        uint16_t data_index = 0;
+        uint8_t crc = 0;
 
     public:
-        void init(char *send_buffer,
-                  int (*write_callback)(void *, const char *data,
-                                        unsigned int size),
-                  void *write_privdata, int received_maxpack_size)
+        bool in_send()
         {
-            //            sem_init(&sem, 0, 1);
-            this->send_buffer = send_buffer;
+            return insend != nullptr;
+        }
+
+        void
+        init(char *send_buffer,
+             int (*write_callback)(void *, const char *data, unsigned int size),
+             int (*room_callback)(void *),
+             void *privdata,
+             int received_maxpack_size)
+        {
             this->received_maxpack_size = received_maxpack_size;
             this->write_callback = write_callback;
-            this->write_privdata = write_privdata;
+            this->room_callback = room_callback;
+            this->priv = privdata;
 
             init_receiver();
             invalidate_sender();
@@ -46,12 +60,12 @@ namespace crow
             status = recver.newchar(c);
             switch (status)
             {
-            case GSTUFF_NEWPACKAGE:
-                newline_handler();
-                break;
+                case GSTUFF_NEWPACKAGE:
+                    newline_handler();
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
 
@@ -69,36 +83,132 @@ namespace crow
         {
             assert(recvpack == nullptr);
             recvpack = crow::allocate_compacted_packet(received_maxpack_size);
-            recver.setbuf((uint8_t *)&recvpack->header(), received_maxpack_size);
+            recver.setbuf((uint8_t *)&recvpack->header(),
+                          received_maxpack_size);
         }
 
-        void start_send()
+        size_t room()
         {
-            if (dlist_empty(&to_send))
-                return;
+            return room_callback(priv);
+        }
 
-            insend = dlist_first_entry(&to_send, crow::packet, ulnk);
-            dlist_del_init(&insend->ulnk);
+        size_t write(char *data, size_t size)
+        {
+            return write_callback(priv, data, size);
+        }
 
-            header_v1 header = insend->extract_header_v1();
+        size_t sendbyte(char c)
+        {
+            return write(&c, 1);
+        }
+
+        void start_send(crow::packet *pack)
+        {
+            insend = pack;
+            /*header_v1 header = insend->extract_header_v1();
             struct iovec iov[] = {
                 {&header, sizeof(header)},
                 {insend->addrptr(), insend->addrsize()},
                 {insend->dataptr(), insend->datasize()},
             };
             int size = gstuffing_v(iov, 3, send_buffer);
+            */
 
-            send_it = send_buffer;
-            send_eit = send_buffer + size;
+            // send_it = send_buffer;
+            // send_eit = send_buffer + size;
+
+            crc = 0xFF;
+            send_state = 0;
+            data_state = 0;
+            data_index = 0;
 
             continue_send();
         }
 
-        void invalidate_sender()
+        bool data_section(char *data, size_t size)
         {
-            insend = nullptr;
-            send_it = nullptr;
-            send_eit = nullptr;
+            while (room() >= 2 && data_index < size)
+            {
+                char arr[2];
+                char c = data[data_index++];
+                igris_strmcrc8(&crc, c);
+                int len = gstuff_byte(c, arr);
+                write(arr, len);
+            }
+            if (data_index == size)
+            {
+                send_state++;
+                data_index = 0;
+                return true;
+            }
+            return false;
+        }
+
+        void continue_send()
+        {
+            bool fallthrow;
+
+            do
+            {
+                fallthrow = false; /// < отвечает за переход в следующую секцию
+                                   /// без возврата из функции путём возвращения
+                                   /// в цикле do-while
+
+                switch (send_state)
+                {
+                    case 0: /// Отправка старта
+                    {
+                        if (room() >= 1)
+                        {
+                            sendbyte(GSTUFF_START);
+                            send_state = 1;
+                            fallthrow = true;
+                        }
+                    }
+                    break;
+                    case 1: /// Отправка заголовка
+                    {
+                        header_v1 header = insend->extract_header_v1();
+                        fallthrow =
+                            data_section((char *)&header, sizeof(header_v1));
+                    }
+                    break;
+                    case 2: /// Отправка адреса
+                    {
+                        fallthrow = data_section((char *)insend->addrptr(),
+                                                 insend->addrsize());
+                    }
+                    break;
+                    case 3: /// Отправка данных
+                    {
+                        fallthrow = data_section((char *)insend->dataptr(),
+                                                 insend->datasize());
+                    }
+                    break;
+                    case 4: /// Отправка контрольной суммы
+                    {
+                        if (room() >= 2)
+                        {
+                            char arr[2];
+                            int len = gstuff_byte(crc, arr);
+                            write(arr, len);
+                            send_state = 5;
+                            fallthrow = true;
+                        }
+                    }
+                    break;
+                    case 5: /// Отправка стоп сигнала
+                    {
+                        if (room() >= 1)
+                        {
+                            sendbyte(GSTUFF_STOP);
+                            fallthrow = false;
+                            finish_send();
+                        }
+                    }
+                    break;
+                }
+            } while (fallthrow);
         }
 
         void finish_send()
@@ -108,50 +218,42 @@ namespace crow
             invalidate_sender();
             system_unlock();
 
-            start_send();
-        }
-
-        void continue_send()
-        {
-            int needwrite = send_eit - send_it;
-            int writed = write_callback(write_privdata, send_it, needwrite);
-
-            send_it += writed;
-
-            if (send_it == send_eit)
+            /// Отправка завершена. Попытаться отправить следующий в очереди
+            /// пакет.
+            if (!dlist_empty(&to_send))
             {
-                finish_send();
+                auto pack = dlist_first_entry(&to_send, crow::packet, ulnk);
+                dlist_del_init(&insend->ulnk);
+                start_send(pack);
             }
         }
 
         void send(crow::packet *pack) override
         {
-            system_lock();
-            dlist_move(&pack->ulnk, &to_send);
-            system_unlock();
-
-            //            if (sem_trywait(&sem))
-            //                return;
-
+            /// Начать отправку пакета, если в очереди никого нет.
+            /// Или добавить в очередь.
             if (insend == nullptr)
+                start_send(pack);
+            else
             {
-                start_send();
+                system_lock();
+                dlist_move(&pack->ulnk, &to_send);
+                system_unlock();
             }
+        }
 
-            //            sem_post(&sem);
+        void invalidate_sender()
+        {
+            insend = nullptr;
         }
 
         void nblock_onestep() override
         {
-            //            if (sem_trywait(&sem))
-            //                return;
-
-            if (send_it != send_eit)
+            if (insend)
             {
+                /// Продолжаем незаверщенную отправку, если это необходимо.
                 continue_send();
             }
-
-            //            sem_post(&sem);
         }
 
         void finish() override
@@ -163,7 +265,10 @@ namespace crow
             }
         }
 
-        ~self_driven_gstuff() { finish(); }
+        ~self_driven_gstuff()
+        {
+            finish();
+        }
     };
 }
 
