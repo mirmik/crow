@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <igris/dprint.h>
 #include <igris/util/hexascii.h>
+#include <igris/util/ctype.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -25,7 +26,7 @@ int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
         {
             uint8_t byte = 0;
             int cnt = 0;
-            while (isdigit(*++it))
+            while (igris_isdigit(*++it))
             {
                 byte *= 10;
                 byte += hex2half(*it);
@@ -41,7 +42,7 @@ int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
         case ':':
         {
             uint16_t twobyte = 0;
-            while (isdigit(*++it))
+            while (igris_isdigit(*++it))
             {
                 twobyte *= 10;
                 twobyte += hex2half(*it);
@@ -55,7 +56,7 @@ int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
         {
             uint8_t high;
             bool phase = 0;
-            while (isxdigit(*++it))
+            while (igris_isxdigit(*++it))
             {
                 if (phase)
                 {
@@ -77,7 +78,7 @@ int hexer(uint8_t *dst, size_t maxsz, const char *src, size_t srcsz)
         }
         break;
         case '@':
-            while (isalpha(*++it))
+            while (igris_isalpha(*++it))
             {
                 *dst++ = *it;
                 ++sz;
