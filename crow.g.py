@@ -1,5 +1,5 @@
-import licant.modules
 import licant
+import licant.modules
 
 DEFINES = []
 if __name__ == "__main__":
@@ -70,7 +70,7 @@ licant.modules.module("crow",
 		"crow.select",
 		"crow.crowker",
 		"crow.minimal",
-	#	"crow.protocol.pubsub",
+		"crow.protocol.pubsub",
 	],
 
 	defines = [] + DEFINES
@@ -125,7 +125,7 @@ licant.modules.module("crow.serial_gstuff",
 licant.module("crow.protocol.pubsub", "impl", default=True,
 	sources = [
 		"crow/pubsub/pubsub.cpp",
-		"pubsub/crowker_support.cpp",
+		"crow/pubsub/crowker_support.cpp",
 	],
 	defines = ["CROW_PUBSUB_PROTOCOL_SUPPORTED=1"]
 )

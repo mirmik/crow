@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 #coding: utf-8
 
-import licant
-import licant.install
+import os
 import shutil
 import sys
-import os
+
+import licant
+import licant.install
 
 licant.include("crow", "crow.g.py")
 
