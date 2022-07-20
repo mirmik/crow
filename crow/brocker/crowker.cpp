@@ -57,6 +57,7 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
 
     auto *sub = crowker_implementation::crow_client::get(saddr);
     sub->context = this;
+    sub->timestamp_activity = crowker_eval_timestamp();
 
     // TODO: Перенести. Незачем перезаписывать адресс каждый раз.
     sub->addr = saddr;
