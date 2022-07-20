@@ -2,15 +2,15 @@
 @file packet.cpp
 */
 
+#include <crow/gateway.h>
+#include <crow/packet.h>
+#include <igris/compiler.h>
+#include <igris/sync/syslock.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
-#include <crow/gateway.h>
-#include <crow/packet.h>
-#include <igris/sync/syslock.h>
-
-#include <igris/compiler.h>
+int crow_allocated_count = 0;
 
 void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
 {
@@ -23,8 +23,8 @@ void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
     pack->self_init();
 }
 
-crow::packet *crow::create_packet(crow::gateway *ingate, uint8_t addrsize,
-                                 size_t datasize)
+crow::packet *
+crow::create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize)
 {
     crow::packet *pack = crow::allocate_packet(addrsize, datasize);
     if (pack == nullptr)
@@ -61,30 +61,7 @@ void crow::packet::revert(igris::buffer *vec, size_t veclen)
     increment_stage(sz);
 }
 
-bool crow::has_allocated() { return !!crow_allocated_count; }
-
-uint8_t *crow::compacted_packet::addrptr()
+bool crow::has_allocated()
 {
-    return (uint8_t *)(&header() + 1);
-}
-
-uint8_t crow::compacted_packet::addrsize()
-{
-    return _header.alen;
-}
-
-char *crow::compacted_packet::dataptr()
-{
-    return (char *)(addrptr() + addrsize());
-}
-
-uint16_t crow::compacted_packet::datasize()
-{
-    return (uint16_t)(full_length() - addrsize() -
-                      sizeof(struct crow::header_v1));
-}
-
-char *crow::compacted_packet::endptr()
-{
-    return (char *)&header() + full_length();
+    return !!crow_allocated_count;
 }

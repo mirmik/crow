@@ -21,11 +21,25 @@ namespace crow
             return code;
         }
 
-        uint16_t quant() const { return _quant_code * quant_const + 4; }
-        uint8_t quality() const { return _qos; }
+        uint16_t ackquant() const
+        {
+            return _quant_code * quant_const + 4;
+        }
 
-        void set_quant(uint16_t quant) { _quant_code = quant_to_code(quant); }
-        void set_quality(uint8_t quality) { _qos = quality; }
+        uint8_t qos() const
+        {
+            return _qos;
+        }
+
+        void set_ackquant(uint16_t quant)
+        {
+            _quant_code = quant_to_code(quant);
+        }
+
+        void set_qos(uint8_t quality)
+        {
+            _qos = quality;
+        }
     };
     static_assert(sizeof(qosbyte) == 1, "qosbyte wrong size");
 
