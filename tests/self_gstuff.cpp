@@ -1,8 +1,8 @@
+#include <chrono>
 #include <crow/gates/self_driven_gstuff.h>
 #include <crow/packet.h>
 #include <doctest/doctest.h>
-
-#include <chrono>
+#include <igris/util/dstring.h>
 #include <thread>
 
 static volatile int ccc = 0;
@@ -30,7 +30,7 @@ TEST_CASE("self_driven_gstuff.output")
     {
         char buf[64];
 
-        crow::self_driven_gstuff gate;
+        crow::self_driven_gstuff<crow::header_v1> gate;
 
         gate.init(buf, write, room, NULL, 100);
         gate.bind(13);
@@ -61,7 +61,11 @@ TEST_CASE("self_driven_gstuff.output")
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         crow::release(pack);
-        CHECK_EQ(writed_data, sbuffer);
+        CHECK_EQ(writed_data.size(), sbuffer.size());
+        CHECK_EQ(igris::dstring(std::string((char *)writed_data.data(),
+                                            writed_data.size())),
+                 igris::dstring(
+                     std::string((char *)sbuffer.data(), sbuffer.size())));
     }
 
     CHECK_EQ(crow::total_travelled, 0);

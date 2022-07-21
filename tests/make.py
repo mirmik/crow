@@ -19,8 +19,8 @@ application("runtests",
 
 	cxxstd="gnu++17",
 	ccstd="c11",
-	cxx_flags = "-g -Werror=all -Werror=pedantic -Weffc++",
-	cc_flags = "-g -Werror=all -Werror=pedantic",
+	cxx_flags = "-g -Werror=all -Werror=pedantic -Weffc++ -Wno-deprecated-declarations",
+	cc_flags = "-g -Werror=all -Werror=pedantic -Wno-deprecated-declarations",
 
 	include_paths = ["."],
 	libs = ["igris", "nos", "pthread"],

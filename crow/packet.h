@@ -16,11 +16,14 @@
 #include <igris/buffer.h>
 #include <igris/container/pool.h>
 #include <igris/datastruct/dlist.h>
+#include <igris/sync/syslock.h>
 
 /// Качество обслуживания.
 #define CROW_WITHOUT_ACK 0
 #define CROW_TARGET_ACK 1
 #define CROW_BINARY_ACK 2
+
+extern int crow_allocated_count;
 
 namespace crow
 {
@@ -35,7 +38,6 @@ namespace crow
         @details Заголовок пакета располагается в первых байтах пакета.
         за заголовком следует поле адреса переменной длины, а за ним данные.
     */
-#ifndef OLD_HEADER
     struct header_v1
     {
         union _u
@@ -56,19 +58,40 @@ namespace crow
             0; ///< Поле стадии. Используется для того, чтобы цепочка врат
         ///< знала, какую часть адреса обрабатывать.
         uint16_t seqid = 0; ///< Порядковый номер пакета.
-        qosbyte qos = {}; ///< Поле качества обслуживания.
+        qosbyte _qos = {}; ///< Поле качества обслуживания.
+
+        void set_qos(uint8_t quality)
+        {
+            _qos.set_qos(quality);
+        }
+
+        void set_ackquant(uint16_t quant)
+        {
+            _qos.set_ackquant(quant);
+        }
+
+        uint8_t qos() const
+        {
+            return _qos.qos();
+        }
+
+        uint16_t ackquant() const
+        {
+            return _qos.ackquant();
+        }
 
         uint16_t addrsize()
         {
             return alen;
         }
+
         uint16_t datasize()
         {
             return flen - alen - sizeof(header_v1);
         }
     } __attribute__((packed));
-#else
-    struct header_v1
+
+    struct header_v0
     {
         union _u
         {
@@ -88,21 +111,41 @@ namespace crow
         uint8_t stg =
             0; ///< Поле стадии. Используется для того, чтобы цепочка врат
         ///< знала, какую часть адреса обрабатывать.
-        uint16_t ackquant = 0; ///< Таймаут для пересылки пакета.
+        uint16_t _ackquant = 0; ///< Таймаут для пересылки пакета.
         uint16_t seqid =
             0; ///< Порядковый номер пакета. Присваивается отправителем.
-        uint8_t qos = 0; ///< Поле качества обслуживания.
+        uint8_t _qos = 0; ///< Поле качества обслуживания.
+
+        void set_qos(uint8_t quality)
+        {
+            _qos = quality;
+        }
+
+        void set_ackquant(uint16_t quant)
+        {
+            _ackquant = quant;
+        }
+
+        uint8_t qos() const
+        {
+            return _qos;
+        }
+
+        uint16_t ackquant() const
+        {
+            return _ackquant;
+        }
 
         uint16_t addrsize()
         {
             return alen;
         }
+
         uint16_t datasize()
         {
             return flen - alen - sizeof(header_v1);
         }
     } __attribute__((packed));
-#endif
 
     class packet
     {
@@ -187,14 +230,8 @@ namespace crow
         {
             set_ack(h.u.f.ack);
             set_type(h.u.f.type);
-
-#ifndef OLD_HEADER
-            set_quality(h.qos.quality());
-            set_ackquant(h.qos.quant());
-#else
-            set_quality(h.qos);
-            set_ackquant(h.ackquant);
-#endif
+            set_quality(h.qos());
+            set_ackquant(h.ackquant());
             set_seqid(h.seqid);
             set_stage(h.stg);
             set_addrsize(h.alen);
@@ -207,15 +244,25 @@ namespace crow
             h.seqid = seqid();
             h.u.f.ack = ack();
             h.u.f.type = type();
-#ifndef OLD_HEADER
-            h.qos.set_quality(quality());
-            h.qos.set_quant(ackquant());
-#else
-            h.qos = quality();
-            h.ackquant = ackquant();
-#endif
+            h.set_qos(quality());
+            h.set_ackquant(ackquant());
             h.stg = stage();
             h.flen = datasize() + addrsize() + sizeof(header_v1);
+            h.alen = addrsize();
+            h.stg = stage();
+            return h;
+        }
+
+        header_v0 extract_header_v0()
+        {
+            header_v0 h;
+            h.seqid = seqid();
+            h.u.f.ack = ack();
+            h.u.f.type = type();
+            h.set_qos(quality());
+            h.set_ackquant(ackquant());
+            h.stg = stage();
+            h.flen = datasize() + addrsize() + sizeof(header_v0);
             h.alen = addrsize();
             h.stg = stage();
             return h;
@@ -366,24 +413,43 @@ namespace crow
         }
     };
 
-    class compacted_packet : public packet
+    template <class Header> class compacted_packet : public packet
     {
     public:
-        header_v1 _header = {};
+        Header _header = {};
 
     public:
-        header_v1 &header()
+        Header &header()
         {
             return _header;
         }
 
-        uint8_t *addrptr() override;
-        uint8_t addrsize() override;
+        uint8_t *addrptr()
+        {
+            return (uint8_t *)(&header() + 1);
+        }
 
-        char *dataptr() override;
-        uint16_t datasize() override;
+        uint8_t addrsize()
+        {
+            return _header.alen;
+        }
 
-        char *endptr() override;
+        char *dataptr()
+        {
+            return (char *)(addrptr() + addrsize());
+        }
+
+        uint16_t datasize()
+        {
+            return (uint16_t)(full_length() - addrsize() -
+                              sizeof(struct crow::header_v1));
+        }
+
+        char *endptr()
+        {
+            return (char *)&header() + full_length();
+        }
+
         uint8_t type() override
         {
             return _header.u.f.type;
@@ -402,29 +468,22 @@ namespace crow
         {
             return _header.flen;
         }
-#ifndef OLD_HEADER
+
         uint8_t quality() override
         {
-            return _header.qos.quality();
+            return _header.qos();
         }
+
         uint16_t ackquant() override
         {
-            return _header.qos.quant();
+            return _header.ackquant();
         }
-#else
-        uint8_t quality() override
-        {
-            return _header.qos;
-        }
-        uint16_t ackquant() override
-        {
-            return _header.ackquant;
-        }
-#endif
+
         uint8_t stage() override
         {
             return _header.stg;
         }
+
         uint8_t ack() override
         {
             return _header.u.f.ack;
@@ -435,34 +494,25 @@ namespace crow
             _header.u.f.type = arg;
         }
 
-#ifndef OLD_HEADER
         void set_quality(uint8_t arg) override
         {
-            _header.qos.set_quality(arg);
+            _header.set_qos(arg);
         }
         void set_ackquant(uint16_t arg) override
         {
-            _header.qos.set_quant(arg);
+            _header.set_ackquant(arg);
         }
-#else
-        void set_quality(uint8_t arg) override
-        {
-            _header.qos = arg;
-        }
-        void set_ackquant(uint16_t arg) override
-        {
-            _header.ackquant = arg;
-        }
-#endif
 
         void set_stage(uint8_t arg) override
         {
             _header.stg = arg;
         }
+
         void set_seqid(uint16_t arg) override
         {
             _header.seqid = arg;
         }
+
         void set_ack(uint8_t arg) override
         {
             _header.u.f.ack = arg;
@@ -472,6 +522,7 @@ namespace crow
         {
             (void)arg;
         }
+
         void set_datasize(uint16_t arg) override
         {
             (void)arg;
@@ -495,18 +546,52 @@ namespace crow
      * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
      */
     crow::packet *allocate_packet(int alen, int dlen);
+    void deallocate_compacted_packet(crow::packet *pack);
     void deallocate_packet(crow::packet *pack);
-    crow::compacted_packet *allocate_compacted_packet(int alen, int dlen);
-    crow::compacted_packet *allocate_compacted_packet(int adlen);
     void packet_initialization(crow::packet *pack, crow::gateway *ingate);
     crow::packet *
     create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize);
-}
 
-extern int crow_allocated_count;
+    template <class Header>
+    crow::compacted_packet<Header> *allocate_compacted_packet(int alen,
+                                                              int dlen)
+    {
+        return allocate_compacted_packet<Header>(alen + dlen);
+    }
 
-namespace crow
-{
+    template <class Header>
+    crow::compacted_packet<Header> *allocate_compacted_packet(int adlen)
+    {
+        auto buflen = sizeof(crow::compacted_packet<Header>) + adlen + 1;
+        system_lock();
+        void *ret = malloc(buflen);
+        memset(ret, 0, buflen);
+        auto *pack = new (ret) crow::compacted_packet<Header>;
+
+        if (ret)
+            crow_allocated_count++;
+
+        pack->set_destructor(crow::deallocate_compacted_packet);
+        system_unlock();
+
+        return pack;
+    }
+
+    template <class Header> Header extract_header(crow::packet *pack)
+    {
+        static_assert(std::is_same_v<Header, crow::header_v1> ||
+                      std::is_same_v<Header, crow::header_v0>);
+
+        if constexpr (std::is_same<Header, crow::header_v1>::value)
+        {
+            return pack->extract_header_v1();
+        }
+        else if constexpr (std::is_same<Header, crow::header_v0>::value)
+        {
+            return pack->extract_header_v0();
+        }
+    }
+
     // Только для аллокации через pool.
     void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
     igris::pool *get_package_pool();

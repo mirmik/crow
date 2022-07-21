@@ -12,13 +12,13 @@
 
 namespace crow
 {
-    class self_driven_gstuff : public crow::gateway
+    template <typename Header> class self_driven_gstuff : public crow::gateway
     {
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
         crow::packet *insend = nullptr;
         /// Максимальная длина пакета, какой мы готовы принять.
         int received_maxpack_size = 48;
-        crow::compacted_packet *recvpack = nullptr;
+        crow::compacted_packet<Header> *recvpack = nullptr;
         gstuff_autorecv recver = {};
 
         int (*write_callback)(void *,
@@ -71,7 +71,7 @@ namespace crow
 
         void newline_handler()
         {
-            crow::compacted_packet *pack = recvpack;
+            crow::compacted_packet<Header> *pack = recvpack;
             recvpack = nullptr;
             pack->revert_gate(this->id);
             crow::packet_initialization(pack, this);
@@ -82,7 +82,8 @@ namespace crow
         void init_receiver()
         {
             assert(recvpack == nullptr);
-            recvpack = crow::allocate_compacted_packet(received_maxpack_size);
+            recvpack =
+                crow::allocate_compacted_packet<Header>(received_maxpack_size);
             recver.setbuf((uint8_t *)&recvpack->header(),
                           received_maxpack_size);
         }
@@ -168,9 +169,9 @@ namespace crow
                     break;
                     case 1: /// Отправка заголовка
                     {
-                        header_v1 header = insend->extract_header_v1();
+                        Header header = crow::extract_header<Header>(insend);
                         fallthrow =
-                            data_section((char *)&header, sizeof(header_v1));
+                            data_section((char *)&header, sizeof(Header));
                     }
                     break;
                     case 2: /// Отправка адреса

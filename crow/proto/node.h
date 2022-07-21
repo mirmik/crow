@@ -19,11 +19,7 @@
 
 namespace crow
 {
-#if OLD_HEADER
     using nodeid_t = uint16_t;
-#else
-    using nodeid_t = uint8_t;
-#endif
     class node;
 
     struct node_subheader
@@ -192,9 +188,7 @@ namespace crow
         {
             crow::keepalive_timer_manager.plan(keepalive_timer, igris::millis(),
                                                interval);
-
             crow::unsleep();
-
             if (immediate_call)
             {
                 keepalive_handle();
