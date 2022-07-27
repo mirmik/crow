@@ -29,9 +29,10 @@ modules = [
 if sys.platform != "win32":
 	modules.extend(["crow.realtime_threads"])
 
-licant.cxx_shared_library(target,
+licant.cxx_static_and_shared("libraries",
 	mdepends = modules,
-
+	static_lib="libcrow.a",
+	shared_lib="libcrow.so",
 	cxxstd="c++17",
 	optimize = "-O2",
 	cxx_flags = '-fPIC -Wall -pedantic -g -Weffc++ -Wextra',
@@ -46,15 +47,18 @@ licant.fileset("apps", targets=[
 
 licant.fileset("all", targets=["apps", target])
 
-licant.install.install_library(tgt="install_library", libtgt=target, headers="crow", hroot="crow", 
-	uninstall="uninstall")
+licant.install.install_library(tgt="install_libraries", 
+							   libtgt=["libcrow.a", "libcrow.so"], 
+							   headers="crow", 
+							   hroot="crow", 
+	                           uninstall="uninstall")
 
 @licant.routine(deps=["apps"])
 def install_apps():
 	licant.do(["install_crowker", "makefile"])
 	licant.do(["install_ctrans", "makefile"])
 
-@licant.routine(deps=["install_apps", "install_library"])
+@licant.routine(deps=["install_apps", "install_libraries"])
 def install():
 	pass
 
