@@ -1,1 +1,1 @@
-git clean -fxd
+./make.py clean
