@@ -19,9 +19,10 @@ application("crowker",
 		"crow.crowker", 
 		"crow.udpgate"
 	],
-	optimize = "-O2",
-	cxx_flags = "-Wextra -Wall",
-	ld_flags = "-static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive",
+    optimize="-O2",
+    cc_flags="-Wextra -Wall -ffunction-sections -fdata-sections",
+    cxx_flags="-Wextra -Wall -ffunction-sections -fdata-sections",
+    ld_flags="-static -Wl,--whole-archive -lpthread -Wl,--strip-all -Wl,--no-whole-archive -ffunction-sections -fdata-sections -Wl,--gc-sections",
 	libs = ["readline", "nos", "igris"]
 )
 
