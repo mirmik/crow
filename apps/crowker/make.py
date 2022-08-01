@@ -21,7 +21,8 @@ application("crowker",
 	],
 	optimize = "-O2",
 	cxx_flags = "-Wextra -Wall",
-	libs = ["pthread", "readline", "nos", "igris"]
+	ld_flags = "-static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive",
+	libs = ["readline", "nos", "igris"]
 )
 
 licant.install.install_application(tgt="install_crowker", src="crowker", dst="crowker")

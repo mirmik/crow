@@ -22,9 +22,10 @@ application("ctrans",
                 "crow.serial_gstuff",
             ],
             defines=defines,
-            optimize="-O0",
-            cc_flags="-Wextra -Wall -g",
-            cxx_flags="-Wextra -Wall -g",
+            optimize="-O2",
+            cc_flags="-Wextra -Wall -ffunction-sections -fdata-sections",
+            cxx_flags="-Wextra -Wall -ffunction-sections -fdata-sections",
+            ld_flags="-static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -ffunction-sections -fdata-sections -Wl,--gc-sections",
             libs=["pthread", "readline", "igris", "nos"],
             cxxstd="c++17"
             )
