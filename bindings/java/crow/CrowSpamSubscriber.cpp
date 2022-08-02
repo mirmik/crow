@@ -21,7 +21,7 @@ void spam_subscriber_helper(
 	if (getEnvStat == JNI_EDETACHED)
 	{
 		std::cout << "GetEnv: not attached" << std::endl;
-		if (g_vm->AttachCurrentThread((void**)&env, NULL) != 0)
+		if (g_vm->AttachCurrentThread((JNIEnv**)&env, NULL) != 0)
 		{
 			std::cout << "Failed to attach" << std::endl;
 		}
