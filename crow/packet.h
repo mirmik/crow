@@ -579,8 +579,8 @@ namespace crow
 
     template <class Header> Header extract_header(crow::packet *pack)
     {
-        static_assert(std::is_same_v<Header, crow::header_v1> ||
-                      std::is_same_v<Header, crow::header_v0>);
+        static_assert(std::is_same<Header, crow::header_v1>::value ||
+                      std::is_same<Header, crow::header_v0>::value);
 
         if constexpr (std::is_same<Header, crow::header_v1>::value)
         {
