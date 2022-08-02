@@ -45,8 +45,6 @@ licant.fileset("apps", targets=[
 	"crowker",
 ], deps=["libcrow.so"])
 
-licant.fileset("all", targets=["apps", target])
-
 licant.install.install_library(tgt="install_libraries", 
 							   libtgt=["libcrow.a", "libcrow.so"], 
 							   headers="crow", 
@@ -61,5 +59,21 @@ def install_apps():
 @licant.routine(deps=["install_apps", "install_libraries"])
 def install():
 	pass
+
+licant.cxx_application("runtests",
+	sources = [
+		"tests/*.cpp",
+		"tests/brocker/*.cpp"
+	],
+	mdepends=["crow", "crow.udpgate"],
+	cxxstd="gnu++17",
+	ccstd="c11",
+	cxx_flags = "-fPIC -g -Werror=all -Werror=pedantic -Weffc++ -Wno-deprecated-declarations",
+	cc_flags = "-fPIC -g -Werror=all -Werror=pedantic -Wno-deprecated-declarations",
+	include_paths = ["tests", "."],
+	libs = ["igris", "nos", "pthread"],
+)
+
+licant.fileset("all", targets=["apps", target, "runtests"])
 
 licant.ex("all")
