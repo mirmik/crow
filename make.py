@@ -65,7 +65,7 @@ licant.cxx_application("runtests",
 		"tests/*.cpp",
 		"tests/brocker/*.cpp"
 	],
-	mdepends=["crow", "crow.udpgate"],
+	objects = [ "libcrow.a" ],
 	cxxstd="gnu++17",
 	ccstd="c11",
 	cxx_flags = "-fPIC -g -Werror=all -Werror=pedantic -Weffc++ -Wno-deprecated-declarations",

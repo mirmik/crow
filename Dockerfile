@@ -13,6 +13,7 @@ COPY --from=1 /usr/lib/libnos.a /usr/lib/libnos.a
 ADD . /root/crow
 
 WORKDIR /root/crow
+RUN /root/sanitize-check.sh
 RUN ./make.py
 RUN ./runtests
 RUN sudo ./make.py install
