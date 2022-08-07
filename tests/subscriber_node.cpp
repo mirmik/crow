@@ -1,14 +1,14 @@
 #include <crow/nodes/subscriber_node.h>
 #include <doctest/doctest.h>
 
-void foo(igris::buffer data, crow::subscriber_node&) 
+void foo(igris::buffer data)
 {
-	(void) data;
+    (void)data;
 }
 
-TEST_CASE("doctest") 
+TEST_CASE("doctest")
 {
-	crow::subscriber_node node(foo);
+    crow::subscriber_node node(foo);
 
-	node.bind(13);
+    node.bind(13);
 }

@@ -85,7 +85,7 @@ std::shared_ptr<crow::tcpgate> tcpgate;
 
 void do_incom_data(igris::buffer);
 
-void subscriber_data_handle(igris::buffer incom_data, crow::subscriber_node &)
+void subscriber_data_handle(igris::buffer incom_data)
 {
     do_incom_data(incom_data);
 }

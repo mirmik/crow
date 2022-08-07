@@ -7,45 +7,48 @@ void crow::subscriber_node::incoming_packet(crow::packet *pack)
 
     switch (s.type)
     {
-    case PubSubTypes::Consume:
-    {
-        auto &sh = pack->subheader<consume_subheader>();
-        incoming_handler(sh.message(), *this);
-    };
-    break;
-
-    default:
+        case PubSubTypes::Consume:
+        {
+            auto &sh = pack->subheader<consume_subheader>();
+            incoming_handler(sh.message());
+        };
         break;
+
+        default:
+            break;
     }
 
     crow::release(pack);
 }
 
-crow::subscriber_node::subscriber_node(
-    delegate incoming)
+crow::subscriber_node::subscriber_node(function incoming)
     : incoming_handler(incoming)
 {
 }
 
-void crow::abstract_subscriber_node::init_subscribe(crow::hostaddr_view crowker_addr, int crowker_node,
-   igris::buffer theme, uint8_t qos, uint16_t ackquant,
-   uint8_t rqos, uint16_t rackquant) 
+void crow::abstract_subscriber_node::init_subscribe(
+    crow::hostaddr_view crowker_addr,
+    int crowker_node,
+    igris::buffer theme,
+    uint8_t qos,
+    uint16_t ackquant,
+    uint8_t rqos,
+    uint16_t rackquant)
 {
     this->crowker_addr = crowker_addr;
     this->crowker_node = crowker_node;
-    this->theme = { theme.data(), theme.size() };
+    this->theme = {theme.data(), theme.size()};
     this->qos = qos;
     this->ackquant = ackquant;
     this->rqos = rqos;
-    this->rackquant = rackquant;    
+    this->rackquant = rackquant;
 }
 
 void crow::abstract_subscriber_node::set_brocker_address(
-	crow::hostaddr_view crowker_addr,
-    int crowker_node) 
+    crow::hostaddr_view crowker_addr, int crowker_node)
 {
-	this->crowker_addr = crowker_addr;
-	this->crowker_node = crowker_node;
+    this->crowker_addr = crowker_addr;
+    this->crowker_node = crowker_node;
 }
 
 void crow::abstract_subscriber_node::subscribe()
@@ -61,7 +64,8 @@ void crow::abstract_subscriber_node::subscribe()
                                   sizeof(sh) - sizeof(node_subheader)},
                                  theme};
 
-    node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
+    node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos,
+                 ackquant);
 }
 
 void crow::abstract_subscriber_node::unsubscribe()
@@ -77,10 +81,12 @@ void crow::abstract_subscriber_node::unsubscribe()
                                   sizeof(sh) - sizeof(node_subheader)},
                                  theme};
 
-    node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
+    node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos,
+                 ackquant);
 }
 
-void crow::abstract_subscriber_node::subscribe_v2(bool updates, uint32_t request_latest) 
+void crow::abstract_subscriber_node::subscribe_v2(bool updates,
+                                                  uint32_t request_latest)
 {
     crow::subscribe_subheader_v2 sh;
 
@@ -95,6 +101,6 @@ void crow::abstract_subscriber_node::subscribe_v2(bool updates, uint32_t request
                                   sizeof(sh) - sizeof(node_subheader)},
                                  theme};
 
-    node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);    
+    node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos,
+                 ackquant);
 }
-

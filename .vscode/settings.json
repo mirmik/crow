@@ -1,10 +1,11 @@
 {
-    "cmake.configureOnOpen": true,
-
-    /** Enable format on save */
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        /** Pyformat use it's own code action to  */
-        "source.organizeImports": true
+    "files.associations": {
+        "algorithm": "cpp",
+        "*.tcc": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "string_view": "cpp",
+        "ranges": "cpp"
     }
 }
