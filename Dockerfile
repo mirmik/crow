@@ -1,7 +1,7 @@
 ARG ARCH
-FROM netricks/igris:$ARCH
-FROM netricks/nos:$ARCH
-FROM netricks/netricks-20.04-env:$ARCH
+FROM igris:$ARCH
+FROM nos:$ARCH
+FROM netricks-20.04-env:$ARCH
 
 COPY --from=0 /usr/local/include/igris /usr/local/include/igris
 COPY --from=0 /usr/lib/libigris.so /usr/lib/libigris.so
