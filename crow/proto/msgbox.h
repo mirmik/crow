@@ -14,7 +14,7 @@
 
 namespace crow
 {
-    class [[deprecated("replace with requestor_node")]] msgbox : public crow::node
+    class msgbox : public crow::node
     {
         sem_t message_lock = {};
         struct dlist_head messages = DLIST_HEAD_INIT(messages);
