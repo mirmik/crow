@@ -22,7 +22,7 @@ namespace crow
         tcpgate(uint16_t port) { open(port); }
 
         void send(crow::packet *) override;
-        bool opened() { return server.fd > 0; }
+        bool opened() { return server.fd() > 0; }
 
         int open(uint16_t port = 0);
         void close();
