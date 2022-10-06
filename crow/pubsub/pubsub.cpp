@@ -1,12 +1,12 @@
 /** @file */
 
-#include <utility>
 #include "pubsub.h"
 #include "subscriber.h"
+#include <utility>
 
 #include <crow/hexer.h>
-#include <igris/util/size.h>
 #include <igris/sync/syslock.h>
+#include <igris/util/size.h>
 
 crow::pubsub_protocol_cls crow::pubsub_protocol;
 
@@ -53,8 +53,10 @@ void crow::pubsub_protocol_cls::undelivered(crow::packet *pack)
 
 crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
                                const igris::buffer theme,
-                               const igris::buffer data, uint8_t qos,
-                               uint16_t acktime, uint8_t type)
+                               const igris::buffer data,
+                               uint8_t qos,
+                               uint16_t acktime,
+                               uint8_t type)
 {
     crow::subheader_pubsub_data subps_d;
 
@@ -74,12 +76,14 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
 
 crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
                                  const igris::buffer theme,
-                                 const igris::buffer *vec, int vecsz,
-                                 uint8_t qos, uint16_t acktime)
+                                 const igris::buffer *vec,
+                                 int vecsz,
+                                 uint8_t qos,
+                                 uint16_t acktime)
 {
     crow::subheader_pubsub_data subps_d;
 
-    subps_d.type = PUBLISH;
+    subps_d.type = (uint8_t)crow::pubsub_type::PUBLISH;
     subps_d.thmsz = theme.size();
     subps_d.datsz = 0;
 
@@ -97,14 +101,17 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
                          CROW_PUBSUB_PROTOCOL, qos, acktime);
 }
 
-void crow::subscribe(const crow::hostaddr_view &addr, const igris::buffer theme,
-                     uint8_t qos, uint16_t acktime, uint8_t rqos,
+void crow::subscribe(const crow::hostaddr_view &addr,
+                     const igris::buffer theme,
+                     uint8_t qos,
+                     uint16_t acktime,
+                     uint8_t rqos,
                      uint16_t racktime)
 {
     size_t thmsz = theme.size();
     crow::subheader_pubsub_control subps_c;
 
-    subps_c.type = SUBSCRIBE;
+    subps_c.type = (uint8_t)crow::pubsub_type::SUBSCRIBE;
     subps_c.thmsz = (uint8_t)thmsz;
     subps_c.qos = rqos;
     subps_c.ackquant = racktime;
@@ -114,7 +121,8 @@ void crow::subscribe(const crow::hostaddr_view &addr, const igris::buffer theme,
         {(char *)theme.data(), theme.size()},
     };
 
-    crow::send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos, acktime);
+    crow::send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
+                 acktime);
 }
 
 void crow::pubsub_protocol_cls::resubscribe_all()
