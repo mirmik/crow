@@ -36,6 +36,6 @@ TEST_CASE("keepalive")
         crow::onestep();
     }
 
-    CHECK(a == 5 || a == 4);
-    CHECK(b == 3 || b == 2);
+    CHECK_UNARY(a == 5 || a == 4);
+    CHECK_UNARY(b == 3 || b == 2);
 }
