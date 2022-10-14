@@ -7,20 +7,20 @@
 
 namespace crow
 {
-    class [[deprecated]] subscriber
+    class subscriber
     {
     public:
         dlist_head lnk = DLIST_HEAD_INIT(lnk);
 
     public:
-        crow::hostaddr_view addr={};
-        const char *theme=nullptr;
-        uint8_t qos=0;
-        uint16_t ackquant=0;
-        uint8_t rqos=0;
-        uint16_t rackquant=0;
+        crow::hostaddr_view addr = {};
+        const char *theme = nullptr;
+        uint8_t qos = 0;
+        uint16_t ackquant = 0;
+        uint8_t rqos = 0;
+        uint16_t rackquant = 0;
 
-        igris::delegate<void, crow::pubsub_packet_ptr> dlg={};
+        igris::delegate<void, crow::pubsub_packet_ptr> dlg = {};
 
     public:
         subscriber() = default;
@@ -29,8 +29,8 @@ namespace crow
         {
         }
 
-        subscriber(const subscriber&) = delete;
-        subscriber& operator=(const subscriber&) = delete;
+        subscriber(const subscriber &) = delete;
+        subscriber &operator=(const subscriber &) = delete;
 
         virtual void newpack_handler(crow::pubsub_packet_ptr pack)
         {
@@ -42,8 +42,11 @@ namespace crow
             this->dlg = dlg;
         }
 
-        subscriber(const crow::hostaddr_view &addr, const char *theme,
-                   uint8_t qos, uint16_t ackquant, uint8_t rqos,
+        subscriber(const crow::hostaddr_view &addr,
+                   const char *theme,
+                   uint8_t qos,
+                   uint16_t ackquant,
+                   uint8_t rqos,
                    uint16_t rackquant,
                    igris::delegate<void, crow::pubsub_packet_ptr> dlg)
             : addr(addr)
@@ -61,8 +64,11 @@ namespace crow
         }
         virtual ~subscriber() = default;
 
-        void subscribe(const crow::hostaddr_view &addr, const char *theme,
-                       uint8_t qos, uint16_t ackquant, uint8_t rqos,
+        void subscribe(const crow::hostaddr_view &addr,
+                       const char *theme,
+                       uint8_t qos,
+                       uint16_t ackquant,
+                       uint8_t rqos,
                        uint16_t rackquant
                        // igris::delegate<void, crow::pubsub_packet_ptr> dlg
         )

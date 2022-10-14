@@ -23,8 +23,6 @@
 #define CROW_TARGET_ACK 1
 #define CROW_BINARY_ACK 2
 
-extern int crow_allocated_count;
-
 namespace crow
 {
     class gateway;
@@ -89,6 +87,11 @@ namespace crow
         {
             return flen - alen - sizeof(header_v1);
         }
+
+        void set_datasize(uint16_t sz)
+        {
+            flen = alen + sizeof(header_v1) + sz;
+        }
     } __attribute__((packed));
 
     struct header_v0
@@ -143,13 +146,24 @@ namespace crow
 
         uint16_t datasize()
         {
-            return flen - alen - sizeof(header_v1);
+            return flen - alen - sizeof(header_v0);
         }
+
+        void set_datasize(uint16_t size)
+        {
+            flen = size + alen + sizeof(header_v0);
+        }
+
     } __attribute__((packed));
 
     class packet
     {
     public:
+        packet(void (*destructor)(packet *)) : _destructor(destructor) {}
+
+        packet(const packet &p) = delete;
+        packet &operator=(const packet &p) = delete;
+
         struct dlist_head lnk =
             DLIST_HEAD_INIT(lnk); ///< Для подключения в списки башни crow.
         struct dlist_head ulnk =
@@ -173,58 +187,227 @@ namespace crow
             } f;
         } u = {};
 
-        void (*destructor)(packet *) = nullptr;
+        union header_u
+        {
+            header_v1 *h1;
+            header_v0 *h0;
+        } h = {};
+        uint8_t header_version = 1;
+        uint8_t *_addrdata = nullptr; ///< Указатель на поле адреса
+
+        // Эта функция вызывается для уничтожения пакета.
+        // Она должна уничтожить сам пакет и все связанные с ним данные.
+        void (*_destructor)(packet *) = nullptr;
 
     public:
-        void set_destructor(void (*destructor)(packet *))
+        void attach_header(header_v0 *h)
         {
-            this->destructor = destructor;
+            this->h.h0 = h;
+            header_version = 0;
         }
 
-        auto get_destructor()
+        void attach_header(header_v1 *h)
         {
-            return destructor;
+            this->h.h1 = h;
+            header_version = 1;
+        }
+
+        uint8_t *header_addr()
+        {
+            // h1 and h0 have the same value
+            return (uint8_t *)h.h1;
+        }
+
+        void attach_addrdata(uint8_t *addrdata)
+        {
+            _addrdata = addrdata;
         }
 
         void revert_gate(uint8_t gateindex);
         void revert(igris::buffer *vec, size_t veclen);
 
-        virtual uint8_t *addrptr() = 0;
-        virtual uint8_t addrsize() = 0;
-        virtual char *dataptr() = 0;
-        virtual uint16_t datasize() = 0;
-        virtual char *endptr() = 0;
-        virtual uint8_t *stageptr() = 0;
+        uint8_t *addrptr() const
+        {
+            return _addrdata;
+        }
 
-        virtual uint16_t full_length() = 0;
-        virtual uint8_t type() = 0;
-        virtual uint8_t quality() = 0;
-        virtual uint16_t ackquant() = 0;
-        virtual uint8_t stage() = 0;
-        virtual uint16_t seqid() = 0;
-        virtual uint8_t ack() = 0;
+        uint8_t addrsize()
+        {
+            if (header_version == 1)
+                return h.h1->addrsize();
+            else
+                return h.h0->addrsize();
+        }
 
-        virtual void set_addrsize(uint8_t) = 0;
-        virtual void set_datasize(uint16_t) = 0;
-        virtual void set_type(uint8_t) = 0;
-        virtual void set_quality(uint8_t) = 0;
-        virtual void set_ackquant(uint16_t) = 0;
-        virtual void set_stage(uint8_t) = 0;
-        virtual void set_seqid(uint16_t) = 0;
-        virtual void set_ack(uint8_t) = 0;
+        char *dataptr()
+        {
+            return (char *)_addrdata + addrsize();
+        }
+
+        uint16_t datasize()
+        {
+            if (header_version == 1)
+                return h.h1->datasize();
+            else
+                return h.h0->datasize();
+        }
+
+        char *endptr()
+        {
+            return dataptr() + datasize();
+        }
+
+        uint8_t *stageptr() const
+        {
+            return addrptr() + stage_index();
+        }
+
+        uint8_t stage_index() const
+        {
+            if (header_version == 1)
+                return h.h1->stg;
+            else
+                return h.h0->stg;
+        }
+
+        uint16_t full_length() const
+        {
+            if (header_version == 1)
+                return h.h1->flen;
+            else
+                return h.h0->flen;
+        }
+
+        uint8_t type() const
+        {
+            if (header_version == 1)
+                return h.h1->u.f.type;
+            else
+                return h.h0->u.f.type;
+        }
+
+        uint8_t quality() const
+        {
+            if (header_version == 1)
+                return h.h1->qos();
+            else
+                return h.h0->qos();
+        }
+
+        uint16_t ackquant() const
+        {
+            if (header_version == 1)
+                return h.h1->ackquant();
+            else
+                return h.h0->ackquant();
+        }
+
+        uint8_t stage() const
+        {
+            return stage_index();
+        }
+
+        uint16_t seqid() const
+        {
+            if (header_version == 1)
+                return h.h1->seqid;
+            else
+                return h.h0->seqid;
+        }
+
+        uint8_t ack() const
+        {
+            if (header_version == 1)
+                return h.h1->u.f.ack;
+            else
+                return h.h0->u.f.ack;
+        }
+
+        void set_addrsize(uint8_t s)
+        {
+            if (header_version == 1)
+                h.h1->alen = s;
+            else
+                h.h0->alen = s;
+        }
+
+        void set_datasize(uint16_t s)
+        {
+            if (header_version == 1)
+                h.h1->set_datasize(s);
+            else
+                h.h0->set_datasize(s);
+        }
+
+        void set_type(uint8_t t)
+        {
+            if (header_version == 1)
+                h.h1->u.f.type = t;
+            else
+                h.h0->u.f.type = t;
+        }
+
+        void set_quality(uint8_t q)
+        {
+            if (header_version == 1)
+                h.h1->set_qos(q);
+            else
+                h.h0->set_qos(q);
+        }
+
+        void set_ackquant(uint16_t a)
+        {
+            if (header_version == 1)
+                h.h1->set_ackquant(a);
+            else
+                h.h0->set_ackquant(a);
+        }
+
+        void set_stage(uint8_t s)
+        {
+            if (header_version == 1)
+                h.h1->stg = s;
+            else
+                h.h0->stg = s;
+        }
+
+        void set_seqid(uint16_t s)
+        {
+            if (header_version == 1)
+                h.h1->seqid = s;
+            else
+                h.h0->seqid = s;
+        }
+
+        void set_ack(uint8_t a)
+        {
+            if (header_version == 1)
+                h.h1->u.f.ack = a;
+            else
+                h.h0->u.f.ack = a;
+        }
 
         void increment_stage(int i)
         {
             set_stage(stage() + i);
         }
+
         void increment_seqid(int i)
         {
             set_seqid(seqid() + i);
         }
 
-        virtual void invalidate() = 0;
-        virtual ~packet() = default;
-        virtual void self_init() = 0;
+        void invalidate()
+        {
+            if (_destructor)
+                _destructor(this);
+            _destructor = nullptr;
+        }
+
+        ~packet()
+        {
+            invalidate();
+        }
 
         void parse_header(const header_v1 &h)
         {
@@ -284,298 +467,21 @@ namespace crow
         }
     };
 
-    class morph_packet : public packet
-    {
-        uint8_t _type = 0;
-        uint8_t _ack = 0;
-        uint8_t _stage = 0;
-        uint8_t _quality = 0;
-        uint16_t _ackquant = 0;
-        uint8_t _alen = 0;
-        uint16_t _dlen = 0;
-        uint16_t _seqid = 0;
-        uint8_t *_aptr = nullptr;
-        char *_dptr = nullptr;
-
-    public:
-        uint8_t *addrptr() override
-        {
-            return _aptr;
-        }
-        uint8_t addrsize() override
-        {
-            return _alen;
-        }
-
-        char *dataptr() override
-        {
-            return _dptr;
-        }
-        uint16_t datasize() override
-        {
-            return _dlen;
-        }
-
-        char *endptr() override
-        {
-            return nullptr;
-        }
-        uint8_t type() override
-        {
-            return _type;
-        }
-        uint16_t seqid() override
-        {
-            return _seqid;
-        }
-
-        uint8_t *stageptr() override
-        {
-            return addrptr() + stage();
-        }
-
-        uint16_t full_length() override
-        {
-            return 0;
-        }
-        uint8_t quality() override
-        {
-            return _quality;
-        }
-        uint16_t ackquant() override
-        {
-            return _ackquant;
-        }
-        uint8_t stage() override
-        {
-            return _stage;
-        }
-        uint8_t ack() override
-        {
-            return _ack;
-        }
-
-        void set_addrsize(uint8_t arg) override
-        {
-            _alen = arg;
-        }
-        void set_datasize(uint16_t arg) override
-        {
-            _dlen = arg;
-        }
-        void set_type(uint8_t arg) override
-        {
-            _type = arg;
-        }
-        void set_quality(uint8_t arg) override
-        {
-            _quality = arg;
-        }
-        void set_ackquant(uint16_t arg) override
-        {
-            _ackquant = arg;
-        }
-        void set_stage(uint8_t arg) override
-        {
-            _stage = arg;
-        }
-        void set_seqid(uint16_t arg) override
-        {
-            _seqid = arg;
-        }
-        void set_ack(uint8_t arg) override
-        {
-            _ack = arg;
-        }
-
-        void invalidate() override
-        {
-            free(_aptr);
-            _aptr = NULL;
-        }
-
-        void allocate_buffer(int alen, int dlen)
-        {
-            _alen = alen;
-            _dlen = dlen;
-            if (_aptr)
-                invalidate();
-            _aptr = (uint8_t *)malloc(alen + dlen + 1);
-            _dptr = (char *)(_aptr + alen);
-            *(_dptr + dlen) = 0;
-        }
-
-        void self_init() override {}
-
-        ~morph_packet()
-        {
-            invalidate();
-        }
-    };
-
-    template <class Header> class compacted_packet : public packet
-    {
-    public:
-        Header _header = {};
-
-    public:
-        Header &header()
-        {
-            return _header;
-        }
-
-        uint8_t *addrptr()
-        {
-            return (uint8_t *)(&header() + 1);
-        }
-
-        uint8_t addrsize()
-        {
-            return _header.alen;
-        }
-
-        char *dataptr()
-        {
-            return (char *)(addrptr() + addrsize());
-        }
-
-        uint16_t datasize()
-        {
-            return (uint16_t)(full_length() - addrsize() -
-                              sizeof(struct crow::header_v1));
-        }
-
-        char *endptr()
-        {
-            return (char *)&header() + full_length();
-        }
-
-        uint8_t type() override
-        {
-            return _header.u.f.type;
-        }
-        uint16_t seqid() override
-        {
-            return _header.seqid;
-        }
-
-        uint8_t *stageptr() override
-        {
-            return (uint8_t *)(&_header + 1) + _header.stg;
-        }
-
-        uint16_t full_length() override
-        {
-            return _header.flen;
-        }
-
-        uint8_t quality() override
-        {
-            return _header.qos();
-        }
-
-        uint16_t ackquant() override
-        {
-            return _header.ackquant();
-        }
-
-        uint8_t stage() override
-        {
-            return _header.stg;
-        }
-
-        uint8_t ack() override
-        {
-            return _header.u.f.ack;
-        }
-
-        void set_type(uint8_t arg) override
-        {
-            _header.u.f.type = arg;
-        }
-
-        void set_quality(uint8_t arg) override
-        {
-            _header.set_qos(arg);
-        }
-        void set_ackquant(uint16_t arg) override
-        {
-            _header.set_ackquant(arg);
-        }
-
-        void set_stage(uint8_t arg) override
-        {
-            _header.stg = arg;
-        }
-
-        void set_seqid(uint16_t arg) override
-        {
-            _header.seqid = arg;
-        }
-
-        void set_ack(uint8_t arg) override
-        {
-            _header.u.f.ack = arg;
-        };
-
-        void set_addrsize(uint8_t arg) override
-        {
-            (void)arg;
-        }
-
-        void set_datasize(uint16_t arg) override
-        {
-            (void)arg;
-        }
-
-        void self_init() override
-        {
-            *((char *)(&header()) + full_length()) = 0;
-        }
-
-        void invalidate() override
-        {
-            // pass
-        }
-    };
-
     /**
      * Выделить память для пакета.
      *
      * Выделяет adlen + sizeof(crow::packet) байт
      * @param adlen Суммарная длина адреса и данных в выделяемом пакете.
      */
-    crow::packet *allocate_packet(int alen, int dlen);
+    crow::packet *allocate_packet_header_v1(int alen, int dlen);
+    crow::packet *allocate_packet_header_v0(int alen, int dlen);
+    crow::packet *allocate_packet_header_v1(int adlen);
+    crow::packet *allocate_packet_header_v0(int adlen);
     void deallocate_compacted_packet(crow::packet *pack);
     void deallocate_packet(crow::packet *pack);
     void packet_initialization(crow::packet *pack, crow::gateway *ingate);
     crow::packet *
     create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize);
-
-    template <class Header>
-    crow::compacted_packet<Header> *allocate_compacted_packet(int alen,
-                                                              int dlen)
-    {
-        return allocate_compacted_packet<Header>(alen + dlen);
-    }
-
-    template <class Header>
-    crow::compacted_packet<Header> *allocate_compacted_packet(int adlen)
-    {
-        auto buflen = sizeof(crow::compacted_packet<Header>) + adlen + 1;
-        system_lock();
-        void *ret = malloc(buflen);
-        memset(ret, 0, buflen);
-        auto *pack = new (ret) crow::compacted_packet<Header>;
-
-        if (ret)
-            crow_allocated_count++;
-
-        pack->set_destructor(crow::deallocate_compacted_packet);
-        system_unlock();
-
-        return pack;
-    }
 
     template <class Header> Header extract_header(crow::packet *pack)
     {
@@ -592,6 +498,36 @@ namespace crow
         }
     }
 
+    template <class Header> crow::packet *allocate_packet(int adlen)
+    {
+        static_assert(std::is_same<Header, crow::header_v1>::value ||
+                      std::is_same<Header, crow::header_v0>::value);
+
+        if constexpr (std::is_same<Header, crow::header_v1>::value)
+        {
+            return allocate_packet_header_v1(adlen);
+        }
+        else if constexpr (std::is_same<Header, crow::header_v0>::value)
+        {
+            return allocate_packet_header_v0(adlen);
+        }
+    }
+
+    template <class Header> crow::packet *allocate_packet(int alen, int dlen)
+    {
+        static_assert(std::is_same<Header, crow::header_v1>::value ||
+                      std::is_same<Header, crow::header_v0>::value);
+
+        if constexpr (std::is_same<Header, crow::header_v1>::value)
+        {
+            return allocate_packet_header_v1(alen, dlen);
+        }
+        else if constexpr (std::is_same<Header, crow::header_v0>::value)
+        {
+            return allocate_packet_header_v0(alen, dlen);
+        }
+    }
+
     // Только для аллокации через pool.
     void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
     igris::pool *get_package_pool();
@@ -599,6 +535,8 @@ namespace crow
     bool has_allocated();
 
     void diagnostic(const char *label, crow::packet *pack);
+
+    int allocated_count();
 }
 
 #endif

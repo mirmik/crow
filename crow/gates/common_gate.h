@@ -12,13 +12,13 @@
 
 namespace crow
 {
-    template <typename Header> class self_driven_gstuff : public crow::gateway
+    class common_gateway : public crow::gateway
     {
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
         crow::packet *insend = nullptr;
         /// Максимальная длина пакета, какой мы готовы принять.
         int received_maxpack_size = 48;
-        crow::packet *recvpack = nullptr;
+        crow::compacted_packet<crow::header_v1> *recvpack = nullptr;
         gstuff_autorecv recver = {};
 
         int (*write_callback)(void *,
@@ -71,7 +71,7 @@ namespace crow
 
         void newline_handler()
         {
-            crow::packet *pack = recvpack;
+            crow::compacted_packet<Header> *pack = recvpack;
             recvpack = nullptr;
             pack->revert_gate(this->id);
             crow::packet_initialization(pack, this);
@@ -83,8 +83,8 @@ namespace crow
         {
             assert(recvpack == nullptr);
             recvpack =
-                crow::allocate_packet<crow::header_v1>(received_maxpack_size);
-            recver.setbuf((uint8_t *)recvpack->header_addr(),
+                crow::allocate_compacted_packet<Header>(received_maxpack_size);
+            recver.setbuf((uint8_t *)&recvpack->header(),
                           received_maxpack_size);
         }
 
@@ -169,7 +169,8 @@ namespace crow
                     break;
                     case 1: /// Отправка заголовка
                     {
-                        Header header = crow::extract_header<Header>(insend);
+                        chrow::header_v1 header =
+                            crow::extract_header<chrow::header_v1>(insend);
                         fallthrow =
                             data_section((char *)&header, sizeof(Header));
                     }
@@ -261,12 +262,12 @@ namespace crow
         {
             if (recvpack)
             {
-                recvpack->invalidate();
+                recvpack->destructor(recvpack);
                 recvpack = nullptr;
             }
         }
 
-        ~self_driven_gstuff()
+        ~common_gateway()
         {
             finish();
         }

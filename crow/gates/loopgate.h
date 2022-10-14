@@ -15,8 +15,8 @@ namespace crow
 
         void send(crow::packet *pack) override
         {
-            crow::packet *copypack =
-                crow::allocate_packet(pack->addrsize(), pack->datasize());
+            crow::packet *copypack = crow::allocate_packet<crow::header_v1>(
+                pack->addrsize(), pack->datasize());
             copypack->parse_header(pack->extract_header_v1());
             memcpy((void *)copypack->addrptr(), pack->addrptr(),
                    pack->addrsize());

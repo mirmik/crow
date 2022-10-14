@@ -70,7 +70,7 @@ TEST_CASE("self_driven_gstuff.output")
 
     CHECK_EQ(crow::total_travelled, 0);
     CHECK_EQ(crow::has_untravelled(), false);
-    CHECK_EQ(crow_allocated_count, 0);
+    CHECK_EQ(crow::allocated_count(), 0);
 }
 
 /*TEST_CASE("self_driven_gstuff.input")
@@ -111,5 +111,5 @@ buf2);
 
     CHECK_EQ(crow::total_travelled, 1);
     CHECK_EQ(crow::has_untravelled(), false);
-    CHECK_EQ(crow_allocated_count, 0);
+    CHECK_EQ(crow::allocated_count(), 0);
 }*/

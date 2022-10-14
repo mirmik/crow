@@ -115,8 +115,8 @@ namespace crow
     void spin_with_select_realtime(int abort_on_fault);
     int start_spin_with_select_realtime(int abort_on_fault);
     int start_spin_realtime(int abort_on_fault);
-}
 
-void crow_tower_release(crow::packet *pack);
+    void tower_release(crow::packet *pack);
+}
 
 #endif

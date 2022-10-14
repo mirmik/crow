@@ -27,14 +27,14 @@ namespace crow
     {
         int fd = -1;
 
-        crow::compacted_packet<Header> *rpack = nullptr;
+        crow::packet *rpack = nullptr;
         bool debug = false;
         gstuff_autorecv recver = {};
 
     public:
         void newline_handler()
         {
-            crow::compacted_packet<Header> *block = rpack;
+            crow::packet *block = rpack;
             rpack = NULL;
 
             block->revert_gate(id);
@@ -79,14 +79,15 @@ namespace crow
 
                 if (rpack == NULL)
                 {
-                    rpack = (crow::compacted_packet<Header> *)malloc(
-                        GSTUFF_MAXPACK_SIZE +
-                        sizeof(crow::compacted_packet<Header>) -
-                        sizeof(Header));
-                    new (rpack) crow::compacted_packet<Header>;
-                    rpack->destructor = +[](crow::packet *pack) { free(pack); };
-                    recver.setbuf((uint8_t *)&rpack->header(),
-                                  GSTUFF_MAXPACK_SIZE);
+                    rpack = (crow::packet *)malloc(GSTUFF_MAXPACK_SIZE +
+                                                   sizeof(crow::packet));
+                    uint8_t *headerptr =
+                        (uint8_t *)rpack + sizeof(crow::packet);
+                    new (rpack)
+                        crow::packet(+[](crow::packet *pack) { free(pack); });
+                    rpack->attach_header(reinterpret_cast<Header *>(
+                        (char *)rpack + sizeof(crow::packet)));
+                    recver.setbuf(headerptr, GSTUFF_MAXPACK_SIZE);
                 }
 
                 int ret = recver.newchar(c);

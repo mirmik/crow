@@ -798,7 +798,11 @@ void create_serial_gate(std::vector<std::string> tokens)
     }
     else
     {
-        std::cerr << "Unknown serial port format: " << tokens[0] << std::endl;
+        std::cout << "Unknown serial port format. tokens: " << std::endl;
+        for (auto &t : tokens)
+        {
+            std::cout << t << std::endl;
+        }
         exit(-1);
     }
 }

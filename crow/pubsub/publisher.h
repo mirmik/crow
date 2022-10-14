@@ -7,7 +7,6 @@
 
 namespace crow
 {
-    [[deprecated]]
     class publisher
     {
     private:
@@ -24,8 +23,10 @@ namespace crow
             init(addr, theme);
         }
 
-        void init(const crow::hostaddr_view &addr, const char *theme,
-                  uint8_t qos = 0, uint16_t acktime = 50)
+        void init(const crow::hostaddr_view &addr,
+                  const char *theme,
+                  uint8_t qos = 0,
+                  uint16_t acktime = 50)
         {
             this->addr = addr;
             this->theme = theme;
@@ -48,7 +49,9 @@ namespace crow
             crow::publish_v(addr, theme, vec, vecsz, qos, acktime);
         }
 
-        void publish_v(const igris::buffer *vec, int vecsz, uint8_t qos,
+        void publish_v(const igris::buffer *vec,
+                       int vecsz,
+                       uint8_t qos,
                        uint16_t acktime)
         {
             crow::publish_v(addr, theme, vec, vecsz, qos, acktime);

@@ -54,8 +54,8 @@ licant.install.install_library(tgt="install_libraries",
 
 @licant.routine(deps=["apps"])
 def install_apps():
-    licant.do(["install_crowker", "makefile"])
-    licant.do(["install_ctrans", "makefile"])
+    licant.do(["install_crowker"])
+    licant.do(["install_ctrans"])
 
 
 @licant.routine(deps=["install_apps", "install_libraries"])

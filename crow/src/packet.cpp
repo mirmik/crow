@@ -20,13 +20,13 @@ void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
     pack->_ackcount = 5;
     pack->u.flags = 0;
     pack->refs = 0;
-    pack->self_init();
 }
 
 crow::packet *
 crow::create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize)
 {
-    crow::packet *pack = crow::allocate_packet(addrsize, datasize);
+    crow::packet *pack =
+        crow::allocate_packet<crow::header_v1>(addrsize, datasize);
     if (pack == nullptr)
         return nullptr;
     pack->set_ackquant(200);

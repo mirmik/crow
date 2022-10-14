@@ -45,7 +45,8 @@ void crow::udpgate::read_handler(int fd)
     if (len <= 0)
         return;
 
-    crow::packet *block = allocate_packet(header.addrsize(), header.datasize());
+    crow::packet *block =
+        allocate_packet<crow::header_v1>(header.addrsize(), header.datasize());
     block->parse_header(header);
 
     size_t package_size =

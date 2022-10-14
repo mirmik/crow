@@ -1,20 +1,20 @@
 /** @file */
 
 #include <assert.h>
+#include <limits>
 #include <stdbool.h>
 #include <string.h>
-#include <limits>
 
+#include <igris/event/delegate.h>
 #include <igris/sync/syslock.h>
 #include <igris/time/systime.h>
-#include <igris/event/delegate.h>
 
 #include <crow/gateway.h>
 #include <crow/print.h>
-#include <crow/tower.h>
-#include <crow/warn.h>
 #include <crow/proto/node.h>
 #include <crow/pubsub/pubsub.h>
+#include <crow/tower.h>
+#include <crow/warn.h>
 
 #include <nos/print.h>
 
@@ -41,8 +41,14 @@ static bool __diagnostic_enabled = false;
 bool _in_incoming_handler = false;
 bool _in_undelivered_handler = false;
 
-bool crow::diagnostic_enabled() { return __diagnostic_enabled; }
-void crow::enable_diagnostic() { __diagnostic_enabled = true; }
+bool crow::diagnostic_enabled()
+{
+    return __diagnostic_enabled;
+}
+void crow::enable_diagnostic()
+{
+    __diagnostic_enabled = true;
+}
 
 void crow::diagnostic_setup(bool en)
 {
@@ -53,9 +59,7 @@ void crow::utilize(crow::packet *pack)
 {
     dlist_del(&pack->lnk); // Очищается в tower_release((см. tower.c))
     dlist_del(&pack->ulnk);
-
     pack->invalidate();
-    pack->destructor(pack);
 }
 
 void crow::release(crow::packet *pack)
@@ -71,7 +75,7 @@ void crow::release(crow::packet *pack)
     system_unlock();
 }
 
-void crow_tower_release(crow::packet *pack)
+void crow::tower_release(crow::packet *pack)
 {
     system_lock();
 
@@ -93,13 +97,12 @@ static void confirmed_utilize_from_outers(crow::packet *pack)
     dlist_for_each_entry(it, &crow_outters, lnk)
     {
         if (it->seqid() == pack->seqid() &&
-                pack->addrsize() == it->addrsize() &&
-                !memcmp(it->addrptr(), pack->addrptr(),
-                        pack->addrsize()))
+            pack->addrsize() == it->addrsize() &&
+            !memcmp(it->addrptr(), pack->addrptr(), pack->addrsize()))
         {
             it->u.f.confirmed = 1;
             crow::node_protocol.delivered(it);
-            crow_tower_release(it);
+            crow::tower_release(it);
             return;
         }
     }
@@ -111,11 +114,10 @@ static void qos_release_from_incoming(crow::packet *pack)
     dlist_for_each_entry(it, &crow_incoming, lnk)
     {
         if (it->seqid() == pack->seqid() &&
-                pack->addrsize() == it->addrsize() &&
-                !memcmp(it->addrptr(), pack->addrptr(),
-                        pack->addrsize()))
+            pack->addrsize() == it->addrsize() &&
+            !memcmp(it->addrptr(), pack->addrptr(), pack->addrsize()))
         {
-            crow_tower_release(it);
+            crow::tower_release(it);
             return;
         }
     }
@@ -152,7 +154,7 @@ crow::packet_ptr crow::travel(crow::packet *pack)
     return crow::packet_ptr(pack);
 }
 
-void crow::unsleep() 
+void crow::unsleep()
 {
     if (unsleep_handler)
     {
@@ -209,13 +211,13 @@ static void crow_send_ack(crow::packet *pack)
     assert(pack);
     assert(ack);
 
-    ack->set_type(pack->quality() == CROW_BINARY_ACK ? G1_ACK21_TYPE : G1_ACK_TYPE);
+    ack->set_type(pack->quality() == CROW_BINARY_ACK ? G1_ACK21_TYPE
+                                                     : G1_ACK_TYPE);
     ack->set_ack(1);
     ack->set_quality(CROW_WITHOUT_ACK);
     ack->set_ackquant(pack->ackquant());
     ack->set_seqid(pack->seqid());
-    memcpy(ack->addrptr(), pack->addrptr(),
-           pack->addrsize());
+    memcpy(ack->addrptr(), pack->addrptr(), pack->addrsize());
     ack->u.f.released_by_world = true;
     crow::travel(ack);
 }
@@ -232,8 +234,7 @@ static void crow_send_ack2(crow::packet *pack)
     ack->set_quality(CROW_WITHOUT_ACK);
     ack->set_ackquant(pack->ackquant());
     ack->set_seqid(pack->seqid());
-    memcpy(ack->addrptr(), pack->addrptr(),
-           pack->addrsize());
+    memcpy(ack->addrptr(), pack->addrptr(), pack->addrsize());
     crow::travel(ack);
 }
 
@@ -368,7 +369,7 @@ static void crow_do_travel(crow::packet *pack)
             //Для пакетов с подтверждение посылаем ack первого или второго
             //типов.
             if (pack->quality() == CROW_TARGET_ACK ||
-                    pack->quality() == CROW_BINARY_ACK)
+                pack->quality() == CROW_BINARY_ACK)
                 crow_send_ack(pack);
 
             if (pack->quality() == CROW_BINARY_ACK)
@@ -379,10 +380,9 @@ static void crow_do_travel(crow::packet *pack)
                 dlist_for_each_entry(inc, &crow_incoming, lnk)
                 {
                     if (inc->seqid() == pack->seqid() &&
-                            inc->addrsize() == pack->addrsize() &&
-                            memcmp(inc->addrptr(),
-                                   pack->addrptr(),
-                                   inc->addrsize()) == 0)
+                        inc->addrsize() == pack->addrsize() &&
+                        memcmp(inc->addrptr(), pack->addrptr(),
+                               inc->addrsize()) == 0)
                     {
                         // Пакет уже фигурирует как принятый, поэтому
                         // отбрасываем его.
@@ -408,7 +408,7 @@ static void crow_do_travel(crow::packet *pack)
             // подтверждения второго уровня, обслуживание со стороны башни не
             // требуется. Вносим соответствующую пометку, что по crow_release
             // пакет мог быть удалён.
-            crow_tower_release(pack);
+            crow::tower_release(pack);
         }
 
         //Решаем, что делать с пришедшим пакетом.
@@ -456,25 +456,25 @@ crow::packet_ptr crow_transport(crow::packet *pack, bool async)
 
     crow::packet_ptr ptr(pack);
 
-    if (async) 
+    if (async)
     {
         return crow::travel(pack);
     }
-    else 
+    else
     {
 
         crow_do_travel(pack);
 
         // Делаем unsleep, чтобы перерасчитать таймауты.
-/*        if (crow::unsleep_handler && pack->quality() != 0)
-        {
-            crow::unsleep_handler();   
-        }
+        /*        if (crow::unsleep_handler && pack->quality() != 0)
+                {
+                    crow::unsleep_handler();
+                }
 
- #ifdef CROW_USE_ASYNCIO
-        crow::asyncio.unsleep();
-#endif
-    }*/
+         #ifdef CROW_USE_ASYNCIO
+                crow::asyncio.unsleep();
+        #endif
+            }*/
         return ptr;
     }
 }
@@ -493,8 +493,11 @@ void crow::nocontrol_travel(crow::packet *pack, bool fastsend)
 }
 
 crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
-                            const igris::buffer data, uint8_t type, uint8_t qos,
-                            uint16_t ackquant, bool async)
+                            const igris::buffer data,
+                            uint8_t type,
+                            uint8_t qos,
+                            uint16_t ackquant,
+                            bool async)
 {
     crow::packet *pack = crow::create_packet(NULL, addr.size(), data.size());
     if (pack == nullptr)
@@ -514,8 +517,12 @@ crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
-                              const igris::buffer *vec, size_t veclen,
-                              uint8_t type, uint8_t qos, uint16_t ackquant, bool async)
+                              const igris::buffer *vec,
+                              size_t veclen,
+                              uint8_t type,
+                              uint8_t qos,
+                              uint16_t ackquant,
+                              bool async)
 {
     size_t dsize = 0;
     const igris::buffer *it = vec;
@@ -549,9 +556,14 @@ crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
-                               const igris::buffer *vec, size_t veclen,
-                               const igris::buffer *vec2, size_t veclen2,
-                               uint8_t type, uint8_t qos, uint16_t ackquant, bool async)
+                               const igris::buffer *vec,
+                               size_t veclen,
+                               const igris::buffer *vec2,
+                               size_t veclen2,
+                               uint8_t type,
+                               uint8_t qos,
+                               uint16_t ackquant,
+                               bool async)
 {
     size_t dsize = 0;
     const igris::buffer *it;
@@ -602,10 +614,16 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_vvv(const crow::hostaddr_view &addr,
-                                const igris::buffer *vec, size_t veclen,
-                                const igris::buffer *vec2, size_t veclen2,
-                                const igris::buffer *vec3, size_t veclen3,
-                                uint8_t type, uint8_t qos, uint16_t ackquant, bool async)
+                                const igris::buffer *vec,
+                                size_t veclen,
+                                const igris::buffer *vec2,
+                                size_t veclen2,
+                                const igris::buffer *vec3,
+                                size_t veclen3,
+                                uint8_t type,
+                                uint8_t qos,
+                                uint16_t ackquant,
+                                bool async)
 {
     size_t dsize = 0;
     const igris::buffer *it;
@@ -686,7 +704,7 @@ void crow::return_to_tower(crow::packet *pack, uint8_t sts)
     {
         //Пакет здешний.
         if (sts != CROW_SENDED || pack->quality() == CROW_WITHOUT_ACK)
-            crow_tower_release(pack);
+            crow::tower_release(pack);
         else
             add_to_outters_list(pack);
     }
@@ -777,7 +795,7 @@ void crow_onestep_outers_stage()
             if (pack->_ackcount == 0)
             {
                 crow_undelivered(pack);
-                crow_tower_release(pack);
+                crow::tower_release(pack);
             }
             else
             {
@@ -841,13 +859,13 @@ void crow_onestep_keepalive_stage()
 
 void crow::onestep()
 {
-    #ifndef CROW_USE_ASYNCIO
+#ifndef CROW_USE_ASYNCIO
     crow::gateway *gate;
     dlist_for_each_entry(gate, &crow::gateway_list, lnk)
     {
         gate->nblock_onestep();
     }
-    #endif
+#endif
 
     crow_onestep_send_stage();
     crow_onestep_keepalive_stage();
@@ -855,8 +873,14 @@ void crow::onestep()
     crow_onestep_incoming_stage();
 }
 
-int crow::incomming_stage_count() { return dlist_size(&crow_incoming); }
-int crow::outers_stage_count() { return dlist_size(&crow_outters); }
+int crow::incomming_stage_count()
+{
+    return dlist_size(&crow_incoming);
+}
+int crow::outers_stage_count()
+{
+    return dlist_size(&crow_outters);
+}
 
 void crow::spin()
 {
@@ -890,7 +914,10 @@ bool crow::has_untravelled_now()
 void crow::finish()
 {
     crow::gateway *gate;
-    dlist_for_each_entry(gate, &crow::gateway_list, lnk) { gate->finish(); }
+    dlist_for_each_entry(gate, &crow::gateway_list, lnk)
+    {
+        gate->finish();
+    }
 }
 
 bool crow::fully_empty()
@@ -906,7 +933,7 @@ int64_t crow::get_minimal_timeout()
 {
     // TODO : Ошибки в учёте переходов через uint16_t
 
-    //int64_t result;
+    // int64_t result;
     int64_t mininterval = std::numeric_limits<int64_t>::max();
     int64_t curtime = igris::millis();
 
