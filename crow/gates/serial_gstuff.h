@@ -79,15 +79,9 @@ namespace crow
 
                 if (rpack == NULL)
                 {
-                    rpack = (crow::packet *)malloc(GSTUFF_MAXPACK_SIZE +
-                                                   sizeof(crow::packet));
-                    uint8_t *headerptr =
-                        (uint8_t *)rpack + sizeof(crow::packet);
-                    new (rpack)
-                        crow::packet(+[](crow::packet *pack) { free(pack); });
-                    rpack->attach_header(reinterpret_cast<Header *>(
-                        (char *)rpack + sizeof(crow::packet)));
-                    recver.setbuf(headerptr, GSTUFF_MAXPACK_SIZE);
+                    rpack =
+                        allocate_packet<crow::header_v1>(GSTUFF_MAXPACK_SIZE);
+                    recver.setbuf(rpack->header_addr(), GSTUFF_MAXPACK_SIZE);
                 }
 
                 int ret = recver.newchar(c);

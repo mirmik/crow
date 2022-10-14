@@ -16,6 +16,7 @@ int crow_allocated_count_inc()
     system_lock();
     _crow_allocated_count++;
     system_unlock();
+    assert(_crow_allocated_count < 64);
     return _crow_allocated_count;
 }
 
