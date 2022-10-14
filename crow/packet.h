@@ -404,6 +404,11 @@ namespace crow
             _destructor = nullptr;
         }
 
+        size_t fullsize() const
+        {
+            return full_length();
+        }
+
         ~packet()
         {
             invalidate();

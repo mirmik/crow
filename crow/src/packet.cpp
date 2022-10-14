@@ -36,12 +36,16 @@ crow::create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize)
     return pack;
 }
 
+// Номер врат - 1 байт, так что просто меняем одно число на
+// номер врат, через которые проходит пакет.
 void crow::packet::revert_gate(uint8_t gateindex)
 {
     *stageptr() = gateindex;
     increment_stage(1);
 }
 
+// Перезаписываем информацию на ту информацию, какую предоставили врата
+// в качестве обратного адреса.
 void crow::packet::revert(igris::buffer *vec, size_t veclen)
 {
     igris::buffer *it = vec + veclen - 1;

@@ -49,19 +49,8 @@ void crow::udpgate::read_handler(int fd)
         allocate_packet<crow::header_v1>(header.addrsize(), header.datasize());
     block->parse_header(header);
 
-    size_t package_size =
-        sizeof(header) + block->addrsize() + block->datasize();
-    if (receive_buffer.size() < package_size)
-        receive_buffer.resize(package_size);
-
-    len = recvfrom(sock, (char *)receive_buffer.data(), package_size, 0,
+    len = recvfrom(sock, (char *)block->header_addr(), block->fullsize(), 0,
                    (struct sockaddr *)&sender, &sender_socksize);
-
-    memcpy(block->addrptr(), (char *)receive_buffer.data() + sizeof(header),
-           block->addrsize());
-    memcpy(block->dataptr(),
-           (char *)receive_buffer.data() + sizeof(header) + block->addrsize(),
-           block->datasize());
 
     if (len <= 0)
     {
