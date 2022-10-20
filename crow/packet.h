@@ -46,7 +46,7 @@ namespace crow
                 uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
                 ///< передается в типе.
                 uint8_t RESERVED1 : 1;
-                uint8_t stg : 3;
+                uint8_t RESERVED2 : 3;
                 uint8_t type : 3; ///< Доп. инф. зависит от ситуации.
             } f;
         } u = {};
