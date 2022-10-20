@@ -2,7 +2,8 @@ import licant
 import licant.modules
 
 DEFINES = []
-licant.cli.add_argument("-o", "--oldheader", action="store_true", default=False)
+licant.cli.add_argument("-o", "--oldheader",
+                        action="store_true", default=False)
 opts, args = licant.cli.parse()
 DEFINES = ["OLD_HEADER=1"] if opts.oldheader else []
 
@@ -39,10 +40,10 @@ licant.modules.module("crow.minimal",
                           "src/hostaddr_view.cpp",
                           "src/hostaddr.cpp",
                           "proto/node.cpp",
+                          "proto/node_protocol.cpp",
                           "proto/keepalive.cpp",
                           "proto/node-sync.cpp",
                           "proto/channel.cpp",
-                          # "nodes/rshell_cli_node.cpp",
                           "nodes/subscriber_node.cpp",
                           "nodes/publisher_node.cpp",
                           "nodes/service_node.cpp",

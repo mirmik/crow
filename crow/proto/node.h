@@ -4,13 +4,12 @@
 #include <crow/keepalive.h>
 #include <crow/packet.h>
 #include <crow/packet_ptr.h>
+#include <crow/proto/node_protocol.h>
 #include <crow/proto/protocol.h>
 #include <crow/tower.h>
-
 #include <igris/binreader.h>
 #include <igris/datastruct/dlist.h>
 #include <igris/sync/syslock.h>
-
 #include <stdint.h>
 
 #define CROW_NODEPACK_COMMON 0
@@ -19,33 +18,11 @@
 
 namespace crow
 {
-    using nodeid_t = uint16_t;
     class node;
-
-    struct node_subheader
-    {
-        nodeid_t sid = 0;
-        nodeid_t rid = 0;
-        union _u
-        {
-            uint8_t flags = 0;
-            struct _f
-            {
-                uint8_t reserved : 4;
-                uint8_t type : 4;
-            } f;
-        } u = {};
-    } __attribute__((packed));
 
     crow::node *find_node(size_t id);
     void __link_node(node *srvs, uint16_t id);
     void bind_node_dynamic(node *srvs);
-
-    static auto node_data(crow::packet *pack)
-    {
-        return igris::buffer(pack->dataptr() + sizeof(node_subheader),
-                             pack->datasize() - sizeof(node_subheader));
-    }
 
     class node_keepalive_timer : public igris::timer_head
     {
@@ -197,35 +174,6 @@ namespace crow
 
         virtual ~alived_object();
     };
-
-    class node_protocol_cls : public crow::protocol
-    {
-    private:
-        void send_node_error(crow::packet *pack, int errcode);
-
-    public:
-        void incoming(crow::packet *pack);
-        void undelivered(crow::packet *pack);
-        void delivered(crow::packet *pack);
-
-        node_protocol_cls() /*: protocol(CROW_NODE_PROTOCOL)*/ {}
-
-        static auto sid(crow::packet *pack)
-        {
-            return ((node_subheader *)(pack->dataptr()))->sid;
-        }
-        static auto rid(crow::packet *pack)
-        {
-            return ((node_subheader *)(pack->dataptr()))->rid;
-        }
-
-        static auto get_error_code(crow::packet *pack)
-        {
-            return *(int *)(node_data(pack).data());
-        }
-    };
-    extern node_protocol_cls node_protocol;
-    extern struct dlist_head nodes_list;
 
     class node_packet_ptr : public packet_ptr
     {
