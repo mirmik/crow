@@ -52,10 +52,9 @@ licant.install.install_library(tgt="install_libraries",
                                    uninstall="uninstall")
 
 
-@licant.routine(deps=["apps"])
+@licant.routine(deps=["install_crowker", "install_ctrans"])
 def install_apps():
-    licant.do(["install_crowker"])
-    licant.do(["install_ctrans"])
+    pass
 
 
 @licant.routine(deps=["install_apps", "install_libraries"])
