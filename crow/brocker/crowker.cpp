@@ -1,13 +1,15 @@
 /** @file */
 
-#include <utility>
-#include <crow/defs.h>
 #include <crow/brocker/crowker.h>
+#include <crow/defs.h>
 #include <crow/hostaddr_view.h>
 #include <igris/util/dstring.h>
 #include <nos/fprint.h>
+#include <nos/inet/tcp_client.h>
+#include <utility>
 
-void crow::crowker::publish(const std::string &theme, const std::shared_ptr<std::string> &data)
+void crow::crowker::publish(const std::string &theme,
+                            const std::shared_ptr<std::string> &data)
 {
     auto *thm = get_theme(theme);
     thm->publish(data);
@@ -28,7 +30,7 @@ crowker_implementation::theme *crow::crowker::get_theme(const std::string &name)
     else
     {
         auto it = themes.emplace(std::make_pair(name, CROW_DEFAULT_QUEUE_SIZE));
-        auto* thm = &((it.first)->second);
+        auto *thm = &((it.first)->second);
         thm->name = name;
         return thm;
     }
@@ -48,7 +50,8 @@ void crow::crowker::subscribe(const std::string &theme, client *cl)
 }
 
 void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
-                                   const std::string &theme, uint8_t qos,
+                                   const std::string &theme,
+                                   uint8_t qos,
                                    uint16_t ackquant)
 {
     std::string saddr{(char *)addr.data(), (size_t)addr.size()};
@@ -90,7 +93,7 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
 }
 
 void crow::crowker::tcp_subscribe(const std::string &theme,
-                                  nos::inet::tcp_socket *sock)
+                                  nos::inet::tcp_client *sock)
 {
     auto *thm = get_theme(theme);
     auto *sub = crowker_implementation::tcp_client::get(sock->getaddr());
@@ -116,7 +119,9 @@ void crow::crowker::unlink_theme_client(crowker_implementation::theme *thm,
     }
 }
 
-void crow::crowker::send_latest(const std::string& theme, client* cl, uint32_t count_of_latest) 
+void crow::crowker::send_latest(const std::string &theme,
+                                client *cl,
+                                uint32_t count_of_latest)
 {
     auto *thm = get_theme(theme);
     thm->timestamp_activity = crowker_eval_timestamp();
@@ -125,10 +130,10 @@ void crow::crowker::send_latest(const std::string& theme, client* cl, uint32_t c
 
     if (count_of_latest == 0)
         return;
-    
-    std::vector<std::shared_ptr<std::string>> latest_messages = 
+
+    std::vector<std::shared_ptr<std::string>> latest_messages =
         thm->get_latest(count_of_latest);
-    for (auto& msg : latest_messages) 
+    for (auto &msg : latest_messages)
     {
         cl->publish(theme, *msg, nullptr);
     }
