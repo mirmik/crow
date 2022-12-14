@@ -25,7 +25,7 @@ licant.cxx_objects("crow-objects",
 	] 
 )
 
-crowopts = licant.core.core.get("crow-objects").finalopts
+crowopts = licant.default_core().get("crow-objects").finalopts
 
 class bdist_wheel(bdist_wheel_):
 	def finalize_options(self):

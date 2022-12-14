@@ -22,7 +22,7 @@ application("crowker",
     optimize="-O2",
     cc_flags="-Wextra -Wall -ffunction-sections -fdata-sections",
     cxx_flags="-Wextra -Wall -ffunction-sections -fdata-sections",
-    ld_flags="-static -Wl,--whole-archive -lpthread -Wl,--strip-all -Wl,--no-whole-archive -ffunction-sections -fdata-sections -Wl,--gc-sections",
+    ld_flags="-static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive",
 	libs = ["readline", "nos", "igris"]
 )
 
