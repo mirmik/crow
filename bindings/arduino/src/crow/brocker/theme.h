@@ -13,20 +13,32 @@ namespace crowker_implementation
 
     class theme
     {
-      public:
+    public:
         std::string name;
         std::set<subscriber *> subs;
-        int64_t timestamp_publish;
-        int64_t timestamp_activity;
+        int64_t publish_timestamp;
+        int64_t activity_timestamp;
 
-      public:
-        size_t count_subscribers() { return subs.size(); }
+    public:
+        size_t count_subscribers()
+        {
+            return subs.size();
+        }
 
-        void link_subscriber(subscriber *sub) { subs.insert(sub); }
+        void link_subscriber(subscriber *sub)
+        {
+            subs.insert(sub);
+        }
 
-        bool has_subscriber(subscriber *sub) { return subs.count(sub); }
+        bool has_subscriber(subscriber *sub)
+        {
+            return subs.count(sub);
+        }
 
-        void unlink_subscriber(subscriber *sub) { subs.erase(sub); }
+        void unlink_subscriber(subscriber *sub)
+        {
+            subs.erase(sub);
+        }
 
         void publish(const std::string &data);
     };

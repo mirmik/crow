@@ -225,3 +225,4 @@ doxygen/latex
 .ninja*
 build.ninja
 runtests
+.vscode

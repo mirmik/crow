@@ -51,7 +51,10 @@ namespace crow
             return _instance;
         }
 
-        void subscribe(const std::string &theme, client *cl);
+        void subscribe(const std::string &theme,
+                       client *cl,
+                       crowker_implementation::options opt);
+
         void send_latest(const std::string &theme,
                          client *cl,
                          uint32_t count_of_latest);

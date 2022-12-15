@@ -22,7 +22,7 @@ namespace crow
         const uint8_t *addr;
         size_t alen;
 
-      public:
+    public:
         hostaddr_view() = default;
         hostaddr_view(const hostaddr_view &h) = default;
         hostaddr_view &operator=(const hostaddr_view &h) = default;
@@ -44,6 +44,8 @@ namespace crow
         bool operator==(igris::buffer buf) const;
         bool operator==(const hostaddr_view &buf) const;
         bool operator<(const hostaddr_view &buf) const;
+
+        std::string to_string() const;
     };
 }
 

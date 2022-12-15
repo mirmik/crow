@@ -31,17 +31,20 @@ crowker_implementation::theme *crow::crowker::get_theme(const std::string &name)
     {
         auto it = themes.emplace(std::make_pair(name, CROW_DEFAULT_QUEUE_SIZE));
         auto *thm = &((it.first)->second);
-        thm->name = name;
+        thm->set_name(name);
         return thm;
     }
 }
 
-void crow::crowker::subscribe(const std::string &theme, client *cl)
+void crow::crowker::subscribe(const std::string &theme,
+                              client *cl,
+                              crowker_implementation::options opt)
 {
     auto *thm = get_theme(theme);
-    thm->timestamp_activity = crowker_eval_timestamp();
-    cl->thms[thm].opts = nullptr;
-    cl->timestamp_activity = crowker_eval_timestamp();
+    cl->set_theme_options(thm, opt);
+
+    thm->set_activity_timestamp(crowker_eval_timestamp());
+    cl->set_activity_timestamp(crowker_eval_timestamp());
 
     bool added = thm->link_client(cl);
 
@@ -56,11 +59,10 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
 {
     std::string saddr{(char *)addr.data(), (size_t)addr.size()};
     auto *thm = get_theme(theme);
-    thm->timestamp_activity = crowker_eval_timestamp();
+    thm->set_activity_timestamp(crowker_eval_timestamp());
 
     auto *sub = crowker_implementation::crow_client::get(saddr);
-    sub->context = this;
-    sub->timestamp_activity = crowker_eval_timestamp();
+    sub->set_activity_timestamp(crowker_eval_timestamp());
 
     // TODO: Перенести. Незачем перезаписывать адресс каждый раз.
     sub->addr = saddr;
@@ -68,8 +70,8 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
     if (!thm->has_client(sub))
     {
         thm->link_client(sub);
-        crowker_implementation::options *&opts = sub->thms[thm].opts;
-        opts = new crowker_implementation::crow_options{qos, ackquant};
+        sub->set_theme_options(thm,
+                               crowker_implementation::options{qos, ackquant});
 
         if (brocker_info)
             nos::fprintln("new subscribe(crow): a:{} q:{} c:{} t:{}",
@@ -78,13 +80,11 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
     }
     else
     {
-        crowker_implementation::crow_options *opts =
-            static_cast<crowker_implementation::crow_options *>(
-                sub->thms[thm].opts);
-        if (opts->qos != qos || opts->ackquant != ackquant)
+        auto opts = sub->get_theme_options(thm);
+        if (opts.qos != qos || opts.ackquant != ackquant)
         {
-            opts->qos = qos;
-            opts->ackquant = ackquant;
+            opts.qos = qos;
+            opts.ackquant = ackquant;
             nos::fprintln("change subscribe(crow): a:{} q:{} c:{} t:{}",
                           igris::dstring(addr.data(), addr.size()), qos,
                           ackquant, theme);
@@ -97,7 +97,6 @@ void crow::crowker::tcp_subscribe(const std::string &theme,
 {
     auto *thm = get_theme(theme);
     auto *sub = crowker_implementation::tcp_client::get(sock->getaddr());
-    sub->context = this;
     sub->sock = sock;
 
     if (!thm->has_client(sub))
@@ -112,11 +111,19 @@ void crow::crowker::tcp_subscribe(const std::string &theme,
 void crow::crowker::unlink_theme_client(crowker_implementation::theme *thm,
                                         crowker_implementation::client *sub)
 {
+    if (!thm->has_client(sub))
+    {
+        nos::fprintln("unlink_theme_client: client not found");
+    }
+
     thm->unlink_client(sub);
-    if (thm->count_clients() == 0)
+    sub->forgot_theme(thm);
+
+    // TODO: Сделать политику удаления клиентов и тем.
+    /*if (thm->count_clients() == 0)
     {
         themes.erase(thm->name);
-    }
+    }*/
 }
 
 void crow::crowker::send_latest(const std::string &theme,
@@ -124,9 +131,9 @@ void crow::crowker::send_latest(const std::string &theme,
                                 uint32_t count_of_latest)
 {
     auto *thm = get_theme(theme);
-    thm->timestamp_activity = crowker_eval_timestamp();
-    cl->thms[thm].opts = nullptr;
-    cl->timestamp_activity = crowker_eval_timestamp();
+    // cl->set_theme_options(thm, nullptr);
+    thm->set_activity_timestamp(crowker_eval_timestamp());
+    cl->set_activity_timestamp(crowker_eval_timestamp());
 
     if (count_of_latest == 0)
         return;
@@ -135,6 +142,6 @@ void crow::crowker::send_latest(const std::string &theme,
         thm->get_latest(count_of_latest);
     for (auto &msg : latest_messages)
     {
-        cl->publish(theme, *msg, nullptr);
+        cl->publish(theme, *msg, cl->get_theme_options(thm));
     }
 }

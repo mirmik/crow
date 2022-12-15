@@ -18,10 +18,10 @@ static int themes(const nos::argv &, nos::ostream &os)
         return 0;
     }
 
-    for (auto &a : themes)
+    for (auto &[name, theme] : themes)
     {
-        std::string s =
-            nos::format("name:{} subs:{}\n", a.first, a.second.subs.size());
+        std::string s = nos::format("name:{} count_of_subs:{}\n", name,
+                                    theme.count_clients());
         nos::print_to(os, s);
     }
     return 0;
@@ -55,7 +55,7 @@ static int clients(const nos::argv &, nos::ostream &os)
 
     for (auto &a : clients)
     {
-        std::string s = nos::format("name:{}\n", a->name);
+        std::string s = nos::format("name:{}\n", a->name());
         nos::print_to(os, s);
     }
     return 0;
@@ -86,13 +86,13 @@ static int last_messages(const nos::argv &argv, nos::ostream &os)
     else
     {
         auto &theme = theme_pair->second;
-        std::lock_guard<std::mutex> lock(theme.mtx);
-        if (size > theme.last_messages.size())
-            size = theme.last_messages.size();
+        std::lock_guard<std::mutex> lock(theme.local_lock());
+        if (size > theme.queue_size())
+            size = theme.queue_size();
         for (size_t i = 0; i < size; ++i)
         {
-            if (theme.last_messages[i])
-                nos::println_to(os, igris::dstring(*theme.last_messages[i]));
+            if (theme.queue()[i])
+                nos::println_to(os, igris::dstring(*theme.queue()[i]));
         }
     }
     return 0;
@@ -116,7 +116,7 @@ static int set_queue_size(const nos::argv &argv, nos::ostream &os)
     if (theme_pair == themes.end())
         return 0;
 
-    theme_pair->second.last_messages.resize(size);
+    theme_pair->second.resize_queue(size);
     return 0;
 }
 

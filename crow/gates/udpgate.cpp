@@ -17,12 +17,12 @@
 #include <sys/uio.h>
 #endif
 
+#include <memory>
+#include <nos/print.h>
+#include <nos/util/osutil.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-
-#include <memory>
-#include <nos/util/osutil.h>
 
 #ifdef CROW_USE_ASYNCIO
 #include <crow/asyncio.h>
@@ -44,6 +44,9 @@ void crow::udpgate::read_handler(int fd)
 
     if (len <= 0)
         return;
+
+    if (_debug)
+        nos::println("udpgate: recvfrom: ", len);
 
     crow::packet *block =
         allocate_packet<crow::header_v1>(header.addrsize(), header.datasize());

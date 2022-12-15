@@ -12,24 +12,17 @@ namespace crow
         class node_client : public crowker_implementation::client
         {
         public:
-            struct options_struct
-            {
-                uint8_t qos = 0;
-                uint16_t ackquant = 0;
-            };
-
             crowker_api *api = nullptr;
             crowker_pubsub_node *crowker_node = nullptr;
-
             crow::hostaddr addr = {};
             int node = -1;
 
-            std::map<std::string, options_struct> options = {};
-
         public:
+            node_client() = default;
+
             void publish(const std::string &theme,
                          const std::string &data,
-                         crowker_implementation::options *opts) override;
+                         crowker_implementation::options opts) override;
 
             ~node_client();
         };

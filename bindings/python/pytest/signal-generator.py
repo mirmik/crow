@@ -37,7 +37,7 @@ while True:
 		data = curtime % 1
 	
 	print(int(time.time()*1000), data)
-	pub.publish_timestamped_float(int(time.time()*1000), data)
+	pub.publish((str(int(time.time()*1000)) + " " + str(data) + str("\n")).encode("utf-8"))
 	pycrow.onestep()
 	time.sleep(interval)
 

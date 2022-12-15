@@ -64,6 +64,8 @@
     "csignal": "cpp",
     "forward_list": "cpp",
     "map": "cpp",
-    "typeindex": "cpp"
+    "typeindex": "cpp",
+    "ios": "cpp",
+    "stop_token": "cpp"
   }
 }

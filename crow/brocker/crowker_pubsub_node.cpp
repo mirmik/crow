@@ -90,7 +90,7 @@ void crow::crowker_pubsub_node::subscribe_on_theme_v2(crow::hostaddr_view view,
                                                       bool subscribe_to_updates,
                                                       uint32_t count_of_latest)
 {
-    node_client::options_struct opt = {rqos, rackquant};
+    crowker_implementation::options opt{rqos, rackquant};
 
     auto key = std::make_pair(view, nid);
     auto &client = clients[key];
@@ -101,13 +101,11 @@ void crow::crowker_pubsub_node::subscribe_on_theme_v2(crow::hostaddr_view view,
     client.node = nid;
     client.crowker_node = this;
 
-    client.options[theme.to_string()] = opt;
-
     crow::crowker::instance()->send_latest(theme.to_string(), &client,
                                            count_of_latest);
 
     if (subscribe_to_updates)
-        crow::crowker::instance()->subscribe(theme.to_string(), &client);
+        crow::crowker::instance()->subscribe(theme.to_string(), &client, opt);
 }
 
 void crow::crowker_pubsub_node::unsubscribe_from_theme(crow::hostaddr_view view,
@@ -123,7 +121,9 @@ void crow::crowker_pubsub_node::unsubscribe_from_theme(crow::hostaddr_view view,
 void crow::crowker_pubsub_node::undelivered_packet_handle(
     crow::hostaddr_view addr, int node)
 {
-    auto &client = clients[std::make_pair(addr, node)];
+    auto addrstr = addr.to_string();
+    nos::log::info("undelivered_packet_handle addr:{} node:{}", addrstr, node);
+    auto &client = clients.at(std::make_pair(addr, node));
     client.detach_from_themes();
 }
 
@@ -141,9 +141,8 @@ crow::crowker_pubsub_node::node_client::~node_client() {}
 void crow::crowker_pubsub_node::node_client::publish(
     const std::string &theme,
     const std::string &data,
-    crowker_implementation::options *)
+    crowker_implementation::options opts)
 {
-    const auto &opts = options[theme];
     crow::consume_subheader sh;
 
     sh.type = PubSubTypes::Consume;

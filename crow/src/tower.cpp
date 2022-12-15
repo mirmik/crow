@@ -882,14 +882,6 @@ int crow::outers_stage_count()
     return dlist_size(&crow_outters);
 }
 
-void crow::spin()
-{
-    while (1)
-    {
-        crow::onestep();
-    }
-}
-
 bool crow::has_untravelled()
 {
     system_lock();

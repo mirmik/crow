@@ -22,8 +22,14 @@ namespace crow
         hostaddr &operator=(const hostaddr &addr) = default;
         hostaddr &operator=(hostaddr &&addr) = default;
 
-        const uint8_t *data() const { return _addr.data(); }
-        size_t size() const { return _addr.size(); }
+        const uint8_t *data() const
+        {
+            return _addr.data();
+        }
+        size_t size() const
+        {
+            return _addr.size();
+        }
 
         hostaddr(const std::vector<uint8_t> &addr) : _addr(addr) {}
         hostaddr(std::vector<uint8_t> &&addr) : _addr(std::move(addr)) {}
@@ -32,6 +38,8 @@ namespace crow
         hostaddr(const hostaddr_view &addr);
 
         hostaddr(uint8_t *addr, size_t len) : _addr(addr, addr + len) {}
+
+        std::string to_string() const;
 
         hostaddr &operator=(std::vector<uint8_t> &&addr)
         {
@@ -62,6 +70,7 @@ namespace crow
         }
 
         hostaddr_view view();
+        const hostaddr_view view() const;
 
         operator hostaddr_view();
     };

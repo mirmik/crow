@@ -1,12 +1,9 @@
+#include <chrono>
+#include <crow/asyncio.h>
 #include <crow/tower.h>
 #include <crow/warn.h>
-
-#include <chrono>
-#include <thread>
-
-#include <crow/asyncio.h>
-
 #include <igris/osutil/fd.h>
+#include <thread>
 #include <unistd.h>
 
 using namespace std::chrono_literals;
@@ -42,6 +39,11 @@ void crow::spin_with_select()
     _spin_runned = false;
 }
 
+void crow::spin()
+{
+    spin_with_select();
+}
+
 int crow::start_spin_with_select()
 {
     if (_spin_runned)
@@ -57,7 +59,10 @@ int crow::start_spin_with_select()
     return 0;
 }
 
-int crow::start_spin() { return crow::start_spin_with_select(); }
+int crow::start_spin()
+{
+    return crow::start_spin_with_select();
+}
 
 int crow::start_spin_without_select()
 {
@@ -67,23 +72,25 @@ int crow::start_spin_without_select()
     }
 
     _spin_runned_unbounded = true;
-    _thread = std::thread([]() {
-        _spin_runned = true;
-
-        while (1)
+    _thread = std::thread(
+        []()
         {
-            if (cancel_token)
-                break;
+            _spin_runned = true;
 
-            crow::onestep();
+            while (1)
+            {
+                if (cancel_token)
+                    break;
 
-            if (cancel_token)
-                break;
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
-        };
+                crow::onestep();
 
-        _spin_runned = false;
-    });
+                if (cancel_token)
+                    break;
+                std::this_thread::sleep_for(std::chrono::microseconds(1));
+            };
+
+            _spin_runned = false;
+        });
 
     return 0;
 }
@@ -111,11 +118,20 @@ int crow::stop_spin(bool wait)
     return 0;
 }
 
-void crow::spin_join() { _thread.join(); }
+void crow::spin_join()
+{
+    _thread.join();
+}
 
-void crow::join_spin() { _thread.join(); }
+void crow::join_spin()
+{
+    _thread.join();
+}
 
-void crow::set_spin_cancel_token() { cancel_token = true; }
+void crow::set_spin_cancel_token()
+{
+    cancel_token = true;
+}
 
 #if defined(CROW_REALTIME_THREADS)
 #include <igris/osutil/realtime.h>

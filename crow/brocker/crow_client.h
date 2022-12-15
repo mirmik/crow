@@ -14,7 +14,7 @@ namespace crowker_implementation
     class crow_client : public client
     {
     public:
-        std::string addr={};
+        std::string addr = {};
 
         static std::map<std::string, crow_client> allsubs;
         static crow_client *get(const std::string &addr)
@@ -30,8 +30,9 @@ namespace crowker_implementation
             return ret;
         }
 
-        void publish(const std::string &theme, const std::string &data,
-                     options *opts) override;
+        void publish(const std::string &theme,
+                     const std::string &data,
+                     options opts) override;
     };
 } // namespace crowker_implementation
 
