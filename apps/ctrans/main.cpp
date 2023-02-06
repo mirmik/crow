@@ -31,6 +31,8 @@
 #include <thread>
 #include <unistd.h>
 
+const std::string VERSION = "2.1.0";
+
 bool debug_mode = false;
 crow::hostaddr address;
 volatile bool cancel_token = false;
@@ -540,6 +542,7 @@ void parse_options(int argc, char **argv)
         {"beam", required_argument, NULL, 'b'},
         {"retransler", no_argument, NULL, 'R'},
         {"control", no_argument, NULL, 'Q'},
+        {"version", no_argument, NULL, 'V'},
 
         {"info", no_argument, NULL,
          'i'}, // Выводит информацию о имеющихся гейтах и режимах.
@@ -726,6 +729,11 @@ void parse_options(int argc, char **argv)
 
             case 'e':
                 pipelinecmd = optarg;
+                break;
+
+            case 'V':
+                nos::println(VERSION);
+                exit(0);
                 break;
 
             case '?':
