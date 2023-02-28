@@ -1,9 +1,9 @@
 pipeline:
-  - name: igris
+  - name: crow
     watchdog: 600
     git:
-      url: https://github.com/mirmik/igris
-      name: igris
+      url: https://github.com/mirmik/crow
+      name: crow
     steps:
       - name: cmake
         run: cmake .
