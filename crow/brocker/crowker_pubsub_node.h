@@ -19,6 +19,10 @@ namespace crow
 
         public:
             node_client() = default;
+            node_client(const node_client &) = delete;
+            node_client(node_client &&) = delete;
+            node_client &operator=(const node_client &) = delete;
+            node_client &operator=(node_client &&) = delete;
 
             void publish(const std::string &theme,
                          const std::string &data,
