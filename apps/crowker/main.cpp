@@ -33,6 +33,8 @@ int tcpport = -1;
 bool quite = false;
 bool debug_mode = false;
 
+const std::string VERSION = "2.1.0";
+
 // crow::crowker_api crowker_api;
 crow::crowker_pubsub_node pubsub_node;
 
@@ -162,6 +164,7 @@ int main(int argc, char *argv[])
         {"debug", no_argument, NULL, 'd'}, // crow transport log
         {"binfo", no_argument, NULL, 'b'}, // browker log
         {"netname", required_argument, NULL, 'n'},
+        {"version", no_argument, NULL, 'v'},
         {NULL, 0, NULL, 0}};
 
     int long_index = 0;
@@ -192,6 +195,11 @@ int main(int argc, char *argv[])
             case 'b':
                 brocker_info = true;
                 crow::crowker::instance()->brocker_info = true;
+                break;
+
+            case 'v':
+                nos::println(VERSION);
+                exit(0);
                 break;
 
             case 0:
