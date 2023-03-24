@@ -20,9 +20,9 @@ application("crowker",
                 "crow.udpgate"
             ],
             optimize="-O0",
-            cc_flags="-fPIC -Wextra -Wall -ffunction-sections -fdata-sections",
-            cxx_flags="-fPIC -Wextra -Wall -ffunction-sections -fdata-sections",
-            ld_flags="-fPIC -static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive",
+            cc_flags="-flto -fPIC -Wextra -Wall -ffunction-sections -fdata-sections",
+            cxx_flags="-flto -fPIC -Wextra -Wall -ffunction-sections -fdata-sections",
+            ld_flags="-flto -fPIC -static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive",
             libs=["readline", "nos", "igris"]
             )
 
