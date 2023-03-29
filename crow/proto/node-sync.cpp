@@ -3,17 +3,17 @@
 
 int crow::node::waitevent()
 {
-    void *ret;
-    wait_current_schedee(&waitlnk, 0, &ret);
-    return (uintptr_t)ret;
+    intptr_t ret;
+    wait_current_schedee(&waitlnk, 0, (void **)&ret);
+    return ret;
 }
 
-void crow::node::notify_one(int future)
+void crow::node::notify_one(intptr_t future)
 {
-    unwait_one(&waitlnk, (void *)(uintptr_t)future);
+    unwait_one(&waitlnk, (intptr_t)future);
 }
 
-void crow::node::notify_all(int future)
+void crow::node::notify_all(intptr_t future)
 {
-    unwait_all(&waitlnk, (void *)(uintptr_t)future);
+    unwait_all(&waitlnk, (intptr_t)future);
 }
