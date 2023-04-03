@@ -43,8 +43,8 @@ namespace crow
         node(node &&) = delete;
 
         int waitevent();
-        void notify_one(int future);
-        void notify_all(int future);
+        void notify_one(intptr_t future);
+        void notify_all(intptr_t future);
 
         node &bind(int addr)
         {
