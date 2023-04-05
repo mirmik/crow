@@ -25,6 +25,12 @@ namespace crow
         {
         }
 
+        void init(const std::string &_name, crow::publisher_node *pubnode)
+        {
+            logger::set_name(_name);
+            this->pubnode = pubnode;
+        }
+
         void log(nos::log::level lvl,
                  const std::string_view &fmt,
                  const nos::visitable_arglist &arglist) override

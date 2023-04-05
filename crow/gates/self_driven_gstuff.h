@@ -17,7 +17,7 @@ namespace crow
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
         crow::packet *insend = nullptr;
         /// Максимальная длина пакета, какой мы готовы принять.
-        int received_maxpack_size = 48;
+        int received_maxpack_size = 0;
         crow::packet *recvpack = nullptr;
         gstuff_autorecv recver = {};
 
@@ -39,8 +39,7 @@ namespace crow
         }
 
         void
-        init(char *send_buffer,
-             int (*write_callback)(void *, const char *data, unsigned int size),
+        init(int (*write_callback)(void *, const char *data, unsigned int size),
              int (*room_callback)(void *),
              void *privdata,
              int received_maxpack_size)
@@ -106,23 +105,10 @@ namespace crow
         void start_send(crow::packet *pack)
         {
             insend = pack;
-            /*header_v1 header = insend->extract_header_v1();
-            struct iovec iov[] = {
-                {&header, sizeof(header)},
-                {insend->addrptr(), insend->addrsize()},
-                {insend->dataptr(), insend->datasize()},
-            };
-            int size = gstuffing_v(iov, 3, send_buffer);
-            */
-
-            // send_it = send_buffer;
-            // send_eit = send_buffer + size;
-
             crc = 0xFF;
             send_state = 0;
             data_state = 0;
             data_index = 0;
-
             continue_send();
         }
 

@@ -64,6 +64,7 @@ crow::packet *crow::allocate_packet_header_v0(int adlen)
     crow_allocated_count_inc();
     uint8_t *buffer = (uint8_t *)malloc(sizeof(crow::packet) +
                                         sizeof(crow::header_v0) + adlen);
+    memset(buffer, 0, sizeof(crow::packet) + sizeof(crow::header_v0) + adlen);
     crow::packet *pack = new (buffer) crow::packet(crow::deallocate_packet);
     pack->attach_header((crow::header_v0 *)(buffer + sizeof(crow::packet)));
     pack->attach_addrdata(buffer + sizeof(crow::packet) +
@@ -76,6 +77,7 @@ crow::packet *crow::allocate_packet_header_v1(int adlen)
     crow_allocated_count_inc();
     uint8_t *buffer = (uint8_t *)malloc(sizeof(crow::packet) +
                                         sizeof(crow::header_v1) + adlen);
+    memset(buffer, 0, sizeof(crow::packet) + sizeof(crow::header_v1) + adlen);
     crow::packet *pack = new (buffer) crow::packet(crow::deallocate_packet);
     pack->attach_header((crow::header_v1 *)(buffer + sizeof(crow::packet)));
     pack->attach_addrdata(buffer + sizeof(crow::packet) +

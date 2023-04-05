@@ -399,9 +399,11 @@ namespace crow
 
         void invalidate()
         {
-            if (_destructor)
+            bool has_destructor = _destructor != nullptr;
+            if (has_destructor)
                 _destructor(this);
-            _destructor = nullptr;
+            else
+                _destructor = nullptr;
         }
 
         size_t fullsize() const
