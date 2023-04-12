@@ -2,6 +2,7 @@
 #define CROW_NODE_PROTOCOL_H
 
 #include <crow/proto/protocol.h>
+#include <igris/container/dlist.h>
 
 namespace crow
 {
@@ -55,7 +56,6 @@ namespace crow
         }
     };
     extern node_protocol_cls node_protocol;
-    extern struct dlist_head nodes_list;
 }
 
 #endif

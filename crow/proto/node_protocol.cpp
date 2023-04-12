@@ -21,12 +21,11 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
     auto &sh = pack->subheader<node_subheader>();
     crow::node *srv = nullptr;
 
-    crow::node *srvs;
-    dlist_for_each_entry(srvs, &crow::nodes_list, lnk)
+    for (crow::node &srvs : crow::nodes_list)
     {
-        if (srvs->id == sh.rid)
+        if (srvs.id == sh.rid)
         {
-            srv = srvs;
+            srv = &srvs;
             break;
         }
     }
@@ -55,17 +54,14 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 void crow::node_protocol_cls::undelivered(crow::packet *pack)
 {
     crow::node_subheader *sh = (crow::node_subheader *)pack->dataptr();
-
-    crow::node *srvs;
-    dlist_for_each_entry(srvs, &crow::nodes_list, lnk)
+    for (crow::node &srvs : crow::nodes_list)
     {
-        if (srvs->id == sh->sid)
+        if (srvs.id == sh->sid)
         {
-            srvs->undelivered_packet(pack);
+            srvs.undelivered_packet(pack);
             return;
         }
     }
-
     crow::release(pack);
 }
 
@@ -73,12 +69,11 @@ void crow::node_protocol_cls::delivered(crow::packet *pack)
 {
     crow::node_subheader *sh = (crow::node_subheader *)pack->dataptr();
 
-    crow::node *srvs;
-    dlist_for_each_entry(srvs, &crow::nodes_list, lnk)
+    for (auto &srvs : crow::nodes_list)
     {
-        if (srvs->id == sh->sid)
+        if (srvs.id == sh->sid)
         {
-            srvs->delivered_packet(pack);
+            srvs.delivered_packet(pack);
             return;
         }
     }

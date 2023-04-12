@@ -8,7 +8,7 @@
 #include <crow/proto/protocol.h>
 #include <crow/tower.h>
 #include <igris/binreader.h>
-#include <igris/datastruct/dlist.h>
+#include <igris/container/dlist.h>
 #include <igris/sync/syslock.h>
 #include <stdint.h>
 
@@ -32,9 +32,8 @@ namespace crow
     class node
     {
     public:
-        struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
-        struct dlist_head waitlnk =
-            DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
+        igris::dlist_node lnk = {}; // Список нодов.
+        igris::dlist_base waitlnk = {}; // Список ожидающих прихода сообщения.
         nodeid_t id = 0;
 
     public:
@@ -222,6 +221,8 @@ namespace crow
                         pack->ackquant());
         }
     };
+
+    extern igris::dlist<crow::node, &crow::node::lnk> nodes_list;
 } // namespace crow
 
 #endif

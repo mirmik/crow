@@ -8,7 +8,7 @@
 
 #include <nos/print.h>
 
-DLIST_HEAD(crow::nodes_list);
+igris::dlist<crow::node, &crow::node::lnk> crow::nodes_list;
 crow::node_protocol_cls crow::node_protocol;
 
 crow::packet_ptr crow::node::send(nodeid_t sid,
@@ -75,17 +75,16 @@ crow::packet_ptr crow::node::send_vv(nodeid_t sid,
 void crow::__link_node(crow::node *srv, uint16_t id)
 {
     srv->id = id;
-    dlist_add_tail(&srv->lnk, &nodes_list);
+    nodes_list.move_back(*srv);
 }
 
 crow::node *crow::find_node(size_t id)
 {
     // TODO: переделать на хештаблицу
-    crow::node *node;
-    dlist_for_each_entry(node, &nodes_list, lnk)
+    for (auto &node : nodes_list)
     {
-        if (node->id == id)
-            return node;
+        if (node.id == id)
+            return &node;
     }
 
     return nullptr;
@@ -111,9 +110,9 @@ void crow::bind_node_dynamic(crow::node *srv)
 crow::node::~node()
 {
     system_lock();
-    if (!dlist_empty(&waitlnk))
+    if (!waitlnk.empty())
         notify_all(-1);
-    dlist_del(&lnk);
+    lnk.unlink();
     system_unlock();
 }
 
