@@ -43,7 +43,7 @@ namespace crow
             crow::nocontrol_travel(block, false);
         }
 
-        void send(crow::packet *pack)
+        void send(crow::packet *pack) override
         {
             char buffer[512];
 
