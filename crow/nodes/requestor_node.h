@@ -10,31 +10,38 @@ namespace crow
     class requestor_node : public crow::publisher_node
     {
         dlist_head incoming_list = DLIST_HEAD_INIT(incoming_list);
-        std::string reply_theme={};
+        std::string reply_theme = {};
 
         int rqos = 0;
         int rackquant = 0;
 
-        igris::delegate<void, igris::buffer> incoming={};
+        igris::delegate<void, nos::buffer> incoming = {};
 
     public:
         requestor_node() = default;
-        requestor_node(igris::delegate<void, igris::buffer> incoming)
+        requestor_node(igris::delegate<void, nos::buffer> incoming)
         {
             set_async_handle(incoming);
         }
-        requestor_node(crow::hostaddr_view crowker_addr, igris::buffer theme,
-                       igris::buffer reptheme);
-        requestor_node(crow::hostaddr_view crowker_addr, nodeid_t crowker_node,
-                       igris::buffer theme, igris::buffer reptheme);
+        requestor_node(crow::hostaddr_view crowker_addr,
+                       nos::buffer theme,
+                       nos::buffer reptheme);
+        requestor_node(crow::hostaddr_view crowker_addr,
+                       nodeid_t crowker_node,
+                       nos::buffer theme,
+                       nos::buffer reptheme);
 
         void async_request(crow::hostaddr_view crowker_addr,
-                           nodeid_t crowker_node, igris::buffer theme,
-                           igris::buffer reptheme, igris::buffer data,
-                           uint8_t qos, uint16_t ackquant, uint8_t rqos,
+                           nodeid_t crowker_node,
+                           nos::buffer theme,
+                           nos::buffer reptheme,
+                           nos::buffer data,
+                           uint8_t qos,
+                           uint16_t ackquant,
+                           uint8_t rqos,
                            uint16_t rackquant);
 
-        void async_request(igris::buffer data);
+        void async_request(nos::buffer data);
 
         template <class... Args> crow::packet_ptr request(Args &&... data)
         {
@@ -50,9 +57,9 @@ namespace crow
             return crow::packet_ptr(ptr);
         }
 
-        void set_reply_theme(igris::buffer reply_theme);
+        void set_reply_theme(nos::buffer reply_theme);
         requestor_node &
-        set_async_handle(igris::delegate<void, igris::buffer> incoming)
+        set_async_handle(igris::delegate<void, nos::buffer> incoming)
         {
             this->incoming = incoming;
             return *this;

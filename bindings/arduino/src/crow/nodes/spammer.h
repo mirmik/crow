@@ -29,8 +29,8 @@ namespace crow
         uint8_t qos = 0;
         uint16_t ackquant = 50;
 
-      public:
-        void send(igris::buffer data, bool fastsend = CROW_FASTSEND_DEFAULT)
+    public:
+        void send(nos::buffer data, bool fastsend = CROW_FASTSEND_DEFAULT)
         {
             auto time = std::chrono::system_clock::now();
 
@@ -56,7 +56,8 @@ namespace crow
             }
         }
 
-        void send_v(igris::buffer *data, size_t sz,
+        void send_v(nos::buffer *data,
+                    size_t sz,
                     bool fastsend = CROW_FASTSEND_DEFAULT)
         {
 
@@ -96,19 +97,24 @@ namespace crow
             crow::release(pack);
         }
 
-        int count_of_subscribers() { return targets.size(); }
+        int count_of_subscribers()
+        {
+            return targets.size();
+        }
     };
 
     class spam_subscriber : public crow::node
     {
-        igris::delegate<void, igris::buffer> dlg;
+        igris::delegate<void, nos::buffer> dlg;
         std::vector<uint8_t> addr;
         int nid;
 
-      public:
-        spam_subscriber(igris::delegate<void, igris::buffer> dlg) : dlg(dlg) {}
+    public:
+        spam_subscriber(igris::delegate<void, nos::buffer> dlg) : dlg(dlg) {}
 
-        void subscribe(nid_t nid, crow::hostaddr_view host, uint8_t qos = 2,
+        void subscribe(nid_t nid,
+                       crow::hostaddr_view host,
+                       uint8_t qos = 2,
                        uint16_t ackquant = 200)
         {
             this->addr = std::vector<uint8_t>(

@@ -19,12 +19,12 @@ namespace crow
     public:
         abstract_subscriber_node(crow::hostaddr_view addr,
                                  int node,
-                                 igris::buffer theme)
+                                 nos::buffer theme)
             : publisher_node(addr, node, theme)
         {
         }
 
-        abstract_subscriber_node(crow::hostaddr_view addr, igris::buffer theme)
+        abstract_subscriber_node(crow::hostaddr_view addr, nos::buffer theme)
             : publisher_node(addr, theme)
         {
         }
@@ -46,14 +46,14 @@ namespace crow
 
         void init_subscribe(crow::hostaddr_view crowker_addr,
                             int crowker_node,
-                            igris::buffer theme,
+                            nos::buffer theme,
                             uint8_t qos,
                             uint16_t ackquant,
                             uint8_t rqos,
                             uint16_t rackquant);
 
         void init_subscribe(crow::hostaddr_view crowker_addr,
-                            igris::buffer theme,
+                            nos::buffer theme,
                             uint8_t qos,
                             uint16_t ackquant,
                             uint8_t rqos,
@@ -71,14 +71,14 @@ namespace crow
 
     class subscriber_node : public crow::abstract_subscriber_node
     {
-        using function = std::function<void(igris::buffer)>;
+        using function = std::function<void(nos::buffer)>;
         function incoming_handler = {};
 
     public:
         subscriber_node() = default;
         subscriber_node(function incoming);
         subscriber_node(crow::hostaddr_view crowker_addr,
-                        igris::buffer theme,
+                        nos::buffer theme,
                         function incoming)
             : abstract_subscriber_node(crowker_addr, theme),
               incoming_handler(incoming)

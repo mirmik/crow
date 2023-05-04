@@ -13,77 +13,77 @@ void crow::channel::incoming_packet(crow::packet *pack)
 
     switch (sh_channel->ftype)
     {
-    case crow::Frame::HANDSHAKE_REQUEST:
-        // Кто-то пытается установить с нами связь.
-        if (u.f.naive_listener ||
-            u.f._state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
-        {
-            crow::subheader_handshake *sh_handshake =
-                crow::get_subheader_handshake(pack);
+        case crow::Frame::HANDSHAKE_REQUEST:
+            // Кто-то пытается установить с нами связь.
+            if (u.f.naive_listener ||
+                u.f._state == CROW_CHANNEL_WAIT_HANDSHAKE_REQUEST)
+            {
+                crow::subheader_handshake *sh_handshake =
+                    crow::get_subheader_handshake(pack);
 
-            // TODO: перенести аллокацию под адрес в другое место
-            // raddr_ptr = malloc(pack->addrsize());
-            if (pack->addrsize() > raddr_cap)
-                return;
+                // TODO: перенести аллокацию под адрес в другое место
+                // raddr_ptr = malloc(pack->addrsize());
+                if (pack->addrsize() > raddr_cap)
+                    return;
 
-            memcpy(raddr_ptr, pack->addrptr(), pack->addrsize());
-            raddr_len = pack->addrsize();
-            rid = sh_node->sid;
+                memcpy(raddr_ptr, pack->addrptr(), pack->addrsize());
+                raddr_len = pack->addrsize();
+                rid = sh_node->sid;
 
-            this->qos = sh_handshake->qos;
-            this->ackquant = sh_handshake->ackquant;
+                this->qos = sh_handshake->qos;
+                this->ackquant = sh_handshake->ackquant;
 
-            send_handshake_answer();
+                send_handshake_answer();
 
-            u.f._state = CROW_CHANNEL_CONNECTED;
-        }
-        else
-        {
-            crow::warn("WARN: HANDSHAKE_REQUEST on another state");
-        }
+                u.f._state = CROW_CHANNEL_CONNECTED;
+            }
+            else
+            {
+                crow::warn("WARN: HANDSHAKE_REQUEST on another state");
+            }
 
-        break;
+            break;
 
-    case crow::Frame::HANDSHAKE_ANSWER:
-        // Кто-то ответил на зов.
-        if (u.f._state == CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER)
-        {
-            // Если мы еще ни с кем и никогда.
-            crow::subheader_handshake *sh_handshake =
-                crow::get_subheader_handshake(pack);
+        case crow::Frame::HANDSHAKE_ANSWER:
+            // Кто-то ответил на зов.
+            if (u.f._state == CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER)
+            {
+                // Если мы еще ни с кем и никогда.
+                crow::subheader_handshake *sh_handshake =
+                    crow::get_subheader_handshake(pack);
 
-            // TODO: перенести аллокацию под адрес в другое место
-            // raddr_ptr = malloc(pack->addrsize());
-            if (pack->addrsize() > raddr_cap)
-                return;
+                // TODO: перенести аллокацию под адрес в другое место
+                // raddr_ptr = malloc(pack->addrsize());
+                if (pack->addrsize() > raddr_cap)
+                    return;
 
-            memcpy(raddr_ptr, pack->addrptr(), pack->addrsize());
-            raddr_len = pack->addrsize();
-            rid = sh_node->sid;
-            qos = sh_handshake->qos;
-            ackquant = sh_handshake->ackquant;
+                memcpy(raddr_ptr, pack->addrptr(), pack->addrsize());
+                raddr_len = pack->addrsize();
+                rid = sh_node->sid;
+                qos = sh_handshake->qos;
+                ackquant = sh_handshake->ackquant;
 
-            u.f._state = CROW_CHANNEL_CONNECTED;
-            notify_one(0);
-        }
-        else
-        {
-            crow::warn("WARN: HANDSHAKE_ANSWER on another state");
-        }
+                u.f._state = CROW_CHANNEL_CONNECTED;
+                notify_one(0);
+            }
+            else
+            {
+                crow::warn("WARN: HANDSHAKE_ANSWER on another state");
+            }
 
-        break;
+            break;
 
-    case crow::Frame::DATA:
-        incoming_data_packet(pack);
-        return;
+        case crow::Frame::DATA:
+            incoming_data_packet(pack);
+            return;
 
-    case crow::Frame::REFUSE:
-        u.f._state = CROW_CHANNEL_DISCONNECTED;
-        break;
+        case crow::Frame::REFUSE:
+            u.f._state = CROW_CHANNEL_DISCONNECTED;
+            break;
 
-    default:
-        BUG();
-        break;
+        default:
+            BUG();
+            break;
     }
 
     crow::release(pack);
@@ -101,8 +101,11 @@ void crow::channel::undelivered_packet(crow::packet *pack)
     crow::release(pack);
 }
 
-void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len,
-                              nodeid_t rid, uint8_t qos, uint16_t ackquant)
+void crow::channel::handshake(const uint8_t *raddr_ptr,
+                              uint16_t raddr_len,
+                              nodeid_t rid,
+                              uint8_t qos,
+                              uint16_t ackquant)
 {
     crow::node_subheader sh_node;
     crow::subheader_channel sh_channel;
@@ -118,16 +121,15 @@ void crow::channel::handshake(const uint8_t *raddr_ptr, uint16_t raddr_len,
     sh_handshake.qos = this->qos = qos;
     sh_handshake.ackquant = this->ackquant = ackquant;
 
-    igris::buffer vec[] = {{(char *)&sh_node, sizeof(sh_node)},
-                           {(char *)&sh_channel, sizeof(sh_channel)},
-                           {(char *)&sh_handshake, sizeof(sh_handshake)}};
+    nos::buffer vec[] = {{(char *)&sh_node, sizeof(sh_node)},
+                         {(char *)&sh_channel, sizeof(sh_channel)},
+                         {(char *)&sh_handshake, sizeof(sh_handshake)}};
 
     u.f._state = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER;
 
     //_state = crow::State::CONNECTED;
-    crow::send_v({raddr_ptr, raddr_len}, vec,
-                 sizeof(vec) / sizeof(igris::buffer), CROW_NODE_PROTOCOL, 2,
-                 ackquant);
+    crow::send_v({raddr_ptr, raddr_len}, vec, sizeof(vec) / sizeof(nos::buffer),
+                 CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
 void crow::channel::send_handshake_answer()
@@ -146,14 +148,13 @@ void crow::channel::send_handshake_answer()
     sh_handshake.qos = this->qos;
     sh_handshake.ackquant = this->ackquant;
 
-    igris::buffer vec[] = {{(char *)&sh_node, sizeof(sh_node)},
-                           {(char *)&sh_channel, sizeof(sh_channel)},
-                           {(char *)&sh_handshake, sizeof(sh_handshake)}};
+    nos::buffer vec[] = {{(char *)&sh_node, sizeof(sh_node)},
+                         {(char *)&sh_channel, sizeof(sh_channel)},
+                         {(char *)&sh_handshake, sizeof(sh_handshake)}};
 
     //_state = crow::State::CONNECTED;
-    crow::send_v({raddr_ptr, raddr_len}, vec,
-                 sizeof(vec) / sizeof(igris::buffer), CROW_NODE_PROTOCOL, 2,
-                 ackquant);
+    crow::send_v({raddr_ptr, raddr_len}, vec, sizeof(vec) / sizeof(nos::buffer),
+                 CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
 int crow::channel::send(const char *data, size_t size)
@@ -173,24 +174,23 @@ int crow::channel::send(const char *data, size_t size)
     sh_channel.frame_id = this->fid++;
     sh_channel.ftype = crow::Frame::DATA;
 
-    igris::buffer vec[] = {
+    nos::buffer vec[] = {
         {(char *)&sh_node, sizeof(sh_node)},
         {(char *)&sh_channel, sizeof(sh_channel)},
         {(char *)data, size},
     };
 
     crow::send_v({this->raddr_ptr, this->raddr_len}, vec,
-                 sizeof(vec) / sizeof(igris::buffer), CROW_NODE_PROTOCOL,
+                 sizeof(vec) / sizeof(nos::buffer), CROW_NODE_PROTOCOL,
                  this->qos, this->ackquant);
 
     return 0;
 }
 
-igris::buffer crow::channel::getdata(crow::packet *pack)
+nos::buffer crow::channel::getdata(crow::packet *pack)
 {
-    return igris::buffer(
-        pack->dataptr() + sizeof(crow::node_subheader) +
-            sizeof(crow::subheader_channel),
-        pack->datasize() - sizeof(crow::node_subheader) -
-            sizeof(crow::subheader_channel));
+    return nos::buffer(pack->dataptr() + sizeof(crow::node_subheader) +
+                           sizeof(crow::subheader_channel),
+                       pack->datasize() - sizeof(crow::node_subheader) -
+                           sizeof(crow::subheader_channel));
 }

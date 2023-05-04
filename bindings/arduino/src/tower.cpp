@@ -34,9 +34,15 @@ bool __live_diagnostic_enabled = false;
 bool _in_incoming_handler = false;
 bool _in_undelivered_handler = false;
 
-void crow::enable_diagnostic() { __diagnostic_enabled = true; }
+void crow::enable_diagnostic()
+{
+    __diagnostic_enabled = true;
+}
 
-void crow::enable_live_diagnostic() { __live_diagnostic_enabled = true; }
+void crow::enable_live_diagnostic()
+{
+    __live_diagnostic_enabled = true;
+}
 
 void crow::diagnostic_setup(bool en, bool len)
 {
@@ -57,7 +63,7 @@ static void __crow_utilize(crow_packet *pack)
 
     if (__live_diagnostic_enabled)
     {
-        //nos::println("alive packages total:", crow_allocated_count);
+        // nos::println("alive packages total:", crow_allocated_count);
         // TODO : crow print function
     }
 }
@@ -66,7 +72,7 @@ static crow::gateway *crow_find_target_gateway(crow_packet *pack)
 {
     uint8_t gidx = *pack->stageptr();
 
-    crow::gateway * gate;
+    crow::gateway *gate;
     dlist_for_each_entry(gate, &crow::gateway_list, lnk)
     {
         if (gate->id == gidx)
@@ -111,7 +117,8 @@ static void confirmed_utilize_from_outers(crow_packet *pack)
     {
         if (it->header.seqid == pack->header.seqid &&
             pack->header.alen == it->header.alen &&
-            !memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack), pack->header.alen))
+            !memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack),
+                    pack->header.alen))
         {
             it->f.confirmed = 1;
             crow_tower_release(it);
@@ -127,7 +134,8 @@ static void qos_release_from_incoming(crow_packet *pack)
     {
         if (it->header.seqid == pack->header.seqid &&
             pack->header.alen == it->header.alen &&
-            !memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack), pack->header.alen))
+            !memcmp(crow_packet_addrptr(it), crow_packet_addrptr(pack),
+                    pack->header.alen))
         {
             crow_tower_release(it);
             return;
@@ -228,7 +236,8 @@ static void crow_send_ack(crow_packet *pack)
     ack->header.qos = CROW_WITHOUT_ACK;
     ack->header.ackquant = pack->header.ackquant;
     ack->header.seqid = pack->header.seqid;
-    memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack), pack->header.alen);
+    memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack),
+           pack->header.alen);
     ack->f.released_by_world = true;
     crow::travel(ack);
 }
@@ -245,7 +254,8 @@ static void crow_send_ack2(crow_packet *pack)
     ack->header.qos = CROW_WITHOUT_ACK;
     ack->header.ackquant = pack->header.ackquant;
     ack->header.seqid = pack->header.seqid;
-    memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack), pack->header.alen);
+    memcpy(crow_packet_addrptr(ack), crow_packet_addrptr(pack),
+           pack->header.alen);
     crow::travel(ack);
 }
 
@@ -279,21 +289,21 @@ static void crow_do_travel(crow_packet *pack)
 
             switch (pack->header.f.type)
             {
-            case G1_ACK_TYPE:
-                confirmed_utilize_from_outers(pack);
-                break;
+                case G1_ACK_TYPE:
+                    confirmed_utilize_from_outers(pack);
+                    break;
 
-            case G1_ACK21_TYPE:
-                confirmed_utilize_from_outers(pack);
-                crow_send_ack2(pack);
-                break;
+                case G1_ACK21_TYPE:
+                    confirmed_utilize_from_outers(pack);
+                    crow_send_ack2(pack);
+                    break;
 
-            case G1_ACK22_TYPE:
-                qos_release_from_incoming(pack);
-                break;
+                case G1_ACK22_TYPE:
+                    qos_release_from_incoming(pack);
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
 
             system_lock();
@@ -325,7 +335,8 @@ static void crow_do_travel(crow_packet *pack)
                 {
                     if (inc->header.seqid == pack->header.seqid &&
                         inc->header.alen == pack->header.alen &&
-                        memcmp(crow_packet_addrptr(inc), crow_packet_addrptr(pack),
+                        memcmp(crow_packet_addrptr(inc),
+                               crow_packet_addrptr(pack),
                                inc->header.alen) == 0)
                     {
                         system_lock();
@@ -363,22 +374,23 @@ static void crow_do_travel(crow_packet *pack)
     {
 
         //Ветка транзитного пакета. Логика поиска врат и пересылки.
-        if (pack->ingate && crow::retransling_allowed == false) 
+        if (pack->ingate && crow::retransling_allowed == false)
         {
             static int warned = 0;
-            if (warned == 0) 
+            if (warned == 0)
             {
                 warned = 1;
-                crow::warn(
-                    "Crow get retransling request but retransling is not allowed.\n"
-                    "Set crow::retransling_allowed option for enable retransling\n"
-                    "Or use --retransler option if utility allowed it.\n" 
-                    "Default retransling will be disabled in future releases.\n"
-                );
+                crow::warn("Crow get retransling request but retransling is "
+                           "not allowed.\n"
+                           "Set crow::retransling_allowed option for enable "
+                           "retransling\n"
+                           "Or use --retransler option if utility allowed it.\n"
+                           "Default retransling will be disabled in future "
+                           "releases.\n");
             }
 
-            //crow_travel_error(pack);
-            //return;
+            // crow_travel_error(pack);
+            // return;
         }
 
         crow::gateway *gate = crow_find_target_gateway(pack);
@@ -433,7 +445,7 @@ crow::packet_ptr crow_transport(crow_packet *pack, bool fastsend)
 
 void crow::nocontrol_travel(crow_packet *pack, bool fastsend)
 {
-    if (fastsend) 
+    if (fastsend)
     {
         crow_do_travel(pack);
         return;
@@ -444,10 +456,12 @@ void crow::nocontrol_travel(crow_packet *pack, bool fastsend)
     system_unlock();
 }
 
-
 crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
-                            const igris::buffer data, uint8_t type, uint8_t qos,
-                            uint16_t ackquant, bool fastsend)
+                            const nos::buffer data,
+                            uint8_t type,
+                            uint8_t qos,
+                            uint16_t ackquant,
+                            bool fastsend)
 {
     crow_packet *pack = crow_create_packet(NULL, addr.size(), data.size());
     if (pack == nullptr)
@@ -467,13 +481,16 @@ crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
-                              const igris::buffer *vec, size_t veclen,
-                              uint8_t type, uint8_t qos, uint16_t ackquant,
+                              const nos::buffer *vec,
+                              size_t veclen,
+                              uint8_t type,
+                              uint8_t qos,
+                              uint16_t ackquant,
                               bool fastsend)
 {
     size_t dsize = 0;
-    const igris::buffer *it = vec;
-    const igris::buffer *const eit = vec + veclen;
+    const nos::buffer *it = vec;
+    const nos::buffer *const eit = vec + veclen;
 
     for (; it != eit; ++it)
     {
@@ -503,14 +520,18 @@ crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
-                               const igris::buffer *vec, size_t veclen,
-                               const igris::buffer *vec2, size_t veclen2,
-                               uint8_t type, uint8_t qos, uint16_t ackquant,
+                               const nos::buffer *vec,
+                               size_t veclen,
+                               const nos::buffer *vec2,
+                               size_t veclen2,
+                               uint8_t type,
+                               uint8_t qos,
+                               uint16_t ackquant,
                                bool fastsend)
 {
     size_t dsize = 0;
-    const igris::buffer *it;
-    const igris::buffer *eit;
+    const nos::buffer *it;
+    const nos::buffer *eit;
 
     it = vec;
     eit = vec + veclen;
@@ -737,14 +758,17 @@ static inline void crow_onestep_incoming_stage()
 
 void crow::onestep()
 {
-    crow::gateway * gate;
-    dlist_for_each_entry (gate, &crow::gateway_list, lnk)
+    crow::gateway *gate;
+    dlist_for_each_entry(gate, &crow::gateway_list, lnk)
     {
         gate->nblock_onestep();
     }
 
     crow::protocol *it;
-    dlist_for_each_entry(it, &crow::protocols, lnk) { it->onestep(); }
+    dlist_for_each_entry(it, &crow::protocols, lnk)
+    {
+        it->onestep();
+    }
 
     crow_onestep_send_stage();
     crow_onestep_outers_stage();
@@ -764,7 +788,7 @@ bool crow::has_untravelled()
     system_lock();
 
     int ret = !(dlist_empty(&crow_travelled) && dlist_empty(&crow_outters) &&
-             dlist_empty(&crow_incoming));
+                dlist_empty(&crow_incoming));
 
     system_unlock();
     return ret;
@@ -775,14 +799,14 @@ bool crow::has_untravelled_now()
     system_lock();
 
     int ret = !dlist_empty(&crow_travelled);
-    
+
     system_unlock();
     return ret;
 }
 
 void crow::finish()
 {
-    crow::gateway * gate;
+    crow::gateway *gate;
     dlist_for_each_entry(gate, &crow::gateway_list, lnk)
     {
         gate->finish();

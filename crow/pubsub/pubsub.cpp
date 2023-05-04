@@ -24,7 +24,7 @@ void crow::pubsub_protocol_cls::incoming(crow::packet *pack)
     else
     {
         auto &shdr = pack->subheader<crow::subheader_pubsub_data>();
-        igris::buffer theme = shdr.theme();
+        nos::buffer theme = shdr.theme();
 
         crow::subscriber *sub;
         dlist_for_each_entry(sub, &subscribers, lnk)
@@ -52,8 +52,8 @@ void crow::pubsub_protocol_cls::undelivered(crow::packet *pack)
 }
 
 crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
-                               const igris::buffer theme,
-                               const igris::buffer data,
+                               const nos::buffer theme,
+                               const nos::buffer data,
                                uint8_t qos,
                                uint16_t acktime,
                                uint8_t type)
@@ -64,7 +64,7 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
     subps_d.thmsz = theme.size();
     subps_d.datsz = data.size();
 
-    const igris::buffer iov[] = {
+    const nos::buffer iov[] = {
         {(char *)&subps_d, sizeof(subps_d)},
         {(char *)theme.data(), subps_d.thmsz},
         data,
@@ -75,8 +75,8 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
-                                 const igris::buffer theme,
-                                 const igris::buffer *vec,
+                                 const nos::buffer theme,
+                                 const nos::buffer *vec,
                                  int vecsz,
                                  uint8_t qos,
                                  uint16_t acktime)
@@ -92,7 +92,7 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
         subps_d.datsz += vec[i].size();
     }
 
-    const igris::buffer iov[] = {
+    const nos::buffer iov[] = {
         {(char *)&subps_d, sizeof(subps_d)},
         {(char *)theme.data(), subps_d.thmsz},
     };
@@ -102,7 +102,7 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
 }
 
 void crow::subscribe(const crow::hostaddr_view &addr,
-                     const igris::buffer theme,
+                     const nos::buffer theme,
                      uint8_t qos,
                      uint16_t acktime,
                      uint8_t rqos,
@@ -116,7 +116,7 @@ void crow::subscribe(const crow::hostaddr_view &addr,
     subps_c.qos = rqos;
     subps_c.ackquant = racktime;
 
-    const igris::buffer iov[] = {
+    const nos::buffer iov[] = {
         {(char *)&subps_c, sizeof(subps_c)},
         {(char *)theme.data(), theme.size()},
     };

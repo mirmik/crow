@@ -7,23 +7,36 @@ namespace crow
 {
     class socket_base : public node
     {
-      public:
+    public:
         dlist_head q = DLIST_HEAD_INIT(q);
 
-        void incoming_packet(crow_packet *pack) { dlist_add(&pack->ulnk, &q); }
+        void incoming_packet(crow_packet *pack)
+        {
+            dlist_add(&pack->ulnk, &q);
+        }
     };
 
     class socket : public socket_base
     {
-      public:
-        socket(int nodeno) { this->bind(nodeno); }
-
-        void undelivered_packet(crow_packet *pack) { crow::release(pack); }
-
-        crow::packet_ptr send(int rid, igris::buffer addr, const char *data,
-                              size_t len, uint8_t qos, uint16_t ackquant)
+    public:
+        socket(int nodeno)
         {
-            return node_send(id, rid, addr, igris::buffer(data, len), qos,
+            this->bind(nodeno);
+        }
+
+        void undelivered_packet(crow_packet *pack)
+        {
+            crow::release(pack);
+        }
+
+        crow::packet_ptr send(int rid,
+                              nos::buffer addr,
+                              const char *data,
+                              size_t len,
+                              uint8_t qos,
+                              uint16_t ackquant)
+        {
+            return node_send(id, rid, addr, nos::buffer(data, len), qos,
                              ackquant);
         }
 

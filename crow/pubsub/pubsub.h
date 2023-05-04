@@ -31,11 +31,11 @@ namespace crow
     struct subheader_pubsub_data : public subheader_pubsub
     {
         uint16_t datsz = 0;
-        igris::buffer theme()
+        nos::buffer theme()
         {
             return {(char *)(this + 1), thmsz};
         }
-        igris::buffer data()
+        nos::buffer data()
         {
             return {(char *)(this + 1) + thmsz, datsz};
         }
@@ -45,7 +45,7 @@ namespace crow
     {
         uint8_t qos = 0;
         uint16_t ackquant = 0;
-        igris::buffer theme()
+        nos::buffer theme()
         {
             return {(char *)(this + 1), thmsz};
         }
@@ -74,21 +74,21 @@ namespace crow
 
     crow::packet_ptr
     publish(const crow::hostaddr_view &addr,
-            const igris::buffer theme,
-            const igris::buffer data,
+            const nos::buffer theme,
+            const nos::buffer data,
             uint8_t qos,
             uint16_t acktime,
             uint8_t type = (uint8_t)crow::pubsub_type::PUBLISH);
 
     crow::packet_ptr publish_v(const crow::hostaddr_view &addr,
-                               const igris::buffer theme,
-                               const igris::buffer *vec,
+                               const nos::buffer theme,
+                               const nos::buffer *vec,
                                int vecsz,
                                uint8_t qos,
                                uint16_t acktime);
 
     void subscribe(const crow::hostaddr_view &addr,
-                   igris::buffer theme,
+                   nos::buffer theme,
                    uint8_t qo0,
                    uint16_t acktime,
                    uint8_t rqos,
@@ -103,13 +103,13 @@ namespace crow
         {
         }
 
-        igris::buffer theme()
+        nos::buffer theme()
         {
             auto &subheader = pack->subheader<subheader_pubsub_data>();
             return subheader.theme();
         }
 
-        igris::buffer message()
+        nos::buffer message()
         {
             auto &subheader = pack->subheader<subheader_pubsub_data>();
             return subheader.data();

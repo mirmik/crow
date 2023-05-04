@@ -3,7 +3,7 @@
 
 namespace crow
 {
-    hostaddr address(const igris::buffer &in)
+    hostaddr address(const nos::buffer &in)
     {
         std::vector<uint8_t> out;
         out.resize(in.size());
@@ -17,7 +17,7 @@ namespace crow
         return out;
     }
 
-    hostaddr address_warned(const igris::buffer &in)
+    hostaddr address_warned(const nos::buffer &in)
     {
         std::vector<uint8_t> out;
         out.resize(in.size());

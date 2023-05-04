@@ -82,28 +82,28 @@ int DATAINPUT_FILENO = STDIN_FILENO;
 std::shared_ptr<crow::udpgate> udpgate;
 std::shared_ptr<crow::tcpgate> tcpgate;
 
-void do_incom_data(igris::buffer);
+void do_incom_data(nos::buffer);
 
-void subscriber_data_handle(igris::buffer incom_data)
+void subscriber_data_handle(nos::buffer incom_data)
 {
     do_incom_data(incom_data);
 }
 
 int service_data_handle(char *cmd, int cmdlen, char *ans, int ansmax)
 {
-    do_incom_data({cmd, cmdlen});
+    do_incom_data({cmd, (size_t)cmdlen});
     snprintf(ans, ansmax, "HelloWorld");
     return strlen(ans);
 }
 
-void requestor_data_handle(igris::buffer incom_data)
+void requestor_data_handle(nos::buffer incom_data)
 {
     do_incom_data(incom_data);
 }
 
 void service_data_handle(char *data, int len, crow::service_node &)
 {
-    do_incom_data({data, len});
+    do_incom_data({data, (size_t)len});
 }
 
 void raw_node_incom_handle(crow::node_packet_ptr incom_data)
@@ -200,7 +200,7 @@ std::string gen_random_string(const int len)
     return tmp_s;
 }
 
-void output_do(igris::buffer data, crow::packet *pack)
+void output_do(nos::buffer data, crow::packet *pack)
 {
     int ret;
     (void)pack;
@@ -239,7 +239,7 @@ void output_do(igris::buffer data, crow::packet *pack)
         exit(0);
 }
 
-void do_incom_data(igris::buffer incom_data)
+void do_incom_data(nos::buffer incom_data)
 {
     output_do(incom_data, nullptr);
     if (exit_on_receive)

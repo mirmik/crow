@@ -22,8 +22,8 @@ void crow_packet_initialization(crow_packet *pack, crow::gateway *ingate)
     pack->refs = 0;
 }
 
-crow_packet *crow_create_packet(crow::gateway *ingate, uint8_t addrsize,
-                                  size_t datasize)
+crow_packet *
+crow_create_packet(crow::gateway *ingate, uint8_t addrsize, size_t datasize)
 {
     crow_packet *pack = crow_allocate_packet(addrsize + datasize);
 
@@ -48,10 +48,10 @@ void crow_packet::revert_gate(uint8_t gateindex)
     ++header.stg;
 }
 
-void crow_packet::revert(igris::buffer *vec, size_t veclen)
+void crow_packet::revert(nos::buffer *vec, size_t veclen)
 {
-    igris::buffer *it = vec + veclen - 1;
-    igris::buffer *eit = vec - 1;
+    nos::buffer *it = vec + veclen - 1;
+    nos::buffer *eit = vec - 1;
 
     size_t sz = 0;
     uint8_t *tgt = stageptr();
@@ -67,4 +67,7 @@ void crow_packet::revert(igris::buffer *vec, size_t veclen)
     header.stg = (uint8_t)(header.stg + sz);
 }
 
-bool crow::has_allocated() { return !!allocated_count; }
+bool crow::has_allocated()
+{
+    return !!allocated_count;
+}

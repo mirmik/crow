@@ -29,7 +29,7 @@ namespace crow
 
     class channel : public crow::node
     {
-      public:
+    public:
         using incoming_handler_t = void (*)(crow::channel *, crow_packet *);
 
         dlist_head lnk;
@@ -70,16 +70,25 @@ namespace crow
             raddr_cap = sz;
         }
 
-        void naive_listener_mode(bool en) { f.naive_listener = en; }
-        uint8_t state() { return (uint8_t)f._state; }
+        void naive_listener_mode(bool en)
+        {
+            f.naive_listener = en;
+        }
+        uint8_t state()
+        {
+            return (uint8_t)f._state;
+        }
 
         void incoming_packet(crow_packet *pack) override;
         void incoming_data_packet(crow_packet *pack);
 
         void undelivered_packet(crow_packet *pack) override;
 
-        void handshake(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
-                       uint8_t qos = 2, uint16_t ackquant = 200);
+        void handshake(const uint8_t *raddr,
+                       uint16_t rlen,
+                       uint16_t rid,
+                       uint8_t qos = 2,
+                       uint16_t ackquant = 200);
         void send_handshake_answer();
 
         void wait_handshake_request()
@@ -89,11 +98,14 @@ namespace crow
 
         int send(const char *data, size_t size);
 
-        static igris::buffer getdata(crow_packet *pack);
+        static nos::buffer getdata(crow_packet *pack);
 
         //////////////////SYNC API/////////////////////////
-        int connect(const uint8_t *raddr, uint16_t rlen, uint16_t rid,
-                    uint8_t qos = 2, uint16_t ackquant = 200);
+        int connect(const uint8_t *raddr,
+                    uint16_t rlen,
+                    uint16_t rid,
+                    uint8_t qos = 2,
+                    uint16_t ackquant = 200);
 
         int syncrecv(crow_packet **ppack);
     };

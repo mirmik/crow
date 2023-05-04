@@ -7,6 +7,7 @@
 #include <crow/gateway.h>
 #include <crow/packet_ptr.h>
 #include <igris/event/delegate.h>
+#include <nos/buffer.h>
 
 #define CROW_SENDED 0
 #define CROW_WRONG_ADDRESS -1
@@ -38,14 +39,14 @@ namespace crow
 
     // Отправить пакет.
     crow::packet_ptr send(const crow::hostaddr_view &addr,
-                          igris::buffer data,
+                          nos::buffer data,
                           uint8_t type,
                           uint8_t qos,
                           uint16_t ackquant,
                           bool async = false);
 
     crow::packet_ptr send_v(const crow::hostaddr_view &addr,
-                            const igris::buffer *vec,
+                            const nos::buffer *vec,
                             size_t veclen,
                             uint8_t type,
                             uint8_t qos,
@@ -53,9 +54,9 @@ namespace crow
                             bool async = false);
 
     crow::packet_ptr send_vv(const crow::hostaddr_view &addr,
-                             const igris::buffer *vec,
+                             const nos::buffer *vec,
                              size_t veclen,
-                             const igris::buffer *vec2,
+                             const nos::buffer *vec2,
                              size_t veclen2,
                              uint8_t type,
                              uint8_t qos,
@@ -63,11 +64,11 @@ namespace crow
                              bool async = false);
 
     crow::packet_ptr send_vvv(const crow::hostaddr_view &addr,
-                              const igris::buffer *vec,
+                              const nos::buffer *vec,
                               size_t veclen,
-                              const igris::buffer *vec2,
+                              const nos::buffer *vec2,
                               size_t veclen2,
-                              const igris::buffer *vec3,
+                              const nos::buffer *vec3,
                               size_t veclen3,
                               uint8_t type,
                               uint8_t qos,

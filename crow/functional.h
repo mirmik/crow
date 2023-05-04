@@ -11,10 +11,10 @@ namespace crow
 {
     extern std::list<std::unique_ptr<crow::subscriber_node>> subscribers;
 
-    crow::subscriber_node &subscribe(igris::buffer theme,
-                                     std::function<void(igris::buffer)>);
+    crow::subscriber_node &subscribe(nos::buffer theme,
+                                     std::function<void(nos::buffer)>);
 
-    void publish(igris::buffer theme, igris::buffer data);
+    void publish(nos::buffer theme, nos::buffer data);
 }
 
 #endif

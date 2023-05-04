@@ -6,17 +6,15 @@
 #ifndef CROW_PACKAGE_H
 #define CROW_PACKAGE_H
 
-#include <stdint.h>
-#include <stdlib.h>
-
 #include <crow/defs.h>
 #include <crow/hostaddr_view.h>
 #include <crow/qosbyte.h>
-
-#include <igris/buffer.h>
 #include <igris/container/pool.h>
 #include <igris/datastruct/dlist.h>
 #include <igris/sync/syslock.h>
+#include <nos/buffer.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 /// Качество обслуживания.
 #define CROW_WITHOUT_ACK 0
@@ -224,7 +222,7 @@ namespace crow
         }
 
         void revert_gate(uint8_t gateindex);
-        void revert(igris::buffer *vec, size_t veclen);
+        void revert(nos::buffer *vec, size_t veclen);
 
         uint8_t *addrptr() const
         {
@@ -463,9 +461,9 @@ namespace crow
             return crow::hostaddr_view(addrptr(), addrsize());
         }
 
-        igris::buffer data()
+        nos::buffer data()
         {
-            return igris::buffer(dataptr(), datasize());
+            return nos::buffer(dataptr(), datasize());
         }
 
         template <class T> T &subheader()

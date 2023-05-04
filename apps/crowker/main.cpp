@@ -48,7 +48,7 @@ void tcp_client_listener(nos::inet::tcp_client client)
 
     while (1)
     {
-        int ret;
+        nos::expected<long unsigned int, nos::input_error> ret;
         char cmd;
         uint8_t datasize;
         uint16_t thmsize;
@@ -58,7 +58,7 @@ void tcp_client_listener(nos::inet::tcp_client client)
 
         ret = client.recv(buf, 3, MSG_WAITALL);
 
-        if (ret <= 0)
+        if (ret.is_error())
             break;
 
         cmd = buf[0];
@@ -73,7 +73,7 @@ void tcp_client_listener(nos::inet::tcp_client client)
 
         ret = client.recv(buf, thmsize, MSG_WAITALL);
 
-        if (ret <= 0)
+        if (ret.is_error())
             break;
 
         theme = std::string(buf, thmsize);
@@ -86,7 +86,7 @@ void tcp_client_listener(nos::inet::tcp_client client)
         else if (cmd == 'p')
         {
             ret = client.recv(buf, 6, MSG_WAITALL);
-            if (ret <= 0)
+            if (ret.is_error())
                 break;
 
             buf[6] = 0;
@@ -95,7 +95,7 @@ void tcp_client_listener(nos::inet::tcp_client client)
                 goto clean;
 
             ret = client.recv(buf, datasize, MSG_WAITALL);
-            if (ret <= 0)
+            if (ret.is_error())
                 break;
 
             auto data = std::make_shared<std::string>(buf, datasize);

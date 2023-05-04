@@ -25,8 +25,8 @@ namespace crow
 
     static auto node_data(crow::packet *pack)
     {
-        return igris::buffer(pack->dataptr() + sizeof(node_subheader),
-                             pack->datasize() - sizeof(node_subheader));
+        return nos::buffer(pack->dataptr() + sizeof(node_subheader),
+                           pack->datasize() - sizeof(node_subheader));
     }
 
     class node_protocol_cls : public crow::protocol

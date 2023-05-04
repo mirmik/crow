@@ -7,7 +7,7 @@
 
 namespace crow
 {
-    void warn(igris::buffer msg);
+    void warn(nos::buffer msg);
 }
 
 #endif

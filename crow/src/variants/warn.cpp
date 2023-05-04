@@ -2,7 +2,7 @@
 #include <igris/dprint.h>
 
 #if !defined(MEMORY_ECONOMY)
-void crow::warn(igris::buffer msg)
+void crow::warn(nos::buffer msg)
 {
     dpr("WARN: ");
     debug_write(msg.data(), msg.size());

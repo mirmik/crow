@@ -1,10 +1,14 @@
 #include <crow/proto/msgbox.h>
 
-crow::msgbox::msgbox() { sem_init(&message_lock, 0, 1); }
+crow::msgbox::msgbox()
+{
+    sem_init(&message_lock, 0, 1);
+}
 
 crow::node_packet_ptr crow::msgbox::query(nodeid_t rid,
                                           const crow::hostaddr_view &addr,
-                                          const igris::buffer data, uint8_t qos,
+                                          const nos::buffer data,
+                                          uint8_t qos,
                                           uint16_t ackquant)
 {
     assert(dlist_empty(&messages));
@@ -36,13 +40,12 @@ crow::node_packet_ptr crow::msgbox::receive()
 }
 
 crow::packet_ptr crow::msgbox::reply(crow::node_packet_ptr msg,
-                                     igris::buffer data, uint8_t qos,
+                                     nos::buffer data,
+                                     uint8_t qos,
                                      uint16_t ackquant)
 {
-    return send(
-        msg.rid(),
-        {msg->addrptr(), msg->addrsize()}, data,
-        qos, ackquant);
+    return send(msg.rid(), {msg->addrptr(), msg->addrsize()}, data, qos,
+                ackquant);
 }
 
 void crow::msgbox::incoming_packet(crow::packet *pack)
@@ -54,10 +57,10 @@ void crow::msgbox::incoming_packet(crow::packet *pack)
     notify_one(0);
 }
 
-void crow::msgbox::undelivered_packet(crow::packet *pack) 
-{ 
-    (void) pack;
-    notify_one(-1); 
+void crow::msgbox::undelivered_packet(crow::packet *pack)
+{
+    (void)pack;
+    notify_one(-1);
 }
 
 crow::msgbox::~msgbox()

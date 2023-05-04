@@ -7,8 +7,8 @@ namespace crow
     {
         int size_encoded(crow_packet *pack) override;
 
-        void encode(crow_packet *pack, igris::buffer);
-        void decode(crow_packet *pack, igris::buffer);
+        void encode(crow_packet *pack, nos::buffer);
+        void decode(crow_packet *pack, nos::buffer);
 
         void encode_streamed(int *state, char in, char *out) override;
         void decode_streamed(int *state, char in, char *out) override;

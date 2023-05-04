@@ -27,8 +27,11 @@ namespace crow
     {
         uint8_t thmsize = 0;
         uint16_t datsize = 0;
-        igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
-        igris::buffer message()
+        nos::buffer theme()
+        {
+            return {(char *)(this + 1), thmsize};
+        }
+        nos::buffer message()
         {
             return {(char *)(this + 1) + thmsize, datsize};
         }
@@ -39,7 +42,10 @@ namespace crow
         uint8_t rqos = 0;
         uint16_t rackquant = 0;
         uint8_t thmsize = 0;
-        igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
+        nos::buffer theme()
+        {
+            return {(char *)(this + 1), thmsize};
+        }
     } __attribute__((packed));
 
     struct subscribe_subheader_v2 : public pubsub_subheader
@@ -56,15 +62,21 @@ namespace crow
                 uint32_t request_latest : 31;
             } f;
         } cmd = {};
-        igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
+        nos::buffer theme()
+        {
+            return {(char *)(this + 1), thmsize};
+        }
     } __attribute__((packed));
 
     struct consume_subheader : public pubsub_subheader
     {
         uint8_t thmsize = 0;
         uint16_t datsize = 0;
-        igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
-        igris::buffer message()
+        nos::buffer theme()
+        {
+            return {(char *)(this + 1), thmsize};
+        }
+        nos::buffer message()
         {
             return {(char *)(this + 1) + thmsize, datsize};
         }
@@ -77,19 +89,22 @@ namespace crow
         uint8_t thmsize = 0;
         uint8_t repthmsize = 0;
         uint16_t datsize = 0;
-        igris::buffer theme() { return {(char *)(this + 1), thmsize}; }
-        igris::buffer reply_theme()
+        nos::buffer theme()
+        {
+            return {(char *)(this + 1), thmsize};
+        }
+        nos::buffer reply_theme()
         {
             return {(char *)(this + 1) + thmsize, repthmsize};
         }
-        igris::buffer message()
+        nos::buffer message()
         {
             return {(char *)(this + 1) + thmsize + repthmsize, datsize};
         }
     } __attribute__((packed));
 
     template <class T>
-    void load_timestamped_object(igris::buffer data, int64_t *timestamp, T *obj)
+    void load_timestamped_object(nos::buffer data, int64_t *timestamp, T *obj)
     {
         memcpy(timestamp, data.data(), sizeof(int64_t));
         memcpy(obj, data.data() + sizeof(int64_t), sizeof(T));

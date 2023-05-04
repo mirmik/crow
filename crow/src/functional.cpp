@@ -6,8 +6,8 @@ namespace crow
     std::list<std::unique_ptr<crow::subscriber_node>> subscribers;
 }
 
-crow::subscriber_node &crow::subscribe(igris::buffer theme,
-                                       std::function<void(igris::buffer)> func)
+crow::subscriber_node &crow::subscribe(nos::buffer theme,
+                                       std::function<void(nos::buffer)> func)
 {
     auto addr = crow::crowker_address();
     auto node = std::make_unique<crow::subscriber_node>(addr, theme, func);
@@ -16,7 +16,7 @@ crow::subscriber_node &crow::subscribe(igris::buffer theme,
     return *subscribers.back();
 }
 
-void crow::publish(igris::buffer theme, igris::buffer data)
+void crow::publish(nos::buffer theme, nos::buffer data)
 {
     auto addr = crow::crowker_address();
     crow::publisher_node node(addr, theme);

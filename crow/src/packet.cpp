@@ -46,10 +46,10 @@ void crow::packet::revert_gate(uint8_t gateindex)
 
 // Перезаписываем информацию на ту информацию, какую предоставили врата
 // в качестве обратного адреса.
-void crow::packet::revert(igris::buffer *vec, size_t veclen)
+void crow::packet::revert(nos::buffer *vec, size_t veclen)
 {
-    igris::buffer *it = vec + veclen - 1;
-    igris::buffer *eit = vec - 1;
+    nos::buffer *it = vec + veclen - 1;
+    nos::buffer *eit = vec - 1;
 
     size_t sz = 0;
     uint8_t *tgt = stageptr();

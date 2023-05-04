@@ -9,8 +9,8 @@ void crow::node_protocol_cls::send_node_error(crow::packet *pack, int errcode)
     sh.rid = crow::node_protocol.sid(pack);
     sh.u.f.type = CROW_NODEPACK_ERROR;
 
-    const igris::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
-                                  {(char *)&errcode, sizeof(errcode)}};
+    const nos::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
+                                {(char *)&errcode, sizeof(errcode)}};
 
     crow::send_v({pack->addrptr(), pack->addrsize()}, iov, 2,
                  CROW_NODE_PROTOCOL, 0, pack->ackquant(), true);

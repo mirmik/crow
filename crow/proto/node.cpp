@@ -14,7 +14,7 @@ crow::node_protocol_cls crow::node_protocol;
 crow::packet_ptr crow::node::send(nodeid_t sid,
                                   nodeid_t rid,
                                   const crow::hostaddr_view &addr,
-                                  const igris::buffer data,
+                                  const nos::buffer data,
                                   uint8_t qos,
                                   uint16_t ackquant,
                                   bool async)
@@ -24,8 +24,8 @@ crow::packet_ptr crow::node::send(nodeid_t sid,
     sh.rid = rid;
     sh.u.f.type = CROW_NODEPACK_COMMON;
 
-    const igris::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
-                                  {(char *)data.data(), data.size()}};
+    const nos::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
+                                {(char *)data.data(), data.size()}};
 
     return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant, async);
 }
@@ -33,7 +33,7 @@ crow::packet_ptr crow::node::send(nodeid_t sid,
 crow::packet_ptr crow::node::send_v(nodeid_t sid,
                                     nodeid_t rid,
                                     const crow::hostaddr_view &addr,
-                                    const igris::buffer *vec,
+                                    const nos::buffer *vec,
                                     size_t veclen,
                                     uint8_t qos,
                                     uint16_t ackquant,
@@ -44,7 +44,7 @@ crow::packet_ptr crow::node::send_v(nodeid_t sid,
     sh.rid = rid;
     sh.u.f.type = CROW_NODEPACK_COMMON;
 
-    const igris::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
+    const nos::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
 
     return crow::send_vv(addr, iov, 1, vec, veclen, CROW_NODE_PROTOCOL, qos,
                          ackquant, async);
@@ -53,9 +53,9 @@ crow::packet_ptr crow::node::send_v(nodeid_t sid,
 crow::packet_ptr crow::node::send_vv(nodeid_t sid,
                                      nodeid_t rid,
                                      const crow::hostaddr_view &addr,
-                                     const igris::buffer *vec1,
+                                     const nos::buffer *vec1,
                                      size_t veclen1,
-                                     const igris::buffer *vec2,
+                                     const nos::buffer *vec2,
                                      size_t veclen2,
                                      uint8_t qos,
                                      uint16_t ackquant,
@@ -66,7 +66,7 @@ crow::packet_ptr crow::node::send_vv(nodeid_t sid,
     sh.rid = rid;
     sh.u.f.type = CROW_NODEPACK_COMMON;
 
-    const igris::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
+    const nos::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
 
     return crow::send_vvv(addr, iov, 1, vec1, veclen1, vec2, veclen2,
                           CROW_NODE_PROTOCOL, qos, ackquant, async);

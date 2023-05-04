@@ -64,9 +64,9 @@ void crow::udpgate::read_handler(int fd)
 
     crow::packet_initialization(block, this);
 
-    igris::buffer vec[3] = {{(char *)&id, 1},
-                            {(char *)&sender.sin_addr.s_addr, 4},
-                            {(char *)&sender.sin_port, 2}};
+    nos::buffer vec[3] = {{(char *)&id, 1},
+                          {(char *)&sender.sin_addr.s_addr, 4},
+                          {(char *)&sender.sin_port, 2}};
 
     block->revert(vec, 3);
 

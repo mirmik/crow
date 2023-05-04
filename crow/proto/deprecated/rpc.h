@@ -38,10 +38,9 @@ namespace crow
 {
     class remote_function_basic
     {
-      public:
-        virtual int invoke(igris::buffer data, igris::buffer out) = 0;
-        virtual int invoke_text_format(igris::buffer data,
-                                       std::string &out) = 0;
+    public:
+        virtual int invoke(nos::buffer data, nos::buffer out) = 0;
+        virtual int invoke_text_format(nos::buffer data, std::string &out) = 0;
         virtual size_t outsize() = 0;
         virtual ~remote_function_basic() = default;
     };
@@ -51,13 +50,15 @@ namespace crow
     {
         igris::delegate<Ret, Args...> dlg;
 
-      public:
+    public:
         remote_function(igris::delegate<Ret, Args...> dlg) : dlg(dlg) {}
 
-        int invoke(igris::buffer data, igris::buffer output) override;
-        int invoke_text_format(igris::buffer data,
-                               std::string &output) override;
-        size_t outsize() override { return sizeof_helper<Ret>::size; }
+        int invoke(nos::buffer data, nos::buffer output) override;
+        int invoke_text_format(nos::buffer data, std::string &output) override;
+        size_t outsize() override
+        {
+            return sizeof_helper<Ret>::size;
+        }
         ~remote_function() = default;
     };
 
@@ -65,8 +66,11 @@ namespace crow
     {
         std::unordered_map<std::string, remote_function_basic *> rfuncmap = {};
 
-      public:
-        void bind(int node_no = CROW_RPC_NODE_NO) { node::bind(node_no); }
+    public:
+        void bind(int node_no = CROW_RPC_NODE_NO)
+        {
+            node::bind(node_no);
+        }
 
         template <class Ret, class... Args>
         void add_delegate(const char *name, igris::delegate<Ret, Args...> dlg)
@@ -87,13 +91,15 @@ namespace crow
 
     class rpc_requestor_node : public crow::node
     {
-      public:
+    public:
         crow::packet *incpack = nullptr;
 
-      public:
+    public:
         template <class Ret, class... Args>
-        void remote_request(crow::hostaddr_view addr, nodeid_t rid,
-                            const char *fname, Args &&...args)
+        void remote_request(crow::hostaddr_view addr,
+                            nodeid_t rid,
+                            const char *fname,
+                            Args &&... args)
         {
             std::string args_data;
             igris::archive::binary_string_writer writer(args_data);
@@ -103,7 +109,7 @@ namespace crow
             writer.dump(format);
 
             // дампим имя функции.
-            writer.dump(igris::buffer(fname, strlen(fname)));
+            writer.dump(nos::buffer(fname, strlen(fname)));
 
             // массово запаковываем аргументы c помощью трикса.
             int ___[] = {(writer.dump(args), 0)...};
@@ -112,7 +118,8 @@ namespace crow
             send(rid, addr, args_data, 2, 50);
         }
 
-        void remote_request_text_format(crow::hostaddr_view addr, nodeid_t rid,
+        void remote_request_text_format(crow::hostaddr_view addr,
+                                        nodeid_t rid,
                                         const char *fname,
                                         const std::string &args)
         {
@@ -124,7 +131,7 @@ namespace crow
             writer.dump(format);
 
             // дампим имя функции.
-            writer.dump(igris::buffer(fname, strlen(fname)));
+            writer.dump(nos::buffer(fname, strlen(fname)));
 
             igris::serialize(writer, args);
 
@@ -141,7 +148,7 @@ namespace crow
         {
             int8_t status;
 
-            igris::buffer data = crow::node_data(incpack);
+            nos::buffer data = crow::node_data(incpack);
             igris::archive::binary_buffer_reader reader(data);
 
             reader.load(status);
@@ -157,7 +164,7 @@ namespace crow
         {
             int8_t status;
 
-            igris::buffer data = crow::node_data(incpack);
+            nos::buffer data = crow::node_data(incpack);
             igris::archive::binary_buffer_reader reader(data);
 
             reader.load(status);
@@ -175,7 +182,7 @@ namespace crow
         crow::hostaddr_view addr;
         crow::nodeid_t rid;
 
-      public:
+    public:
         rpc_requestor(crow::hostaddr_view addr,
                       crow::nodeid_t rid = CROW_RPC_NODE_NO)
             : addr(addr), rid(rid)
@@ -183,7 +190,7 @@ namespace crow
         }
 
         template <class Ret, class... Args>
-        int request(const char *fname, Ret &out, Args &&...args)
+        int request(const char *fname, Ret &out, Args &&... args)
         {
             rpc_requestor_node wnode;
             int status;
@@ -202,7 +209,8 @@ namespace crow
             return status;
         }
 
-        int request_text_format(const char *fname, std::string &out,
+        int request_text_format(const char *fname,
+                                std::string &out,
                                 const std::string &in)
         {
             rpc_requestor_node wnode;
@@ -225,7 +233,7 @@ namespace crow
 
 template <class Ret, class... Args>
 int crow::remote_function<Ret, Args...>::invoke(
-    /*int8_t format, */ igris::buffer data, igris::buffer out)
+    /*int8_t format, */ nos::buffer data, nos::buffer out)
 {
     std::tuple<Args...> args = igris::deserialize<std::tuple<Args...>>(data);
 
@@ -254,14 +262,14 @@ template <class Arg> static void __bind(Arg &arg, const igris::trent &tr)
 }
 
 template <class Tuple, size_t... I>
-static void __expand(std::index_sequence<I...>, Tuple &&tpl,
-                     const igris::trent &tr)
+static void
+__expand(std::index_sequence<I...>, Tuple &&tpl, const igris::trent &tr)
 {
-    std::apply([&](auto &&...args) { (__bind(args, tr[(int)I]), ...); }, tpl);
+    std::apply([&](auto &&... args) { (__bind(args, tr[(int)I]), ...); }, tpl);
 }
 
 template <class Ret, class... Args>
-int crow::remote_function<Ret, Args...>::invoke_text_format(igris::buffer data,
+int crow::remote_function<Ret, Args...>::invoke_text_format(nos::buffer data,
                                                             std::string &out)
 {
     igris::trent tr;

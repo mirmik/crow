@@ -80,41 +80,89 @@ namespace crow
         };
         struct crow_header header;
 
-        uint8_t *stageptr() { return (uint8_t *)(&header + 1) + header.stg; }
+        uint8_t *stageptr()
+        {
+            return (uint8_t *)(&header + 1) + header.stg;
+        }
 
-        char *endptr() { return (char *)(&header) + header.flen; }
-        uint16_t blocksize() { return header.flen; }
+        char *endptr()
+        {
+            return (char *)(&header) + header.flen;
+        }
+        uint16_t blocksize()
+        {
+            return header.flen;
+        }
 
-        igris::buffer rawdata() { return igris::buffer(dataptr(), datasize()); }
+        nos::buffer rawdata()
+        {
+            return nos::buffer(dataptr(), datasize());
+        }
         crow::hostaddr_view addr()
         {
-            return igris::buffer((char *)addrptr(), addrsize());
+            return nos::buffer((char *)addrptr(), addrsize());
         }
 
         void revert_gate(uint8_t gateindex);
-        void revert(igris::buffer *vec, size_t veclen);
+        void revert(nos::buffer *vec, size_t veclen);
 
-        uint8_t *addrptr() { return (uint8_t *)(&header + 1); }
-        uint8_t addrsize() { return header.alen; }
+        uint8_t *addrptr()
+        {
+            return (uint8_t *)(&header + 1);
+        }
+        uint8_t addrsize()
+        {
+            return header.alen;
+        }
 
-        char *dataptr() { return (char *)(addrptr() + addrsize()); }
+        char *dataptr()
+        {
+            return (char *)(addrptr() + addrsize());
+        }
         uint16_t datasize()
         {
             return (uint16_t)(header.flen - header.alen - sizeof(crow_header));
         }
 
-        size_t fullsize() { return header.flen; };
+        size_t fullsize()
+        {
+            return header.flen;
+        };
 
-        void type(uint8_t t) { header.f.type = t; }
-        void qos(uint8_t q) { header.qos = q; }
-        void ackquant(uint16_t a) { header.ackquant = a; }
+        void type(uint8_t t)
+        {
+            header.f.type = t;
+        }
+        void qos(uint8_t q)
+        {
+            header.qos = q;
+        }
+        void ackquant(uint16_t a)
+        {
+            header.ackquant = a;
+        }
 
-        uint8_t type() { return header.f.type; }
-        uint8_t qos() { return header.qos; }
-        uint16_t ackquant() { return header.ackquant; }
+        uint8_t type()
+        {
+            return header.f.type;
+        }
+        uint8_t qos()
+        {
+            return header.qos;
+        }
+        uint16_t ackquant()
+        {
+            return header.ackquant;
+        }
 
-        void ackcount(uint16_t c) { _ackcount = c; }
-        uint16_t ackcount() { return _ackcount; }
+        void ackcount(uint16_t c)
+        {
+            _ackcount = c;
+        }
+        uint16_t ackcount()
+        {
+            return _ackcount;
+        }
     }; //На самом деле, он не должен быть packed.
     //__attribute__((packed));
 
@@ -129,7 +177,8 @@ namespace crow
     ///Вернуть память выделенную для пакета pack
     void deallocate_packet(crow_packet *pack);
 
-    packet *create_packet(struct crow::gateway *ingate, uint8_t addrsize,
+    packet *create_packet(struct crow::gateway *ingate,
+                          uint8_t addrsize,
                           size_t datasize);
 
     void packet_initialization(struct crow_packet *pack,

@@ -3,14 +3,14 @@
 #ifndef CROW_WARN_H
 #define CROW_WARN_H
 
-#include <igris/buffer.h>
+#include <nos/buffer.h>
 
 namespace crow
 {
 #if defined(MEMORY_ECONOMY)
-    static inline void warn(igris::buffer) {}
+    static inline void warn(nos::buffer) {}
 #else
-    void warn(igris::buffer msg);
+    void warn(nos::buffer msg);
 #endif
 }
 

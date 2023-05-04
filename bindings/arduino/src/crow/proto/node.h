@@ -18,22 +18,30 @@
 
 namespace crow
 {
-    crow::packet_ptr node_send(uint16_t sid, uint16_t rid,
+    crow::packet_ptr node_send(uint16_t sid,
+                               uint16_t rid,
                                const crow::hostaddr_view &addr,
-                               const igris::buffer data, uint8_t qos,
+                               const nos::buffer data,
+                               uint8_t qos,
                                uint16_t ackquant,
                                bool fastsend = CROW_FASTSEND_DEFAULT);
 
-    crow::packet_ptr node_send_special(uint16_t sid, uint16_t rid,
+    crow::packet_ptr node_send_special(uint16_t sid,
+                                       uint16_t rid,
                                        const crow::hostaddr_view &addr,
-                                       uint8_t type, const igris::buffer data,
-                                       uint8_t qos, uint16_t ackquant,
+                                       uint8_t type,
+                                       const nos::buffer data,
+                                       uint8_t qos,
+                                       uint16_t ackquant,
                                        bool fastsend = CROW_FASTSEND_DEFAULT);
 
-    crow::packet_ptr node_send_v(uint16_t sid, uint16_t rid,
+    crow::packet_ptr node_send_v(uint16_t sid,
+                                 uint16_t rid,
                                  const crow::hostaddr_view &addr,
-                                 const igris::buffer *vec, size_t veclen,
-                                 uint8_t qos, uint16_t ackquant,
+                                 const nos::buffer *vec,
+                                 size_t veclen,
+                                 uint8_t qos,
+                                 uint16_t ackquant,
                                  bool fastsend = CROW_FASTSEND_DEFAULT);
 
     // TODO: replace with annotation
@@ -68,7 +76,7 @@ namespace crow
             } f;
         };
 
-        int parse(igris::buffer data)
+        int parse(nos::buffer data)
         {
             igris::binreader reader(data.data());
 
@@ -90,20 +98,22 @@ namespace crow
 
     static auto node_data(crow_packet *pack)
     {
-        return igris::buffer(crow_packet_dataptr(pack) + sizeof(node_subheader),
-                             crow_packet_datasize(pack) -
-                                 sizeof(node_subheader));
+        return nos::buffer(crow_packet_dataptr(pack) + sizeof(node_subheader),
+                           crow_packet_datasize(pack) - sizeof(node_subheader));
     }
 
     class node
     {
-      public:
+    public:
         struct dlist_head lnk = DLIST_HEAD_INIT(lnk); // Список нодов.
         struct dlist_head waitlnk =
             DLIST_HEAD_INIT(waitlnk); // Список ожидающих прихода сообщения.
         uint16_t id = 0;
 
-        virtual void incoming_packet(crow_packet *pack) { crow::release(pack); }
+        virtual void incoming_packet(crow_packet *pack)
+        {
+            crow::release(pack);
+        }
 
         virtual void undelivered_packet(crow_packet *pack)
         {
@@ -114,7 +124,10 @@ namespace crow
         void notify_one(int future);
         void notify_all(int future);
 
-        virtual const char *typestr() { return "node"; }
+        virtual const char *typestr()
+        {
+            return "node";
+        }
 
         node &bind(int addr)
         {
@@ -130,8 +143,10 @@ namespace crow
             return *this;
         };
 
-        crow::packet_ptr send(uint16_t rid, const crow::hostaddr_view &raddr,
-                              const igris::buffer data, uint8_t qos,
+        crow::packet_ptr send(uint16_t rid,
+                              const crow::hostaddr_view &raddr,
+                              const nos::buffer data,
+                              uint8_t qos,
                               uint16_t ackquant,
                               bool fastsend = CROW_FASTSEND_DEFAULT)
         {
@@ -142,8 +157,10 @@ namespace crow
 
         crow::packet_ptr send_special(uint16_t rid,
                                       const crow::hostaddr_view &raddr,
-                                      uint8_t type, const igris::buffer data,
-                                      uint8_t qos, uint16_t ackquant,
+                                      uint8_t type,
+                                      const nos::buffer data,
+                                      uint8_t qos,
+                                      uint16_t ackquant,
                                       bool fastsend = CROW_FASTSEND_DEFAULT)
         {
             assert(id != 0);
@@ -151,9 +168,12 @@ namespace crow
                                            ackquant, fastsend);
         }
 
-        crow::packet_ptr send_v(uint16_t rid, const crow::hostaddr_view &raddr,
-                                const igris::buffer *vdat, size_t vlen,
-                                uint8_t qos, uint16_t ackquant,
+        crow::packet_ptr send_v(uint16_t rid,
+                                const crow::hostaddr_view &raddr,
+                                const nos::buffer *vdat,
+                                size_t vlen,
+                                uint8_t qos,
+                                uint16_t ackquant,
                                 bool fastsend = CROW_FASTSEND_DEFAULT)
         {
             assert(id != 0);
@@ -161,7 +181,7 @@ namespace crow
                                      fastsend);
         }
 
-        static igris::buffer message(crow_packet *pack)
+        static nos::buffer message(crow_packet *pack)
         {
             return node_data(pack);
         }
@@ -171,7 +191,10 @@ namespace crow
             return (crow::node_subheader *)crow_packet_dataptr(pack);
         }
 
-        static nid_t sid(crow_packet *pack) { return subheader(pack)->sid; }
+        static nid_t sid(crow_packet *pack)
+        {
+            return subheader(pack)->sid;
+        }
 
         static node_subheader_annotation annotation(crow_packet *pack)
         {
@@ -185,10 +208,10 @@ namespace crow
 
     class node_protocol_cls : public crow::protocol
     {
-      private:
+    private:
         void send_node_error(crow_packet *pack, int errcode);
 
-      public:
+    public:
         void incoming(crow_packet *pack) override;
         void undelivered(crow_packet *pack) override;
 
@@ -213,7 +236,7 @@ namespace crow
 
     class node_packet_ptr : public packet_ptr
     {
-      public:
+    public:
         node_packet_ptr(crow_packet *pack_) : packet_ptr(pack_) {}
         node_packet_ptr(const crow::packet_ptr &oth) : packet_ptr(oth) {}
         node_packet_ptr(crow::packet_ptr &&oth) : packet_ptr(std::move(oth)) {}
@@ -224,7 +247,10 @@ namespace crow
             return h->rid;
         }
 
-        igris::buffer message() { return node_data(pack); }
+        nos::buffer message()
+        {
+            return node_data(pack);
+        }
     };
 } // namespace crow
 

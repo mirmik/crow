@@ -47,7 +47,7 @@ namespace crowker_implementation
             return _confirmation;
         }
 
-        void set_name(igris::buffer name)
+        void set_name(nos::buffer name)
         {
             _name = std::string(name.data(), name.size());
         }

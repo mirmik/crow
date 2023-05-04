@@ -61,7 +61,7 @@ namespace crow
 
         crow::packet_ptr send(nodeid_t rid,
                               const crow::hostaddr_view &raddr,
-                              const igris::buffer data,
+                              const nos::buffer data,
                               uint8_t qos = CROW_DEFAULT_QOS,
                               uint16_t ackquant = CROW_DEFAULT_ACKQUANT,
                               bool async = false)
@@ -73,7 +73,7 @@ namespace crow
 
         crow::packet_ptr send_v(nodeid_t rid,
                                 const crow::hostaddr_view &raddr,
-                                const igris::buffer *vdat,
+                                const nos::buffer *vdat,
                                 size_t vlen,
                                 uint8_t qos,
                                 uint16_t ackquant,
@@ -87,9 +87,9 @@ namespace crow
 
         crow::packet_ptr send_vv(nodeid_t rid,
                                  const crow::hostaddr_view &raddr,
-                                 const igris::buffer *vdat1,
+                                 const nos::buffer *vdat1,
                                  size_t vlen1,
-                                 const igris::buffer *vdat2,
+                                 const nos::buffer *vdat2,
                                  size_t vlen2,
                                  uint8_t qos,
                                  uint16_t ackquant,
@@ -104,7 +104,7 @@ namespace crow
         static crow::packet_ptr send(nodeid_t sid,
                                      nodeid_t rid,
                                      const crow::hostaddr_view &addr,
-                                     const igris::buffer data,
+                                     const nos::buffer data,
                                      uint8_t qos,
                                      uint16_t ackquant,
                                      bool async = false);
@@ -112,7 +112,7 @@ namespace crow
         static crow::packet_ptr send_v(nodeid_t sid,
                                        nodeid_t rid,
                                        const crow::hostaddr_view &addr,
-                                       const igris::buffer *vec,
+                                       const nos::buffer *vec,
                                        size_t veclen,
                                        uint8_t qos,
                                        uint16_t ackquant,
@@ -121,9 +121,9 @@ namespace crow
         static crow::packet_ptr send_vv(nodeid_t sid,
                                         nodeid_t rid,
                                         const crow::hostaddr_view &addr,
-                                        const igris::buffer *vec1,
+                                        const nos::buffer *vec1,
                                         size_t veclen1,
-                                        const igris::buffer *vec2,
+                                        const nos::buffer *vec2,
                                         size_t veclen2,
                                         uint8_t qos,
                                         uint16_t ackquant,
@@ -210,12 +210,12 @@ namespace crow
             return h->sid;
         }
 
-        igris::buffer message()
+        nos::buffer message()
         {
             return node_data(pack);
         }
 
-        void reply(igris::buffer rep)
+        void reply(nos::buffer rep)
         {
             _node->send(sid(), pack->addr(), rep, pack->quality(),
                         pack->ackquant());

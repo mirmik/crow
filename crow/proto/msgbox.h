@@ -24,13 +24,16 @@ namespace crow
 
         crow::node_packet_ptr query(nodeid_t rid,
                                     const crow::hostaddr_view &addr,
-                                    const igris::buffer data, uint8_t qos,
+                                    const nos::buffer data,
+                                    uint8_t qos,
                                     uint16_t ackquant);
 
         crow::node_packet_ptr receive();
 
-        crow::packet_ptr reply(crow::node_packet_ptr msg, igris::buffer data,
-                               uint8_t qos, uint16_t ackquant);
+        crow::packet_ptr reply(crow::node_packet_ptr msg,
+                               nos::buffer data,
+                               uint8_t qos,
+                               uint16_t ackquant);
 
         void incoming_packet(crow::packet *pack) override;
 

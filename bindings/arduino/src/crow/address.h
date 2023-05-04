@@ -15,8 +15,8 @@
 namespace crow
 {
     hostaddr crowker_address();
-    hostaddr address(const igris::buffer &in);
-    hostaddr address_warned(const igris::buffer &in);
+    hostaddr address(const nos::buffer &in);
+    hostaddr address_warned(const nos::buffer &in);
 }
 
 #endif

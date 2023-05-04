@@ -40,19 +40,29 @@ namespace crow
     void diagnostic_setup(bool en, bool len = false);
 
     // Отправить пакет.
-    crow::packet_ptr send(const crow::hostaddr_view &addr, igris::buffer data,
-                          uint8_t type, uint8_t qos, uint16_t ackquant,
+    crow::packet_ptr send(const crow::hostaddr_view &addr,
+                          nos::buffer data,
+                          uint8_t type,
+                          uint8_t qos,
+                          uint16_t ackquant,
                           bool fastsend = CROW_FASTSEND_DEFAULT);
 
     crow::packet_ptr send_v(const crow::hostaddr_view &addr,
-                            const igris::buffer *vec, size_t veclen,
-                            uint8_t type, uint8_t qos, uint16_t ackquant,
+                            const nos::buffer *vec,
+                            size_t veclen,
+                            uint8_t type,
+                            uint8_t qos,
+                            uint16_t ackquant,
                             bool fastsend = CROW_FASTSEND_DEFAULT);
 
     crow::packet_ptr send_vv(const crow::hostaddr_view &addr,
-                             const igris::buffer *vec, size_t veclen,
-                             const igris::buffer *vec2, size_t veclen2,
-                             uint8_t type, uint8_t qos, uint16_t ackquant,
+                             const nos::buffer *vec,
+                             size_t veclen,
+                             const nos::buffer *vec2,
+                             size_t veclen2,
+                             uint8_t type,
+                             uint8_t qos,
+                             uint16_t ackquant,
                              bool fastsend = CROW_FASTSEND_DEFAULT);
 
     // Эта функция вызывается вратами после обработки отсылаемого пакета.

@@ -43,22 +43,19 @@ PYBIND11_MODULE(libcrow, m)
 {
     auto pack = py::class_<packet_ptr>(m, "packet_ptr")
                     .def("rawdata",
-                         [](packet_ptr &self) -> py::bytes
-                         {
-                             igris::buffer buf = self->data();
+                         [](packet_ptr &self) -> py::bytes {
+                             nos::buffer buf = self->data();
                              return {buf.data(), buf.size()};
                          })
-                    .def("addr",
-                         [](packet_ptr &self) -> crow::hostaddr
-                         { return self->addr(); });
+                    .def("addr", [](packet_ptr &self) -> crow::hostaddr {
+                        return self->addr();
+                    });
 
     py::class_<node_packet_ptr>(m, "node_packet_ptr", pack)
-        .def("message",
-             [](node_packet_ptr &self) -> py::bytes
-             {
-                 auto buf = self.message();
-                 return {buf.data(), buf.size()};
-             });
+        .def("message", [](node_packet_ptr &self) -> py::bytes {
+            auto buf = self.message();
+            return {buf.data(), buf.size()};
+        });
 
     py::class_<crow::hostaddr>(m, "hostaddr")
         .def(py::init<const crow::hostaddr_view &>())
@@ -86,8 +83,9 @@ PYBIND11_MODULE(libcrow, m)
 
     m.def("send",
           [](const crow::hostaddr_view &addr, const std::string &data,
-             uint8_t type, uint8_t qos, uint16_t ackquant, bool fastsend)
-          { return crow::send(addr, data, type, qos, ackquant); });
+             uint8_t type, uint8_t qos, uint16_t ackquant, bool fastsend) {
+              return crow::send(addr, data, type, qos, ackquant);
+          });
 
     m.def("create_udpgate", &crow::create_udpgate,
           py::arg("id") = CROW_UDPGATE_NO, py::arg("port") = 0);
@@ -106,8 +104,9 @@ PYBIND11_MODULE(libcrow, m)
             "send",
             [](crow::node &node, int rid, const crow::hostaddr_view &addr,
                const std::string &data, uint8_t qos, uint16_t ackquant,
-               bool fastsend)
-            { return node.send(rid, addr, data, qos, ackquant); },
+               bool fastsend) {
+                return node.send(rid, addr, data, qos, ackquant);
+            },
             ungil(), py::arg("rid"), py::arg("addr"), py::arg("data"),
             py::arg("qos") = 2, py::arg("ackquant") = 50,
             py::arg("fastsend") = false);

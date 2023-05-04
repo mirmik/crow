@@ -12,9 +12,8 @@ namespace crow
         void *_arg;
 
     public:
-        [[deprecated]] oneshoot_async_requester(void (*dlg)(void *, int,
-                                                            crow::packet *),
-                                                void *arg)
+        [[deprecated]] oneshoot_async_requester(
+            void (*dlg)(void *, int, crow::packet *), void *arg)
             : _dlg(dlg), _arg(arg)
         {
         }
@@ -34,13 +33,20 @@ namespace crow
             destroy();
         }
 
-        void destroy() { delete this; }
+        void destroy()
+        {
+            delete this;
+        }
     };
 
     static inline oneshoot_async_requester *
-    async_request(void (*dlg)(void *, int, crow::packet *), void *arg,
-                  nodeid_t rid, const crow::hostaddr_view &addr,
-                  igris::buffer data, uint8_t qos, uint16_t ackquant)
+    async_request(void (*dlg)(void *, int, crow::packet *),
+                  void *arg,
+                  nodeid_t rid,
+                  const crow::hostaddr_view &addr,
+                  nos::buffer data,
+                  uint8_t qos,
+                  uint16_t ackquant)
     {
         if (qos == 0)
         {
@@ -56,9 +62,13 @@ namespace crow
     }
 
     static inline oneshoot_async_requester *
-    async_request_v(void (*dlg)(void *, int, crow::packet *), void *arg,
-                    nodeid_t rid, const crow::hostaddr_view &addr,
-                    igris::buffer *data, int len, uint8_t qos,
+    async_request_v(void (*dlg)(void *, int, crow::packet *),
+                    void *arg,
+                    nodeid_t rid,
+                    const crow::hostaddr_view &addr,
+                    nos::buffer *data,
+                    int len,
+                    uint8_t qos,
                     uint16_t ackquant)
     {
         if (qos == 0)

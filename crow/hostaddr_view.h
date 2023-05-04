@@ -3,7 +3,7 @@
 #ifndef CROW_HOSTADDR_VIEW_H
 #define CROW_HOSTADDR_VIEW_H
 
-#include <igris/buffer.h>
+#include <nos/buffer.h>
 
 #if __has_include(<vector>)
 #include <vector>
@@ -27,7 +27,7 @@ namespace crow
         hostaddr_view(const hostaddr_view &h) = default;
         hostaddr_view &operator=(const hostaddr_view &h) = default;
         hostaddr_view(const hostaddr &h);
-        hostaddr_view(const igris::buffer &v);
+        hostaddr_view(const nos::buffer &v);
         hostaddr_view(const uint8_t *addr, size_t alen);
         hostaddr_view(const char *addr, size_t alen);
         hostaddr_view(const void *addr, size_t alen);
@@ -41,7 +41,7 @@ namespace crow
         const uint8_t *begin() const;
         const uint8_t *end() const;
 
-        bool operator==(igris::buffer buf) const;
+        bool operator==(nos::buffer buf) const;
         bool operator==(const hostaddr_view &buf) const;
         bool operator<(const hostaddr_view &buf) const;
 

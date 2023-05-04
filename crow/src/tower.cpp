@@ -493,7 +493,7 @@ void crow::nocontrol_travel(crow::packet *pack, bool fastsend)
 }
 
 crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
-                            const igris::buffer data,
+                            const nos::buffer data,
                             uint8_t type,
                             uint8_t qos,
                             uint16_t ackquant,
@@ -517,7 +517,7 @@ crow::packet_ptr crow::send(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
-                              const igris::buffer *vec,
+                              const nos::buffer *vec,
                               size_t veclen,
                               uint8_t type,
                               uint8_t qos,
@@ -525,8 +525,8 @@ crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
                               bool async)
 {
     size_t dsize = 0;
-    const igris::buffer *it = vec;
-    const igris::buffer *const eit = vec + veclen;
+    const nos::buffer *it = vec;
+    const nos::buffer *const eit = vec + veclen;
 
     for (; it != eit; ++it)
     {
@@ -556,9 +556,9 @@ crow::packet_ptr crow::send_v(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
-                               const igris::buffer *vec,
+                               const nos::buffer *vec,
                                size_t veclen,
-                               const igris::buffer *vec2,
+                               const nos::buffer *vec2,
                                size_t veclen2,
                                uint8_t type,
                                uint8_t qos,
@@ -566,8 +566,8 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
                                bool async)
 {
     size_t dsize = 0;
-    const igris::buffer *it;
-    const igris::buffer *eit;
+    const nos::buffer *it;
+    const nos::buffer *eit;
 
     it = vec;
     eit = vec + veclen;
@@ -614,11 +614,11 @@ crow::packet_ptr crow::send_vv(const crow::hostaddr_view &addr,
 }
 
 crow::packet_ptr crow::send_vvv(const crow::hostaddr_view &addr,
-                                const igris::buffer *vec,
+                                const nos::buffer *vec,
                                 size_t veclen,
-                                const igris::buffer *vec2,
+                                const nos::buffer *vec2,
                                 size_t veclen2,
-                                const igris::buffer *vec3,
+                                const nos::buffer *vec3,
                                 size_t veclen3,
                                 uint8_t type,
                                 uint8_t qos,
@@ -626,8 +626,8 @@ crow::packet_ptr crow::send_vvv(const crow::hostaddr_view &addr,
                                 bool async)
 {
     size_t dsize = 0;
-    const igris::buffer *it;
-    const igris::buffer *eit;
+    const nos::buffer *it;
+    const nos::buffer *eit;
 
     it = vec;
     eit = vec + veclen;
@@ -929,8 +929,7 @@ int64_t crow::get_minimal_timeout()
     int64_t mininterval = std::numeric_limits<int64_t>::max();
     int64_t curtime = igris::millis();
 
-    auto update_candidate = [&](int64_t candidate)
-    {
+    auto update_candidate = [&](int64_t candidate) {
         if (mininterval > candidate)
             mininterval = candidate;
     };

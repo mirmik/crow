@@ -34,22 +34,22 @@ namespace crow
             this->acktime = acktime;
         }
 
-        void publish(const igris::buffer data)
+        void publish(const nos::buffer data)
         {
             crow::publish(addr, theme, data, qos, acktime);
         }
 
-        void publish(const igris::buffer data, uint8_t qos, uint16_t acktime)
+        void publish(const nos::buffer data, uint8_t qos, uint16_t acktime)
         {
             crow::publish(addr, theme, data, qos, acktime);
         }
 
-        void publish_v(const igris::buffer *vec, int vecsz)
+        void publish_v(const nos::buffer *vec, int vecsz)
         {
             crow::publish_v(addr, theme, vec, vecsz, qos, acktime);
         }
 
-        void publish_v(const igris::buffer *vec,
+        void publish_v(const nos::buffer *vec,
                        int vecsz,
                        uint8_t qos,
                        uint16_t acktime)

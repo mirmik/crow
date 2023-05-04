@@ -15,13 +15,13 @@ namespace crow
     class hostaddr;
     class hostaddr_view
     {
-      public:
+    public:
         const uint8_t *addr;
         size_t alen;
 
         hostaddr_view() = default;
         hostaddr_view(const hostaddr &h);
-        hostaddr_view(const igris::buffer &v);
+        hostaddr_view(const nos::buffer &v);
         hostaddr_view(const uint8_t *addr, size_t alen);
         hostaddr_view(const char *addr, size_t alen);
         hostaddr_view(const void *addr, size_t alen);
@@ -35,7 +35,7 @@ namespace crow
         const uint8_t *begin() const;
         const uint8_t *end() const;
 
-        bool operator==(igris::buffer buf) const;
+        bool operator==(nos::buffer buf) const;
         bool operator==(const hostaddr_view &buf) const;
     };
 }
