@@ -38,6 +38,8 @@ namespace crow
             auto str = nos::format(fmt, arglist) + "\r\n";
             pubnode->publish({str.data(), str.size()});
         }
+
+        using nos::log::logger::log;
     };
 } // namespace crow
 
