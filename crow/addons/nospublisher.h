@@ -57,6 +57,7 @@ namespace crow
                 {
                     crow::publish(addr, alen, theme, buffer, cursor, 0, 200);
                     cursor = 0;
+                    memset(buffer, 0, 64);
                 }
             }
         }
