@@ -32,7 +32,7 @@ namespace crow
         }
 
         void log(nos::log::level lvl,
-                 const std::string &fmt,
+                 const std::string_view &fmt,
                  const nos::visitable_arglist &arglist) override
         {
             auto str = nos::format(fmt, arglist) + "\r\n";
