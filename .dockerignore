@@ -225,4 +225,10 @@ doxygen/latex
 .ninja*
 build.ninja
 runtests
+
+.git
+.gitignore
+.gitmodules
+.gitattributes
+.github
 .vscode

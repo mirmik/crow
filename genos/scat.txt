@@ -1,8 +1,0 @@
-genos/**
-./make.py
-genos.g.py
-
-[TREE]
-genos/**
-./make.py
-genos.g.py
