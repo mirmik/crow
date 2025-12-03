@@ -9,4 +9,4 @@ FixNamespaceComments: false
 AccessModifierOffset: -4
 AllowShortFunctionsOnASingleLine: Empty
 IndentCaseLabels: true
-BinPackParameters: false
+BinPackArguments: false
