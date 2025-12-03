@@ -1,0 +1,44 @@
+name: CMake
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        compiler:
+          - { C: gcc, CXX: g++ }
+          - { C: clang, CXX: clang++ }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ clang
+          echo "CC=${{ matrix.compiler.C }}"   >> $GITHUB_ENV
+          echo "CXX=${{ matrix.compiler.CXX }}" >> $GITHUB_ENV
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+                -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+                -DNOS_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }}
+
+      - name: Test
+        working-directory: build
+        run: ctest -C ${{ env.BUILD_TYPE }} --output-on-failure
