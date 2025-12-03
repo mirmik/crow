@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>scat.txt</title>
+</head>
+<body>
+<!-- BEGIN SCAT CODE -->
+crow/**<br>
+apps/**<br>
+tests/**<br>
+docs/**<br>
+CMakeLists.txt<br>
+README.md<br>
+scat.txt<br>
+<br>
+[TREE]<br>
+**<br>
+!**/*.o<br>
+!**/*.d<br>
+!CMakeFiles/**<br>
+!.github/**<br>
+!.git/**<br>
+!CMakeCache.txt<br>
+!CMakeFiles*<br>
+!CTest*<br>
+!.scatwrap/**<br>
+!build/**<br>
+!Testing/**<br>
+!chunk<br>
+!chunk_tests<br>
+!cmake_install.cmake<br>
+!install_manifest.txt<br>
+!patch.yaml<br>
+<br>
+[MAPFORMAT]<br>
+------------------------------<br>
+Актуальная&nbsp;версия&nbsp;репозитория:<br>
+{RAWMAP}<br>
+Присылать&nbsp;патчи&nbsp;к&nbsp;коду&nbsp;можно&nbsp;в&nbsp;формате&nbsp;CHUNK:&nbsp;https://mirmik.github.io/chunk/CHUNK_ru.ROBOTS.html<br>
+(При&nbsp;составлении&nbsp;патча&nbsp;обрати&nbsp;внимания,&nbsp;что&nbsp;.scatwrap/&nbsp;не&nbsp;является&nbsp;частью&nbsp;относительного&nbsp;пути)<br>
+Да,&nbsp;и&nbsp;не&nbsp;ищи&nbsp;спецификацию&nbsp;CHUNK&nbsp;в&nbsp;интернете.&nbsp;Это&nbsp;мой&nbsp;экспериментальный&nbsp;формат.&nbsp;Воспользуйся&nbsp;ссылкой,&nbsp;что&nbsp;я&nbsp;тебе&nbsp;дал<br>
+------------------------------<br>
+<!-- END SCAT CODE -->
+</body>
+</html>

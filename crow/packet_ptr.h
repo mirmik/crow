@@ -27,6 +27,8 @@ namespace crow
 
         packet_ptr(const crow::packet_ptr &oth) : pack(oth.pack)
         {
+            if (pack == nullptr)
+                return;
             assert(pack->refs >= 0);
             system_lock();
             pack->refs++;

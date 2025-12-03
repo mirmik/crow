@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>crow/src/gateway.cpp</title>
+</head>
+<body>
+<!-- BEGIN SCAT CODE -->
+#include&nbsp;&lt;crow/gateway.h&gt;<br>
+#include&nbsp;&lt;crow/tower.h&gt;<br>
+<br>
+#include&nbsp;&lt;igris/sync/syslock.h&gt;<br>
+<br>
+DLIST_HEAD(crow::gateway_list);<br>
+DLIST_HEAD(crow_gateway_list);<br>
+<br>
+int&nbsp;crow_gateway_bind(struct&nbsp;crow_gateway&nbsp;*gate,&nbsp;int&nbsp;id)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;system_lock();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(crow_get_gateway(id))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;-1;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gate-&gt;id&nbsp;=&nbsp;id;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dlist_move_tail(&amp;gate-&gt;lnk,&nbsp;&amp;crow_gateway_list);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;system_unlock();<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;0;<br>
+}<br>
+<br>
+struct&nbsp;crow_gateway&nbsp;*crow_get_gateway(int&nbsp;no)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;crow_gateway&nbsp;*g;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dlist_for_each_entry(g,&nbsp;&amp;crow_gateway_list,&nbsp;lnk)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(g-&gt;id&nbsp;==&nbsp;no)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;g;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;nullptr;<br>
+}<br>
+<br>
+int&nbsp;crow::gateway::bind(int&nbsp;id)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gateway&nbsp;*g;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;system_lock();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;=&nbsp;get_gateway(id);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(g)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;-1;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;this-&gt;id&nbsp;=&nbsp;id;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dlist_add_tail(&amp;this-&gt;lnk,&nbsp;&amp;crow::gateway_list);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;system_unlock();<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;0;<br>
+}<br>
+<br>
+crow::gateway&nbsp;*crow::get_gateway(int&nbsp;no)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;crow::gateway&nbsp;*g;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dlist_for_each_entry(g,&nbsp;&amp;crow::gateway_list,&nbsp;lnk)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(g-&gt;id&nbsp;==&nbsp;no)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;g;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;nullptr;<br>
+}<br>
+<!-- END SCAT CODE -->
+</body>
+</html>

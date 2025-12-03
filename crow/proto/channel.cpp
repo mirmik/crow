@@ -24,7 +24,10 @@ void crow::channel::incoming_packet(crow::packet *pack)
                 // TODO: перенести аллокацию под адрес в другое место
                 // raddr_ptr = malloc(pack->addrsize());
                 if (pack->addrsize() > raddr_cap)
+                {
+                    crow::release(pack);
                     return;
+                }
 
                 memcpy(raddr_ptr, pack->addrptr(), pack->addrsize());
                 raddr_len = pack->addrsize();
@@ -55,7 +58,10 @@ void crow::channel::incoming_packet(crow::packet *pack)
                 // TODO: перенести аллокацию под адрес в другое место
                 // raddr_ptr = malloc(pack->addrsize());
                 if (pack->addrsize() > raddr_cap)
+                {
+                    crow::release(pack);
                     return;
+                }
 
                 memcpy(raddr_ptr, pack->addrptr(), pack->addrsize());
                 raddr_len = pack->addrsize();
