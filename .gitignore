@@ -215,6 +215,12 @@ crowrequest
 !apps/crowcalc
 !apps/crowrequest
 
+!.scatwrap/apps/ctrans
+!.scatwrap/apps/crowker
+!.scatwrap/apps/crowpulse
+!.scatwrap/apps/crowcalc
+!.scatwrap/apps/crowrequest
+
 test/runtests
 tests/runtests
 crow_test
