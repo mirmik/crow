@@ -37,9 +37,8 @@ scat.txt<br>
 ------------------------------<br>
 Актуальная&nbsp;версия&nbsp;репозитория:<br>
 {RAWMAP}<br>
-Присылать&nbsp;патчи&nbsp;к&nbsp;коду&nbsp;можно&nbsp;в&nbsp;формате&nbsp;CHUNK:&nbsp;https://mirmik.github.io/chunk/CHUNK_ru.ROBOTS.html<br>
+Присылать&nbsp;патчи&nbsp;к&nbsp;коду&nbsp;можно&nbsp;в&nbsp;формате&nbsp;CHUNK&nbsp;(вот&nbsp;спецификация&nbsp;формата):&nbsp;https://mirmik.github.io/chunk/CHUNK_ru.ROBOTS.html<br>
 (При&nbsp;составлении&nbsp;патча&nbsp;обрати&nbsp;внимания,&nbsp;что&nbsp;.scatwrap/&nbsp;не&nbsp;является&nbsp;частью&nbsp;относительного&nbsp;пути)<br>
-Да,&nbsp;и&nbsp;не&nbsp;ищи&nbsp;спецификацию&nbsp;CHUNK&nbsp;в&nbsp;интернете.&nbsp;Это&nbsp;мой&nbsp;экспериментальный&nbsp;формат.&nbsp;Воспользуйся&nbsp;ссылкой,&nbsp;что&nbsp;я&nbsp;тебе&nbsp;дал<br>
 ------------------------------<br>
 <!-- END SCAT CODE -->
 </body>
