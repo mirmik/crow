@@ -109,20 +109,20 @@ std::string parity_description(char parity)
 {
     switch (parity)
     {
-    case 'n':
-    case 'N':
-        return "none";
+        case 'n':
+        case 'N':
+            return "none";
 
-    case 'e':
-    case 'E':
-        return "even";
+        case 'e':
+        case 'E':
+            return "even";
 
-    case 'o':
-    case 'O':
-        return "odd";
+        case 'o':
+        case 'O':
+            return "odd";
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return "unknown";
@@ -145,11 +145,8 @@ std::string describe_port(uint16_t port)
     return std::to_string(port);
 }
 
-void register_serial_gate_info(const std::string &path,
-                               int baud,
-                               char parity,
-                               int stopbits,
-                               int databits,
+void register_serial_gate_info(const std::string &path, int baud, char parity,
+                               int stopbits, int databits,
                                const char *header_version)
 {
     register_gate_info("serial_gstuff",
@@ -234,14 +231,14 @@ std::string informat_tostr()
 {
     switch (informat)
     {
-    case input_format::INPUT_RAW:
-        return "INPUT_RAW";
+        case input_format::INPUT_RAW:
+            return "INPUT_RAW";
 
-    case input_format::INPUT_RAW_ENDLINE:
-        return "INPUT_RAW_ENDLINE";
+        case input_format::INPUT_RAW_ENDLINE:
+            return "INPUT_RAW_ENDLINE";
 
-    default:
-        BUG();
+        default:
+            BUG();
     }
 
     return std::string();
@@ -251,14 +248,14 @@ std::string outformat_tostr()
 {
     switch (outformat)
     {
-    case output_format::OUTPUT_RAW:
-        return "OUTPUT_RAW";
+        case output_format::OUTPUT_RAW:
+            return "OUTPUT_RAW";
 
-    case output_format::OUTPUT_DSTRING:
-        return "OUTPUT_DSTRING";
+        case output_format::OUTPUT_DSTRING:
+            return "OUTPUT_DSTRING";
 
-    default:
-        BUG();
+        default:
+            BUG();
     }
 
     return std::string();
@@ -296,19 +293,19 @@ void output_do(nos::buffer data, crow::packet *pack)
 
     switch (outformat)
     {
-    case output_format::OUTPUT_RAW:
-        ret = write(DATAOUTPUT_FILENO, data.data(), data.size());
-        break;
+        case output_format::OUTPUT_RAW:
+            ret = write(DATAOUTPUT_FILENO, data.data(), data.size());
+            break;
 
-    case output_format::OUTPUT_DSTRING:
-        // Вывод в stdout информацию пакета.
-        char buf[10000];
-        bytes_to_dstring(buf, data.data(), data.size());
-        ret = write(DATAOUTPUT_FILENO, buf, strlen(buf));
-        break;
+        case output_format::OUTPUT_DSTRING:
+            // Вывод в stdout информацию пакета.
+            char buf[10000];
+            bytes_to_dstring(buf, data.data(), data.size());
+            ret = write(DATAOUTPUT_FILENO, buf, strlen(buf));
+            break;
 
-    default:
-        BUG();
+        default:
+            BUG();
     }
 
     if (nlout)
@@ -336,17 +333,17 @@ std::pair<std::string, bool> input_do(const std::string &data)
 
     switch (informat)
     {
-    case input_format::INPUT_RAW_ENDLINE:
-        message = data;
-        message += '\n';
-        return std::make_pair(message, true);
+        case input_format::INPUT_RAW_ENDLINE:
+            message = data;
+            message += '\n';
+            return std::make_pair(message, true);
 
-    case input_format::INPUT_RAW:
-        message = data;
-        return std::make_pair(message, true);
+        case input_format::INPUT_RAW:
+            message = data;
+            return std::make_pair(message, true);
 
-    default:
-        BUG();
+        default:
+            BUG();
     }
 }
 
@@ -405,68 +402,68 @@ void send_do(const std::string message)
 {
     switch (protoopt)
     {
-    case protoopt_e::PROTOOPT_BASIC:
-        crow::send(
-            address, {message.data(), message.size()}, type, qos, ackquant);
+        case protoopt_e::PROTOOPT_BASIC:
+            crow::send(
+                address, {message.data(), message.size()}, type, qos, ackquant);
+            break;
+
+        case protoopt_e::PROTOOPT_PUBLISH_NODE:
+        {
+            publish_node.publish(address,
+                                 CROWKER_SERVICE_BROCKER_NODE_NO,
+                                 theme.c_str(),
+                                 message,
+                                 qos,
+                                 ackquant);
+        }
         break;
 
-    case protoopt_e::PROTOOPT_PUBLISH_NODE:
-    {
-        publish_node.publish(address,
-                             CROWKER_SERVICE_BROCKER_NODE_NO,
-                             theme.c_str(),
-                             message,
+        case protoopt_e::PROTOOPT_CHANNEL:
+        {
+            int ret = channel.send(message.data(), message.size());
+
+            if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+            {
+                nos::println("Channel is not connected");
+            }
+        }
+        break;
+
+        case protoopt_e::PROTOOPT_NODE:
+        {
+            crow::node::send(1,
+                             nodeno,
+                             address,
+                             {message.data(), message.size()},
                              qos,
                              ackquant);
-    }
-    break;
-
-    case protoopt_e::PROTOOPT_CHANNEL:
-    {
-        int ret = channel.send(message.data(), message.size());
-
-        if (ret == CROW_CHANNEL_ERR_NOCONNECT)
-        {
-            nos::println("Channel is not connected");
         }
-    }
-    break;
+        break;
 
-    case protoopt_e::PROTOOPT_NODE:
-    {
-        crow::node::send(1,
-                         nodeno,
-                         address,
-                         {message.data(), message.size()},
-                         qos,
-                         ackquant);
-    }
-    break;
-
-    case protoopt_e::PROTOOPT_REQUEST:
-    {
-        requestor_node.async_request(address,
-                                     CROWKER_SERVICE_BROCKER_NODE_NO,
-                                     theme,
-                                     reply_theme,
-                                     {message.data(), message.size()},
-                                     qos,
-                                     ackquant,
-                                     qos,
-                                     ackquant);
-    }
-    break;
-
-    case protoopt_e::PROTOOPT_REVERSE_CHANNEL:
-    {
-        int ret = reverse_channel->send(message.data(), message.size());
-
-        if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+        case protoopt_e::PROTOOPT_REQUEST:
         {
-            nos::println("Channel is not connected");
+            requestor_node.async_request(address,
+                                         CROWKER_SERVICE_BROCKER_NODE_NO,
+                                         theme,
+                                         reply_theme,
+                                         {message.data(), message.size()},
+                                         qos,
+                                         ackquant,
+                                         qos,
+                                         ackquant);
         }
-    }
-    break;
+        break;
+
+        case protoopt_e::PROTOOPT_REVERSE_CHANNEL:
+        {
+            int ret = reverse_channel->send(message.data(), message.size());
+
+            if (ret == CROW_CHANNEL_ERR_NOCONNECT)
+            {
+                nos::println("Channel is not connected");
+            }
+        }
+        break;
     }
 }
 
@@ -590,8 +587,24 @@ void print_help()
         "      --api             enable incoming console (cmds: 'exit')\n"
         "      --retransler      enable retransling option\n"
         "\n"
-        "Crow address reference:\n"
-        "      man crow-protocol\n");
+        "Crow address format:\n"
+        "        A crow address is a byte sequence describing a routing path:\n"
+        "        [gate_no][gate_arg][next_gate_no][next_gate_arg]...\n"
+        "        Gate argument length is arbitrary and may be empty.\n"
+        "   \n"
+        "Hexer syntax used in ADDRESS:\n"
+        "        .N        decimal byte (0..255), e.g. .12 .127\n"
+        "        :N        decimal 16-bit value (big-endian), usually a port, "
+        "e.g. :10009\n"
+        "        #HEX raw hexadecimal bytes, e.g.#0C7F0000012714\n "
+        "        @NAME     ASCII letters written as-is, e.g. @UDP\n"
+        "        _         visual separator, ignored by parser\n"
+        "\n"
+        "Examples:\n"
+        "       .12.127.0.0.1:10009\n"
+        "       UDP gate 12 → 127.0.0.1:10009\n"
+        "       #F2 .12.127.0.0.1 : 10009\n "
+        "       Adds prefix byte F2 before the UDP gate\n");
 }
 
 void signal_handler(int)
@@ -683,196 +696,196 @@ void parse_options(int argc, char **argv)
     {
         switch (opt)
         {
-        case 'h':
-            print_help();
-            exit(0);
+            case 'h':
+                print_help();
+                exit(0);
 
-        case 'q':
-            qos = (uint8_t)atoi(optarg);
-            userqos = true;
-            break;
+            case 'q':
+                qos = (uint8_t)atoi(optarg);
+                userqos = true;
+                break;
 
-        case 'A':
-            ackquant = (uint16_t)atoi(optarg);
-            break;
+            case 'A':
+                ackquant = (uint16_t)atoi(optarg);
+                break;
 
-        case 's':
-            crow::debug_data_size = (uint16_t)atoi(optarg);
-            break;
+            case 's':
+                crow::debug_data_size = (uint16_t)atoi(optarg);
+                break;
 
-        case 't':
-            type = (uint8_t)atoi(optarg);
-            break;
+            case 't':
+                type = (uint8_t)atoi(optarg);
+                break;
 
-        case 'T':
-            TIMESTAMP_MODE = true;
-            break;
+            case 'T':
+                TIMESTAMP_MODE = true;
+                break;
 
-        case 'u':
-            udpport = (uint16_t)atoi(optarg);
-            break;
+            case 'u':
+                udpport = (uint16_t)atoi(optarg);
+                break;
 
-        case 'c':
-            tcpport = (uint16_t)atoi(optarg);
-            break;
+            case 'c':
+                tcpport = (uint16_t)atoi(optarg);
+                break;
 
-        case 'S':
-            serial_port = (char *)malloc(strlen(optarg) + 1);
-            strcpy(serial_port, optarg);
-            break;
+            case 'S':
+                serial_port = (char *)malloc(strlen(optarg) + 1);
+                strcpy(serial_port, optarg);
+                break;
 
-        case 'E':
-            echo = true;
-            break;
+            case 'E':
+                echo = true;
+                break;
 
-        case 'x':
-            noend = true;
-            break;
+            case 'x':
+                noend = true;
+                break;
 
-        case 'N':
-            nlout = true;
-            break;
+            case 'N':
+                nlout = true;
+                break;
 
-        case 'i':
-            info = true;
-            break;
+            case 'i':
+                info = true;
+                break;
 
-        case 'Q':
-            crowker_mode = true;
-            protoopt = protoopt_e::PROTOOPT_NODE;
-            nodeno = CROWKER_CONTROL_BROCKER_NODE_NO;
-            break;
+            case 'Q':
+                crowker_mode = true;
+                protoopt = protoopt_e::PROTOOPT_NODE;
+                nodeno = CROWKER_CONTROL_BROCKER_NODE_NO;
+                break;
 
-        case 'R':
-            crow::retransling_allowed = true;
-            break;
+            case 'R':
+                crow::retransling_allowed = true;
+                break;
 
-        case 'r':
-            outformat = output_format::OUTPUT_RAW;
-            break;
+            case 'r':
+                outformat = output_format::OUTPUT_RAW;
+                break;
 
-        case 'j':
-            outformat = output_format::OUTPUT_DSTRING;
-            break;
+            case 'j':
+                outformat = output_format::OUTPUT_DSTRING;
+                break;
 
-        case 'n':
-            noconsole = true;
-            break;
+            case 'n':
+                noconsole = true;
+                break;
 
-        case 'U':
-        {
-            auto lst = igris::split(optarg, ',');
-            for (auto a : lst)
+            case 'U':
             {
-                listened_nodes.push_back(atoi(a.data()));
+                auto lst = igris::split(optarg, ',');
+                for (auto a : lst)
+                {
+                    listened_nodes.push_back(atoi(a.data()));
+                }
             }
-        }
-        break;
-
-        case 'g':
-            gdebug = true;
             break;
 
-        case 'p':
-            pulse = optarg;
-            break;
+            case 'g':
+                gdebug = true;
+                break;
 
-        case 'a':
-            api = true;
-            break;
+            case 'p':
+                pulse = optarg;
+                break;
 
-        case 'd':
-            debug_mode = true;
-            crow::enable_diagnostic();
-            break;
+            case 'a':
+                api = true;
+                break;
 
-        case 'L':
-            theme = optarg;
-            protoopt = protoopt_e::PROTOOPT_PUBLISH_NODE;
-            crowker_mode = 1;
-            break;
+            case 'd':
+                debug_mode = true;
+                crow::enable_diagnostic();
+                break;
 
-        case 'Y':
-            theme = optarg;
-            service_mode = 1;
-            crowker_mode = 1;
-            break;
+            case 'L':
+                theme = optarg;
+                protoopt = protoopt_e::PROTOOPT_PUBLISH_NODE;
+                crowker_mode = 1;
+                break;
 
-        case 'K':
-            theme = optarg;
-            subscribe_mode = 1;
-            crowker_mode = 1;
-            break;
+            case 'Y':
+                theme = optarg;
+                service_mode = 1;
+                crowker_mode = 1;
+                break;
 
-        case 'D':
-            latest = atoi(optarg);
-            latest_mode = 1;
-            break;
+            case 'K':
+                theme = optarg;
+                subscribe_mode = 1;
+                crowker_mode = 1;
+                break;
 
-        case 'G':
-            theme = optarg;
-            request_mode = 1;
-            protoopt = protoopt_e::PROTOOPT_REQUEST;
-            crowker_mode = 1;
-            break;
+            case 'D':
+                latest = atoi(optarg);
+                latest_mode = 1;
+                break;
 
-        case 'm':
-            crowker_mode = 1;
-            crowker_control_request_mode = 1;
-            crowker_control_request_command = optarg;
-            exit_on_receive = 1;
-            noconsole = 1;
-            break;
+            case 'G':
+                theme = optarg;
+                request_mode = 1;
+                protoopt = protoopt_e::PROTOOPT_REQUEST;
+                crowker_mode = 1;
+                break;
 
-        case 'b':
-            beam_mode = 1;
-            noconsole = 1;
-            crowker_mode = 1;
-            beam.set_client_name(optarg);
-            break;
+            case 'm':
+                crowker_mode = 1;
+                crowker_control_request_mode = 1;
+                crowker_control_request_command = optarg;
+                exit_on_receive = 1;
+                noconsole = 1;
+                break;
 
-        case 'w':
-            acceptorno = atoi(optarg);
-            protoopt = protoopt_e::PROTOOPT_REVERSE_CHANNEL;
-            break;
+            case 'b':
+                beam_mode = 1;
+                noconsole = 1;
+                crowker_mode = 1;
+                beam.set_client_name(optarg);
+                break;
 
-        case 'H':
-            channelno = atoi(optarg);
-            protoopt = protoopt_e::PROTOOPT_CHANNEL;
-            break;
+            case 'w':
+                acceptorno = atoi(optarg);
+                protoopt = protoopt_e::PROTOOPT_REVERSE_CHANNEL;
+                break;
 
-        case 'M':
-            if (isalpha(*optarg))
-                nodename = optarg;
-            else
-                nodeno = atoi(optarg);
+            case 'H':
+                channelno = atoi(optarg);
+                protoopt = protoopt_e::PROTOOPT_CHANNEL;
+                break;
 
-            protoopt = protoopt_e::PROTOOPT_NODE;
-            break;
+            case 'M':
+                if (isalpha(*optarg))
+                    nodename = optarg;
+                else
+                    nodeno = atoi(optarg);
 
-        case 'e':
-            pipelinecmd = optarg;
-            break;
+                protoopt = protoopt_e::PROTOOPT_NODE;
+                break;
 
-        case 'V':
-            nos::println(VERSION);
-            exit(0);
-            break;
+            case 'e':
+                pipelinecmd = optarg;
+                break;
 
-        case '?':
-            exit(-1);
-            break;
+            case 'V':
+                nos::println(VERSION);
+                exit(0);
+                break;
 
-        case 0:
-            nos::println("getopt error");
-            exit(-1);
-            break;
+            case '?':
+                exit(-1);
+                break;
+
+            case 0:
+                nos::println("getopt error");
+                exit(-1);
+                break;
         }
     }
 }
 
-void create_serial_gate_v0(
-    std::string path, int baud, char parity, int stopbits, int databits)
+void create_serial_gate_v0(std::string path, int baud, char parity,
+                           int stopbits, int databits)
 {
     crow::serial_gstuff_v0 *gate = nullptr;
     if ((gate = crow::create_serial_gstuff_v0(path.c_str(),
@@ -892,8 +905,8 @@ void create_serial_gate_v0(
     }
 }
 
-void create_serial_gate_v1(
-    std::string path, int baud, char parity, int stopbits, int databits)
+void create_serial_gate_v1(std::string path, int baud, char parity,
+                           int stopbits, int databits)
 {
     crow::serial_gstuff *gate = nullptr;
     if ((gate = crow::create_serial_gstuff(path.c_str(),
@@ -1101,12 +1114,12 @@ int main(int argc, char *argv[])
             switch (ret)
             {
 
-            case CROW_ERRNO_UNREGISTRED_RID:
-                nos::println("Unregistred remote rid");
-                break;
-            default:
-                nos::println("Handshake failure");
-                break;
+                case CROW_ERRNO_UNREGISTRED_RID:
+                    nos::println("Unregistred remote rid");
+                    break;
+                default:
+                    nos::println("Handshake failure");
+                    break;
             }
 
             crow::stop_spin(false);
