@@ -912,6 +912,43 @@ void crow::finish()
     }
 }
 
+void crow::reset_for_test()
+{
+    system_lock();
+
+    // Clear travelled list
+    while (!dlist_empty(&crow_travelled))
+    {
+        crow::packet *pack =
+            dlist_first_entry(&crow_travelled, crow::packet, lnk);
+        dlist_del(&pack->lnk);
+        crow::deallocate_packet(pack);
+    }
+
+    // Clear incoming list
+    while (!dlist_empty(&crow_incoming))
+    {
+        crow::packet *pack =
+            dlist_first_entry(&crow_incoming, crow::packet, lnk);
+        dlist_del(&pack->lnk);
+        crow::deallocate_packet(pack);
+    }
+
+    // Clear outters list
+    while (!dlist_empty(&crow_outters))
+    {
+        crow::packet *pack =
+            dlist_first_entry(&crow_outters, crow::packet, lnk);
+        dlist_del(&pack->lnk);
+        crow::deallocate_packet(pack);
+    }
+
+    crow::total_travelled = 0;
+    crow::reset_allocated_count();
+
+    system_unlock();
+}
+
 bool crow::fully_empty()
 {
     system_lock();

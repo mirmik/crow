@@ -533,8 +533,10 @@ namespace crow
         }
     }
 
-    // Только для аллокации через pool.
+    // Pool allocator control (by default malloc is used)
     void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
+    void disengage_packet_pool();
+    bool is_pool_engaged();
     igris::pool *get_package_pool();
 
     bool has_allocated();
@@ -542,6 +544,7 @@ namespace crow
     void diagnostic(const char *label, crow::packet *pack);
 
     int allocated_count();
+    void reset_allocated_count();
 }
 
 #endif

@@ -43,6 +43,16 @@ int crow::allocated_count()
     return _crow_allocated_count;
 }
 
+bool crow::has_allocated()
+{
+    return _crow_allocated_count > 0;
+}
+
+void crow::reset_allocated_count()
+{
+    _crow_allocated_count = 0;
+}
+
 crow::packet *crow::allocate_packet_header_v0(int alen, int dlen)
 {
     crow::packet *pack = allocate_packet_header_v0(alen + dlen);

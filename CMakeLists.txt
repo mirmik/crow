@@ -43,7 +43,6 @@ file(GLOB CROW_HEADERS
 file(GLOB CROW_SOURCES CONFIGURE_DEPENDS
     crow/src/*.cpp
     crow/src/*.c
-	crow/src/variants/allocation_malloc.cpp
 	crow/src/variants/crow_print.cpp
 	crow/src/variants/warn.cpp
 	crow/src/variants/stdtime.cpp

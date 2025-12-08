@@ -107,6 +107,9 @@ namespace crow
     // Завершить гейты.
     void finish();
 
+    // Очистить состояние для тестов
+    void reset_for_test();
+
     int incomming_stage_count();
     int outers_stage_count();
     void unsleep();

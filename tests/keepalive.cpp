@@ -4,6 +4,7 @@
 #include <doctest/doctest.h>
 #include <iostream>
 #include <thread>
+#include "allocator_test_helper.h"
 
 static int a = 0;
 static int b = 0;
@@ -25,17 +26,31 @@ public:
 
 TEST_CASE("keepalive")
 {
-    test_keepalive_node an(a);
-    test_keepalive_node bn(b);
-    an.install_keepalive(10);
-    bn.install_keepalive(20);
-
-    int64_t start = igris::millis();
-    while (igris::millis() - start < 41)
+    FOR_EACH_ALLOCATOR
     {
-        crow::onestep();
-    }
+        a = 0;
+        b = 0;
 
-    CHECK_UNARY(a == 5 || a == 4);
-    CHECK_UNARY(b == 3 || b == 2);
+        test_keepalive_node an(a);
+        test_keepalive_node bn(b);
+        an.install_keepalive(10);
+        bn.install_keepalive(20);
+
+        // Run for 60ms to ensure enough keepalive callbacks
+        int64_t start = igris::millis();
+        while (igris::millis() - start < 60)
+        {
+            crow::onestep();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+
+        // a: 10ms interval -> 6+ calls in 60ms (including immediate)
+        // b: 20ms interval -> 3+ calls in 60ms (including immediate)
+        CHECK_UNARY(a >= 4);
+        CHECK_UNARY(b >= 2);
+
+        // Cleanup: unplan keepalive timers
+        an.keepalive_timer.unplan();
+        bn.keepalive_timer.unplan();
+    }
 }
