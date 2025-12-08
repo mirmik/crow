@@ -14,7 +14,7 @@ namespace crow
         nodeid_t rid = 0;
         union _u
         {
-            uint8_t flags = 0;
+            uint8_t flags;
             struct _f
             {
                 uint8_t reserved : 4;

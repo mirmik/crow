@@ -55,7 +55,7 @@ namespace crow
         uint8_t thmsize = 0;
         union cmd_u
         {
-            uint32_t all = 0;
+            uint32_t all;
             struct
             {
                 uint8_t subscribe_on_updates : 1;

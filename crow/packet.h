@@ -38,7 +38,7 @@ namespace crow
     {
         union _u
         {
-            uint8_t pflag = 0; ///< Флаги пакета
+            uint8_t pflag; ///< Флаги пакета
             struct _f
             {
                 uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
@@ -96,7 +96,7 @@ namespace crow
     {
         union _u
         {
-            uint8_t pflag = 0; ///< Флаги пакета
+            uint8_t pflag; ///< Флаги пакета
             struct _f
             {
                 uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
