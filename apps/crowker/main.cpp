@@ -50,11 +50,10 @@ void tcp_client_listener(nos::inet::tcp_client client)
     {
         nos::expected<long unsigned int, nos::input_error> ret;
         char cmd;
-        uint8_t datasize;
+        uint32_t datasize;
         uint16_t thmsize;
 
         std::string theme;
-        std::string data;
 
         ret = client.recv(buf, 3, MSG_WAITALL);
 
@@ -162,15 +161,14 @@ int main(int argc, char *argv[])
         {"udp", required_argument, NULL, 'u'}, // crow udpgate port
         {"tcp", required_argument, NULL, 't'},
         {"debug", no_argument, NULL, 'd'}, // crow transport log
-        {"binfo", no_argument, NULL, 'b'}, // browker log
-        {"netname", required_argument, NULL, 'n'},
+        {"binfo", no_argument, NULL, 'b'}, // brocker log
         {"version", no_argument, NULL, 'v'},
         {NULL, 0, NULL, 0}};
 
     int long_index = 0;
     int opt = 0;
 
-    while ((opt = getopt_long(argc, argv, "usvdibtn", long_options,
+    while ((opt = getopt_long(argc, argv, "u:t:svdib", long_options,
                               &long_index)) != -1)
     {
         switch (opt)
