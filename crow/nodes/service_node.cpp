@@ -69,8 +69,13 @@ void crow::service_node::reply_chunked(const char *answ, size_t size)
         chunk_buf[3] = has_more ? CHUNK_FLAG_HAS_MORE : 0;
         std::memcpy(chunk_buf + CHUNK_HEADER_SIZE, answ + offset, chunk_payload);
 
+        // Use QOS=0 for intermediate chunks to avoid packet queue buildup
+        // Only last chunk uses configured qos for delivery guarantee
+        uint8_t chunk_qos = has_more ? 0 : qos;
+        uint16_t chunk_ackquant = has_more ? 0 : ackquant;
+
         publish(curpack->addr(), subheader.sid, reply_theme,
-                {chunk_buf, CHUNK_HEADER_SIZE + chunk_payload}, qos, ackquant);
+                {chunk_buf, CHUNK_HEADER_SIZE + chunk_payload}, chunk_qos, chunk_ackquant);
 
         offset += chunk_payload;
         chunk_id++;
