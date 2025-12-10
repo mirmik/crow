@@ -3,6 +3,7 @@
 
 #include <crow/gateway.h>
 #include <crow/tower.h>
+#include <igris/dprint.h>
 #include <igris/iovec.h>
 #include <igris/protocols/gstuff.h>
 #include <igris/sync/semaphore.h>
@@ -16,7 +17,9 @@ namespace crow
     {
         gstuff_context gctx;
 
+        static constexpr size_t MAX_SEND_QUEUE = 32;
         dlist_head to_send = DLIST_HEAD_INIT(to_send);
+        size_t send_queue_count = 0;
         crow::packet *insend = nullptr;
         /// Максимальная длина пакета, какой мы готовы принять.
         int received_maxpack_size = 0;
@@ -216,6 +219,8 @@ namespace crow
             {
                 auto pack = dlist_first_entry(&to_send, crow::packet, ulnk);
                 dlist_del_init(&pack->ulnk);
+                if (send_queue_count > 0)
+                    --send_queue_count;
                 start_send(pack);
             }
         }
@@ -229,7 +234,18 @@ namespace crow
             else
             {
                 system_lock();
+                if (send_queue_count >= MAX_SEND_QUEUE)
+                {
+                    system_unlock();
+                    dpr("crow: gate send queue full (");
+                    dpr(send_queue_count);
+                    dpr("/");
+                    dpr(MAX_SEND_QUEUE);
+                    dprln("), dropping packet");
+                    return;
+                }
                 dlist_move(&pack->ulnk, &to_send);
+                ++send_queue_count;
                 system_unlock();
             }
         }
