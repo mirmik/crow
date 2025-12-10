@@ -5,10 +5,16 @@
 #include <crow/proto/node.h>
 #include <functional>
 #include <igris/event/delegate.h>
+#include <map>
 #include <nos/print.h>
+#include <vector>
 
 namespace crow
 {
+    // Chunked reply constants (shared with service_node.h)
+    inline constexpr uint8_t CHUNKED_REPLY_MARKER = 0x01;
+    inline constexpr uint8_t CHUNK_FLAG_HAS_MORE = 0x01;
+
     class abstract_subscriber_node : public crow::publisher_node,
                                      public crow::alived_object
     {
@@ -74,6 +80,11 @@ namespace crow
         using function = std::function<void(nos::buffer)>;
         function incoming_handler = {};
 
+        // Chunked message reassembly
+        std::map<uint16_t, std::vector<char>> _chunk_buffer;
+        uint16_t _expected_chunks = 0;
+        bool _receiving_chunks = false;
+
     public:
         subscriber_node() = default;
         subscriber_node(function incoming);
@@ -90,8 +101,14 @@ namespace crow
             incoming_handler = incoming;
         }
 
+        /// Handle incoming message with chunked reply support.
+        /// Public for testing purposes.
+        void handle_incoming_message(nos::buffer message);
+
     private:
         void incoming_packet(crow::packet *) override;
+        void reset_chunk_buffer();
+        bool try_reassemble_chunks(std::vector<char> &result);
     };
 }
 

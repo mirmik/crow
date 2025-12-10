@@ -2,8 +2,11 @@
 #define CROW_requestor_node_H
 
 #include <crow/nodes/publisher_node.h>
+#include <crow/nodes/subscriber_node.h>
 #include <crow/proto/node.h>
 #include <igris/event/delegate.h>
+#include <map>
+#include <vector>
 
 namespace crow
 {
@@ -16,6 +19,12 @@ namespace crow
         int rackquant = 0;
 
         igris::delegate<void, nos::buffer> incoming = {};
+
+        // Chunked reply reassembly
+        // Map: chunk_id -> payload data
+        std::map<uint16_t, std::vector<char>> _chunk_buffer;
+        uint16_t _expected_chunks = 0;
+        bool _receiving_chunks = false;
 
     public:
         requestor_node() = default;
@@ -71,9 +80,15 @@ namespace crow
             rackquant = _rackquant;
         }
 
+        /// Handle incoming message with chunked reply support.
+        /// Public for testing purposes.
+        void handle_incoming_message(nos::buffer message);
+
     private:
         void incoming_packet(crow::packet *pack) override;
         void undelivered_packet(crow::packet *pack) override;
+        void reset_chunk_buffer();
+        bool try_reassemble_chunks(std::vector<char> &result);
     };
 }
 
