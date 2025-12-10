@@ -34,8 +34,9 @@ DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
 
-// Hash table for fast lookup of outgoing packets by seqid
+// Hash tables for fast lookup of packets by seqid
 static crow::packet_htable crow_outters_htable;
+static crow::packet_htable crow_incoming_htable;
 
 // List size limits and counters for DoS protection
 static constexpr size_t MAX_OUTTERS = 128;
@@ -135,12 +136,15 @@ static void qos_release_from_incoming(crow::packet *pack)
 {
     crow::packet *it;
     system_lock();
-    dlist_for_each_entry(it, &crow_incoming, lnk)
+    // Use hash table for O(1) bucket lookup instead of O(n) list scan
+    dlist_head *bucket = crow_incoming_htable.bucket(pack->seqid());
+    dlist_for_each_entry(it, bucket, ihlnk)
     {
         if (it->seqid() == pack->seqid() &&
             pack->addrsize() == it->addrsize() &&
             !memcmp(it->addrptr(), pack->addrptr(), pack->addrsize()))
         {
+            crow_incoming_htable.remove(&it->ihlnk);
             if (incoming_count > 0)
                 --incoming_count;
             system_unlock();
@@ -178,6 +182,8 @@ static bool add_to_incoming_list(crow::packet *pack)
     }
     pack->last_request_time = igris::millis();
     dlist_move_sorted(pack, &crow_incoming, lnk, crow_time_comparator);
+    // Add to hash table for fast lookup by seqid
+    crow_incoming_htable.put(pack, &pack->ihlnk, pack->seqid());
     ++incoming_count;
     crow::unsleep();
     return true;
@@ -446,7 +452,8 @@ static void crow_do_travel(crow::packet *pack)
                 //Перед тем как добавить пакет в обработку, проверяем,
                 //нет ли его в списке принятых.
                 crow::packet *inc;
-                dlist_for_each_entry(inc, &crow_incoming, lnk)
+                dlist_head *bucket = crow_incoming_htable.bucket(pack->seqid());
+                dlist_for_each_entry(inc, bucket, ihlnk)
                 {
                     if (inc->seqid() == pack->seqid() &&
                         inc->addrsize() == pack->addrsize() &&
@@ -919,6 +926,8 @@ void crow_onestep_incoming_stage()
 
             if (pack->_ackcount == 0)
             {
+                // Remove from hash table
+                crow_incoming_htable.remove(&pack->ihlnk);
                 if (incoming_count > 0)
                     --incoming_count;
                 pack->u.f.undelivered = 1;
@@ -931,6 +940,7 @@ void crow_onestep_incoming_stage()
             else
             {
                 // Re-add to sorted list for retry, don't change counter
+                // Hash table entry stays valid
                 dlist_move_sorted(pack, &crow_incoming, lnk,
                                   crow_time_comparator);
                 pack->last_request_time = curtime;

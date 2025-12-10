@@ -169,6 +169,8 @@ namespace crow
         ///< зависимых протоколов.
         struct dlist_head hlnk =
             DLIST_HEAD_INIT(hlnk); ///< Для хеш-таблицы outters.
+        struct dlist_head ihlnk =
+            DLIST_HEAD_INIT(ihlnk); ///< Для хеш-таблицы incoming.
         crow::gateway *ingate =
             nullptr; ///< gate, которым пакет прибыл в систему.
         uint16_t last_request_time = 0; ///< время последней отправки
