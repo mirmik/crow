@@ -114,6 +114,10 @@ if(CROW_BUILD_TESTS)
     target_link_libraries(crow_test PRIVATE crow)
     target_include_directories(crow_test PRIVATE tests)
     add_test(NAME crow_test COMMAND crow_test)
+
+    # Integration test helper: service that replies with large chunked messages
+    add_executable(large_reply_service tests/integration/large_reply_service.cpp)
+    target_link_libraries(large_reply_service PRIVATE crow)
 endif()
 
 install(TARGETS crow

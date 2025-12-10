@@ -19,6 +19,7 @@
 #include <igris/util/dstring.h>
 #include <nos/fprint.h>
 #include <nos/print.h>
+#include <nos/io/stdfile.h>
 
 #include <nos/inet/tcp_client.h>
 #include <nos/inet/tcp_server.h>
@@ -44,7 +45,7 @@ void tcp_client_listener(nos::inet::tcp_client client)
     nos::inet::netaddr addr = client.getaddr();
 
     if (brocker_info)
-        nos::println("new tcp client from", addr);
+        nos::println_to(nos::cerr, "new tcp client from", addr);
 
     while (1)
     {
@@ -106,14 +107,14 @@ void tcp_client_listener(nos::inet::tcp_client client)
     clean:
     {
         if (brocker_info)
-            nos::println("unresolved tcp command from", addr, cmd);
+            nos::println_to(nos::cerr, "unresolved tcp command from", addr, cmd);
 
         continue;
     }
     }
 
     if (brocker_info)
-        nos::println("tcp connection was clossed", addr);
+        nos::println_to(nos::cerr, "tcp connection was clossed", addr);
 }
 
 void tcp_listener(int port)
@@ -208,7 +209,7 @@ int main(int argc, char *argv[])
     if (udpport == -1)
     {
         if (debug_mode)
-            printf("Use default udp port 10009.\n");
+            fprintf(stderr, "Use default udp port 10009.\n");
         udpport = 10009;
     }
 

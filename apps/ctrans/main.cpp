@@ -21,6 +21,7 @@
 #include <iostream>
 #include <map>
 #include <nos/fprint.h>
+#include <nos/io/stdfile.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -432,7 +433,7 @@ void send_do(const std::string message)
 
             if (ret == CROW_CHANNEL_ERR_NOCONNECT)
             {
-                nos::println("Channel is not connected");
+                nos::println_to(nos::cerr, "Channel is not connected");
             }
         }
         break;
@@ -468,7 +469,7 @@ void send_do(const std::string message)
 
             if (ret == CROW_CHANNEL_ERR_NOCONNECT)
             {
-                nos::println("Channel is not connected");
+                nos::println_to(nos::cerr, "Channel is not connected");
             }
         }
         break;
@@ -877,7 +878,7 @@ void parse_options(int argc, char **argv)
                 break;
 
             case 'V':
-                nos::println(VERSION);
+                nos::println_to(nos::cerr, VERSION);
                 exit(0);
                 break;
 
@@ -886,7 +887,7 @@ void parse_options(int argc, char **argv)
                 break;
 
             case 0:
-                nos::println("getopt error");
+                nos::println_to(nos::cerr, "getopt error");
                 exit(-1);
                 break;
         }
@@ -982,7 +983,7 @@ void create_serial_gate(std::vector<std::string> tokens)
 
         if (tokens[5] == "v0")
         {
-            nos::println("create_serial_gate header=v0 gstuff=v1");
+            nos::println_to(nos::cerr, "create_serial_gate header=v0 gstuff=v1");
             create_serial_gate_v0(tokens[0],
                                   std::stoi(tokens[1]),
                                   tokens[2][0],
@@ -992,7 +993,7 @@ void create_serial_gate(std::vector<std::string> tokens)
         }
         else if (tokens[5] == "v1")
         {
-            nos::println("create_serial_gate header=v1 gstuff=v1");
+            nos::println_to(nos::cerr, "create_serial_gate header=v1 gstuff=v1");
             create_serial_gate_v1(tokens[0],
                                   std::stoi(tokens[1]),
                                   tokens[2][0],
@@ -1013,7 +1014,7 @@ void create_serial_gate(std::vector<std::string> tokens)
 
         if (tokens[5] == "v0")
         {
-            nos::println("create_serial_gate header=v0 gstuff=", gstuff_v1 ? "v1" : "v0");
+            nos::println_to(nos::cerr, "create_serial_gate header=v0 gstuff=", gstuff_v1 ? "v1" : "v0");
             create_serial_gate_v0(tokens[0],
                                   std::stoi(tokens[1]),
                                   tokens[2][0],
@@ -1023,7 +1024,7 @@ void create_serial_gate(std::vector<std::string> tokens)
         }
         else if (tokens[5] == "v1")
         {
-            nos::println("create_serial_gate header=v1 gstuff=", gstuff_v1 ? "v1" : "v0");
+            nos::println_to(nos::cerr, "create_serial_gate header=v1 gstuff=", gstuff_v1 ? "v1" : "v0");
             create_serial_gate_v1(tokens[0],
                                   std::stoi(tokens[1]),
                                   tokens[2][0],
@@ -1106,7 +1107,7 @@ int main(int argc, char *argv[])
         address = crow::address_warned(argv[optind]);
         if (address.size() == 0)
         {
-            nos::println("address error");
+            nos::println_to(nos::cerr, "address error");
             exit(0);
         }
 
@@ -1129,23 +1130,23 @@ int main(int argc, char *argv[])
     {
         if (created_gate_info.empty())
         {
-            nos::println("gates info: none");
+            nos::println_to(nos::cerr, "gates info: none");
         }
         else
         {
-            nos::println("gates info:");
+            nos::println_to(nos::cerr, "gates info:");
             for (const auto &gate : created_gate_info)
             {
-                nos::fprintln("  {}", gate.name);
+                nos::fprintln_to(nos::cerr, "  {}", gate.name);
                 for (const auto &param : gate.parameters)
                 {
-                    nos::fprintln("    {}: {}", param.first, param.second);
+                    nos::fprintln_to(nos::cerr, "    {}: {}", param.first, param.second);
                 }
             }
         }
 
-        nos::fprintln("input format: {}", informat_tostr());
-        nos::fprintln("output format: {}", outformat_tostr());
+        nos::fprintln_to(nos::cerr, "input format: {}", informat_tostr());
+        nos::fprintln_to(nos::cerr, "output format: {}", outformat_tostr());
     }
 
     if (pipelinecmd != "")
@@ -1174,10 +1175,10 @@ int main(int argc, char *argv[])
             {
 
                 case CROW_ERRNO_UNREGISTRED_RID:
-                    nos::println("Unregistred remote rid");
+                    nos::println_to(nos::cerr, "Unregistred remote rid");
                     break;
                 default:
-                    nos::println("Handshake failure");
+                    nos::println_to(nos::cerr, "Handshake failure");
                     break;
             }
 

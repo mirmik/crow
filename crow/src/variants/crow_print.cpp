@@ -9,12 +9,13 @@
 
 #include <nos/fprint.h>
 #include <nos/print.h>
+#include <nos/io/stdfile.h>
 
 void crow::diagnostic(const char *notation, crow::packet *pack)
 {
     bool postfix_points = pack->datasize() > crow::debug_data_size;
 
-    nos::fprint(
+    nos::fprint_to(nos::cerr,
         "{}: ("
         "qos:{}, "
         "ack:{}, "
@@ -39,17 +40,17 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
                            ? crow::debug_data_size
                            : pack->datasize()));
 
-    if (pack->type() == CROW_NODE_PROTOCOL) 
+    if (pack->type() == CROW_NODE_PROTOCOL)
     {
-        nos::fprint(
+        nos::fprint_to(nos::cerr,
         ", sid:{}, "
         "rid:{}",
         crow::node_protocol_cls::sid(pack), crow::node_protocol_cls::rid(pack)
-        ); 
+        );
     }
 
     if (postfix_points)
-        nos::println("...)");
+        nos::println_to(nos::cerr, "...)");
     else
-        nos::println(")");
+        nos::println_to(nos::cerr, ")");
 }
