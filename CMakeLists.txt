@@ -90,6 +90,8 @@ target_link_libraries(crow
         Threads::Threads
 )
 
+target_compile_definitions(crow PRIVATE CROW_DEBUG_CHUNKS)
+
 if(WIN32)
     target_link_libraries(crow PRIVATE ws2_32)
 endif()
@@ -98,6 +100,7 @@ if(CROW_BUILD_APPS)
     add_executable(ctrans apps/ctrans/main.cpp)
     target_link_libraries(ctrans PRIVATE crow)
     target_include_directories(ctrans PRIVATE apps/ctrans)
+    target_compile_definitions(ctrans PRIVATE CROW_DEBUG_CHUNKS)
 
     add_executable(crowker
         apps/crowker/main.cpp

@@ -3,6 +3,7 @@
 #include <igris/util/bug.h>
 #include <nos/print.h>
 #include <cstring>
+//#include <iostream>
 
 const char *crow::pubsub_type_to_string(PubSubTypes type)
 {
@@ -62,8 +63,10 @@ void crow::requestor_node::handle_incoming_message(nos::buffer message)
         uint8_t flags = static_cast<uint8_t>(message.data()[3]);
         bool has_more = (flags & CHUNK_FLAG_HAS_MORE) != 0;
 
-        fprintf(stderr, "[chunk] id=%d, has_more=%d, expected=%d, buffered=%zu\n",
-                chunk_id, has_more, _expected_chunks, _chunk_buffer.size());
+#ifdef CROW_DEBUG_CHUNKS
+        printf("[chunk] id=%d, has_more=%d, expected=%d, buffered=%zu\n",
+               chunk_id, has_more, _expected_chunks, _chunk_buffer.size());
+#endif
 
         // Extract payload
         std::vector<char> payload(message.data() + 4, message.data() + message.size());
@@ -82,14 +85,18 @@ void crow::requestor_node::handle_incoming_message(nos::buffer message)
             std::vector<char> assembled;
             if (try_reassemble_chunks(assembled))
             {
-                fprintf(stderr, "[chunk] reassembled! total_size=%zu\n", assembled.size());
+#ifdef CROW_DEBUG_CHUNKS
+                printf("[chunk] reassembled! total_size=%zu\n", assembled.size());
+#endif
                 incoming(nos::buffer(assembled.data(), assembled.size()));
                 reset_chunk_buffer();
             }
+#ifdef CROW_DEBUG_CHUNKS
             else
             {
-                fprintf(stderr, "[chunk] waiting for more chunks...\n");
+                printf("[chunk] waiting for more chunks...\n");
             }
+#endif
         }
     }
     else
