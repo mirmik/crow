@@ -44,6 +44,131 @@ static constexpr size_t MAX_INCOMING = 128;
 static size_t outters_count = 0;
 static size_t incoming_count = 0;
 
+// TIME_WAIT mechanism for QOS2 duplicate filtering
+// Stores "ghost" entries after ACK22 to filter late retransmits
+struct time_wait_entry
+{
+    dlist_head lnk;        // For linked list
+    dlist_head hlnk;       // For hash table
+    uint64_t expire_time;  // When this entry expires (milliseconds)
+    uint16_t seqid;
+    uint8_t addrsize;
+    uint8_t addr[32];      // Max address size
+};
+
+static constexpr size_t TIME_WAIT_HTABLE_SIZE = 64;
+static constexpr size_t MAX_TIME_WAIT_ENTRIES = 256;
+static dlist_head time_wait_list = DLIST_HEAD_INIT(time_wait_list);
+static dlist_head time_wait_htable[TIME_WAIT_HTABLE_SIZE];
+static size_t time_wait_count = 0;
+static uint32_t time_wait_duration_ms = 15000; // Default 15 seconds
+
+// Pool for time_wait entries
+static time_wait_entry time_wait_pool[MAX_TIME_WAIT_ENTRIES];
+static dlist_head time_wait_free_list = DLIST_HEAD_INIT(time_wait_free_list);
+static bool time_wait_initialized = false;
+
+static void time_wait_init()
+{
+    if (time_wait_initialized)
+        return;
+    for (size_t i = 0; i < TIME_WAIT_HTABLE_SIZE; ++i)
+        dlist_init(&time_wait_htable[i]);
+    for (size_t i = 0; i < MAX_TIME_WAIT_ENTRIES; ++i)
+    {
+        dlist_init(&time_wait_pool[i].lnk);
+        dlist_init(&time_wait_pool[i].hlnk);
+        dlist_add(&time_wait_pool[i].lnk, &time_wait_free_list);
+    }
+    time_wait_initialized = true;
+}
+
+static size_t time_wait_hash(uint16_t seqid)
+{
+    return seqid % TIME_WAIT_HTABLE_SIZE;
+}
+
+static void time_wait_cleanup_expired()
+{
+    uint64_t now = igris::millis();
+    dlist_head *it, *nxt;
+    dlist_for_each_safe(it, nxt, &time_wait_list)
+    {
+        time_wait_entry *entry = dlist_entry(it, time_wait_entry, lnk);
+        if (now >= entry->expire_time)
+        {
+            dlist_del(&entry->lnk);
+            dlist_del(&entry->hlnk);
+            dlist_add(&entry->lnk, &time_wait_free_list);
+            --time_wait_count;
+        }
+        else
+        {
+            // List is ordered by expire time, so we can stop here
+            break;
+        }
+    }
+}
+
+static bool time_wait_check(uint16_t seqid, const uint8_t *addr, uint8_t addrsize)
+{
+    time_wait_init();
+    time_wait_cleanup_expired();
+
+    dlist_head *bucket = &time_wait_htable[time_wait_hash(seqid)];
+    time_wait_entry *entry;
+    dlist_for_each_entry(entry, bucket, hlnk)
+    {
+        if (entry->seqid == seqid &&
+            entry->addrsize == addrsize &&
+            memcmp(entry->addr, addr, addrsize) == 0)
+        {
+            return true; // Found in TIME_WAIT - this is a duplicate
+        }
+    }
+    return false;
+}
+
+static void time_wait_add(uint16_t seqid, const uint8_t *addr, uint8_t addrsize)
+{
+    time_wait_init();
+    time_wait_cleanup_expired();
+
+    if (addrsize > sizeof(time_wait_entry::addr))
+        return; // Address too long
+
+    // Get entry from free list or evict oldest
+    time_wait_entry *entry;
+    if (!dlist_empty(&time_wait_free_list))
+    {
+        entry = dlist_first_entry(&time_wait_free_list, time_wait_entry, lnk);
+        dlist_del(&entry->lnk);
+    }
+    else if (!dlist_empty(&time_wait_list))
+    {
+        // Evict oldest entry
+        entry = dlist_first_entry(&time_wait_list, time_wait_entry, lnk);
+        dlist_del(&entry->lnk);
+        dlist_del(&entry->hlnk);
+        --time_wait_count;
+    }
+    else
+    {
+        return; // No entries available (shouldn't happen)
+    }
+
+    entry->seqid = seqid;
+    entry->addrsize = addrsize;
+    memcpy(entry->addr, addr, addrsize);
+    entry->expire_time = igris::millis() + time_wait_duration_ms;
+
+    // Add to end of list (ordered by expire time)
+    dlist_add_tail(&entry->lnk, &time_wait_list);
+    // Add to hash table
+    dlist_add(&entry->hlnk, &time_wait_htable[time_wait_hash(seqid)]);
+    ++time_wait_count;
+}
+
 igris::delegate<void> crow::unsleep_handler;
 void (*crow::default_incoming_handler)(crow::packet *pack) = nullptr;
 void (*crow::undelivered_handler)(crow::packet *pack) = nullptr;
@@ -119,6 +244,14 @@ static void confirmed_utilize_from_outers(crow::packet *pack)
             pack->addrsize() == it->addrsize() &&
             !memcmp(it->addrptr(), pack->addrptr(), pack->addrsize()))
         {
+            if (__diagnostic_enabled)
+            {
+                dpr("OUTFLT: ACK received, removing seqid=");
+                dprhex(pack->seqid());
+                dpr(" from outters, out_count=");
+                dpr(outters_count);
+                dln();
+            }
             it->u.f.confirmed = 1;
             crow_outters_htable.remove(&it->hlnk);
             if (outters_count > 0)
@@ -128,6 +261,12 @@ static void confirmed_utilize_from_outers(crow::packet *pack)
             crow::tower_release(it);
             return;
         }
+    }
+    if (__diagnostic_enabled)
+    {
+        dpr("OUTFLT: ACK for seqid=");
+        dprhex(pack->seqid());
+        dpr(" but NOT FOUND in outters!\n");
     }
     system_unlock();
 }
@@ -144,6 +283,17 @@ static void qos_release_from_incoming(crow::packet *pack)
             pack->addrsize() == it->addrsize() &&
             !memcmp(it->addrptr(), pack->addrptr(), pack->addrsize()))
         {
+            if (__diagnostic_enabled)
+            {
+                dpr("DUPFLT: ACK22 removing seqid=");
+                dprhex(pack->seqid());
+                dpr(" from htable -> TIME_WAIT, inc_count=");
+                dpr(incoming_count);
+                dln();
+            }
+            // Add to TIME_WAIT before removing from incoming
+            time_wait_add(it->seqid(), it->addrptr(), it->addrsize());
+
             crow_incoming_htable.remove(&it->ihlnk);
             if (incoming_count > 0)
                 --incoming_count;
@@ -462,12 +612,42 @@ static void crow_do_travel(crow::packet *pack)
                     {
                         // Пакет уже фигурирует как принятый, поэтому
                         // отбрасываем его.
+                        if (__diagnostic_enabled)
+                        {
+                            dpr("DUPFLT: filtered duplicate seqid=");
+                            dprhex(pack->seqid());
+                            dpr(" (in incoming_htable)\n");
+                        }
                         system_lock();
                         crow::utilize(pack);
                         system_unlock();
 
                         return;
                     }
+                }
+
+                // Check TIME_WAIT for late retransmits after ACK22
+                if (time_wait_check(pack->seqid(), pack->addrptr(), pack->addrsize()))
+                {
+                    if (__diagnostic_enabled)
+                    {
+                        dpr("DUPFLT: filtered duplicate seqid=");
+                        dprhex(pack->seqid());
+                        dpr(" (in TIME_WAIT)\n");
+                    }
+                    system_lock();
+                    crow::utilize(pack);
+                    system_unlock();
+                    return;
+                }
+
+                if (__diagnostic_enabled)
+                {
+                    dpr("DUPFLT: new packet seqid=");
+                    dprhex(pack->seqid());
+                    dpr(" adding to htable, inc_count=");
+                    dpr(incoming_count);
+                    dln();
                 }
 
                 // Фиксирем пакет как принятый для фильтрации
@@ -890,6 +1070,14 @@ void crow_onestep_outers_stage()
                 // Retransmit - packet stays in outters (re-added via travel)
                 // Don't decrement counter as add_to_outters_list won't increment
                 // for retransmits (detected via non-empty hlnk)
+                if (__diagnostic_enabled)
+                {
+                    dpr("OUTFLT: RETRANSMIT seqid=");
+                    dprhex(pack->seqid());
+                    dpr(" ackcount=");
+                    dpr(pack->_ackcount);
+                    dln();
+                }
                 system_unlock();
                 crow::travel(pack);
                 system_lock();
@@ -927,6 +1115,14 @@ void crow_onestep_incoming_stage()
             if (pack->_ackcount == 0)
             {
                 // Remove from hash table
+                if (__diagnostic_enabled)
+                {
+                    dpr("DUPFLT: TIMEOUT removing seqid=");
+                    dprhex(pack->seqid());
+                    dpr(" from htable, inc_count=");
+                    dpr(incoming_count);
+                    dln();
+                }
                 crow_incoming_htable.remove(&pack->ihlnk);
                 if (incoming_count > 0)
                     --incoming_count;
@@ -1097,4 +1293,24 @@ int64_t crow::get_minimal_timeout()
 
     else
         return mininterval;
+}
+
+void crow::set_time_wait_duration(uint32_t duration_ms)
+{
+    time_wait_duration_ms = duration_ms;
+}
+
+uint32_t crow::get_time_wait_duration()
+{
+    return time_wait_duration_ms;
+}
+
+void crow::set_initial_seqid(uint16_t seqid)
+{
+    __seqcounter = seqid;
+}
+
+uint16_t crow::get_current_seqid()
+{
+    return __seqcounter;
 }

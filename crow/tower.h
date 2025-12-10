@@ -121,6 +121,14 @@ namespace crow
     int start_spin_realtime(int abort_on_fault);
 
     void tower_release(crow::packet *pack);
+
+    // TIME_WAIT duration for QOS2 duplicate filtering (default: 15000 ms)
+    void set_time_wait_duration(uint32_t duration_ms);
+    uint32_t get_time_wait_duration();
+
+    // Set initial sequence number (useful for random seqid at startup)
+    void set_initial_seqid(uint16_t seqid);
+    uint16_t get_current_seqid();
 }
 
 #endif

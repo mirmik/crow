@@ -32,6 +32,7 @@
 #include <thread>
 #include <unistd.h>
 #include <vector>
+#include <random>
 
 const std::string VERSION = "2.1.0";
 
@@ -1051,6 +1052,11 @@ void create_serial_gate(std::vector<std::string> tokens)
 
 int main(int argc, char *argv[])
 {
+    // Initialize with random seqid to reduce collision probability
+    // after restart (TIME_WAIT entries on remote nodes still reference old seqids)
+    std::random_device rd;
+    crow::set_initial_seqid(rd() & 0xFFFF);
+
     parse_options(argc, argv);
 
     raw_node.bind(1);
@@ -1201,14 +1207,24 @@ int main(int argc, char *argv[])
         if (msgpair.second)
             send_do(msgpair.first);
 
-        while (crow::has_untravelled() || crow::has_allocated())
+        // For request mode, wait for response before exiting
+        if (request_mode)
         {
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
+            exit_on_receive = true;
+            // Let spin loop handle waiting for response
         }
+        else
+        {
+            // For non-request modes, wait for packets to be sent
+            while (crow::has_untravelled() || crow::has_allocated())
+            {
+                std::this_thread::sleep_for(std::chrono::microseconds(1));
+            }
 
-        crow::stop_spin(false);
-        crow::join_spin();
-        exit(0);
+            crow::stop_spin(false);
+            crow::join_spin();
+            exit(0);
+        }
     }
 
     if (subscribe_mode)

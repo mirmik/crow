@@ -11,6 +11,7 @@
 #include <map>
 #include <string>
 #include <thread>
+#include <random>
 
 #include "control_node.h"
 #include <crow/brocker/crowker.h>
@@ -151,6 +152,11 @@ void print_help()
 
 int main(int argc, char *argv[])
 {
+    // Initialize with random seqid to reduce collision probability
+    // after restart (TIME_WAIT entries on remote nodes still reference old seqids)
+    std::random_device rd;
+    crow::set_initial_seqid(rd() & 0xFFFF);
+
 #ifdef CROW_PUBSUB_PROTOCOL_SUPPORTED
     crow::pubsub_protocol.enable_crowker_subsystem();
 #endif

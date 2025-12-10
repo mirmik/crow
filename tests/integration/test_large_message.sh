@@ -106,16 +106,24 @@ sleep 1.5
 run_test() {
     local size=$1
     local description=$2
-    local timeout_sec=${3:-5}
+    local base_timeout=${3:-5}
+    # Double timeout in DEBUG mode due to slow logging
+    local timeout_sec=$base_timeout
+    if [[ "$DEBUG" == "1" ]]; then
+        timeout_sec=$((base_timeout * 3))
+    fi
 
     log "Test: $description (size=$size bytes)..."
 
     # Send request and capture response using --pulse for one-shot mode
     local response
-    local ctrans_args=(--request "$THEME" --pulse "$size" --qos 2 --ackquant 50 "$CROWKER_ADDR")
+    # Use longer ackquant in DEBUG mode to avoid timeouts from slow logging
+    local ackquant=50
     if [[ "$DEBUG" == "1" ]]; then
-        ctrans_args+=(--debug)
+        ackquant=200
     fi
+    local ctrans_args=(--request "$THEME" --pulse "$size" --qos 2 --ackquant "$ackquant" "$CROWKER_ADDR")
+    # Note: ctrans debug is disabled to avoid log pollution, crowker/service have debug enabled
 
     # Note: stderr redirect to /dev/null causes issues with capturing stdout
     # Use explicit file redirect instead
