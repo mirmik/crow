@@ -86,7 +86,8 @@ std::shared_ptr<crow::tcpgate> tcpgate;
 constexpr uint8_t CTRANS_SERIAL_GATE_NO = 42;
 constexpr const char *CTRANS_HEADER_V0 = "crow::header_v0";
 constexpr const char *CTRANS_HEADER_V1 = "crow::header_v1";
-constexpr const char *CTRANS_SERIAL_GSTUFF_VERSION = "gstuff_v0";
+constexpr const char *CTRANS_GSTUFF_V0 = "gstuff_v0";
+constexpr const char *CTRANS_GSTUFF_V1 = "gstuff_v1";
 
 struct gate_info
 {
@@ -147,7 +148,8 @@ std::string describe_port(uint16_t port)
 
 void register_serial_gate_info(const std::string &path, int baud, char parity,
                                int stopbits, int databits,
-                               const char *header_version)
+                               const char *header_version,
+                               const char *gstuff_version)
 {
     register_gate_info("serial_gstuff",
                        {{"gate_no", std::to_string(CTRANS_SERIAL_GATE_NO)},
@@ -157,7 +159,7 @@ void register_serial_gate_info(const std::string &path, int baud, char parity,
                         {"stopbits", std::to_string(stopbits)},
                         {"databits", std::to_string(databits)},
                         {"header", header_version},
-                        {"gstuff", CTRANS_SERIAL_GSTUFF_VERSION}});
+                        {"gstuff", gstuff_version}});
 }
 
 void do_incom_data(nos::buffer);
@@ -553,9 +555,10 @@ void print_help()
         "  -S, --serial          make gate on serial device.\n"
         "                        Format:\n"
         "                          "
-        "PATH[:BAUD[:PARITY[:STOPBITS[:DATABITS[:v0|v1]]]]]\n"
+        "PATH[:BAUD[:PARITY[:STOPBITS[:DATABITS[:v0|v1[:g0|g1]]]]]]\n"
         "                          Header version v0 or v1 (default v1)\n"
-        "                        Defaults: 115200:n:1:8:v1, parity n|e|o\n"
+        "                          Gstuff version g0 or g1 (default g1)\n"
+        "                        Defaults: 115200:n:1:8:v1:g1, parity n|e|o\n"
         "\n"
         "Package settings option list:\n"
         "  -q, --qos             set QOS policy mode\n"
@@ -885,14 +888,15 @@ void parse_options(int argc, char **argv)
 }
 
 void create_serial_gate_v0(std::string path, int baud, char parity,
-                           int stopbits, int databits)
+                           int stopbits, int databits, bool gstuff_v1)
 {
+    gstuff_context gctx = gstuff_v1 ? gstuff_context{} : gstuff_context_v0();
     crow::serial_gstuff_v0 *gate = nullptr;
     if ((gate = crow::create_serial_gstuff_v0(path.c_str(),
                                               115200,
                                               CTRANS_SERIAL_GATE_NO,
                                               gdebug,
-                                              gstuff_context_v0())) == NULL)
+                                              gctx)) == NULL)
     {
         perror("serialgate open");
         exit(-1);
@@ -901,19 +905,21 @@ void create_serial_gate_v0(std::string path, int baud, char parity,
     {
         gate->setup_serial_port(baud, parity, stopbits, databits);
         register_serial_gate_info(
-            path, baud, parity, stopbits, databits, CTRANS_HEADER_V0);
+            path, baud, parity, stopbits, databits, CTRANS_HEADER_V0,
+            gstuff_v1 ? CTRANS_GSTUFF_V1 : CTRANS_GSTUFF_V0);
     }
 }
 
 void create_serial_gate_v1(std::string path, int baud, char parity,
-                           int stopbits, int databits)
+                           int stopbits, int databits, bool gstuff_v1)
 {
+    gstuff_context gctx = gstuff_v1 ? gstuff_context{} : gstuff_context_v0();
     crow::serial_gstuff *gate = nullptr;
     if ((gate = crow::create_serial_gstuff(path.c_str(),
                                            115200,
                                            CTRANS_SERIAL_GATE_NO,
                                            gdebug,
-                                           gstuff_context_v0())) == NULL)
+                                           gctx)) == NULL)
     {
         perror("serialgate open");
         exit(-1);
@@ -922,59 +928,106 @@ void create_serial_gate_v1(std::string path, int baud, char parity,
     {
         gate->setup_serial_port(baud, parity, stopbits, databits);
         register_serial_gate_info(
-            path, baud, parity, stopbits, databits, CTRANS_HEADER_V1);
+            path, baud, parity, stopbits, databits, CTRANS_HEADER_V1,
+            gstuff_v1 ? CTRANS_GSTUFF_V1 : CTRANS_GSTUFF_V0);
     }
 }
 
 void create_serial_gate_v0(std::string path)
 {
-    create_serial_gate_v0(path, 115200, 'n', 1, 8);
+    create_serial_gate_v0(path, 115200, 'n', 1, 8, true);
 }
 
 void create_serial_gate_v1(std::string path)
 {
-    create_serial_gate_v1(path, 115200, 'n', 1, 8);
+    create_serial_gate_v1(path, 115200, 'n', 1, 8, true);
 }
 
+static bool parse_gstuff_version(const std::string &token)
+{
+    if (token == "g0")
+        return false;
+    if (token == "g1")
+        return true;
+    std::cerr << "Unknown gstuff version: " << token << " (expected g0 or g1)" << std::endl;
+    exit(-1);
+}
 void create_serial_gate(std::vector<std::string> tokens)
 {
+    // PATH
     if (tokens.size() == 1)
     {
         create_serial_gate_v1(tokens[0]);
     }
-
+    // PATH:BAUD:PARITY:STOPBITS:DATABITS
     else if (tokens.size() == 5)
     {
         create_serial_gate_v1(tokens[0],
                               std::stoi(tokens[1]),
                               tokens[2][0],
                               std::stoi(tokens[3]),
-                              std::stoi(tokens[4]));
+                              std::stoi(tokens[4]),
+                              true);
     }
-
+    // PATH:BAUD:PARITY:STOPBITS:DATABITS:v0|v1
     else if (tokens.size() == 6)
     {
+        bool gstuff_v1 = true;
+
         if (tokens[5] == "v0")
         {
-            nos::println("create_serial_gate_v<crow::header_v0>");
+            nos::println("create_serial_gate header=v0 gstuff=v1");
             create_serial_gate_v0(tokens[0],
                                   std::stoi(tokens[1]),
                                   tokens[2][0],
                                   std::stoi(tokens[3]),
-                                  std::stoi(tokens[4]));
+                                  std::stoi(tokens[4]),
+                                  gstuff_v1);
         }
         else if (tokens[5] == "v1")
         {
-            nos::println("create_serial_gate_v<crow::header_v1>");
+            nos::println("create_serial_gate header=v1 gstuff=v1");
             create_serial_gate_v1(tokens[0],
                                   std::stoi(tokens[1]),
                                   tokens[2][0],
                                   std::stoi(tokens[3]),
-                                  std::stoi(tokens[4]));
+                                  std::stoi(tokens[4]),
+                                  gstuff_v1);
         }
         else
         {
-            std::cerr << "Unknown protocol version: " << tokens[5] << std::endl;
+            std::cerr << "Unknown header version: " << tokens[5] << std::endl;
+            exit(-1);
+        }
+    }
+    // PATH:BAUD:PARITY:STOPBITS:DATABITS:v0|v1:g0|g1
+    else if (tokens.size() == 7)
+    {
+        bool gstuff_v1 = parse_gstuff_version(tokens[6]);
+
+        if (tokens[5] == "v0")
+        {
+            nos::println("create_serial_gate header=v0 gstuff=", gstuff_v1 ? "v1" : "v0");
+            create_serial_gate_v0(tokens[0],
+                                  std::stoi(tokens[1]),
+                                  tokens[2][0],
+                                  std::stoi(tokens[3]),
+                                  std::stoi(tokens[4]),
+                                  gstuff_v1);
+        }
+        else if (tokens[5] == "v1")
+        {
+            nos::println("create_serial_gate header=v1 gstuff=", gstuff_v1 ? "v1" : "v0");
+            create_serial_gate_v1(tokens[0],
+                                  std::stoi(tokens[1]),
+                                  tokens[2][0],
+                                  std::stoi(tokens[3]),
+                                  std::stoi(tokens[4]),
+                                  gstuff_v1);
+        }
+        else
+        {
+            std::cerr << "Unknown header version: " << tokens[5] << std::endl;
             exit(-1);
         }
     }

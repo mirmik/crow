@@ -7,12 +7,38 @@
 #include <igris/protocols/gstuff.h>
 #include <igris/util/bug.h>
 #include <nos/io/serial_port.h>
+#include <nos/print.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/cdefs.h>
 #include <termios.h>
 #include <unistd.h>
+
+static const char *gstuff_status_to_string(int status)
+{
+    switch (status)
+    {
+        case GSTUFF_CRC_ERROR:
+            return "CRC_ERROR";
+        case GSTUFF_OVERFLOW:
+            return "OVERFLOW";
+        case GSTUFF_STUFFING_ERROR:
+            return "STUFFING_ERROR";
+        case GSTUFF_ALGORITHM_ERROR:
+            return "ALGORITHM_ERROR";
+        case GSTUFF_CONTINUE:
+            return "CONTINUE";
+        case GSTUFF_NEWPACKAGE:
+            return "NEWPACKAGE";
+        case GSTUFF_FORCE_RESTART:
+            return "FORCE_RESTART";
+        case GSTUFF_GARBAGE:
+            return "GARBAGE";
+        default:
+            return "UNKNOWN";
+    }
+}
 
 crow::serial_gstuff::serial_gstuff(gstuff_context gctx)
     : gctx(gctx), recver(gctx)
@@ -56,14 +82,6 @@ void crow::serial_gstuff::read_handler(int)
     {
         char c = buf[i];
 
-        if (debug)
-        {
-            debug_printhex_uint8(c);
-            debug_putchar('\t');
-            debug_putchar(c);
-            debug_print_newline();
-        }
-
         if (rpack == NULL)
         {
             rpack = allocate_packet<crow::header_v1>(GSTUFF_MAXPACK_SIZE);
@@ -72,25 +90,62 @@ void crow::serial_gstuff::read_handler(int)
 
         int ret = recver.newchar(c);
 
+        if (debug)
+        {
+            nos::printhex(c);
+            nos::print("\t");
+            if (c >= 0x20 && c < 0x7F)
+                nos::putbyte((char)c);
+            else
+                nos::print(".");
+            nos::print("\tbuf=", recver.size());
+            nos::print("\tsts=", gstuff_status_to_string(ret));
+            nos::println();
+        }
+
         switch (ret)
         {
-        case GSTUFF_CRC_ERROR:
-            crow::warn("warn: gstuff crc error");
-            break;
+            case GSTUFF_CRC_ERROR:
+                crow::warn(std::string("gstuff: CRC error, received ") +
+                           std::to_string(recver.size()) + " bytes");
+                break;
 
-        case GSTUFF_NEWPACKAGE:
-            newline_handler();
-            break;
+            case GSTUFF_OVERFLOW:
+                crow::warn("gstuff: buffer overflow");
+                break;
 
-        default:
-            break;
+            case GSTUFF_STUFFING_ERROR:
+                crow::warn("gstuff: stuffing error (invalid escape sequence)");
+                break;
+
+            case GSTUFF_ALGORITHM_ERROR:
+                crow::warn("gstuff: algorithm error (invalid state)");
+                break;
+
+            case GSTUFF_FORCE_RESTART:
+                if (debug)
+                    nos::println(
+                        "gstuff: force restart (unexpected START byte)");
+                break;
+
+            case GSTUFF_GARBAGE:
+                // Garbage bytes before START - normal, don't warn
+                break;
+
+            case GSTUFF_NEWPACKAGE:
+                if (debug)
+                    nos::println("gstuff: packet received, size=",
+                                 recver.size());
+                newline_handler();
+                break;
+
+            default:
+                break;
         }
     }
 }
 
-void crow::serial_gstuff::setup_serial_port(int baud,
-                                            char parity,
-                                            int databits,
+void crow::serial_gstuff::setup_serial_port(int baud, char parity, int databits,
                                             int stopbits)
 {
     nos::serial_port port(fd);
@@ -99,12 +154,10 @@ void crow::serial_gstuff::setup_serial_port(int baud,
 
 void crow::serial_gstuff::finish() {}
 
-// template <class Header>
 crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
-                                                uint32_t baudrate,
-                                                uint8_t id,
+                                                uint32_t baudrate, uint8_t id,
                                                 bool debug,
-                                                const gstuff_context& gctx)
+                                                const gstuff_context &gctx)
 {
     (void)baudrate;
     auto *g = new crow::serial_gstuff(gctx);
@@ -123,6 +176,21 @@ crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
     g->rpack = NULL;
     g->bind(id);
 
+    if (debug)
+    {
+
+        nos::print("gctx.GSTUFF_STUB =");
+        nos::printhexln((char)gctx.GSTUFF_STUB);
+        nos::print("gctx.GSTUFF_START =");
+        nos::printhexln((char)gctx.GSTUFF_START);
+        nos::print("gctx.GSTUFF_STOP   =");
+        nos::printhexln((char)gctx.GSTUFF_STOP);
+        nos::print("gctx.GSTUFF_STUB_START =");
+        nos::printhexln((char)gctx.GSTUFF_STUB_START);
+        nos::print("gctx.GSTUFF_STUB_STOP =");
+        nos::printhexln((char)gctx.GSTUFF_STUB_STOP);
+    }
+
     crow::asyncio.add_iotask(
         g->fd,
         SelectType::READ,
@@ -131,19 +199,9 @@ crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
     return g;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+// ============================================================================
+// serial_gstuff_v0
+// ============================================================================
 
 crow::serial_gstuff_v0::serial_gstuff_v0(gstuff_context gctx)
     : gctx(gctx), recver(gctx)
@@ -187,14 +245,6 @@ void crow::serial_gstuff_v0::read_handler(int)
     {
         char c = buf[i];
 
-        if (debug)
-        {
-            debug_printhex_uint8(c);
-            debug_putchar('\t');
-            debug_putchar(c);
-            debug_print_newline();
-        }
-
         if (rpack == NULL)
         {
             rpack = allocate_packet<crow::header_v0>(GSTUFF_MAXPACK_SIZE);
@@ -203,26 +253,63 @@ void crow::serial_gstuff_v0::read_handler(int)
 
         int ret = recver.newchar(c);
 
+        if (debug)
+        {
+            nos::printhex(c);
+            nos::print("\t");
+            if (c >= 0x20 && c < 0x7F)
+                nos::putbyte((char)c);
+            else
+                nos::print(".");
+            nos::print("\tbuf=", recver.size());
+            nos::print("\tsts=", gstuff_status_to_string(ret));
+            nos::println();
+        }
+
         switch (ret)
         {
-        case GSTUFF_CRC_ERROR:
-            crow::warn("warn: gstuff crc error");
-            break;
+            case GSTUFF_CRC_ERROR:
+                crow::warn(std::string("gstuff_v0: CRC error, received ") +
+                           std::to_string(recver.size()) + " bytes");
+                break;
 
-        case GSTUFF_NEWPACKAGE:
-            newline_handler();
-            break;
+            case GSTUFF_OVERFLOW:
+                crow::warn("gstuff_v0: buffer overflow");
+                break;
 
-        default:
-            break;
+            case GSTUFF_STUFFING_ERROR:
+                crow::warn(
+                    "gstuff_v0: stuffing error (invalid escape sequence)");
+                break;
+
+            case GSTUFF_ALGORITHM_ERROR:
+                crow::warn("gstuff_v0: algorithm error (invalid state)");
+                break;
+
+            case GSTUFF_FORCE_RESTART:
+                if (debug)
+                    nos::println(
+                        "gstuff_v0: force restart (unexpected START byte)");
+                break;
+
+            case GSTUFF_GARBAGE:
+                break;
+
+            case GSTUFF_NEWPACKAGE:
+                if (debug)
+                    nos::println("gstuff_v0: packet received, size=",
+                                 recver.size());
+                newline_handler();
+                break;
+
+            default:
+                break;
         }
     }
 }
 
-void crow::serial_gstuff_v0::setup_serial_port(int baud,
-                                            char parity,
-                                            int databits,
-                                            int stopbits)
+void crow::serial_gstuff_v0::setup_serial_port(int baud, char parity,
+                                               int databits, int stopbits)
 {
     nos::serial_port port(fd);
     port.setup(baud, parity, databits, stopbits);
@@ -230,12 +317,9 @@ void crow::serial_gstuff_v0::setup_serial_port(int baud,
 
 void crow::serial_gstuff_v0::finish() {}
 
-// template <class Header>
-crow::serial_gstuff_v0 *crow::create_serial_gstuff_v0(const char *path,
-                                                uint32_t baudrate,
-                                                uint8_t id,
-                                                bool debug,
-                                                const gstuff_context& gctx)
+crow::serial_gstuff_v0 *
+crow::create_serial_gstuff_v0(const char *path, uint32_t baudrate, uint8_t id,
+                              bool debug, const gstuff_context &gctx)
 {
     (void)baudrate;
     auto *g = new crow::serial_gstuff_v0(gctx);
@@ -253,6 +337,20 @@ crow::serial_gstuff_v0 *crow::create_serial_gstuff_v0(const char *path,
 
     g->rpack = NULL;
     g->bind(id);
+
+    if (debug)
+    {
+        nos::print("gctx.GSTUFF_STUB =");
+        nos::printhexln((char)gctx.GSTUFF_STUB);
+        nos::print("gctx.GSTUFF_START =");
+        nos::printhexln((char)gctx.GSTUFF_START);
+        nos::print("gctx.GSTUFF_STOP   =");
+        nos::printhexln((char)gctx.GSTUFF_STOP);
+        nos::print("gctx.GSTUFF_STUB_START =");
+        nos::printhexln((char)gctx.GSTUFF_STUB_START);
+        nos::print("gctx.GSTUFF_STUB_STOP =");
+        nos::printhexln((char)gctx.GSTUFF_STUB_STOP);
+    }
 
     crow::asyncio.add_iotask(
         g->fd,
