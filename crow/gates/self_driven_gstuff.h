@@ -215,7 +215,7 @@ namespace crow
             if (!dlist_empty(&to_send))
             {
                 auto pack = dlist_first_entry(&to_send, crow::packet, ulnk);
-                dlist_del_init(&insend->ulnk);
+                dlist_del_init(&pack->ulnk);
                 start_send(pack);
             }
         }
