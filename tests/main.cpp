@@ -28,6 +28,14 @@ if (iResult != 0) {
 	udpgate.bind(12);
 	udpgate.open(10099);
 
+	// Reset state before running tests
+	crow::reset_for_test();
+
+	// Verify reset worked
+	if (crow::allocated_count() != 0) {
+		printf("WARNING: allocated_count=%d after reset!\n", crow::allocated_count());
+	}
+
 	doctest::Context context;
 
 	int res = context.run(); // run

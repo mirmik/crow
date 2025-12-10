@@ -10,8 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-int crow_allocated_count = 0;
-
 void crow::packet_initialization(crow::packet *pack, crow::gateway *ingate)
 {
     dlist_init(&pack->lnk);
@@ -63,9 +61,4 @@ void crow::packet::revert(nos::buffer *vec, size_t veclen)
             *tgt++ = *--ptr;
     }
     increment_stage(sz);
-}
-
-bool crow::has_allocated()
-{
-    return !!crow_allocated_count;
 }

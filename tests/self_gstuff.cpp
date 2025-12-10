@@ -1,9 +1,11 @@
 #include <chrono>
 #include <crow/gates/self_driven_gstuff.h>
 #include <crow/packet.h>
+#include <crow/tower.h>
 #include <doctest/doctest.h>
 #include <igris/util/dstring.h>
 #include <thread>
+#include "allocator_test_helper.h"
 
 static volatile int ccc = 0;
 
@@ -25,9 +27,13 @@ static int room(void *priv)
 
 TEST_CASE("self_driven_gstuff.output")
 {
-    crow::total_travelled = 0;
-    crow::default_incoming_handler = nullptr;
+    FOR_EACH_ALLOCATOR
     {
+        write_total = 0;
+        writed_data.clear();
+        ccc = 0;
+        crow::default_incoming_handler = nullptr;
+        {
         crow::self_driven_gstuff<crow::header_v1> gate;
 
         gate.init(write, room, NULL, 100);
@@ -70,9 +76,10 @@ TEST_CASE("self_driven_gstuff.output")
         }
     }
 
-    CHECK_EQ(crow::total_travelled, 0);
-    CHECK_EQ(crow::has_untravelled(), false);
-    CHECK_EQ(crow::allocated_count(), 0);
+        CHECK_EQ(crow::total_travelled, 0);
+        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(crow::allocated_count(), 0);
+    } // FOR_EACH_ALLOCATOR
 }
 
 /*TEST_CASE("self_driven_gstuff.input")

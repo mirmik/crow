@@ -3,6 +3,7 @@
 #include <crow/tower.h>
 #include <doctest/doctest.h>
 #include <nos/print.h>
+#include "allocator_test_helper.h"
 
 #include <chrono>
 #include <thread>
@@ -22,11 +23,13 @@ void undel(crow::node_packet_ptr)
     ucount++;
 }
 
-TEST_CASE("node0" * doctest::timeout(2))
+TEST_CASE("node0" * doctest::timeout(5))
 {
-    count = ucount = 0;
-    crow::total_travelled = 0;
-    crow::default_incoming_handler = nullptr;
+    FOR_EACH_ALLOCATOR
+    {
+        count = ucount = 0;
+        crow::total_travelled = 0;
+        crow::default_incoming_handler = nullptr;
 
     SUBCASE("0")
     {
@@ -273,28 +276,13 @@ TEST_CASE("node0" * doctest::timeout(2))
 
         auto ptr = node0.send(11, waddr, "data", 1, 2);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
+        // ackquant=2 gets quantized to 4ms, need 5 retries
+        // Use 15ms intervals with more iterations to ensure all retries complete
+        for (int i = 0; i < 12; i++)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(15));
+            crow::onestep();
+        }
 
         CHECK_EQ(count, 0);
         CHECK_EQ(ucount, 1);
@@ -313,24 +301,13 @@ TEST_CASE("node0" * doctest::timeout(2))
 
         node0.send(11, waddr, "data", 2, 2);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
-        std::this_thread::sleep_for(std::chrono::milliseconds(7));
-        crow::onestep();
+        // ackquant=2 gets quantized to 4ms, need 5 retries
+        // Use 15ms intervals with more iterations to ensure all retries complete
+        for (int i = 0; i < 12; i++)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(15));
+            crow::onestep();
+        }
 
         CHECK_EQ(count, 0);
         CHECK_EQ(ucount, 1);
@@ -338,4 +315,5 @@ TEST_CASE("node0" * doctest::timeout(2))
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
+    } // FOR_EACH_ALLOCATOR
 }

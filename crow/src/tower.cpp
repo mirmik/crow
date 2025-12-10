@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <igris/dprint.h>
 #include <igris/event/delegate.h>
 #include <igris/sync/syslock.h>
 #include <igris/time/systime.h>
@@ -15,6 +16,7 @@
 #include <crow/pubsub/pubsub.h>
 #include <crow/tower.h>
 #include <crow/warn.h>
+#include <crow/src/packet_htable.h>
 
 #include <nos/print.h>
 
@@ -31,6 +33,15 @@ bool crow::retransling_allowed = false;
 DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
+
+// Hash table for fast lookup of outgoing packets by seqid
+static crow::packet_htable crow_outters_htable;
+
+// List size limits and counters for DoS protection
+static constexpr size_t MAX_OUTTERS = 128;
+static constexpr size_t MAX_INCOMING = 128;
+static size_t outters_count = 0;
+static size_t incoming_count = 0;
 
 igris::delegate<void> crow::unsleep_handler;
 void (*crow::default_incoming_handler)(crow::packet *pack) = nullptr;
@@ -83,6 +94,10 @@ void crow::tower_release(crow::packet *pack)
     //Инициализируем для последуещего освобождения в utilize
     dlist_del_init(&pack->lnk);
 
+    // Remove from hash table if present (entry points to itself when not in list)
+    if (!dlist_empty(&pack->hlnk))
+        crow_outters_htable.remove(&pack->hlnk);
+
     if (pack->u.f.released_by_world && pack->refs == 0)
         crow::utilize(pack);
     else
@@ -94,33 +109,46 @@ void crow::tower_release(crow::packet *pack)
 static void confirmed_utilize_from_outers(crow::packet *pack)
 {
     crow::packet *it;
-    dlist_for_each_entry(it, &crow_outters, lnk)
+    system_lock();
+    // Use hash table for O(1) bucket lookup instead of O(n) list scan
+    dlist_head *bucket = crow_outters_htable.bucket(pack->seqid());
+    dlist_for_each_entry(it, bucket, hlnk)
     {
         if (it->seqid() == pack->seqid() &&
             pack->addrsize() == it->addrsize() &&
             !memcmp(it->addrptr(), pack->addrptr(), pack->addrsize()))
         {
             it->u.f.confirmed = 1;
+            crow_outters_htable.remove(&it->hlnk);
+            if (outters_count > 0)
+                --outters_count;
+            system_unlock();
             crow::node_protocol.delivered(it);
             crow::tower_release(it);
             return;
         }
     }
+    system_unlock();
 }
 
 static void qos_release_from_incoming(crow::packet *pack)
 {
     crow::packet *it;
+    system_lock();
     dlist_for_each_entry(it, &crow_incoming, lnk)
     {
         if (it->seqid() == pack->seqid() &&
             pack->addrsize() == it->addrsize() &&
             !memcmp(it->addrptr(), pack->addrptr(), pack->addrsize()))
         {
+            if (incoming_count > 0)
+                --incoming_count;
+            system_unlock();
             crow::tower_release(it);
             return;
         }
     }
+    system_unlock();
 }
 
 bool crow_time_comparator(crow::packet *a, crow::packet *b)
@@ -131,18 +159,59 @@ bool crow_time_comparator(crow::packet *a, crow::packet *b)
     return a_timer < b_timer;
 }
 
-static void add_to_incoming_list(crow::packet *pack)
+static bool add_to_incoming_list(crow::packet *pack)
 {
+    // Check limit before adding
+    if (incoming_count >= MAX_INCOMING)
+    {
+        if (__diagnostic_enabled)
+        {
+            dpr("crow: incoming list full (");
+            dpr(incoming_count);
+            dpr("/");
+            dpr(MAX_INCOMING);
+            dpr("), dropping seqid=");
+            dprhex(pack->seqid());
+            dln();
+        }
+        return false;
+    }
     pack->last_request_time = igris::millis();
     dlist_move_sorted(pack, &crow_incoming, lnk, crow_time_comparator);
+    ++incoming_count;
     crow::unsleep();
+    return true;
 }
 
-static void add_to_outters_list(crow::packet *pack)
+static bool add_to_outters_list(crow::packet *pack)
 {
+    // Check limit before adding (but allow retransmits - already in list)
+    bool is_retransmit = !dlist_empty(&pack->hlnk);
+    if (!is_retransmit && outters_count >= MAX_OUTTERS)
+    {
+        if (__diagnostic_enabled)
+        {
+            dpr("crow: outters list full (");
+            dpr(outters_count);
+            dpr("/");
+            dpr(MAX_OUTTERS);
+            dpr("), dropping seqid=");
+            dprhex(pack->seqid());
+            dln();
+        }
+        return false;
+    }
     pack->last_request_time = igris::millis();
     dlist_move_sorted(pack, &crow_outters, lnk, crow_time_comparator);
+    // Add to hash table for fast lookup by seqid
+    // First remove if already in table (for retransmits)
+    if (is_retransmit)
+        crow_outters_htable.remove(&pack->hlnk);
+    else
+        ++outters_count;
+    crow_outters_htable.put(pack, &pack->hlnk, pack->seqid());
     crow::unsleep();
+    return true;
 }
 
 crow::packet_ptr crow::travel(crow::packet *pack)
@@ -397,7 +466,13 @@ static void crow_do_travel(crow::packet *pack)
                 // Фиксирем пакет как принятый для фильтрации
                 // возможных последующих копий.
                 system_lock();
-                add_to_incoming_list(pack);
+                if (!add_to_incoming_list(pack))
+                {
+                    // List full, drop packet
+                    crow::utilize(pack);
+                    system_unlock();
+                    return;
+                }
                 system_unlock();
             }
         }
@@ -705,8 +780,12 @@ void crow::return_to_tower(crow::packet *pack, uint8_t sts)
         //Пакет здешний.
         if (sts != CROW_SENDED || pack->quality() == CROW_WITHOUT_ACK)
             crow::tower_release(pack);
-        else
-            add_to_outters_list(pack);
+        else if (!add_to_outters_list(pack))
+        {
+            // List full, mark as undelivered
+            pack->u.f.undelivered = 1;
+            crow::tower_release(pack);
+        }
     }
 
     system_unlock();
@@ -794,11 +873,16 @@ void crow_onestep_outers_stage()
 
             if (pack->_ackcount == 0)
             {
+                if (outters_count > 0)
+                    --outters_count;
                 crow_undelivered(pack);
                 crow::tower_release(pack);
             }
             else
             {
+                // Retransmit - packet stays in outters (re-added via travel)
+                // Don't decrement counter as add_to_outters_list won't increment
+                // for retransmits (detected via non-empty hlnk)
                 system_unlock();
                 crow::travel(pack);
                 system_lock();
@@ -835,11 +919,18 @@ void crow_onestep_incoming_stage()
 
             if (pack->_ackcount == 0)
             {
+                if (incoming_count > 0)
+                    --incoming_count;
                 pack->u.f.undelivered = 1;
-                crow::utilize(pack);
+                // Use tower_release instead of utilize to respect
+                // released_by_world flag and refs count
+                pack->u.f.released_by_tower = true;
+                if (pack->u.f.released_by_world && pack->refs == 0)
+                    crow::utilize(pack);
             }
             else
             {
+                // Re-add to sorted list for retry, don't change counter
                 dlist_move_sorted(pack, &crow_incoming, lnk,
                                   crow_time_comparator);
                 pack->last_request_time = curtime;
@@ -910,6 +1001,43 @@ void crow::finish()
     {
         gate->finish();
     }
+}
+
+void crow::reset_for_test()
+{
+    system_lock();
+
+    // Clear travelled list
+    while (!dlist_empty(&crow_travelled))
+    {
+        crow::packet *pack =
+            dlist_first_entry(&crow_travelled, crow::packet, lnk);
+        dlist_del(&pack->lnk);
+        crow::deallocate_packet(pack);
+    }
+
+    // Clear incoming list
+    while (!dlist_empty(&crow_incoming))
+    {
+        crow::packet *pack =
+            dlist_first_entry(&crow_incoming, crow::packet, lnk);
+        dlist_del(&pack->lnk);
+        crow::deallocate_packet(pack);
+    }
+
+    // Clear outters list
+    while (!dlist_empty(&crow_outters))
+    {
+        crow::packet *pack =
+            dlist_first_entry(&crow_outters, crow::packet, lnk);
+        dlist_del(&pack->lnk);
+        crow::deallocate_packet(pack);
+    }
+
+    crow::total_travelled = 0;
+    crow::reset_allocated_count();
+
+    system_unlock();
 }
 
 bool crow::fully_empty()

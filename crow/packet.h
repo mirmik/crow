@@ -38,7 +38,7 @@ namespace crow
     {
         union _u
         {
-            uint8_t pflag = 0; ///< Флаги пакета
+            uint8_t pflag; ///< Флаги пакета
             struct _f
             {
                 uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
@@ -96,7 +96,7 @@ namespace crow
     {
         union _u
         {
-            uint8_t pflag = 0; ///< Флаги пакета
+            uint8_t pflag; ///< Флаги пакета
             struct _f
             {
                 uint8_t ack : 1; ///< Идентифицирует ack пакеты. Доп.инф.
@@ -167,6 +167,8 @@ namespace crow
         struct dlist_head ulnk =
             DLIST_HEAD_INIT(ulnk); ///< Для подключения в список пользователя и
         ///< зависимых протоколов.
+        struct dlist_head hlnk =
+            DLIST_HEAD_INIT(hlnk); ///< Для хеш-таблицы outters.
         crow::gateway *ingate =
             nullptr; ///< gate, которым пакет прибыл в систему.
         uint16_t last_request_time = 0; ///< время последней отправки
@@ -533,8 +535,10 @@ namespace crow
         }
     }
 
-    // Только для аллокации через pool.
+    // Pool allocator control (by default malloc is used)
     void engage_packet_pool(void *zone, size_t zonesize, size_t elsize);
+    void disengage_packet_pool();
+    bool is_pool_engaged();
     igris::pool *get_package_pool();
 
     bool has_allocated();
@@ -542,6 +546,7 @@ namespace crow
     void diagnostic(const char *label, crow::packet *pack);
 
     int allocated_count();
+    void reset_allocated_count();
 }
 
 #endif

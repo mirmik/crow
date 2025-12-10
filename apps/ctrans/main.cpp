@@ -178,6 +178,12 @@ int service_data_handle(char *cmd, int cmdlen, char *ans, int ansmax)
 
 void requestor_data_handle(nos::buffer incom_data)
 {
+    if (debug_mode)
+    {
+        fprintf(stderr, "requestor_data_handle: size=%zu, last_byte=0x%02x\n",
+                incom_data.size(),
+                incom_data.size() > 0 ? (uint8_t)incom_data.data()[incom_data.size()-1] : 0);
+    }
     do_incom_data(incom_data);
 }
 
