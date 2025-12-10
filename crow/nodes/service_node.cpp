@@ -43,6 +43,16 @@ void crow::service_node::reply_chunked(const char *answ, size_t size)
     constexpr size_t CHUNK_HEADER_SIZE = 4;
     size_t payload_per_chunk = _chunk_size - CHUNK_HEADER_SIZE;
 
+    // Static buffer on stack - max chunk size is typically 400-512 bytes
+    // Use 512 as reasonable max for embedded systems
+    char chunk_buf[512];
+    if (_chunk_size > sizeof(chunk_buf))
+    {
+        // Chunk size too large for stack buffer, fall back to single reply
+        reply_single(answ, size);
+        return;
+    }
+
     size_t offset = 0;
     uint16_t chunk_id = 0;
 
@@ -53,15 +63,14 @@ void crow::service_node::reply_chunked(const char *answ, size_t size)
         bool has_more = (offset + chunk_payload < size);
 
         // Build chunk: [marker][chunk_id_lo][chunk_id_hi][flags][payload...]
-        std::vector<char> chunk_buf(CHUNK_HEADER_SIZE + chunk_payload);
         chunk_buf[0] = static_cast<char>(CHUNKED_REPLY_MARKER);
         chunk_buf[1] = static_cast<char>(chunk_id & 0xFF);
         chunk_buf[2] = static_cast<char>((chunk_id >> 8) & 0xFF);
         chunk_buf[3] = has_more ? CHUNK_FLAG_HAS_MORE : 0;
-        std::memcpy(chunk_buf.data() + CHUNK_HEADER_SIZE, answ + offset, chunk_payload);
+        std::memcpy(chunk_buf + CHUNK_HEADER_SIZE, answ + offset, chunk_payload);
 
         publish(curpack->addr(), subheader.sid, reply_theme,
-                {chunk_buf.data(), chunk_buf.size()}, qos, ackquant);
+                {chunk_buf, CHUNK_HEADER_SIZE + chunk_payload}, qos, ackquant);
 
         offset += chunk_payload;
         chunk_id++;
