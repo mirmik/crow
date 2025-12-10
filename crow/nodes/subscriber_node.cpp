@@ -1,12 +1,14 @@
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/nodes/subscriber_node.h>
 #include <cstring>
+#include <igris/time/systime.h>
 
 void crow::subscriber_node::reset_chunk_buffer()
 {
     _chunk_buffer.clear();
     _expected_chunks = 0;
     _receiving_chunks = false;
+    _chunk_start_time = 0;
 }
 
 bool crow::subscriber_node::try_reassemble_chunks(std::vector<char> &result)
@@ -35,6 +37,27 @@ void crow::subscriber_node::handle_incoming_message(nos::buffer message)
                            (static_cast<uint8_t>(message.data()[2]) << 8);
         uint8_t flags = static_cast<uint8_t>(message.data()[3]);
         bool has_more = (flags & CHUNK_FLAG_HAS_MORE) != 0;
+
+        // Check chunk_id limit to prevent memory exhaustion
+        if (chunk_id >= MAX_CHUNKS)
+        {
+            reset_chunk_buffer();
+            return;
+        }
+
+        // Check timeout for reassembly
+        uint64_t now = igris::millis();
+        if (_receiving_chunks && _chunk_start_time > 0 &&
+            (now - _chunk_start_time) > CHUNK_REASSEMBLY_TIMEOUT_MS)
+        {
+            reset_chunk_buffer();
+        }
+
+        // Start timer on first chunk
+        if (!_receiving_chunks)
+        {
+            _chunk_start_time = now;
+        }
 
         std::vector<char> payload(message.data() + 4, message.data() + message.size());
         _chunk_buffer[chunk_id] = std::move(payload);

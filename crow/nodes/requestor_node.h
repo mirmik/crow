@@ -25,6 +25,7 @@ namespace crow
         std::map<uint16_t, std::vector<char>> _chunk_buffer;
         uint16_t _expected_chunks = 0;
         bool _receiving_chunks = false;
+        uint64_t _chunk_start_time = 0;
 
     public:
         requestor_node() = default;

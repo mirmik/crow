@@ -1,9 +1,9 @@
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/nodes/requestor_node.h>
+#include <igris/time/systime.h>
 #include <igris/util/bug.h>
 #include <nos/print.h>
 #include <cstring>
-//#include <iostream>
 
 const char *crow::pubsub_type_to_string(PubSubTypes type)
 {
@@ -30,6 +30,7 @@ void crow::requestor_node::reset_chunk_buffer()
     _chunk_buffer.clear();
     _expected_chunks = 0;
     _receiving_chunks = false;
+    _chunk_start_time = 0;
 }
 
 bool crow::requestor_node::try_reassemble_chunks(std::vector<char> &result)
@@ -67,6 +68,27 @@ void crow::requestor_node::handle_incoming_message(nos::buffer message)
         printf("[chunk] id=%d, has_more=%d, expected=%d, buffered=%zu\n",
                chunk_id, has_more, _expected_chunks, _chunk_buffer.size());
 #endif
+
+        // Check chunk_id limit to prevent memory exhaustion
+        if (chunk_id >= MAX_CHUNKS)
+        {
+            reset_chunk_buffer();
+            return;
+        }
+
+        // Check timeout for reassembly
+        uint64_t now = igris::millis();
+        if (_receiving_chunks && _chunk_start_time > 0 &&
+            (now - _chunk_start_time) > CHUNK_REASSEMBLY_TIMEOUT_MS)
+        {
+            reset_chunk_buffer();
+        }
+
+        // Start timer on first chunk
+        if (!_receiving_chunks)
+        {
+            _chunk_start_time = now;
+        }
 
         // Extract payload
         std::vector<char> payload(message.data() + 4, message.data() + message.size());

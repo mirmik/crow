@@ -15,6 +15,7 @@
 #include <crow/pubsub/pubsub.h>
 #include <crow/tower.h>
 #include <crow/warn.h>
+#include <crow/src/packet_htable.h>
 
 #include <nos/print.h>
 
@@ -31,6 +32,9 @@ bool crow::retransling_allowed = false;
 DLIST_HEAD(crow_travelled);
 DLIST_HEAD(crow_incoming);
 DLIST_HEAD(crow_outters);
+
+// Hash table for fast lookup of outgoing packets by seqid
+static crow::packet_htable crow_outters_htable;
 
 igris::delegate<void> crow::unsleep_handler;
 void (*crow::default_incoming_handler)(crow::packet *pack) = nullptr;
@@ -83,6 +87,10 @@ void crow::tower_release(crow::packet *pack)
     //Инициализируем для последуещего освобождения в utilize
     dlist_del_init(&pack->lnk);
 
+    // Remove from hash table if present (entry points to itself when not in list)
+    if (!dlist_empty(&pack->hlnk))
+        crow_outters_htable.remove(&pack->hlnk);
+
     if (pack->u.f.released_by_world && pack->refs == 0)
         crow::utilize(pack);
     else
@@ -94,33 +102,42 @@ void crow::tower_release(crow::packet *pack)
 static void confirmed_utilize_from_outers(crow::packet *pack)
 {
     crow::packet *it;
-    dlist_for_each_entry(it, &crow_outters, lnk)
+    system_lock();
+    // Use hash table for O(1) bucket lookup instead of O(n) list scan
+    dlist_head *bucket = crow_outters_htable.bucket(pack->seqid());
+    dlist_for_each_entry(it, bucket, hlnk)
     {
         if (it->seqid() == pack->seqid() &&
             pack->addrsize() == it->addrsize() &&
             !memcmp(it->addrptr(), pack->addrptr(), pack->addrsize()))
         {
             it->u.f.confirmed = 1;
+            crow_outters_htable.remove(&it->hlnk);
+            system_unlock();
             crow::node_protocol.delivered(it);
             crow::tower_release(it);
             return;
         }
     }
+    system_unlock();
 }
 
 static void qos_release_from_incoming(crow::packet *pack)
 {
     crow::packet *it;
+    system_lock();
     dlist_for_each_entry(it, &crow_incoming, lnk)
     {
         if (it->seqid() == pack->seqid() &&
             pack->addrsize() == it->addrsize() &&
             !memcmp(it->addrptr(), pack->addrptr(), pack->addrsize()))
         {
+            system_unlock();
             crow::tower_release(it);
             return;
         }
     }
+    system_unlock();
 }
 
 bool crow_time_comparator(crow::packet *a, crow::packet *b)
@@ -142,6 +159,11 @@ static void add_to_outters_list(crow::packet *pack)
 {
     pack->last_request_time = igris::millis();
     dlist_move_sorted(pack, &crow_outters, lnk, crow_time_comparator);
+    // Add to hash table for fast lookup by seqid
+    // First remove if already in table (for retransmits)
+    if (!dlist_empty(&pack->hlnk))
+        crow_outters_htable.remove(&pack->hlnk);
+    crow_outters_htable.put(pack, &pack->hlnk, pack->seqid());
     crow::unsleep();
 }
 

@@ -167,6 +167,8 @@ namespace crow
         struct dlist_head ulnk =
             DLIST_HEAD_INIT(ulnk); ///< Для подключения в список пользователя и
         ///< зависимых протоколов.
+        struct dlist_head hlnk =
+            DLIST_HEAD_INIT(hlnk); ///< Для хеш-таблицы outters.
         crow::gateway *ingate =
             nullptr; ///< gate, которым пакет прибыл в систему.
         uint16_t last_request_time = 0; ///< время последней отправки
