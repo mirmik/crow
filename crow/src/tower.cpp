@@ -1314,3 +1314,15 @@ uint16_t crow::get_current_seqid()
 {
     return __seqcounter;
 }
+
+static std::string __diagnostic_label;
+
+void crow::set_diagnostic_label(const std::string &name)
+{
+    __diagnostic_label = name;
+}
+
+const std::string &crow::get_diagnostic_label()
+{
+    return __diagnostic_label;
+}

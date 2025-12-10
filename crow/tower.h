@@ -8,6 +8,7 @@
 #include <crow/packet_ptr.h>
 #include <igris/event/delegate.h>
 #include <nos/buffer.h>
+#include <string>
 
 #define CROW_SENDED 0
 #define CROW_WRONG_ADDRESS -1
@@ -129,6 +130,10 @@ namespace crow
     // Set initial sequence number (useful for random seqid at startup)
     void set_initial_seqid(uint16_t seqid);
     uint16_t get_current_seqid();
+
+    // Application name for diagnostic messages
+    void set_diagnostic_label(const std::string &name);
+    const std::string &get_diagnostic_label();
 }
 
 #endif

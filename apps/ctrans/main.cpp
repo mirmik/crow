@@ -1057,6 +1057,9 @@ int main(int argc, char *argv[])
     std::random_device rd;
     crow::set_initial_seqid(rd() & 0xFFFF);
 
+    // Set diagnostic label with PID for debugging
+    crow::set_diagnostic_label(nos::format("ctrans:{}", getpid()));
+
     parse_options(argc, argv);
 
     raw_node.bind(1);

@@ -166,6 +166,7 @@ int main(int argc, char *argv[])
             case 'd':
                 debug_mode = true;
                 crow::enable_diagnostic();
+                crow::set_diagnostic_label("service:" + std::to_string(getpid()));
                 break;
             default:
                 return 1;

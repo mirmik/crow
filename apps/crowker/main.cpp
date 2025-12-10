@@ -7,6 +7,7 @@
 #include <getopt.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include <map>
 #include <string>
@@ -156,6 +157,9 @@ int main(int argc, char *argv[])
     // after restart (TIME_WAIT entries on remote nodes still reference old seqids)
     std::random_device rd;
     crow::set_initial_seqid(rd() & 0xFFFF);
+
+    // Set diagnostic label with PID for debugging
+    crow::set_diagnostic_label(nos::format("crowker:{}", getpid()));
 
 #ifdef CROW_PUBSUB_PROTOCOL_SUPPORTED
     crow::pubsub_protocol.enable_crowker_subsystem();

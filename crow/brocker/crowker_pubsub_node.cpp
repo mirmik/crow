@@ -1,6 +1,7 @@
 #include <crow/brocker/crowker_api.h>
 #include <crow/brocker/crowker_pubsub_node.h>
 #include <crow/nodes/pubsub_defs.h>
+#include <crow/tower.h>
 
 #include <igris/util/bug.h>
 #include <nos/fprint.h>
@@ -122,7 +123,11 @@ void crow::crowker_pubsub_node::undelivered_packet_handle(
     crow::hostaddr_view addr, int node)
 {
     auto addrstr = addr.to_string();
-    nos::log::info("undelivered_packet_handle addr:{} node:{}", addrstr, node);
+    const std::string &label = crow::get_diagnostic_label();
+    if (!label.empty())
+        nos::log::info("[{}] undelivered_packet_handle addr:{} node:{}", label, addrstr, node);
+    else
+        nos::log::info("undelivered_packet_handle addr:{} node:{}", addrstr, node);
     auto &client = clients.at(std::make_pair(addr, node));
     client.detach_from_themes();
 }

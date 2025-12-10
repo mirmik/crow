@@ -15,6 +15,10 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
 {
     bool postfix_points = pack->datasize() > crow::debug_data_size;
 
+    const std::string &label = crow::get_diagnostic_label();
+    if (!label.empty())
+        nos::fprint_to(nos::cerr, "[{}] ", label);
+
     nos::fprint_to(nos::cerr,
         "{}: ("
         "qos:{}, "
