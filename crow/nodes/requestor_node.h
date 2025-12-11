@@ -8,8 +8,6 @@
 
 namespace crow
 {
-    // Note: Chunked message reassembly is now handled at node_protocol level.
-
     class requestor_node : public crow::publisher_node
     {
         dlist_head incoming_list = DLIST_HEAD_INIT(incoming_list);

@@ -9,11 +9,6 @@
 
 namespace crow
 {
-    // Note: Chunked message reassembly is now handled at node_protocol level.
-    // These constants are kept for backward compatibility with old code.
-    inline constexpr uint8_t CHUNKED_REPLY_MARKER = 0x01;
-    inline constexpr uint8_t CHUNK_FLAG_HAS_MORE = 0x01;
-
     class abstract_subscriber_node : public crow::publisher_node,
                                      public crow::alived_object
     {

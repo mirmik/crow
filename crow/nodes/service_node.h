@@ -5,9 +5,6 @@
 
 namespace crow
 {
-    // Chunked replies are now handled at the node protocol level.
-    // Set chunk_size via node::set_chunk_size() to enable automatic chunking.
-
     class service_node : public crow::abstract_subscriber_node
     {
         using delegate = igris::delegate<void, char *, int, service_node &>;
@@ -42,9 +39,6 @@ namespace crow
         {
             abstract_subscriber_node::init_subscribe(addr, theme, 2, 50, 2, 50);
         }
-
-        // Chunk size is now inherited from node base class.
-        // Use node::set_chunk_size() and node::chunk_size()
 
         void reply(const char *data, size_t size);
         void reply(nos::buffer buf)

@@ -2,9 +2,6 @@
 #include <crow/nodes/subscriber_node.h>
 #include <cstring>
 
-// Note: Chunked message reassembly is now handled at node_protocol level.
-// By the time incoming_packet is called, chunks have already been assembled.
-
 void crow::subscriber_node::incoming_packet(crow::packet *pack)
 {
     auto &s = pack->subheader<pubsub_subheader>();

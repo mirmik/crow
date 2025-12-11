@@ -4,9 +4,6 @@
 #include <nos/print.h>
 #include <cstring>
 
-// Note: Chunked message reassembly is now handled at node_protocol level.
-// By the time incoming_packet is called, chunks have already been assembled.
-
 const char *crow::pubsub_type_to_string(PubSubTypes type)
 {
     switch (type)
