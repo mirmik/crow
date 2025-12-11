@@ -4,6 +4,7 @@
 #include <crow/hostaddr.h>
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/nodes/subscriber_node.h>
+#include <crow/tower_cls.h>
 #include <pybind11/embed.h>
 
 #include <functional>
@@ -51,6 +52,18 @@ public:
             this->addr, this->theme.c_str(), 2, 50, 2, 50);
         abstract_subscriber_node::subscribe();
     }
+
+    pybind_subscriber &bind_to_tower(crow::Tower &tower, int addr)
+    {
+        crow::node::bind(tower, addr);
+        return *this;
+    }
+
+    pybind_subscriber &bind_to_tower_dynamic(crow::Tower &tower)
+    {
+        crow::node::bind(tower);
+        return *this;
+    }
 };
 #pragma GCC visibility pop
 
@@ -60,5 +73,11 @@ void register_subscriber_class(py::module &m)
         .def(py::init<std::function<void(py::bytes)> &>())
         .def("install_keepalive", &pybind_subscriber::install_keepalive)
         .def("subscribe", &pybind_subscriber::subscribe, py::arg("addr"),
-             py::arg("theme"));
+             py::arg("theme"))
+        .def("bind_to_tower", &pybind_subscriber::bind_to_tower,
+             py::arg("tower"), py::arg("addr"),
+             py::return_value_policy::reference)
+        .def("bind_to_tower", &pybind_subscriber::bind_to_tower_dynamic,
+             py::arg("tower"),
+             py::return_value_policy::reference);
 }

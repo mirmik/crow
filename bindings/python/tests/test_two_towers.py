@@ -167,3 +167,54 @@ class TestTwoTowers:
 
         assert tower1.get_retransling_allowed() == True
         assert tower2.get_retransling_allowed() == False
+
+    def test_loopgate_local_communication(self):
+        """Test local communication via loopgate within single tower."""
+        tower = pycrow.Tower()
+        tower.set_retransling_allowed(True)
+
+        # Create loopgate
+        loopgate = pycrow.loopgate()
+        loopgate.bind_to_tower(tower, 99)
+
+        # Local address using loopgate
+        addr = pycrow.address(".99")
+
+        # Send message
+        tower.send(addr, b"Local message", qos=0)
+
+        # Process
+        for _ in range(5):
+            tower.onestep()
+
+        # Loopgate loops back, so travelled count should be 2 (sent + received)
+        assert tower.get_total_travelled() == 2
+        assert not tower.has_untravelled()
+
+    def test_two_towers_with_loopgates(self):
+        """Test two independent towers with their own loopgates."""
+        tower1 = pycrow.Tower()
+        tower2 = pycrow.Tower()
+
+        tower1.set_retransling_allowed(True)
+        tower2.set_retransling_allowed(True)
+
+        loopgate1 = pycrow.loopgate()
+        loopgate2 = pycrow.loopgate()
+
+        loopgate1.bind_to_tower(tower1, 99)
+        loopgate2.bind_to_tower(tower2, 99)
+
+        # Each tower communicates locally
+        addr = pycrow.address(".99")
+
+        tower1.send(addr, b"Message in tower1", qos=0)
+        tower2.send(addr, b"Message in tower2", qos=0)
+
+        for _ in range(5):
+            tower1.onestep()
+            tower2.onestep()
+
+        # Each tower should have 2 travelled (sent + loopback received)
+        assert tower1.get_total_travelled() == 2
+        assert tower2.get_total_travelled() == 2

@@ -7,6 +7,7 @@
 
 #include "pynode.h"
 #include <crow/address.h>
+#include <crow/gates/loopgate.h>
 #include <crow/gates/udpgate.h>
 #include <crow/iter.h>
 #include <crow/nodes/publisher_node.h>
@@ -47,6 +48,18 @@ public:
     using crow::udpgate::udpgate;
 
     int bind_to_tower(crow::Tower &tower, int gate_no = CROW_UDPGATE_NO)
+    {
+        return crow::gateway::bind(tower, gate_no);
+    }
+};
+
+// Helper class for loopgate with Tower binding support
+class py_loopgate : public crow::loopgate
+{
+public:
+    using crow::loopgate::loopgate;
+
+    int bind_to_tower(crow::Tower &tower, int gate_no)
     {
         return crow::gateway::bind(tower, gate_no);
     }
@@ -122,6 +135,11 @@ PYBIND11_MODULE(libcrow, m)
         .def("bind_to_tower", &py_udpgate::bind_to_tower,
              py::arg("tower"), py::arg("gate_no") = CROW_UDPGATE_NO);
 
+    py::class_<py_loopgate>(m, "loopgate", __gateway__)
+        .def(py::init<>())
+        .def("bind_to_tower", &py_loopgate::bind_to_tower,
+             py::arg("tower"), py::arg("gate_no"));
+
     m.def("send",
           [](const crow::hostaddr_view &addr, const std::string &data,
              uint8_t type, uint8_t qos, uint16_t ackquant, bool fastsend) {
@@ -138,8 +156,22 @@ PYBIND11_MODULE(libcrow, m)
     m.def("finish", finish);
 
     py::class_<crow::node>(m, "node")
-        .def("bind", py::overload_cast<>(&crow::node::bind))
-        .def("bind", py::overload_cast<int>(&crow::node::bind))
+        .def("bind", py::overload_cast<>(&crow::node::bind),
+             py::return_value_policy::reference)
+        .def("bind", py::overload_cast<int>(&crow::node::bind),
+             py::return_value_policy::reference)
+        .def("bind_to_tower",
+             [](crow::node &self, crow::Tower &tower, int addr) -> crow::node & {
+                 return self.bind(tower, addr);
+             },
+             py::arg("tower"), py::arg("addr"),
+             py::return_value_policy::reference)
+        .def("bind_to_tower",
+             [](crow::node &self, crow::Tower &tower) -> crow::node & {
+                 return self.bind(tower);
+             },
+             py::arg("tower"),
+             py::return_value_policy::reference)
         .def_readwrite("id", &node::id)
         .def(
             "send",
@@ -170,7 +202,9 @@ PYBIND11_MODULE(libcrow, m)
     m.def("start_spin", &crow::start_spin);
     m.def("stop_spin", &crow::stop_spin, py::arg("wait") = true);
     m.def("onestep", &crow::onestep);
-    m.def("spin", &crow::spin);
+    m.def("spin", py::overload_cast<>(&crow::spin));
+    m.def("spin", py::overload_cast<crow::Tower &>(&crow::spin),
+          py::arg("tower"));
 
     m.def("get_gateway", &crow::get_gateway);
 

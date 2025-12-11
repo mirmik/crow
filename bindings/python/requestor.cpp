@@ -4,6 +4,7 @@
 #include <crow/hostaddr.h>
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/nodes/requestor_node.h>
+#include <crow/tower_cls.h>
 #include <pybind11/embed.h>
 
 #include <functional>
@@ -43,6 +44,18 @@ public:
         std::string info = data;
         return requestor_node::request(nos::buffer{info.data(), info.size()});
     }
+
+    pybind_requestor &bind_to_tower(crow::Tower &tower, int addr)
+    {
+        crow::node::bind(tower, addr);
+        return *this;
+    }
+
+    pybind_requestor &bind_to_tower_dynamic(crow::Tower &tower)
+    {
+        crow::node::bind(tower);
+        return *this;
+    }
 };
 #pragma GCC visibility pop
 
@@ -52,5 +65,11 @@ void register_requestor_class(py::module &m)
         .def(py::init<crow::hostaddr, std::string, std::string>(),
              py::arg("addr"), py::arg("theme"), py::arg("reply_theme"))
         .def("async_request", &pybind_requestor::async_request, py::arg("data"))
-        .def("request", &pybind_requestor::request, py::arg("data"));
+        .def("request", &pybind_requestor::request, py::arg("data"))
+        .def("bind_to_tower", &pybind_requestor::bind_to_tower,
+             py::arg("tower"), py::arg("addr"),
+             py::return_value_policy::reference)
+        .def("bind_to_tower", &pybind_requestor::bind_to_tower_dynamic,
+             py::arg("tower"),
+             py::return_value_policy::reference);
 }
