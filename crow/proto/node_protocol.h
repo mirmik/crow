@@ -3,7 +3,7 @@
 
 #include <crow/proto/protocol.h>
 #include <igris/container/dlist.h>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <cstdint>
 
@@ -62,23 +62,41 @@ namespace crow
         nodeid_t sid;        // source node
         uint64_t addr_hash;  // hash of source address
 
-        bool operator<(const reassembly_key &o) const
-        {
-            if (rid != o.rid) return rid < o.rid;
-            if (sid != o.sid) return sid < o.sid;
-            return addr_hash < o.addr_hash;
-        }
-
         bool operator==(const reassembly_key &o) const
         {
             return rid == o.rid && sid == o.sid && addr_hash == o.addr_hash;
         }
     };
+}
+
+// Hash specialization for reassembly_key
+namespace std
+{
+    template <>
+    struct hash<crow::reassembly_key>
+    {
+        size_t operator()(const crow::reassembly_key &k) const
+        {
+            // Combine hashes using FNV-like mixing
+            size_t h = 14695981039346656037ULL;
+            h ^= k.rid;
+            h *= 1099511628211ULL;
+            h ^= k.sid;
+            h *= 1099511628211ULL;
+            h ^= k.addr_hash;
+            h *= 1099511628211ULL;
+            return h;
+        }
+    };
+}
+
+namespace crow
+{
 
     // Buffer for reassembling chunked messages
     struct reassembly_buffer
     {
-        std::map<uint16_t, crow::packet *> chunks;
+        std::unordered_map<uint16_t, crow::packet *> chunks;
         uint16_t expected_chunks = 0;  // 0 = unknown (last chunk not yet received)
         uint64_t start_time_ms = 0;
         size_t total_payload_size = 0;
@@ -101,7 +119,7 @@ namespace crow
     class node_protocol_cls : public crow::protocol
     {
     private:
-        std::map<reassembly_key, reassembly_buffer> _reassembly;
+        std::unordered_map<reassembly_key, reassembly_buffer> _reassembly;
         size_t _max_message_size = NODE_DEFAULT_MAX_MESSAGE_SIZE;
         uint32_t _reassembly_timeout_ms = NODE_DEFAULT_REASSEMBLY_TIMEOUT_MS;
 
