@@ -189,9 +189,12 @@ void crow::Tower::tower_release(crow::packet *pack)
 
     dlist_del_init(&pack->lnk);
 
-    // Remove from hash table if present
+    // Remove from hash table if present (just disconnect the intrusive link)
+    // We use dlist_del_init directly instead of _outters_htable.remove()
+    // to avoid dependency on specific Tower instance - the link can safely
+    // disconnect itself from any hash table bucket it belongs to.
     if (!dlist_empty(&pack->hlnk))
-        _outters_htable.remove(&pack->hlnk);
+        dlist_del_init(&pack->hlnk);
 
     if (pack->u.f.released_by_world && pack->refs == 0)
         utilize(pack);
@@ -390,7 +393,7 @@ void crow::Tower::incoming_handler(crow::packet *pack)
     {
         if (_diagnostic_enabled)
         {
-            crow::diagnostic("wproto", pack);
+            crow::diagnostic("wproto", pack, _diagnostic_label, _debug_data_size);
         }
         release(pack);
         return;
@@ -459,12 +462,12 @@ void crow::Tower::send_to_gate_phase(crow::packet *pack)
             if (pack->ack())
             {
                 if (_diagnostic_enabled && _diagnostic_noack == false)
-                    crow::diagnostic("track", pack);
+                    crow::diagnostic("track", pack, _diagnostic_label, _debug_data_size);
             }
             else
             {
                 if (_diagnostic_enabled)
-                    crow::diagnostic("trans", pack);
+                    crow::diagnostic("trans", pack, _diagnostic_label, _debug_data_size);
             }
             assert(pack->u.f.sended_to_gate == 0);
             pack->u.f.sended_to_gate = 1;
@@ -473,7 +476,7 @@ void crow::Tower::send_to_gate_phase(crow::packet *pack)
         }
 
         if (_diagnostic_enabled)
-            crow::diagnostic("wgate", pack);
+            crow::diagnostic("wgate", pack, _diagnostic_label, _debug_data_size);
 
         if (pack->ingate == nullptr)
         {
@@ -489,12 +492,12 @@ void crow::Tower::send_to_gate_phase(crow::packet *pack)
         if (pack->ack())
         {
             if (_diagnostic_enabled && _diagnostic_noack == false)
-                crow::diagnostic("track", pack);
+                crow::diagnostic("track", pack, _diagnostic_label, _debug_data_size);
         }
         else
         {
             if (_diagnostic_enabled)
-                crow::diagnostic("trans", pack);
+                crow::diagnostic("trans", pack, _diagnostic_label, _debug_data_size);
         }
         assert(pack->u.f.sended_to_gate == 0);
         pack->u.f.sended_to_gate = 1;
@@ -505,7 +508,7 @@ void crow::Tower::send_to_gate_phase(crow::packet *pack)
 void crow::Tower::incoming_ack_phase(crow::packet *pack)
 {
     if (_diagnostic_enabled && _diagnostic_noack == false)
-        crow::diagnostic("inack", pack);
+        crow::diagnostic("inack", pack, _diagnostic_label, _debug_data_size);
 
     switch (pack->type())
     {
@@ -548,7 +551,7 @@ void crow::Tower::do_travel(crow::packet *pack)
         }
 
         if (_diagnostic_enabled)
-            crow::diagnostic("incom", pack);
+            crow::diagnostic("incom", pack, _diagnostic_label, _debug_data_size);
 
         if (pack->ingate)
         {
@@ -1389,6 +1392,7 @@ int crow::Tower::bind_c_gateway(crow_gateway *gate, int gateno)
 
 // ============================================================================
 // Compatibility layer - free functions delegating to default_tower()
+// For apps and tests that don't manage explicit Tower instances
 // ============================================================================
 
 bool crow::diagnostic_enabled()

@@ -2,6 +2,7 @@
 
 #include "pubsub.h"
 #include "subscriber.h"
+#include <crow/tower_cls.h>
 #include <utility>
 
 #include <crow/hexer.h>
@@ -35,7 +36,7 @@ void crow::pubsub_protocol_cls::incoming(crow::packet *pack)
                 return;
             }
         }
-        crow::release(pack);
+        crow::default_tower().release(pack);
     }
 }
 
@@ -47,7 +48,7 @@ void crow::pubsub_protocol_cls::undelivered(crow::packet *pack)
     }
     else
     {
-        crow::release(pack);
+        crow::default_tower().release(pack);
     }
 }
 
@@ -70,7 +71,7 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
         data,
     };
 
-    return crow::send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
+    return crow::default_tower().send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
                         acktime);
 }
 
@@ -97,7 +98,7 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
         {(char *)theme.data(), subps_d.thmsz},
     };
 
-    return crow::send_vv(addr, iov, igris::size(iov), vec, vecsz,
+    return crow::default_tower().send_vv(addr, iov, igris::size(iov), vec, vecsz,
                          CROW_PUBSUB_PROTOCOL, qos, acktime);
 }
 
@@ -121,7 +122,7 @@ void crow::subscribe(const crow::hostaddr_view &addr,
         {(char *)theme.data(), theme.size()},
     };
 
-    crow::send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
+    crow::default_tower().send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
                  acktime);
 }
 

@@ -1,9 +1,18 @@
 #include <crow/print.h>
-#include <crow/tower.h>
 #include <igris/dprint.h>
 
-void crow::diagnostic(const char *notation, crow::packet *pack)
+void crow::diagnostic(const char *notation,
+                      crow::packet *pack,
+                      const std::string &label,
+                      uint16_t dbg_size)
 {
+    (void)dbg_size; // Not used in debug variant
+    if (!label.empty())
+    {
+        dpr("[");
+        dpr(label.c_str());
+        dpr("] ");
+    }
     dpr(notation);
     dpr(": (");
     dpr("ptr:");

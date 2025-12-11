@@ -64,14 +64,14 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
         }
         break;
     }
-    crow::release(pack);
+    _tower->release(pack);
 }
 
 void crow::crowker_pubsub_node::undelivered_packet(crow::packet *pack)
 {
     auto node = crow::node_protocol_cls::rid(pack);
     undelivered_packet_handle(pack->addr(), node);
-    crow::release(pack);
+    _tower->release(pack);
 }
 
 void crow::crowker_pubsub_node::subscribe_on_theme(crow::hostaddr_view view,
@@ -123,7 +123,7 @@ void crow::crowker_pubsub_node::undelivered_packet_handle(
     crow::hostaddr_view addr, int node)
 {
     auto addrstr = addr.to_string();
-    const std::string &label = crow::get_diagnostic_label();
+    const std::string &label = _tower->get_diagnostic_label();
     if (!label.empty())
         nos::log::info("[{}] undelivered_packet_handle addr:{} node:{}", label, addrstr, node);
     else

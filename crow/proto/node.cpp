@@ -97,7 +97,7 @@ crow::packet_ptr crow::node::send(nodeid_t sid,
     const nos::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
                                 {(char *)data.data(), data.size()}};
 
-    return crow::send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant, async);
+    return crow::default_tower().send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant, async);
 }
 
 crow::packet_ptr crow::node::send_v(nodeid_t sid,
@@ -116,7 +116,7 @@ crow::packet_ptr crow::node::send_v(nodeid_t sid,
 
     const nos::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
 
-    return crow::send_vv(addr, iov, 1, vec, veclen, CROW_NODE_PROTOCOL, qos,
+    return crow::default_tower().send_vv(addr, iov, 1, vec, veclen, CROW_NODE_PROTOCOL, qos,
                          ackquant, async);
 }
 
@@ -138,7 +138,7 @@ crow::packet_ptr crow::node::send_vv(nodeid_t sid,
 
     const nos::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
 
-    return crow::send_vvv(addr, iov, 1, vec1, veclen1, vec2, veclen2,
+    return crow::default_tower().send_vvv(addr, iov, 1, vec1, veclen1, vec2, veclen2,
                           CROW_NODE_PROTOCOL, qos, ackquant, async);
 }
 

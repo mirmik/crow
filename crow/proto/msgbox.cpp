@@ -68,7 +68,7 @@ crow::msgbox::~msgbox()
     {
         crow::packet *pack = dlist_first_entry(&messages, crow::packet, ulnk);
         dlist_del_init(&pack->ulnk);
-        crow::release(pack);
+        _tower->release(pack);
     }
     igris_sem_post(&message_lock);
 }

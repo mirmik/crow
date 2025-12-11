@@ -25,7 +25,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
                 // raddr_ptr = malloc(pack->addrsize());
                 if (pack->addrsize() > raddr_cap)
                 {
-                    crow::release(pack);
+                    _tower->release(pack);
                     return;
                 }
 
@@ -59,7 +59,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
                 // raddr_ptr = malloc(pack->addrsize());
                 if (pack->addrsize() > raddr_cap)
                 {
-                    crow::release(pack);
+                    _tower->release(pack);
                     return;
                 }
 
@@ -92,7 +92,7 @@ void crow::channel::incoming_packet(crow::packet *pack)
             break;
     }
 
-    crow::release(pack);
+    _tower->release(pack);
 }
 
 void crow::channel::incoming_data_packet(crow::packet *pack)
@@ -104,7 +104,7 @@ void crow::channel::undelivered_packet(crow::packet *pack)
 {
     notify_one(-1);
     u.f._state = CROW_CHANNEL_DISCONNECTED;
-    crow::release(pack);
+    _tower->release(pack);
 }
 
 void crow::channel::handshake(const uint8_t *raddr_ptr,
@@ -134,7 +134,7 @@ void crow::channel::handshake(const uint8_t *raddr_ptr,
     u.f._state = CROW_CHANNEL_WAIT_HANDSHAKE_ANSWER;
 
     //_state = crow::State::CONNECTED;
-    crow::send_v({raddr_ptr, raddr_len}, vec, sizeof(vec) / sizeof(nos::buffer),
+    _tower->send_v({raddr_ptr, raddr_len}, vec, sizeof(vec) / sizeof(nos::buffer),
                  CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
@@ -159,7 +159,7 @@ void crow::channel::send_handshake_answer()
                          {(char *)&sh_handshake, sizeof(sh_handshake)}};
 
     //_state = crow::State::CONNECTED;
-    crow::send_v({raddr_ptr, raddr_len}, vec, sizeof(vec) / sizeof(nos::buffer),
+    _tower->send_v({raddr_ptr, raddr_len}, vec, sizeof(vec) / sizeof(nos::buffer),
                  CROW_NODE_PROTOCOL, 2, ackquant);
 }
 
@@ -186,7 +186,7 @@ int crow::channel::send(const char *data, size_t size)
         {(char *)data, size},
     };
 
-    crow::send_v({this->raddr_ptr, this->raddr_len}, vec,
+    _tower->send_v({this->raddr_ptr, this->raddr_len}, vec,
                  sizeof(vec) / sizeof(nos::buffer), CROW_NODE_PROTOCOL,
                  this->qos, this->ackquant);
 

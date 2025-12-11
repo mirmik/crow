@@ -19,12 +19,12 @@ void crow::acceptor::incoming_packet(crow::packet *pack)
         ch->incoming_packet(pack);
     }
     else
-        crow::release(pack);
+        _tower->release(pack);
 }
 
 void crow::acceptor::undelivered_packet(crow::packet *pack)
 {
-    crow::release(pack);
+    _tower->release(pack);
 }
 
 uint16_t crow::dynport()

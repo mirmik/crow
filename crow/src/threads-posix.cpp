@@ -1,6 +1,7 @@
 #include <chrono>
 #include <crow/asyncio.h>
 #include <crow/tower.h>
+#include <crow/tower_cls.h>
 #include <crow/warn.h>
 #include <igris/osutil/fd.h>
 #include <thread>
@@ -13,7 +14,10 @@ static std::thread _thread;
 bool _spin_runned = false;
 bool _spin_runned_unbounded = false;
 
-void crow::spin_with_select()
+namespace crow
+{
+
+void spin_with_select()
 {
     _spin_runned = true;
 
@@ -26,25 +30,25 @@ void crow::spin_with_select()
 
         do
         {
-            crow::onestep();
+            default_tower().onestep();
 
             if (cancel_token)
                 break;
-        } while (crow::has_untravelled_now());
+        } while (default_tower().has_untravelled_now());
 
-        int64_t timeout = crow::get_minimal_timeout();
+        int64_t timeout = default_tower().get_minimal_timeout();
         asyncio.step(timeout);
     };
 
     _spin_runned = false;
 }
 
-void crow::spin()
+void spin()
 {
     spin_with_select();
 }
 
-int crow::start_spin_with_select()
+int start_spin_with_select()
 {
     if (_spin_runned)
     {
@@ -59,12 +63,12 @@ int crow::start_spin_with_select()
     return 0;
 }
 
-int crow::start_spin()
+int start_spin()
 {
-    return crow::start_spin_with_select();
+    return start_spin_with_select();
 }
 
-int crow::start_spin_without_select()
+int start_spin_without_select()
 {
     if (_spin_runned)
     {
@@ -82,7 +86,7 @@ int crow::start_spin_without_select()
                 if (cancel_token)
                     break;
 
-                crow::onestep();
+                default_tower().onestep();
 
                 if (cancel_token)
                     break;
@@ -95,7 +99,7 @@ int crow::start_spin_without_select()
     return 0;
 }
 
-int crow::stop_spin(bool wait)
+int stop_spin(bool wait)
 {
     if (!_spin_runned)
     {
@@ -118,24 +122,24 @@ int crow::stop_spin(bool wait)
     return 0;
 }
 
-void crow::spin_join()
+void spin_join()
 {
     _thread.join();
 }
 
-void crow::join_spin()
+void join_spin()
 {
     _thread.join();
 }
 
-void crow::set_spin_cancel_token()
+void set_spin_cancel_token()
 {
     cancel_token = true;
 }
 
 //#if defined(CROW_REALTIME_THREADS)
 #include <igris/osutil/realtime.h>
-void crow::spin_with_select_realtime(int abort_on_fault)
+void spin_with_select_realtime(int abort_on_fault)
 {
     int ret;
     if ((ret = this_thread_set_realtime_priority()))
@@ -146,10 +150,10 @@ void crow::spin_with_select_realtime(int abort_on_fault)
             abort();
     }
 
-    crow::spin_with_select();
+    spin_with_select();
 }
 
-int crow::start_spin_with_select_realtime(int abort_on_fault)
+int start_spin_with_select_realtime(int abort_on_fault)
 {
     if (_spin_runned)
     {
@@ -164,8 +168,10 @@ int crow::start_spin_with_select_realtime(int abort_on_fault)
     return 0;
 }
 
-int crow::start_spin_realtime(int abort_on_fault)
+int start_spin_realtime(int abort_on_fault)
 {
-    return crow::start_spin_with_select_realtime(abort_on_fault);
+    return start_spin_with_select_realtime(abort_on_fault);
 }
 //#endif
+
+} // namespace crow

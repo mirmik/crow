@@ -3,6 +3,7 @@
 #include "pubsub.h"
 #include "subscriber.h"
 #include <crow/brocker/crowker.h>
+#include <crow/tower_cls.h>
 
 #include <igris/util/bug.h>
 
@@ -46,7 +47,7 @@ void incoming_crowker_handler(crow::packet *pack)
         break;
     }
 
-    crow::release(pack);
+    crow::default_tower().release(pack);
 }
 
 void undelivered_crowker_handler(crow::packet *pack)
@@ -59,7 +60,7 @@ void undelivered_crowker_handler(crow::packet *pack)
             std::string((char *)pack->addrptr(), pack->addrsize()));
     }
 
-    crow::release(pack);
+    crow::default_tower().release(pack);
 }
 
 void crow::pubsub_protocol_cls::enable_crowker_subsystem()

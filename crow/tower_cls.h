@@ -171,10 +171,10 @@ namespace crow
                             uint16_t ackquant,
                             bool async = false);
 
-        // Packet management
-        void release(packet *pack);
-        void utilize(packet *pack);
-        void tower_release(packet *pack);
+        // Packet management (static - don't depend on specific Tower instance)
+        static void release(packet *pack);
+        static void utilize(packet *pack);
+        static void tower_release(packet *pack);
 
         // Event loop
         void onestep();

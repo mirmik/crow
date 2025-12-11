@@ -1,5 +1,5 @@
 #include <crow/packet_ptr.h>
-#include <crow/tower.h>
+#include <crow/tower_cls.h>
 
 #include <assert.h>
 
@@ -16,7 +16,7 @@ void crow::packet_ptr::clear()
         system_unlock();
 
         if (should_release)
-            crow::release(pack);
+            crow::Tower::release(pack);
 
         pack = nullptr;
     }

@@ -171,7 +171,7 @@ namespace crow
         {
             crow::keepalive_timer_manager.plan(keepalive_timer, igris::millis(),
                                                interval);
-            crow::unsleep();
+            crow::default_tower().unsleep();
             if (immediate_call)
             {
                 keepalive_handle();

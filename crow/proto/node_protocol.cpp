@@ -12,7 +12,7 @@ void crow::node_protocol_cls::send_node_error(crow::packet *pack, int errcode)
     const nos::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
                                 {(char *)&errcode, sizeof(errcode)}};
 
-    crow::send_v({pack->addrptr(), pack->addrsize()}, iov, 2,
+    crow::default_tower().send_v({pack->addrptr(), pack->addrsize()}, iov, 2,
                  CROW_NODE_PROTOCOL, 0, pack->ackquant(), true);
 }
 
@@ -33,7 +33,7 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
     if (srv == nullptr)
     {
         send_node_error(pack, CROW_ERRNO_UNREGISTRED_RID);
-        crow::release(pack);
+        crow::default_tower().release(pack);
         return;
     }
 
@@ -45,7 +45,7 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 
         case CROW_NODEPACK_ERROR:
             srv->notify_one(get_error_code(pack));
-            crow::release(pack);
+            crow::default_tower().release(pack);
             break;
     }
     return;
@@ -62,7 +62,7 @@ void crow::node_protocol_cls::undelivered(crow::packet *pack)
             return;
         }
     }
-    crow::release(pack);
+    crow::default_tower().release(pack);
 }
 
 void crow::node_protocol_cls::delivered(crow::packet *pack)
@@ -78,5 +78,5 @@ void crow::node_protocol_cls::delivered(crow::packet *pack)
         }
     }
 
-    crow::release(pack);
+    crow::default_tower().release(pack);
 }

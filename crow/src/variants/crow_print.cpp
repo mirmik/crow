@@ -1,5 +1,4 @@
 #include <crow/print.h>
-#include <crow/tower.h>
 #include <crow/proto/node.h>
 
 #include <igris/string/hexascii_string.h>
@@ -11,12 +10,13 @@
 #include <nos/print.h>
 #include <nos/io/stdfile.h>
 
-void crow::diagnostic(const char *notation, crow::packet *pack)
+void crow::diagnostic(const char *notation,
+                      crow::packet *pack,
+                      const std::string &label,
+                      uint16_t dbg_size)
 {
-    uint16_t dbg_size = crow::get_debug_data_size();
     bool postfix_points = pack->datasize() > dbg_size;
 
-    const std::string &label = crow::get_diagnostic_label();
     if (!label.empty())
         nos::fprint_to(nos::cerr, "[{}] ", label);
 
