@@ -51,8 +51,13 @@ __END_DECLS
 
 namespace crow
 {
+    class Tower; // Forward declaration
+
     class gateway
     {
+    protected:
+        Tower *_tower = nullptr; ///< башня, к которой привязаны врата
+
     public:
         struct dlist_head lnk =
             DLIST_HEAD_INIT(lnk); ///< встроенное поле списка.
@@ -63,6 +68,9 @@ namespace crow
         virtual void nblock_onestep() {}
 
         int bind(int gateno);
+        int bind(Tower &tower, int gateno);
+
+        Tower *tower() const { return _tower; }
 
         gateway() = default;
 

@@ -4,7 +4,7 @@
 #define CROW_GATES_LOOPGATE_H
 
 #include <crow/gateway.h>
-#include <crow/tower.h>
+#include <crow/tower_cls.h>
 
 namespace crow
 {
@@ -26,17 +26,25 @@ namespace crow
             crow::packet_initialization(copypack, this);
             copypack->revert_gate(id);
 
-            crow::return_to_tower(pack, 0);
-            crow::nocontrol_travel(copypack, false);
+            _tower->return_to_tower(pack, 0);
+            _tower->nocontrol_travel(copypack, false);
         }
 
         void finish() override {}
     };
 
-    int create_loopgate(uint8_t id)
+    inline int create_loopgate(uint8_t id)
     {
         auto *gate = new loopgate;
         gate->bind(id);
+
+        return 0;
+    }
+
+    inline int create_loopgate(Tower &tower, uint8_t id)
+    {
+        auto *gate = new loopgate;
+        gate->bind(tower, id);
 
         return 0;
     }

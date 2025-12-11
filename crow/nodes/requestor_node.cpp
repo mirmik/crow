@@ -156,7 +156,7 @@ void crow::requestor_node::incoming_packet(crow::packet *pack)
             break;
         }
 
-        crow::release(pack);
+        _tower->release(pack);
     }
 
     else
@@ -232,5 +232,5 @@ void crow::requestor_node::undelivered_packet(crow::packet *pack)
 {
     BUG();
     notify_one(-1);
-    crow::release(pack);
+    _tower->release(pack);
 }

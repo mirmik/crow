@@ -25,13 +25,13 @@ namespace crow
 
         void undelivered_packet(crow::packet *pack) override
         {
-            crow::release(pack);
+            _tower->release(pack);
             send_block();
         }
 
         void delivered_packet(crow::packet *pack) override
         {
-            crow::release(pack);
+            _tower->release(pack);
             send_block();
         }
     };

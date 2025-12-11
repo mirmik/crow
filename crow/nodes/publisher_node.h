@@ -102,7 +102,7 @@ namespace crow
     private:
         void incoming_packet(crow::packet *pack) override
         {
-            crow::release(pack);
+            _tower->release(pack);
         }
     };
 

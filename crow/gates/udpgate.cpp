@@ -1,7 +1,7 @@
 /** @file */
 
 #include <crow/gates/udpgate.h>
-#include <crow/tower.h>
+#include <crow/tower_cls.h>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -80,7 +80,7 @@ void crow::udpgate::read_handler(int fd)
     crow::packet *pack = block;
     block = NULL;
 
-    crow::nocontrol_travel(pack, true);
+    _tower->nocontrol_travel(pack, true);
 }
 
 int crow::udpgate::open(uint16_t port)
@@ -172,7 +172,7 @@ void crow::udpgate::send(crow::packet *pack)
            0,
            (struct sockaddr *)&ipaddr,
            iplen);
-    crow::return_to_tower(pack, CROW_SENDED);
+    _tower->return_to_tower(pack, CROW_SENDED);
 }
 
 int crow::create_udpgate(uint8_t id, uint16_t port)

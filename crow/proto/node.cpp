@@ -1,6 +1,6 @@
 #include <crow/defs.h>
 #include <crow/proto/node.h>
-#include <crow/tower.h>
+#include <crow/tower_cls.h>
 
 #include <crow/print.h>
 #include <igris/sync/syslock.h>
@@ -11,6 +11,76 @@
 igris::dlist<crow::node, &crow::node::lnk> crow::nodes_list;
 crow::node_protocol_cls crow::node_protocol;
 
+// Instance methods - use _tower
+crow::packet_ptr crow::node::send(nodeid_t rid,
+                                  const crow::hostaddr_view &raddr,
+                                  const nos::buffer data,
+                                  uint8_t qos,
+                                  uint16_t ackquant,
+                                  bool async)
+{
+    if (id == 0)
+        bind();
+
+    crow::node_subheader sh;
+    sh.sid = id;
+    sh.rid = rid;
+    sh.u.f.type = CROW_NODEPACK_COMMON;
+
+    const nos::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
+                                {(char *)data.data(), data.size()}};
+
+    return _tower->send_v(raddr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant,
+                          async);
+}
+
+crow::packet_ptr crow::node::send_v(nodeid_t rid,
+                                    const crow::hostaddr_view &raddr,
+                                    const nos::buffer *vdat,
+                                    size_t vlen,
+                                    uint8_t qos,
+                                    uint16_t ackquant,
+                                    bool async)
+{
+    if (id == 0)
+        bind();
+
+    crow::node_subheader sh;
+    sh.sid = id;
+    sh.rid = rid;
+    sh.u.f.type = CROW_NODEPACK_COMMON;
+
+    const nos::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
+
+    return _tower->send_vv(raddr, iov, 1, vdat, vlen, CROW_NODE_PROTOCOL, qos,
+                           ackquant, async);
+}
+
+crow::packet_ptr crow::node::send_vv(nodeid_t rid,
+                                     const crow::hostaddr_view &raddr,
+                                     const nos::buffer *vdat1,
+                                     size_t vlen1,
+                                     const nos::buffer *vdat2,
+                                     size_t vlen2,
+                                     uint8_t qos,
+                                     uint16_t ackquant,
+                                     bool async)
+{
+    if (id == 0)
+        bind();
+
+    crow::node_subheader sh;
+    sh.sid = id;
+    sh.rid = rid;
+    sh.u.f.type = CROW_NODEPACK_COMMON;
+
+    const nos::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
+
+    return _tower->send_vvv(raddr, iov, 1, vdat1, vlen1, vdat2, vlen2,
+                            CROW_NODE_PROTOCOL, qos, ackquant, async);
+}
+
+// Static methods - use default_tower() for backward compatibility
 crow::packet_ptr crow::node::send(nodeid_t sid,
                                   nodeid_t rid,
                                   const crow::hostaddr_view &addr,

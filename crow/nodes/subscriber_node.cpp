@@ -107,7 +107,7 @@ void crow::subscriber_node::incoming_packet(crow::packet *pack)
             break;
     }
 
-    crow::release(pack);
+    _tower->release(pack);
 }
 
 crow::subscriber_node::subscriber_node(function incoming)

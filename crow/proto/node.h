@@ -7,6 +7,7 @@
 #include <crow/proto/node_protocol.h>
 #include <crow/proto/protocol.h>
 #include <crow/tower.h>
+#include <crow/tower_cls.h>
 #include <igris/binreader.h>
 #include <igris/container/dlist.h>
 #include <igris/sync/syslock.h>
@@ -31,6 +32,9 @@ namespace crow
 
     class node
     {
+    protected:
+        Tower *_tower = nullptr; ///< башня, к которой привязан узел
+
     public:
         igris::dlist_node lnk = {}; // Список нодов.
         igris::dlist_base waitlnk = {}; // Список ожидающих прихода сообщения.
@@ -41,12 +45,15 @@ namespace crow
         node(const node &) = delete;
         node(node &&) = delete;
 
+        Tower *tower() const { return _tower; }
+
         int waitevent();
         void notify_one(intptr_t future);
         void notify_all(intptr_t future);
 
         node &bind(int addr)
         {
+            _tower = &default_tower();
             system_lock();
             __link_node(this, addr);
             system_unlock();
@@ -55,6 +62,23 @@ namespace crow
 
         node &bind()
         {
+            _tower = &default_tower();
+            bind_node_dynamic(this);
+            return *this;
+        };
+
+        node &bind(Tower &tower, int addr)
+        {
+            _tower = &tower;
+            system_lock();
+            __link_node(this, addr);
+            system_unlock();
+            return *this;
+        };
+
+        node &bind(Tower &tower)
+        {
+            _tower = &tower;
             bind_node_dynamic(this);
             return *this;
         };
@@ -64,12 +88,7 @@ namespace crow
                               const nos::buffer data,
                               uint8_t qos = CROW_DEFAULT_QOS,
                               uint16_t ackquant = CROW_DEFAULT_ACKQUANT,
-                              bool async = false)
-        {
-            if (id == 0)
-                bind();
-            return crow::node::send(id, rid, raddr, data, qos, ackquant, async);
-        }
+                              bool async = false);
 
         crow::packet_ptr send_v(nodeid_t rid,
                                 const crow::hostaddr_view &raddr,
@@ -77,13 +96,7 @@ namespace crow
                                 size_t vlen,
                                 uint8_t qos,
                                 uint16_t ackquant,
-                                bool async = false)
-        {
-            if (id == 0)
-                bind();
-            return crow::node::send_v(id, rid, raddr, vdat, vlen, qos, ackquant,
-                                      async);
-        }
+                                bool async = false);
 
         crow::packet_ptr send_vv(nodeid_t rid,
                                  const crow::hostaddr_view &raddr,
@@ -93,13 +106,7 @@ namespace crow
                                  size_t vlen2,
                                  uint8_t qos,
                                  uint16_t ackquant,
-                                 bool async = false)
-        {
-            if (id == 0)
-                bind();
-            return crow::node::send_vv(id, rid, raddr, vdat1, vlen1, vdat2,
-                                       vlen2, qos, ackquant, async);
-        }
+                                 bool async = false);
 
         static crow::packet_ptr send(nodeid_t sid,
                                      nodeid_t rid,
@@ -142,12 +149,12 @@ namespace crow
         virtual void undelivered_packet(crow::packet *pack)
         {
             notify_all(-1);
-            crow::release(pack);
+            _tower->release(pack);
         }
 
         virtual void delivered_packet(crow::packet *pack)
         {
-            crow::release(pack);
+            _tower->release(pack);
         }
 
         friend class node_protocol_cls;

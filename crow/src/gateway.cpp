@@ -18,7 +18,14 @@ struct crow_gateway *crow_get_gateway(int no)
 // C++ gateway binding - uses default_tower()
 int crow::gateway::bind(int id)
 {
-    return crow::default_tower().bind_gateway(this, id);
+    return bind(crow::default_tower(), id);
+}
+
+// C++ gateway binding with explicit tower
+int crow::gateway::bind(Tower &tower, int id)
+{
+    _tower = &tower;
+    return tower.bind_gateway(this, id);
 }
 
 crow::gateway *crow::get_gateway(int no)

@@ -1,7 +1,7 @@
 #include <crow/asyncio.h>
 #include <crow/gates/serial_gstuff.h>
 #include <crow/gateway.h>
-#include <crow/tower.h>
+#include <crow/tower_cls.h>
 #include <crow/warn.h>
 #include <fcntl.h>
 #include <igris/protocols/gstuff.h>
@@ -53,7 +53,7 @@ void crow::serial_gstuff::newline_handler()
     block->revert_gate(id);
 
     crow::packet_initialization(block, this);
-    crow::nocontrol_travel(block, false);
+    _tower->nocontrol_travel(block, false);
 }
 
 void crow::serial_gstuff::send(crow::packet *pack)
@@ -69,7 +69,7 @@ void crow::serial_gstuff::send(crow::packet *pack)
     int size = gstuffing_v(iov, 3, buffer, gctx);
     auto _ = write(fd, buffer, size);
     (void)_;
-    crow::return_to_tower(pack, CROW_SENDED);
+    _tower->return_to_tower(pack, CROW_SENDED);
 }
 
 void crow::serial_gstuff::read_handler(int)
@@ -216,7 +216,7 @@ void crow::serial_gstuff_v0::newline_handler()
     block->revert_gate(id);
 
     crow::packet_initialization(block, this);
-    crow::nocontrol_travel(block, false);
+    _tower->nocontrol_travel(block, false);
 }
 
 void crow::serial_gstuff_v0::send(crow::packet *pack)
@@ -232,7 +232,7 @@ void crow::serial_gstuff_v0::send(crow::packet *pack)
     int size = gstuffing_v(iov, 3, buffer, gctx);
     auto _ = write(fd, buffer, size);
     (void)_;
-    crow::return_to_tower(pack, CROW_SENDED);
+    _tower->return_to_tower(pack, CROW_SENDED);
 }
 
 void crow::serial_gstuff_v0::read_handler(int)

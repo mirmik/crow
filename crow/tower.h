@@ -10,9 +10,6 @@
 #include <nos/buffer.h>
 #include <string>
 
-#define CROW_SENDED 0
-#define CROW_WRONG_ADDRESS -1
-
 // Forward declaration of Tower class
 namespace crow
 {

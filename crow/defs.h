@@ -36,4 +36,7 @@
 
 #define CROW_DEFAULT_QUEUE_SIZE 1000
 
+#define CROW_SENDED 0
+#define CROW_WRONG_ADDRESS -1
+
 #endif

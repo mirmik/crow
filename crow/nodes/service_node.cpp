@@ -15,7 +15,7 @@ void crow::service_node::incoming_packet(crow::packet *pack)
     dlg(message.data(), message.size(), *this);
 
     // release after reply
-    crow::release(pack);
+    _tower->release(pack);
 }
 
 void crow::service_node::reply_single(const char *answ, size_t size)

@@ -2,7 +2,7 @@
 #define CROW_SELF_DRIVEN_GSTUFF_H
 
 #include <crow/gateway.h>
-#include <crow/tower.h>
+#include <crow/tower_cls.h>
 #include <igris/dprint.h>
 #include <igris/iovec.h>
 #include <igris/protocols/gstuff.h>
@@ -83,7 +83,7 @@ namespace crow
             recvpack = nullptr;
             pack->revert_gate(this->id);
             crow::packet_initialization(pack, this);
-            crow::nocontrol_travel(pack, false);
+            _tower->nocontrol_travel(pack, false);
             init_receiver();
         }
 
@@ -209,7 +209,7 @@ namespace crow
         void finish_send()
         {
             system_lock();
-            crow::return_to_tower(insend, CROW_SENDED);
+            _tower->return_to_tower(insend, CROW_SENDED);
             invalidate_sender();
             system_unlock();
 
