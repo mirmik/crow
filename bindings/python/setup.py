@@ -21,7 +21,8 @@ licant.cxx_objects("crow-objects",
                        "igris",
                        "igris.syslock",
                        "igris.dprint",
-                       ("igris.ctrobj", "linux")
+                       ("igris.ctrobj", "linux"),
+                       ("igris.os_extension", "unix")
                    ]
                    )
 
@@ -53,7 +54,7 @@ pycrow_lib = Extension("pycrow.libcrow",
                            "publisher.cpp",
                            "pywrap.cpp",
                        ] + crowopts["sources"],
-                       extra_compile_args=['-fPIC', '-std=c++17', '-DCROW_USE_ASYNCIO=1'],
+                       extra_compile_args=['-fPIC', '-std=c++20', '-DCROW_USE_ASYNCIO=1'],
                        extra_link_args=['-Wl,-rpath,$ORIGIN/libs'],
                        include_dirs=crowopts["include_paths"],
                        libraries=[],

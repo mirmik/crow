@@ -39,7 +39,7 @@ public:
                 break;
         }
 
-        crow::release(pack);
+        _tower->release(pack);
     }
 
     void subscribe(const crow::hostaddr &addr, const std::string &theme)

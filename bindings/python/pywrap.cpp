@@ -16,6 +16,7 @@
 #include <crow/proto/msgbox.h>
 #include <crow/proto/node.h>
 #include <crow/tower.h>
+#include <crow/tower_cls.h>
 
 using namespace crow;
 namespace py = pybind11;
@@ -39,8 +40,45 @@ void subscribe_handler_bind_invoke(crow::packet *pack)
     subscribe_handler_bind(control);
 }*/
 
+// Helper class for udpgate with Tower binding support
+class py_udpgate : public crow::udpgate
+{
+public:
+    using crow::udpgate::udpgate;
+
+    int bind_to_tower(crow::Tower &tower, int gate_no = CROW_UDPGATE_NO)
+    {
+        return crow::gateway::bind(tower, gate_no);
+    }
+};
+
 PYBIND11_MODULE(libcrow, m)
 {
+    // Tower class - for multiple independent towers
+    py::class_<crow::Tower>(m, "Tower")
+        .def(py::init<>())
+        .def("send",
+             [](crow::Tower &self, const crow::hostaddr_view &addr,
+                const std::string &data, uint8_t type, uint8_t qos,
+                uint16_t ackquant, bool async) {
+                 return self.send(addr, data, type, qos, ackquant, async);
+             },
+             py::arg("addr"), py::arg("data"), py::arg("type") = 0,
+             py::arg("qos") = 2, py::arg("ackquant") = 50,
+             py::arg("async") = false)
+        .def("onestep", &crow::Tower::onestep)
+        .def("has_untravelled", &crow::Tower::has_untravelled)
+        .def("get_total_travelled", &crow::Tower::get_total_travelled)
+        .def("set_retransling_allowed", &crow::Tower::set_retransling_allowed)
+        .def("get_retransling_allowed", &crow::Tower::get_retransling_allowed)
+        .def("set_debug_data_size", &crow::Tower::set_debug_data_size)
+        .def("get_debug_data_size", &crow::Tower::get_debug_data_size)
+        .def("release",
+             [](crow::Tower &self, crow::packet *pack) { self.release(pack); });
+
+    m.def("default_tower", &crow::default_tower,
+          py::return_value_policy::reference);
+
     auto pack = py::class_<packet_ptr>(m, "packet_ptr")
                     .def("rawdata",
                          [](packet_ptr &self) -> py::bytes {
@@ -71,15 +109,18 @@ PYBIND11_MODULE(libcrow, m)
     py::implicitly_convertible<crow::hostaddr, crow::hostaddr_view>();
 
     auto __gateway__ = py::class_<gateway>(m, "gateway")
-                           .def("bind", &gateway::bind)
+                           .def("bind", py::overload_cast<int>(&gateway::bind))
                            .def("finish", &gateway::finish);
 
-    py::class_<udpgate>(m, "udpgate", __gateway__)
+    py::class_<py_udpgate>(m, "udpgate", __gateway__)
         .def(py::init<>())
         .def(py::init<uint16_t>())
-        .def("open", &udpgate::open)
-        .def("close", &udpgate::close)
-        .def("debug", &udpgate::debug);
+        .def("open", &py_udpgate::open)
+        .def("close", &py_udpgate::close)
+        .def("debug", &py_udpgate::debug)
+        .def("read_handler", &py_udpgate::read_handler, py::arg("fd") = 0)
+        .def("bind_to_tower", &py_udpgate::bind_to_tower,
+             py::arg("tower"), py::arg("gate_no") = CROW_UDPGATE_NO);
 
     m.def("send",
           [](const crow::hostaddr_view &addr, const std::string &data,
