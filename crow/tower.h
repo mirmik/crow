@@ -13,19 +13,31 @@
 #define CROW_SENDED 0
 #define CROW_WRONG_ADDRESS -1
 
+// Forward declaration of Tower class
 namespace crow
 {
-    extern uint16_t debug_data_size;
+    class Tower;
+    Tower &default_tower();
+}
 
-    extern dlist_head protocols;
-    extern bool diagnostic_noack;
-    extern unsigned int total_travelled;
+namespace crow
+{
+    // Configuration accessors (delegate to default_tower())
+    void set_diagnostic_noack(bool value);
+    bool get_diagnostic_noack();
 
-    extern void (*default_incoming_handler)(crow::packet *pack);
-    extern void (*undelivered_handler)(crow::packet *pack);
-    extern igris::delegate<void> unsleep_handler;
+    void set_debug_data_size(uint16_t size);
+    uint16_t get_debug_data_size();
 
-    extern bool retransling_allowed;
+    void set_retransling_allowed(bool value);
+    bool get_retransling_allowed();
+
+    unsigned int get_total_travelled();
+
+    // Handler accessors (delegate to default_tower())
+    void set_default_incoming_handler(void (*handler)(packet *));
+    void set_undelivered_handler(void (*handler)(packet *));
+    void set_unsleep_handler(igris::delegate<void> handler);
 
     // Передать пакет в обработку.
     packet_ptr travel(crow::packet *pack);

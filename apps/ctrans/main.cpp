@@ -721,7 +721,7 @@ void parse_options(int argc, char **argv)
                 break;
 
             case 's':
-                crow::debug_data_size = (uint16_t)atoi(optarg);
+                crow::set_debug_data_size((uint16_t)atoi(optarg));
                 break;
 
             case 't':
@@ -768,7 +768,7 @@ void parse_options(int argc, char **argv)
                 break;
 
             case 'R':
-                crow::retransling_allowed = true;
+                crow::set_retransling_allowed(true);
                 break;
 
             case 'r':
@@ -1103,7 +1103,7 @@ int main(int argc, char *argv[])
 
     // Переопределение стандартного обработчика (Для возможности перехвата и
     // api)
-    crow::default_incoming_handler = incoming_handler;
+    crow::set_default_incoming_handler(incoming_handler);
 
     if (noend)
     {

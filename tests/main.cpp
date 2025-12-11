@@ -23,7 +23,7 @@ if (iResult != 0) {
 }
 #endif
 
-	crow::retransling_allowed = true;
+	crow::set_retransling_allowed(true);
 	loopgate.bind(99);
 	udpgate.bind(12);
 	udpgate.open(10099);

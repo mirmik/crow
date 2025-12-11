@@ -1,6 +1,7 @@
 #include <crow/address.h>
 #include <crow/nodes/node_delegate.h>
 #include <crow/tower.h>
+#include <crow/tower_cls.h>
 #include <doctest/doctest.h>
 #include <nos/print.h>
 #include "allocator_test_helper.h"
@@ -28,8 +29,8 @@ TEST_CASE("node0" * doctest::timeout(5))
     FOR_EACH_ALLOCATOR
     {
         count = ucount = 0;
-        crow::total_travelled = 0;
-        crow::default_incoming_handler = nullptr;
+        crow::default_tower().reset_total_travelled();
+        crow::set_default_incoming_handler(nullptr);
 
     SUBCASE("0")
     {
@@ -45,7 +46,7 @@ TEST_CASE("node0" * doctest::timeout(5))
 
         CHECK_EQ(count, 1);
         CHECK_EQ(ucount, 0);
-        CHECK_EQ(crow::total_travelled, 2);
+        CHECK_EQ(crow::get_total_travelled(), 2);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -81,7 +82,7 @@ TEST_CASE("node0" * doctest::timeout(5))
 
         CHECK_EQ(count, 1);
         CHECK_EQ(ucount, 0);
-        CHECK_EQ(crow::total_travelled, 4);
+        CHECK_EQ(crow::get_total_travelled(), 4);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 1);
     }
@@ -117,7 +118,7 @@ TEST_CASE("node0" * doctest::timeout(5))
 
         CHECK_EQ(count, 1);
         CHECK_EQ(ucount, 0);
-        CHECK_EQ(crow::total_travelled, 6);
+        CHECK_EQ(crow::get_total_travelled(), 6);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -153,7 +154,7 @@ TEST_CASE("node0" * doctest::timeout(5))
 
         CHECK_EQ(count, 0);
         CHECK_EQ(ucount, 0);
-        CHECK_EQ(crow::total_travelled, 4); // pack*2 + err(qos:0)*2
+        CHECK_EQ(crow::get_total_travelled(), 4); // pack*2 + err(qos:0)*2
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -189,7 +190,7 @@ TEST_CASE("node0" * doctest::timeout(5))
 
         CHECK_EQ(count, 0);
         CHECK_EQ(ucount, 0);
-        CHECK_EQ(crow::total_travelled, 6); // pack + err(qos:2)
+        CHECK_EQ(crow::get_total_travelled(), 6); // pack + err(qos:2)
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -225,7 +226,7 @@ TEST_CASE("node0" * doctest::timeout(5))
 
         CHECK_EQ(count, 0);
         CHECK_EQ(ucount, 0);
-        CHECK_EQ(crow::total_travelled, 8); // pack + err(qos:2)
+        CHECK_EQ(crow::get_total_travelled(), 8); // pack + err(qos:2)
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -261,7 +262,7 @@ TEST_CASE("node0" * doctest::timeout(5))
 
         CHECK_EQ(count, 0);
         CHECK_EQ(ucount, 0);
-        CHECK_EQ(crow::total_travelled, 1);
+        CHECK_EQ(crow::get_total_travelled(), 1);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -286,7 +287,7 @@ TEST_CASE("node0" * doctest::timeout(5))
 
         CHECK_EQ(count, 0);
         CHECK_EQ(ucount, 1);
-        CHECK_EQ(crow::total_travelled, 5);
+        CHECK_EQ(crow::get_total_travelled(), 5);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 1);
     }
@@ -311,7 +312,7 @@ TEST_CASE("node0" * doctest::timeout(5))
 
         CHECK_EQ(count, 0);
         CHECK_EQ(ucount, 1);
-        CHECK_EQ(crow::total_travelled, 5);
+        CHECK_EQ(crow::get_total_travelled(), 5);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }

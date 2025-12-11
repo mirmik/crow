@@ -27,7 +27,8 @@ struct crow_gateway
     uint8_t id; ///< номер врат.
 };
 
-extern struct dlist_head crow_gateway_list;
+// DEPRECATED: Use crow::default_tower().c_gateway_list() instead
+extern struct dlist_head &crow_gateway_list;
 
 __BEGIN_DECLS
 
@@ -75,7 +76,8 @@ namespace crow
 
     gateway *get_gateway(int no);
 
-    extern struct dlist_head gateway_list;
+    // DEPRECATED: Use default_tower().gateway_list() instead
+    extern struct dlist_head &gateway_list;
 }
 
 #endif

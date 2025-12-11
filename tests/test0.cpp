@@ -78,7 +78,7 @@ TEST_CASE("test0" * doctest::timeout(3.0))
     FOR_EACH_ALLOCATOR
     {
         count = 0;
-        crow::default_incoming_handler = incoming;
+        crow::set_default_incoming_handler(incoming);
         CHECK_EQ(crow::allocated_count(), 0);
 
     SUBCASE("0")
@@ -87,7 +87,7 @@ TEST_CASE("test0" * doctest::timeout(3.0))
         crow::onestep();
 
         CHECK_EQ(count, 1);
-        CHECK_EQ(crow::total_travelled, 2);
+        CHECK_EQ(crow::get_total_travelled(), 2);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -141,7 +141,7 @@ TEST_CASE("test0" * doctest::timeout(3.0))
         crow::onestep();
 
         CHECK_EQ(count, 1);
-        CHECK_EQ(crow::total_travelled, 4); // pack * 2 + ack * 2
+        CHECK_EQ(crow::get_total_travelled(), 4); // pack * 2 + ack * 2
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -154,7 +154,7 @@ TEST_CASE("test0" * doctest::timeout(3.0))
         std::this_thread::sleep_for(10ms);
 
         CHECK_EQ(count, 1);
-        CHECK_EQ(crow::total_travelled, 6); // pack * 2 + ack * 2 + ack2 * 2
+        CHECK_EQ(crow::get_total_travelled(), 6); // pack * 2 + ack * 2 + ack2 * 2
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -166,7 +166,7 @@ TEST_CASE("test0" * doctest::timeout(3.0))
         crow::onestep();
 
         CHECK_EQ(count, 0);
-        CHECK_EQ(crow::total_travelled, 1);
+        CHECK_EQ(crow::get_total_travelled(), 1);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -191,7 +191,7 @@ TEST_CASE("test0" * doctest::timeout(3.0))
 
         CHECK_EQ(crow::outers_stage_count(), 0);
         CHECK_EQ(count, 0);
-        CHECK_EQ(crow::total_travelled, 5);
+        CHECK_EQ(crow::get_total_travelled(), 5);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -209,7 +209,7 @@ TEST_CASE("test0" * doctest::timeout(3.0))
         }
 
         CHECK_EQ(count, 0);
-        CHECK_EQ(crow::total_travelled, 5);
+        CHECK_EQ(crow::get_total_travelled(), 5);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }

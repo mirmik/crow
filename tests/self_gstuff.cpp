@@ -32,7 +32,7 @@ TEST_CASE("self_driven_gstuff.output")
         write_total = 0;
         writed_data.clear();
         ccc = 0;
-        crow::default_incoming_handler = nullptr;
+        crow::set_default_incoming_handler(nullptr);
         {
         crow::self_driven_gstuff<crow::header_v1> gate;
 
@@ -76,7 +76,7 @@ TEST_CASE("self_driven_gstuff.output")
         }
     }
 
-        CHECK_EQ(crow::total_travelled, 0);
+        CHECK_EQ(crow::get_total_travelled(), 0);
         CHECK_EQ(crow::has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     } // FOR_EACH_ALLOCATOR

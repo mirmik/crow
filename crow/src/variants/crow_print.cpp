@@ -13,7 +13,8 @@
 
 void crow::diagnostic(const char *notation, crow::packet *pack)
 {
-    bool postfix_points = pack->datasize() > crow::debug_data_size;
+    uint16_t dbg_size = crow::get_debug_data_size();
+    bool postfix_points = pack->datasize() > dbg_size;
 
     const std::string &label = crow::get_diagnostic_label();
     if (!label.empty())
@@ -40,8 +41,8 @@ void crow::diagnostic(const char *notation, crow::packet *pack)
                                pack->addrsize()),
         pack->stage(), pack->datasize(),
         igris::dstring(pack->dataptr(),
-                       pack->datasize() > crow::debug_data_size
-                           ? crow::debug_data_size
+                       pack->datasize() > dbg_size
+                           ? dbg_size
                            : pack->datasize()));
 
     if (pack->type() == CROW_NODE_PROTOCOL)
