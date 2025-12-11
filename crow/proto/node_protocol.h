@@ -3,6 +3,9 @@
 
 #include <crow/proto/protocol.h>
 #include <igris/container/dlist.h>
+#include <map>
+#include <vector>
+#include <cstdint>
 
 namespace crow
 {
@@ -18,29 +21,113 @@ namespace crow
             uint8_t flags;
             struct _f
             {
-                uint8_t reserved : 4;
+                uint8_t has_more : 1;  // more chunks follow
+                uint8_t chunked : 1;   // this is a chunked message
+                uint8_t reserved : 2;
                 uint8_t type : 4;
             } f;
         } u = {};
     } __attribute__((packed));
 
-    static auto node_data(crow::packet *pack)
+    // Chunk header follows node_subheader when chunked=1
+    // Format: [chunk_id:2 bytes LE]
+    struct node_chunk_header
     {
-        return nos::buffer(pack->dataptr() + sizeof(node_subheader),
-                           pack->datasize() - sizeof(node_subheader));
+        uint16_t chunk_id = 0;
+    } __attribute__((packed));
+
+    // Constants for chunked protocol
+    inline constexpr size_t NODE_CHUNK_HEADER_SIZE = sizeof(node_chunk_header);
+    inline constexpr size_t NODE_DEFAULT_MAX_MESSAGE_SIZE = 64 * 1024;  // 64 KiB
+    inline constexpr uint32_t NODE_DEFAULT_REASSEMBLY_TIMEOUT_MS = 5000;  // 5 seconds
+    inline constexpr uint16_t NODE_MAX_CHUNKS = 1024;
+
+    // Get data portion of a node packet (excluding headers)
+    static inline nos::buffer node_data(crow::packet *pack)
+    {
+        auto *sh = (node_subheader *)pack->dataptr();
+        size_t header_size = sizeof(node_subheader);
+        if (sh->u.f.chunked)
+        {
+            header_size += NODE_CHUNK_HEADER_SIZE;
+        }
+        return nos::buffer(pack->dataptr() + header_size,
+                           pack->datasize() - header_size);
     }
+
+    // Key for identifying a reassembly session
+    struct reassembly_key
+    {
+        nodeid_t rid;        // destination node
+        nodeid_t sid;        // source node
+        uint64_t addr_hash;  // hash of source address
+
+        bool operator<(const reassembly_key &o) const
+        {
+            if (rid != o.rid) return rid < o.rid;
+            if (sid != o.sid) return sid < o.sid;
+            return addr_hash < o.addr_hash;
+        }
+
+        bool operator==(const reassembly_key &o) const
+        {
+            return rid == o.rid && sid == o.sid && addr_hash == o.addr_hash;
+        }
+    };
+
+    // Buffer for reassembling chunked messages
+    struct reassembly_buffer
+    {
+        std::map<uint16_t, crow::packet *> chunks;
+        uint16_t expected_chunks = 0;  // 0 = unknown (last chunk not yet received)
+        uint64_t start_time_ms = 0;
+        size_t total_payload_size = 0;
+
+        bool is_complete() const
+        {
+            if (expected_chunks == 0)
+                return false;
+            return chunks.size() == expected_chunks;
+        }
+
+        // Assemble all chunks into a new packet
+        // Returns nullptr on failure
+        crow::packet *assemble(Tower &tower);
+
+        // Release all held packets
+        void release_all();
+    };
 
     class node_protocol_cls : public crow::protocol
     {
     private:
+        std::map<reassembly_key, reassembly_buffer> _reassembly;
+        size_t _max_message_size = NODE_DEFAULT_MAX_MESSAGE_SIZE;
+        uint32_t _reassembly_timeout_ms = NODE_DEFAULT_REASSEMBLY_TIMEOUT_MS;
+
         void send_node_error(crow::packet *pack, int errcode, Tower &tower);
+        void deliver_to_node(crow::packet *pack, Tower &tower);
+        void handle_chunk(crow::packet *pack, Tower &tower);
+        void cleanup_stale_buffers(uint64_t now_ms);
+
+        static uint64_t hash_address(const uint8_t *addr, size_t len);
 
     public:
         void incoming(crow::packet *pack, Tower &tower) override;
         void undelivered(crow::packet *pack, Tower &tower) override;
         void delivered(crow::packet *pack, Tower &tower);
 
-        node_protocol_cls() /*: protocol(CROW_NODE_PROTOCOL)*/ {}
+        node_protocol_cls() {}
+
+        // Configuration
+        void set_max_message_size(size_t size) { _max_message_size = size; }
+        size_t max_message_size() const { return _max_message_size; }
+
+        void set_reassembly_timeout(uint32_t ms) { _reassembly_timeout_ms = ms; }
+        uint32_t reassembly_timeout() const { return _reassembly_timeout_ms; }
+
+        // Statistics
+        size_t reassembly_sessions_count() const { return _reassembly.size(); }
 
         static auto sid(crow::packet *pack)
         {

@@ -1,9 +1,11 @@
 #include <crow/nodes/pubsub_defs.h>
 #include <crow/nodes/requestor_node.h>
-#include <igris/time/systime.h>
 #include <igris/util/bug.h>
 #include <nos/print.h>
 #include <cstring>
+
+// Note: Chunked message reassembly is now handled at node_protocol level.
+// By the time incoming_packet is called, chunks have already been assembled.
 
 const char *crow::pubsub_type_to_string(PubSubTypes type)
 {
@@ -25,115 +27,6 @@ const char *crow::pubsub_type_to_string(PubSubTypes type)
     return "undefined";
 }
 
-void crow::requestor_node::reset_chunk_buffer()
-{
-    _chunk_buffer.clear();
-    _expected_chunks = 0;
-    _receiving_chunks = false;
-    _chunk_start_time = 0;
-}
-
-bool crow::requestor_node::try_reassemble_chunks(std::vector<char> &result)
-{
-    // Check if we have all chunks from 0 to _expected_chunks-1
-    for (uint16_t i = 0; i < _expected_chunks; ++i)
-    {
-        if (_chunk_buffer.find(i) == _chunk_buffer.end())
-            return false;
-    }
-
-    // Reassemble
-    result.clear();
-    for (uint16_t i = 0; i < _expected_chunks; ++i)
-    {
-        auto &chunk = _chunk_buffer[i];
-        result.insert(result.end(), chunk.begin(), chunk.end());
-    }
-    return true;
-}
-
-void crow::requestor_node::handle_incoming_message(nos::buffer message)
-{
-    // Check if this is a chunked reply
-    if (message.size() >= 4 &&
-        static_cast<uint8_t>(message.data()[0]) == CHUNKED_REPLY_MARKER)
-    {
-        // Parse chunk header: [marker:1][chunk_id:2][flags:1][payload...]
-        uint16_t chunk_id = static_cast<uint8_t>(message.data()[1]) |
-                           (static_cast<uint8_t>(message.data()[2]) << 8);
-        uint8_t flags = static_cast<uint8_t>(message.data()[3]);
-        bool has_more = (flags & CHUNK_FLAG_HAS_MORE) != 0;
-
-#ifdef CROW_DEBUG_CHUNKS
-        printf("[chunk] id=%d, has_more=%d, expected=%d, buffered=%zu\n",
-               chunk_id, has_more, _expected_chunks, _chunk_buffer.size());
-#endif
-
-        // Check chunk_id limit to prevent memory exhaustion
-        if (chunk_id >= MAX_CHUNKS)
-        {
-            reset_chunk_buffer();
-            return;
-        }
-
-        // Check timeout for reassembly
-        uint64_t now = igris::millis();
-        if (_receiving_chunks && _chunk_start_time > 0 &&
-            (now - _chunk_start_time) > CHUNK_REASSEMBLY_TIMEOUT_MS)
-        {
-            reset_chunk_buffer();
-        }
-
-        // Start timer on first chunk
-        if (!_receiving_chunks)
-        {
-            _chunk_start_time = now;
-        }
-
-        // Extract payload
-        std::vector<char> payload(message.data() + 4, message.data() + message.size());
-        _chunk_buffer[chunk_id] = std::move(payload);
-        _receiving_chunks = true;
-
-        if (!has_more)
-        {
-            // This is the last chunk - now we know total count
-            _expected_chunks = chunk_id + 1;
-        }
-
-        // Try to reassemble if we know how many chunks to expect
-        if (_expected_chunks > 0)
-        {
-            std::vector<char> assembled;
-            if (try_reassemble_chunks(assembled))
-            {
-#ifdef CROW_DEBUG_CHUNKS
-                printf("[chunk] reassembled! total_size=%zu\n", assembled.size());
-#endif
-                incoming(nos::buffer(assembled.data(), assembled.size()));
-                reset_chunk_buffer();
-            }
-#ifdef CROW_DEBUG_CHUNKS
-            else
-            {
-                printf("[chunk] waiting for more chunks...\n");
-            }
-#endif
-        }
-    }
-    else
-    {
-        // Legacy single-packet reply
-        // But first check if we were receiving chunks - this would be an error
-        if (_receiving_chunks)
-        {
-            // Mixed mode - reset and process as single
-            reset_chunk_buffer();
-        }
-        incoming(message);
-    }
-}
-
 void crow::requestor_node::incoming_packet(crow::packet *pack)
 {
     auto &s = pack->subheader<pubsub_subheader>();
@@ -144,7 +37,7 @@ void crow::requestor_node::incoming_packet(crow::packet *pack)
             case PubSubTypes::Consume:
             {
                 auto &sh = pack->subheader<consume_subheader>();
-                handle_incoming_message(sh.message());
+                incoming(sh.message());
             };
             break;
 

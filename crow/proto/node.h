@@ -30,10 +30,14 @@ namespace crow
         void execute() override;
     };
 
+    // Default chunk size for node protocol (0 = no chunking)
+    inline constexpr size_t NODE_DEFAULT_CHUNK_SIZE = 0;
+
     class node
     {
     protected:
         Tower *_tower = nullptr; ///< башня, к которой привязан узел
+        size_t _chunk_size = NODE_DEFAULT_CHUNK_SIZE; ///< chunk size (0 = disabled)
 
     public:
         igris::dlist_node lnk = {}; // Список нодов.
@@ -46,6 +50,12 @@ namespace crow
         node(node &&) = delete;
 
         Tower *tower() const { return _tower; }
+
+        /// Set chunk size for outgoing messages.
+        /// If 0 (default), messages are sent as single packets.
+        /// If > 0, large messages are split into chunks of this size.
+        void set_chunk_size(size_t size) { _chunk_size = size; }
+        size_t chunk_size() const { return _chunk_size; }
 
         int waitevent();
         void notify_one(intptr_t future);
@@ -128,10 +138,26 @@ namespace crow
             return (crow::node_subheader *)pack->dataptr();
         }
 
+        /// Send data with automatic chunking if chunk_size is set and data is large
+        void send_chunked(nodeid_t rid,
+                          const crow::hostaddr_view &raddr,
+                          const nos::buffer data,
+                          uint8_t qos,
+                          uint16_t ackquant);
+
         virtual ~node();
 
     private:
         virtual void incoming_packet(crow::packet *pack) = 0;
+
+        void send_single_chunk(nodeid_t rid,
+                               const crow::hostaddr_view &raddr,
+                               const char *data,
+                               size_t size,
+                               uint16_t chunk_id,
+                               bool has_more,
+                               uint8_t qos,
+                               uint16_t ackquant);
 
         virtual void undelivered_packet(crow::packet *pack)
         {

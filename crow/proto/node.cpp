@@ -204,3 +204,80 @@ void crow::node_keepalive_timer::execute()
     alived_object &n = *mcast_out(this, alived_object, keepalive_timer);
     n.keepalive_handle();
 }
+
+// ============================================================================
+// Chunked sending implementation
+// ============================================================================
+
+void crow::node::send_single_chunk(nodeid_t rid,
+                                   const crow::hostaddr_view &raddr,
+                                   const char *data,
+                                   size_t size,
+                                   uint16_t chunk_id,
+                                   bool has_more,
+                                   uint8_t qos,
+                                   uint16_t ackquant)
+{
+    assert(_tower != nullptr && "Node must be bound to a tower before sending");
+    if (id == 0)
+        bind_node_dynamic(this);
+
+    crow::node_subheader sh;
+    sh.sid = id;
+    sh.rid = rid;
+    sh.u.f.type = CROW_NODEPACK_COMMON;
+    sh.u.f.chunked = 1;
+    sh.u.f.has_more = has_more ? 1 : 0;
+
+    crow::node_chunk_header ch;
+    ch.chunk_id = chunk_id;
+
+    const nos::buffer iov[3] = {
+        {(char *)&sh, sizeof(sh)},
+        {(char *)&ch, sizeof(ch)},
+        {data, size}
+    };
+
+    _tower->send_v(raddr, iov, 3, CROW_NODE_PROTOCOL, qos, ackquant, false);
+}
+
+void crow::node::send_chunked(nodeid_t rid,
+                              const crow::hostaddr_view &raddr,
+                              const nos::buffer data,
+                              uint8_t qos,
+                              uint16_t ackquant)
+{
+    // If chunking disabled or data fits in one chunk, send as single packet
+    if (_chunk_size == 0 || data.size() <= _chunk_size)
+    {
+        send(rid, raddr, data, qos, ackquant, false);
+        return;
+    }
+
+    // Calculate payload per chunk (chunk_size includes headers)
+    size_t header_overhead = sizeof(node_subheader) + sizeof(node_chunk_header);
+    if (_chunk_size <= header_overhead)
+    {
+        // Chunk size too small, send as single packet
+        send(rid, raddr, data, qos, ackquant, false);
+        return;
+    }
+    size_t payload_per_chunk = _chunk_size - header_overhead;
+
+    // Split and send chunks
+    size_t offset = 0;
+    uint16_t chunk_id = 0;
+
+    while (offset < data.size())
+    {
+        size_t remaining = data.size() - offset;
+        size_t chunk_payload = (remaining > payload_per_chunk) ? payload_per_chunk : remaining;
+        bool has_more = (offset + chunk_payload < data.size());
+
+        send_single_chunk(rid, raddr, data.data() + offset, chunk_payload,
+                          chunk_id, has_more, qos, ackquant);
+
+        offset += chunk_payload;
+        chunk_id++;
+    }
+}
