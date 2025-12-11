@@ -14,6 +14,7 @@
 #include <crow/gates/udpgate.h>
 #include <crow/nodes/service_node.h>
 #include <crow/tower.h>
+#include <crow/tower_cls.h>
 
 #include <getopt.h>
 #include <signal.h>
@@ -28,6 +29,7 @@ size_t chunk_size = 64;
 std::string crowker_addr_str = ".12.127.0.0.1:10009";
 std::string theme = "test_service";
 
+crow::Tower tower;
 crow::service_node service;
 
 // Generate test response of specified size
@@ -165,8 +167,8 @@ int main(int argc, char *argv[])
                 break;
             case 'd':
                 debug_mode = true;
-                crow::enable_diagnostic();
-                crow::set_diagnostic_label("service:" + std::to_string(getpid()));
+                tower.enable_diagnostic();
+                tower.set_diagnostic_label("service:" + std::to_string(getpid()));
                 break;
             default:
                 return 1;
@@ -174,11 +176,13 @@ int main(int argc, char *argv[])
     }
 
     // Create UDP gate
-    if (crow::create_udpgate(12, udpport))
+    auto udpgate = crow::create_udpgate_safe(12, udpport);
+    if (!udpgate || !udpgate->opened())
     {
         perror("udpgate");
         return 1;
     }
+    udpgate->bind(tower, 12);
 
     // Parse crowker address
     auto crowker_addr = crow::address(crowker_addr_str);
@@ -189,7 +193,7 @@ int main(int argc, char *argv[])
     }
 
     // Setup service node
-    service.bind(50);  // arbitrary node id
+    service.bind(tower, 50);  // arbitrary node id
     service.set_chunk_size(chunk_size);
     service.set_handle(service_handler);
     service.init_subscribe(crowker_addr,
@@ -214,7 +218,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
 
-    crow::spin_with_select();
+    crow::spin_with_select(tower);
 
     return 0;
 }

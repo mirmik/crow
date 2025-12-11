@@ -3,6 +3,7 @@
 #include <crow/brocker/crowker_pubsub_node.h>
 #include <crow/gates/udpgate.h>
 #include <crow/tower.h>
+#include <crow/tower_cls.h>
 
 #include <getopt.h>
 #include <stdbool.h>
@@ -38,7 +39,7 @@ bool debug_mode = false;
 
 const std::string VERSION = "2.1.0";
 
-// crow::crowker_api crowker_api;
+crow::Tower tower;
 crow::crowker_pubsub_node pubsub_node;
 
 void tcp_client_listener(nos::inet::tcp_client client)
@@ -156,15 +157,15 @@ int main(int argc, char *argv[])
     // Initialize with random seqid to reduce collision probability
     // after restart (TIME_WAIT entries on remote nodes still reference old seqids)
     std::random_device rd;
-    crow::set_initial_seqid(rd() & 0xFFFF);
+    tower.set_initial_seqid(rd() & 0xFFFF);
 
     // Set diagnostic label with PID for debugging
-    crow::set_diagnostic_label(nos::format("crowker:{}", getpid()));
+    tower.set_diagnostic_label(nos::format("crowker:{}", getpid()));
 
 #ifdef CROW_PUBSUB_PROTOCOL_SUPPORTED
     crow::pubsub_protocol.enable_crowker_subsystem();
 #endif
-    pubsub_node.bind(CROWKER_SERVICE_BROCKER_NODE_NO);
+    pubsub_node.bind(tower, CROWKER_SERVICE_BROCKER_NODE_NO);
     crow::crowker::instance()->add_api(&pubsub_node);
 
     const struct option long_options[] = {
@@ -198,7 +199,7 @@ int main(int argc, char *argv[])
 
             case 'd':
                 debug_mode = 1;
-                crow::enable_diagnostic();
+                tower.enable_diagnostic();
                 break;
 
             case 'b':
@@ -223,11 +224,13 @@ int main(int argc, char *argv[])
         udpport = 10009;
     }
 
-    if (crow::create_udpgate(CROW_UDPGATE_NO, udpport))
+    auto udpgate = crow::create_udpgate_safe(CROW_UDPGATE_NO, udpport);
+    if (!udpgate || !udpgate->opened())
     {
         perror("udpgate open");
         exit(-1);
     }
+    udpgate->bind(tower, CROW_UDPGATE_NO);
 
     if (tcpport != -1)
     {
@@ -235,6 +238,6 @@ int main(int argc, char *argv[])
         thr.detach();
     }
 
-    init_control_node();
-    crow::spin_with_select();
+    init_control_node(tower);
+    crow::spin_with_select(tower);
 }

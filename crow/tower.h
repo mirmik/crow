@@ -21,7 +21,11 @@ namespace crow
 // For apps and tests that don't manage explicit Tower instances
 namespace crow
 {
-    // Spin/thread functions
+    // Spin/thread functions (Tower-specific versions)
+    void spin(Tower &tower);
+    void spin_with_select(Tower &tower);
+
+    // Spin/thread functions (use default_tower)
     void spin();
     void spin_with_select();
 

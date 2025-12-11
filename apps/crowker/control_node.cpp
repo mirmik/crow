@@ -155,10 +155,11 @@ crow::node_delegate control(incoming, undelivered);
 crow::node_delegate beamsocket(incoming_beam, undelivered);
 crow::service_node control_service(control_handler);
 
-void init_control_node()
+void init_control_node(crow::Tower &tower)
 {
-    control.bind(CROWKER_CONTROL_BROCKER_NODE_NO);
-    beamsocket.bind(CROWKER_BEAMSOCKET_BROCKER_NODE_NO);
+    control.bind(tower, CROWKER_CONTROL_BROCKER_NODE_NO);
+    beamsocket.bind(tower, CROWKER_BEAMSOCKET_BROCKER_NODE_NO);
+    control_service.bind(tower);
     control_service.init(crow::hostaddr(""), "crowker/control");
     control_service.subscribe();
 }

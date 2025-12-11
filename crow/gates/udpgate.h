@@ -45,6 +45,11 @@ namespace crow
             return gateway::bind(gate_no);
         }
 
+        int bind(Tower &tower, int gate_no = CROW_UDPGATE_NO)
+        {
+            return gateway::bind(tower, gate_no);
+        }
+
         ~udpgate() override
         {
             close();

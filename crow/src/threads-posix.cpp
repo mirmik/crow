@@ -17,7 +17,8 @@ bool _spin_runned_unbounded = false;
 namespace crow
 {
 
-void spin_with_select()
+// Tower-specific spin function
+void spin_with_select(Tower &tower)
 {
     _spin_runned = true;
 
@@ -30,17 +31,28 @@ void spin_with_select()
 
         do
         {
-            default_tower().onestep();
+            tower.onestep();
 
             if (cancel_token)
                 break;
-        } while (default_tower().has_untravelled_now());
+        } while (tower.has_untravelled_now());
 
-        int64_t timeout = default_tower().get_minimal_timeout();
+        int64_t timeout = tower.get_minimal_timeout();
         asyncio.step(timeout);
     };
 
     _spin_runned = false;
+}
+
+// Compatibility: uses default_tower()
+void spin_with_select()
+{
+    spin_with_select(default_tower());
+}
+
+void spin(Tower &tower)
+{
+    spin_with_select(tower);
 }
 
 void spin()
@@ -58,7 +70,7 @@ int start_spin_with_select()
     cancel_token = false;
     _spin_runned_unbounded = true;
     _spin_runned = true;
-    _thread = std::thread(spin_with_select);
+    _thread = std::thread(static_cast<void(*)()>(spin_with_select));
 
     return 0;
 }
@@ -150,7 +162,7 @@ void spin_with_select_realtime(int abort_on_fault)
             abort();
     }
 
-    spin_with_select();
+    spin_with_select(default_tower());
 }
 
 int start_spin_with_select_realtime(int abort_on_fault)

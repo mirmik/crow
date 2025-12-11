@@ -12,6 +12,7 @@
 #include <crow/proto/acceptor.h>
 #include <crow/proto/channel.h>
 #include <crow/tower.h>
+#include <crow/tower_cls.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <igris/osutil/timeouted_read.h>
@@ -82,6 +83,7 @@ std::string reply_theme = ":unchanged:";
 int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
+crow::Tower tower;
 std::shared_ptr<crow::udpgate> udpgate;
 std::shared_ptr<crow::tcpgate> tcpgate;
 
@@ -332,7 +334,7 @@ void do_incom_data(nos::buffer incom_data)
     output_do(incom_data, nullptr);
     if (exit_on_receive)
     {
-        crow::stop_spin(false);
+        crow::set_spin_cancel_token();
         cancel_token = true;
     }
 }
@@ -413,7 +415,7 @@ void send_do(const std::string message)
     switch (protoopt)
     {
         case protoopt_e::PROTOOPT_BASIC:
-            crow::send(
+            tower.send(
                 address, {message.data(), message.size()}, type, qos, ackquant);
             break;
 
@@ -482,7 +484,7 @@ void incoming_handler(crow::packet *pack)
     if (echo)
     {
         // Переотослать пакет точно повторяющий входящий.
-        crow::send(pack->addr(),
+        tower.send(pack->addr(),
                    {pack->dataptr(), pack->datasize()},
                    pack->type(),
                    pack->quality(),
@@ -502,7 +504,7 @@ void incoming_handler(crow::packet *pack)
     }
 
     output_do(pack->data(), pack);
-    crow::release(pack);
+    crow::Tower::release(pack);
 }
 
 void print_channel_message(crow::channel *ch, crow::packet *pack)
@@ -721,7 +723,7 @@ void parse_options(int argc, char **argv)
                 break;
 
             case 's':
-                crow::set_debug_data_size((uint16_t)atoi(optarg));
+                tower.set_debug_data_size((uint16_t)atoi(optarg));
                 break;
 
             case 't':
@@ -768,7 +770,7 @@ void parse_options(int argc, char **argv)
                 break;
 
             case 'R':
-                crow::set_retransling_allowed(true);
+                tower.set_retransling_allowed(true);
                 break;
 
             case 'r':
@@ -807,7 +809,7 @@ void parse_options(int argc, char **argv)
 
             case 'd':
                 debug_mode = true;
-                crow::enable_diagnostic();
+                tower.enable_diagnostic();
                 break;
 
             case 'L':
@@ -1055,19 +1057,19 @@ int main(int argc, char *argv[])
     // Initialize with random seqid to reduce collision probability
     // after restart (TIME_WAIT entries on remote nodes still reference old seqids)
     std::random_device rd;
-    crow::set_initial_seqid(rd() & 0xFFFF);
+    tower.set_initial_seqid(rd() & 0xFFFF);
 
     // Set diagnostic label with PID for debugging
-    crow::set_diagnostic_label(nos::format("ctrans:{}", getpid()));
+    tower.set_diagnostic_label(nos::format("ctrans:{}", getpid()));
 
     parse_options(argc, argv);
 
-    raw_node.bind(1);
-    publish_node.bind(CTRANS_DEFAULT_PUBLISHER_NODE);
-    subscriber_node.bind(CTRANS_DEFAULT_SUBSCRIBER_NODE);
-    service_node.bind(CTRANS_DEFAULT_SERVICE_NODE);
-    requestor_node.bind(CTRANS_DEFAULT_REQUESTOR_NODE);
-    beam.bind(CTRANS_DEFAULT_BEAM_NODE);
+    raw_node.bind(tower, 1);
+    publish_node.bind(tower, CTRANS_DEFAULT_PUBLISHER_NODE);
+    subscriber_node.bind(tower, CTRANS_DEFAULT_SUBSCRIBER_NODE);
+    service_node.bind(tower, CTRANS_DEFAULT_SERVICE_NODE);
+    requestor_node.bind(tower, CTRANS_DEFAULT_REQUESTOR_NODE);
+    beam.bind(tower, CTRANS_DEFAULT_BEAM_NODE);
     reply_theme = gen_random_string(10);
 
     udpgate = crow::create_udpgate_safe(CROW_UDPGATE_NO, udpport);
@@ -1076,6 +1078,7 @@ int main(int argc, char *argv[])
         perror("udpgate open");
         exit(-1);
     }
+    udpgate->bind(tower, CROW_UDPGATE_NO);
     register_gate_info("udpgate",
                        {{"gate_no", std::to_string(CROW_UDPGATE_NO)},
                         {"listen_port", describe_port(udpport)},
@@ -1089,6 +1092,7 @@ int main(int argc, char *argv[])
             perror("tcpgate open");
             exit(-1);
         }
+        tcpgate->bind(tower, CROW_TCPGATE_NO);
         register_gate_info("tcpgate",
                            {{"gate_no", std::to_string(CROW_TCPGATE_NO)},
                             {"listen_port", describe_port(tcpport)},
@@ -1103,7 +1107,7 @@ int main(int argc, char *argv[])
 
     // Переопределение стандартного обработчика (Для возможности перехвата и
     // api)
-    crow::set_default_incoming_handler(incoming_handler);
+    tower.set_default_incoming_handler(incoming_handler);
 
     if (noend)
     {
@@ -1163,8 +1167,8 @@ int main(int argc, char *argv[])
         pipeline(pipelinecmd);
     }
 
-    // START CROW
-    crow::start_spin();
+    // START CROW - use blocking spin with select in main thread
+    // (crow::start_spin would use default_tower, but we have explicit tower)
     signal(SIGINT, signal_handler);
 
     if (channelno >= 0)
@@ -1219,7 +1223,7 @@ int main(int argc, char *argv[])
         else
         {
             // For non-request modes, wait for packets to be sent
-            while (crow::has_untravelled() || crow::has_allocated())
+            while (tower.has_untravelled() || crow::has_allocated())
             {
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
             }

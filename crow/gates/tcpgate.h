@@ -41,6 +41,11 @@ namespace crow
             return gateway::bind(gate_no);
         }
 
+        int bind(Tower &tower, int gate_no = CROW_TCPGATE_NO)
+        {
+            return gateway::bind(tower, gate_no);
+        }
+
         void open_new_client(nos::inet::netaddr addr)
         {
             auto sock = nos::inet::tcp_client(addr);
