@@ -13,7 +13,8 @@
 #include <crow/proto/channel.h>
 #include <crow/tower.h>
 #include <crow/tower_cls.h>
-#include <crow/tower_thread_executor.h>
+#include <crow/asyncio.h>
+#include <igris/event/delegate.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <igris/osutil/timeouted_read.h>
@@ -31,7 +32,6 @@
 #include <string.h>
 #include <string>
 #include <sys/ioctl.h>
-#include <thread>
 #include <unistd.h>
 #include <vector>
 #include <random>
@@ -85,7 +85,6 @@ int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
 crow::Tower tower;
-crow::TowerThreadExecutor executor(tower);
 std::shared_ptr<crow::udpgate> udpgate;
 std::shared_ptr<crow::tcpgate> tcpgate;
 
@@ -336,7 +335,7 @@ void do_incom_data(nos::buffer incom_data)
     output_do(incom_data, nullptr);
     if (exit_on_receive)
     {
-        executor.stop(false);
+        crow::asyncio.cancel();
         cancel_token = true;
     }
 }
@@ -527,26 +526,28 @@ crow::channel *acceptor_create_channel()
     return ch;
 }
 
-void console_listener()
+void console_read_handler(int fd)
 {
-    std::string input;
     char readbuf[1024];
+    int len = read(fd, readbuf, 1024);
 
-    while (1)
+    if (len <= 0)
     {
-        int len = read(DATAINPUT_FILENO, readbuf, 1024);
-        if (cancel_token)
-            break;
-
         if (len == 0)
-            continue;
-
-        input = std::string(readbuf, len);
-        auto msgpair = input_do(input);
-
-        if (msgpair.second)
-            send_do(msgpair.first);
+        {
+            // EOF on stdin - stop the event loop
+            crow::asyncio.cancel();
+            cancel_token = true;
+        }
+        // len < 0 means EAGAIN/EWOULDBLOCK for non-blocking fd, just return
+        return;
     }
+
+    std::string input(readbuf, len);
+    auto msgpair = input_do(input);
+
+    if (msgpair.second)
+        send_do(msgpair.first);
 }
 
 uint16_t udpport = 0;
@@ -1169,37 +1170,14 @@ int main(int argc, char *argv[])
         pipeline(pipelinecmd);
     }
 
-    // Start the tower executor thread
     signal(SIGINT, signal_handler);
-    executor.start();
 
+    // Channel mode requires synchronous connect which needs threaded event loop
+    // TODO: implement async channel connect
     if (channelno >= 0)
     {
-        if (userqos == false)
-            qos = 2;
-
-        channel.init(33, print_channel_message);
-        channel.set_addr_buffer((char *)malloc(128), 128);
-
-        int ret = channel.connect(
-            address.data(), address.size(), channelno, qos, ackquant);
-
-        if (ret)
-        {
-            switch (ret)
-            {
-
-                case CROW_ERRNO_UNREGISTRED_RID:
-                    nos::println_to(nos::cerr, "Unregistred remote rid");
-                    break;
-                default:
-                    nos::println_to(nos::cerr, "Handshake failure");
-                    break;
-            }
-
-            executor.stop(true);
-            exit(0);
-        }
+        nos::println_to(nos::cerr, "Error: --channel mode is not yet supported in single-threaded async mode");
+        exit(-1);
     }
 
     if (acceptorno >= 0)
@@ -1219,17 +1197,16 @@ int main(int argc, char *argv[])
         if (request_mode)
         {
             exit_on_receive = true;
-            // Let spin loop handle waiting for response
+            // Fall through to spin loop to wait for response
         }
         else
         {
-            // For non-request modes, wait for packets to be sent
+            // For non-request modes, run event loop until packets are sent
             while (tower.has_untravelled() || crow::has_allocated())
             {
-                std::this_thread::sleep_for(std::chrono::microseconds(1));
+                tower.onestep();
+                crow::asyncio.step(tower.get_minimal_timeout());
             }
-
-            executor.stop(true);
             exit(0);
         }
     }
@@ -1287,12 +1264,17 @@ int main(int argc, char *argv[])
         beam.keepalive_handle();
     }
 
-    // Создание консольного ввода, если необходимо.
+    // Register console input as async event source
     if (!noconsole)
     {
-        console_listener();
+        nos::osutil::nonblock(DATAINPUT_FILENO, true);
+        crow::asyncio.add_iotask(
+            DATAINPUT_FILENO,
+            crow::SelectType::READ,
+            igris::make_delegate(console_read_handler));
     }
 
-    executor.join();
+    // Run single-threaded event loop
+    crow::spin_with_select(tower);
     quick_exit(0);
 }
