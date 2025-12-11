@@ -13,6 +13,7 @@
 #include <crow/proto/channel.h>
 #include <crow/tower.h>
 #include <crow/tower_cls.h>
+#include <crow/tower_thread_executor.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <igris/osutil/timeouted_read.h>
@@ -84,6 +85,7 @@ int DATAOUTPUT_FILENO = STDOUT_FILENO;
 int DATAINPUT_FILENO = STDIN_FILENO;
 
 crow::Tower tower;
+crow::TowerThreadExecutor executor(tower);
 std::shared_ptr<crow::udpgate> udpgate;
 std::shared_ptr<crow::tcpgate> tcpgate;
 
@@ -334,7 +336,7 @@ void do_incom_data(nos::buffer incom_data)
     output_do(incom_data, nullptr);
     if (exit_on_receive)
     {
-        crow::set_spin_cancel_token();
+        executor.stop(false);
         cancel_token = true;
     }
 }
@@ -1167,9 +1169,9 @@ int main(int argc, char *argv[])
         pipeline(pipelinecmd);
     }
 
-    // START CROW - use blocking spin with select in main thread
-    // (crow::start_spin would use default_tower, but we have explicit tower)
+    // Start the tower executor thread
     signal(SIGINT, signal_handler);
+    executor.start();
 
     if (channelno >= 0)
     {
@@ -1195,8 +1197,7 @@ int main(int argc, char *argv[])
                     break;
             }
 
-            crow::stop_spin(false);
-            crow::join_spin();
+            executor.stop(true);
             exit(0);
         }
     }
@@ -1228,8 +1229,7 @@ int main(int argc, char *argv[])
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
             }
 
-            crow::stop_spin(false);
-            crow::join_spin();
+            executor.stop(true);
             exit(0);
         }
     }
@@ -1293,6 +1293,6 @@ int main(int argc, char *argv[])
         console_listener();
     }
 
-    crow::join_spin();
+    executor.join();
     quick_exit(0);
 }
