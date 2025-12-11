@@ -16,11 +16,11 @@ crow::pubsub_protocol_cls &crow::pubsub_protocol_cls::instance()
     return crow::pubsub_protocol;
 }
 
-void crow::pubsub_protocol_cls::incoming(crow::packet *pack)
+void crow::pubsub_protocol_cls::incoming(crow::packet *pack, Tower &tower)
 {
     if (incoming_handler)
     {
-        incoming_handler(pack);
+        incoming_handler(pack, tower);
     }
     else
     {
@@ -36,23 +36,25 @@ void crow::pubsub_protocol_cls::incoming(crow::packet *pack)
                 return;
             }
         }
-        crow::default_tower().release(pack);
+        Tower::release(pack);
     }
 }
 
-void crow::pubsub_protocol_cls::undelivered(crow::packet *pack)
+void crow::pubsub_protocol_cls::undelivered(crow::packet *pack, Tower &tower)
 {
     if (undelivered_handler)
     {
-        undelivered_handler(pack);
+        undelivered_handler(pack, tower);
     }
     else
     {
-        crow::default_tower().release(pack);
+        Tower::release(pack);
     }
 }
 
-crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
+// New API with explicit Tower
+crow::packet_ptr crow::publish(Tower &tower,
+                               const crow::hostaddr_view &addr,
                                const nos::buffer theme,
                                const nos::buffer data,
                                uint8_t qos,
@@ -71,11 +73,12 @@ crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
         data,
     };
 
-    return crow::default_tower().send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
+    return tower.send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
                         acktime);
 }
 
-crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
+crow::packet_ptr crow::publish_v(Tower &tower,
+                                 const crow::hostaddr_view &addr,
                                  const nos::buffer theme,
                                  const nos::buffer *vec,
                                  int vecsz,
@@ -98,11 +101,12 @@ crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
         {(char *)theme.data(), subps_d.thmsz},
     };
 
-    return crow::default_tower().send_vv(addr, iov, igris::size(iov), vec, vecsz,
+    return tower.send_vv(addr, iov, igris::size(iov), vec, vecsz,
                          CROW_PUBSUB_PROTOCOL, qos, acktime);
 }
 
-void crow::subscribe(const crow::hostaddr_view &addr,
+void crow::subscribe(Tower &tower,
+                     const crow::hostaddr_view &addr,
                      const nos::buffer theme,
                      uint8_t qos,
                      uint16_t acktime,
@@ -122,8 +126,39 @@ void crow::subscribe(const crow::hostaddr_view &addr,
         {(char *)theme.data(), theme.size()},
     };
 
-    crow::default_tower().send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
+    tower.send_v(addr, iov, igris::size(iov), CROW_PUBSUB_PROTOCOL, qos,
                  acktime);
+}
+
+// Deprecated: compatibility layer using default_tower()
+crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
+                               const nos::buffer theme,
+                               const nos::buffer data,
+                               uint8_t qos,
+                               uint16_t acktime,
+                               uint8_t type)
+{
+    return publish(default_tower(), addr, theme, data, qos, acktime, type);
+}
+
+crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
+                                 const nos::buffer theme,
+                                 const nos::buffer *vec,
+                                 int vecsz,
+                                 uint8_t qos,
+                                 uint16_t acktime)
+{
+    return publish_v(default_tower(), addr, theme, vec, vecsz, qos, acktime);
+}
+
+void crow::subscribe(const crow::hostaddr_view &addr,
+                     const nos::buffer theme,
+                     uint8_t qos,
+                     uint16_t acktime,
+                     uint8_t rqos,
+                     uint16_t racktime)
+{
+    subscribe(default_tower(), addr, theme, qos, acktime, rqos, racktime);
 }
 
 void crow::pubsub_protocol_cls::resubscribe_all()

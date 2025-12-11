@@ -1,5 +1,6 @@
 #include <crow/address.h>
 #include <crow/tower.h>
+#include <crow/tower_cls.h>
 #include <doctest/doctest.h>
 #include <nos/print.h>
 #include "allocator_test_helper.h"
@@ -9,15 +10,15 @@
 
 using namespace std::chrono_literals;
 
-static auto waddr = crow::address(".12.127.0.0.1:10098");
 static auto addr = crow::address(".99");
 static auto addr2 = crow::address(".99.99");
 static int count = 0;
+static crow::Tower *g_tower = nullptr;
 
 void incoming(crow::packet *ptr)
 {
     count++;
-    crow::release(ptr);
+    crow::Tower::release(ptr);
 }
 
 TEST_CASE("ptr")
@@ -27,7 +28,9 @@ TEST_CASE("ptr")
         {
             auto ptr = crow::create_packet(nullptr, 0, 0);
             crow::packet_ptr pptr(ptr);
-            crow::tower_release(ptr);
+            // tower_release invalidates the packet immediately, regardless of refs
+            // pptr destructor will handle the packet_ptr cleanup
+            crow::Tower::tower_release(ptr);
         }
         CHECK_EQ(crow::allocated_count(), 0);
     }
@@ -35,7 +38,7 @@ TEST_CASE("ptr")
 
 TEST_CASE("get_stage")
 {
-    FOR_EACH_ALLOCATOR
+    FOR_EACH_ALLOCATOR_WITH_TOWER
     {
         std::string data = "data";
         crow::packet *pack =
@@ -55,8 +58,15 @@ TEST_CASE("get_stage")
 
 TEST_CASE("get_stage_2")
 {
-    FOR_EACH_ALLOCATOR
+    static auto waddr = crow::address(".12.127.0.0.1:10098");
+    for (bool _use_pool : {false, true})
     {
+        auto _subcase = doctest::detail::Subcase(
+            _use_pool ? "pool" : "malloc", __FILE__, __LINE__);
+        if (!_subcase)
+            continue;
+
+        TowerTestGuardWithUdp _guard(_use_pool, 10098);
         std::string data = "data";
         crow::packet *pack =
             crow::create_packet(NULL, waddr.size(), data.size());
@@ -75,143 +85,162 @@ TEST_CASE("get_stage_2")
 
 TEST_CASE("test0" * doctest::timeout(3.0))
 {
-    FOR_EACH_ALLOCATOR
+    FOR_EACH_ALLOCATOR_WITH_TOWER
     {
         count = 0;
-        crow::set_default_incoming_handler(incoming);
+        tower.set_default_incoming_handler(incoming);
         CHECK_EQ(crow::allocated_count(), 0);
 
     SUBCASE("0")
     {
-        crow::send(addr, "data", 0, 0, 20);
-        crow::onestep();
+        tower.send(addr, "data", 0, 0, 20);
+        tower.onestep();
 
         CHECK_EQ(count, 1);
-        CHECK_EQ(crow::get_total_travelled(), 2);
-        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(tower.get_total_travelled(), 2);
+        CHECK_EQ(tower.has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
 
     SUBCASE("2_safe")
     {
-        auto packptr = crow::send(addr, "data", 0, 0, 20);
+        auto packptr = tower.send(addr, "data", 0, 0, 20);
         CHECK_EQ(packptr->refs, 1);
 
-        crow::onestep();
+        tower.onestep();
         std::this_thread::sleep_for(10ms);
         CHECK_EQ(packptr->refs, 1);
 
         CHECK_EQ(count, 1);
-        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(tower.has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 1);
     }
 
     SUBCASE("3_safe")
     {
-        auto packptr = crow::send(addr, "data0", 0, 0, 20);
-        packptr = crow::send(addr, "data1", 0, 0, 20);
-        packptr = crow::send(addr, "data2", 0, 0, 20);
+        auto packptr = tower.send(addr, "data0", 0, 0, 20);
+        packptr = tower.send(addr, "data1", 0, 0, 20);
+        packptr = tower.send(addr, "data2", 0, 0, 20);
         CHECK_EQ(packptr->refs, 1);
 
-        crow::onestep();
+        tower.onestep();
         std::this_thread::sleep_for(10ms);
         CHECK_EQ(packptr->refs, 1);
 
         CHECK_EQ(count, 3);
-        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(tower.has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 1);
     }
 
     SUBCASE("addr2")
     {
-        crow::send(addr2, "data", 0, 0, 20);
+        tower.send(addr2, "data", 0, 0, 20);
 
-        crow::onestep();
+        tower.onestep();
         std::this_thread::sleep_for(10ms);
 
         CHECK_EQ(count, 1);
-        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(tower.has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
 
     SUBCASE("qos1")
     {
-        crow::send(addr, "data", 0, 1, 20);
+        tower.send(addr, "data", 0, 1, 20);
 
-        crow::onestep();
+        tower.onestep();
 
         CHECK_EQ(count, 1);
-        CHECK_EQ(crow::get_total_travelled(), 4); // pack * 2 + ack * 2
-        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(tower.get_total_travelled(), 4); // pack * 2 + ack * 2
+        CHECK_EQ(tower.has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
 
     SUBCASE("qos2")
     {
-        crow::send(addr, "data", 0, 2, 20);
+        tower.send(addr, "data", 0, 2, 20);
 
-        crow::onestep();
+        tower.onestep();
         std::this_thread::sleep_for(10ms);
 
         CHECK_EQ(count, 1);
-        CHECK_EQ(crow::get_total_travelled(), 6); // pack * 2 + ack * 2 + ack2 * 2
-        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(tower.get_total_travelled(), 6); // pack * 2 + ack * 2 + ack2 * 2
+        CHECK_EQ(tower.has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
+    } // FOR_EACH_ALLOCATOR_WITH_TOWER
+}
+
+// Separate test case for undelivered tests that require UDP gate
+TEST_CASE("test0_undelivered" * doctest::timeout(3.0))
+{
+    static auto waddr = crow::address(".12.127.0.0.1:10098");
+    for (bool _use_pool : {false, true})
+    {
+        auto _subcase = doctest::detail::Subcase(
+            _use_pool ? "pool" : "malloc", __FILE__, __LINE__);
+        if (!_subcase)
+            continue;
+
+        TowerTestGuardWithUdp _guard(_use_pool, 10099);
+        crow::Tower &tower = _guard.tower;
+        count = 0;
+        tower.set_default_incoming_handler(incoming);
+        CHECK_EQ(crow::allocated_count(), 0);
 
     SUBCASE("undelivered_0")
     {
-        crow::send(waddr, "data", 0, 0, 2);
+        tower.send(waddr, "data", 0, 0, 2);
 
-        crow::onestep();
+        tower.onestep();
 
         CHECK_EQ(count, 0);
-        CHECK_EQ(crow::get_total_travelled(), 1);
-        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(tower.get_total_travelled(), 1);
+        CHECK_EQ(tower.has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
 
     SUBCASE("undelivered_1")
     {
-        crow::send(waddr, "data", 0, 1, 2);
+        tower.send(waddr, "data", 0, 1, 2);
 
-        CHECK_EQ(crow::incomming_stage_count(), 0);
-        CHECK_EQ(crow::outers_stage_count(), 1);
-        crow::onestep();
+        CHECK_EQ(tower.incomming_stage_count(), 0);
+        CHECK_EQ(tower.outers_stage_count(), 1);
+        tower.onestep();
 
-        CHECK_EQ(crow::incomming_stage_count(), 0);
+        CHECK_EQ(tower.incomming_stage_count(), 0);
 
         // ackquant=2 gets quantized to 4ms, need 5 retries
         // Use 15ms intervals with more iterations to ensure all retries complete
         for (int i = 0; i < 12; i++)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(15));
-            crow::onestep();
+            tower.onestep();
         }
 
-        CHECK_EQ(crow::outers_stage_count(), 0);
+        CHECK_EQ(tower.outers_stage_count(), 0);
         CHECK_EQ(count, 0);
-        CHECK_EQ(crow::get_total_travelled(), 5);
-        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(tower.get_total_travelled(), 5);
+        CHECK_EQ(tower.has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
 
     SUBCASE("undelivered_2")
     {
-        crow::send(waddr, "data", 0, 2, 2);
+        tower.send(waddr, "data", 0, 2, 2);
 
         // ackquant=2 gets quantized to 4ms, need 5 retries
         // Use 15ms intervals with more iterations to ensure all retries complete
         for (int i = 0; i < 12; i++)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(15));
-            crow::onestep();
+            tower.onestep();
         }
 
         CHECK_EQ(count, 0);
-        CHECK_EQ(crow::get_total_travelled(), 5);
-        CHECK_EQ(crow::has_untravelled(), false);
+        CHECK_EQ(tower.get_total_travelled(), 5);
+        CHECK_EQ(tower.has_untravelled(), false);
         CHECK_EQ(crow::allocated_count(), 0);
     }
-    } // FOR_EACH_ALLOCATOR
+    } // for _use_pool
 }

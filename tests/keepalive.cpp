@@ -26,7 +26,7 @@ public:
 
 TEST_CASE("keepalive" * doctest::timeout(5))
 {
-    FOR_EACH_ALLOCATOR
+    FOR_EACH_ALLOCATOR_WITH_TOWER
     {
         a = 0;
         b = 0;
@@ -43,7 +43,7 @@ TEST_CASE("keepalive" * doctest::timeout(5))
         int64_t start = igris::millis();
         while (igris::millis() - start < 150)
         {
-            crow::onestep();
+            tower.onestep();
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
 

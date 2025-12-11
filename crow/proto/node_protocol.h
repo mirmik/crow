@@ -6,6 +6,7 @@
 
 namespace crow
 {
+    class Tower; // Forward declaration
     using nodeid_t = uint16_t;
 
     struct node_subheader
@@ -32,12 +33,12 @@ namespace crow
     class node_protocol_cls : public crow::protocol
     {
     private:
-        void send_node_error(crow::packet *pack, int errcode);
+        void send_node_error(crow::packet *pack, int errcode, Tower &tower);
 
     public:
-        void incoming(crow::packet *pack);
-        void undelivered(crow::packet *pack);
-        void delivered(crow::packet *pack);
+        void incoming(crow::packet *pack, Tower &tower) override;
+        void undelivered(crow::packet *pack, Tower &tower) override;
+        void delivered(crow::packet *pack, Tower &tower);
 
         node_protocol_cls() /*: protocol(CROW_NODE_PROTOCOL)*/ {}
 

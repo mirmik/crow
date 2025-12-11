@@ -80,8 +80,9 @@ crow::packet_ptr crow::node::send_vv(nodeid_t rid,
                             CROW_NODE_PROTOCOL, qos, ackquant, async);
 }
 
-// Static methods - use default_tower() for backward compatibility
-crow::packet_ptr crow::node::send(nodeid_t sid,
+// New API with explicit Tower
+crow::packet_ptr crow::node::send(Tower &tower,
+                                  nodeid_t sid,
                                   nodeid_t rid,
                                   const crow::hostaddr_view &addr,
                                   const nos::buffer data,
@@ -97,10 +98,11 @@ crow::packet_ptr crow::node::send(nodeid_t sid,
     const nos::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
                                 {(char *)data.data(), data.size()}};
 
-    return crow::default_tower().send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant, async);
+    return tower.send_v(addr, iov, 2, CROW_NODE_PROTOCOL, qos, ackquant, async);
 }
 
-crow::packet_ptr crow::node::send_v(nodeid_t sid,
+crow::packet_ptr crow::node::send_v(Tower &tower,
+                                    nodeid_t sid,
                                     nodeid_t rid,
                                     const crow::hostaddr_view &addr,
                                     const nos::buffer *vec,
@@ -116,11 +118,12 @@ crow::packet_ptr crow::node::send_v(nodeid_t sid,
 
     const nos::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
 
-    return crow::default_tower().send_vv(addr, iov, 1, vec, veclen, CROW_NODE_PROTOCOL, qos,
+    return tower.send_vv(addr, iov, 1, vec, veclen, CROW_NODE_PROTOCOL, qos,
                          ackquant, async);
 }
 
-crow::packet_ptr crow::node::send_vv(nodeid_t sid,
+crow::packet_ptr crow::node::send_vv(Tower &tower,
+                                     nodeid_t sid,
                                      nodeid_t rid,
                                      const crow::hostaddr_view &addr,
                                      const nos::buffer *vec1,
@@ -138,8 +141,46 @@ crow::packet_ptr crow::node::send_vv(nodeid_t sid,
 
     const nos::buffer iov[1] = {{(char *)&sh, sizeof(sh)}};
 
-    return crow::default_tower().send_vvv(addr, iov, 1, vec1, veclen1, vec2, veclen2,
+    return tower.send_vvv(addr, iov, 1, vec1, veclen1, vec2, veclen2,
                           CROW_NODE_PROTOCOL, qos, ackquant, async);
+}
+
+// Deprecated: compatibility layer using default_tower()
+crow::packet_ptr crow::node::send(nodeid_t sid,
+                                  nodeid_t rid,
+                                  const crow::hostaddr_view &addr,
+                                  const nos::buffer data,
+                                  uint8_t qos,
+                                  uint16_t ackquant,
+                                  bool async)
+{
+    return send(default_tower(), sid, rid, addr, data, qos, ackquant, async);
+}
+
+crow::packet_ptr crow::node::send_v(nodeid_t sid,
+                                    nodeid_t rid,
+                                    const crow::hostaddr_view &addr,
+                                    const nos::buffer *vec,
+                                    size_t veclen,
+                                    uint8_t qos,
+                                    uint16_t ackquant,
+                                    bool async)
+{
+    return send_v(default_tower(), sid, rid, addr, vec, veclen, qos, ackquant, async);
+}
+
+crow::packet_ptr crow::node::send_vv(nodeid_t sid,
+                                     nodeid_t rid,
+                                     const crow::hostaddr_view &addr,
+                                     const nos::buffer *vec1,
+                                     size_t veclen1,
+                                     const nos::buffer *vec2,
+                                     size_t veclen2,
+                                     uint8_t qos,
+                                     uint16_t ackquant,
+                                     bool async)
+{
+    return send_vv(default_tower(), sid, rid, addr, vec1, veclen1, vec2, veclen2, qos, ackquant, async);
 }
 
 void crow::__link_node(crow::node *srv, uint16_t id)

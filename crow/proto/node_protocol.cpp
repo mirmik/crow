@@ -1,7 +1,9 @@
 #include <crow/proto/node.h>
 #include <crow/proto/node_protocol.h>
+#include <crow/tower_cls.h>
 
-void crow::node_protocol_cls::send_node_error(crow::packet *pack, int errcode)
+void crow::node_protocol_cls::send_node_error(crow::packet *pack, int errcode,
+                                              Tower &tower)
 {
     crow::node_subheader sh;
 
@@ -12,11 +14,11 @@ void crow::node_protocol_cls::send_node_error(crow::packet *pack, int errcode)
     const nos::buffer iov[2] = {{(char *)&sh, sizeof(sh)},
                                 {(char *)&errcode, sizeof(errcode)}};
 
-    crow::default_tower().send_v({pack->addrptr(), pack->addrsize()}, iov, 2,
+    tower.send_v({pack->addrptr(), pack->addrsize()}, iov, 2,
                  CROW_NODE_PROTOCOL, 0, pack->ackquant(), true);
 }
 
-void crow::node_protocol_cls::incoming(crow::packet *pack)
+void crow::node_protocol_cls::incoming(crow::packet *pack, Tower &tower)
 {
     auto &sh = pack->subheader<node_subheader>();
     crow::node *srv = nullptr;
@@ -32,8 +34,8 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 
     if (srv == nullptr)
     {
-        send_node_error(pack, CROW_ERRNO_UNREGISTRED_RID);
-        crow::default_tower().release(pack);
+        send_node_error(pack, CROW_ERRNO_UNREGISTRED_RID, tower);
+        Tower::release(pack);
         return;
     }
 
@@ -45,14 +47,15 @@ void crow::node_protocol_cls::incoming(crow::packet *pack)
 
         case CROW_NODEPACK_ERROR:
             srv->notify_one(get_error_code(pack));
-            crow::default_tower().release(pack);
+            Tower::release(pack);
             break;
     }
     return;
 }
 
-void crow::node_protocol_cls::undelivered(crow::packet *pack)
+void crow::node_protocol_cls::undelivered(crow::packet *pack, Tower &tower)
 {
+    (void)tower;
     crow::node_subheader *sh = (crow::node_subheader *)pack->dataptr();
     for (crow::node &srvs : crow::nodes_list)
     {
@@ -62,11 +65,12 @@ void crow::node_protocol_cls::undelivered(crow::packet *pack)
             return;
         }
     }
-    crow::default_tower().release(pack);
+    Tower::release(pack);
 }
 
-void crow::node_protocol_cls::delivered(crow::packet *pack)
+void crow::node_protocol_cls::delivered(crow::packet *pack, Tower &tower)
 {
+    (void)tower;
     crow::node_subheader *sh = (crow::node_subheader *)pack->dataptr();
 
     for (auto &srvs : crow::nodes_list)
@@ -78,5 +82,5 @@ void crow::node_protocol_cls::delivered(crow::packet *pack)
         }
     }
 
-    crow::default_tower().release(pack);
+    Tower::release(pack);
 }

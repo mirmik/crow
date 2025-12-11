@@ -7,8 +7,9 @@
 
 #include <igris/util/bug.h>
 
-void incoming_crowker_handler(crow::packet *pack)
+void incoming_crowker_handler(crow::packet *pack, crow::Tower &tower)
 {
+    (void)tower;
     crow::subheader_pubsub &shps = pack->subheader<crow::subheader_pubsub>();
 
     switch (shps.type)
@@ -47,11 +48,12 @@ void incoming_crowker_handler(crow::packet *pack)
         break;
     }
 
-    crow::default_tower().release(pack);
+    crow::Tower::release(pack);
 }
 
-void undelivered_crowker_handler(crow::packet *pack)
+void undelivered_crowker_handler(crow::packet *pack, crow::Tower &tower)
 {
+    (void)tower;
     auto &shps = pack->subheader<crow::subheader_pubsub>();
 
     if (shps.type == (uint8_t)crow::pubsub_type::PUBLISH)
@@ -60,7 +62,7 @@ void undelivered_crowker_handler(crow::packet *pack)
             std::string((char *)pack->addrptr(), pack->addrsize()));
     }
 
-    crow::default_tower().release(pack);
+    crow::Tower::release(pack);
 }
 
 void crow::pubsub_protocol_cls::enable_crowker_subsystem()

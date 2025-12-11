@@ -229,7 +229,7 @@ void crow::Tower::confirmed_utilize_from_outers(crow::packet *pack)
             if (_outters_count > 0)
                 --_outters_count;
             system_unlock();
-            crow::node_protocol.delivered(it);
+            crow::node_protocol.delivered(it, *this);
             tower_release(it);
             return;
         }
@@ -367,7 +367,7 @@ void crow::Tower::incoming_handler(crow::packet *pack)
     if (CROW_NODE_PROTOCOL == pack->type())
     {
         _in_incoming_handler = true;
-        crow::node_protocol.incoming(pack);
+        crow::node_protocol.incoming(pack, *this);
         _in_incoming_handler = false;
         return;
     }
@@ -376,7 +376,7 @@ void crow::Tower::incoming_handler(crow::packet *pack)
     if (CROW_PUBSUB_PROTOCOL == pack->type())
     {
         _in_incoming_handler = true;
-        crow::pubsub_protocol.incoming(pack);
+        crow::pubsub_protocol.incoming(pack, *this);
         _in_incoming_handler = false;
         return;
     }
@@ -933,7 +933,7 @@ void crow::Tower::undelivered(crow::packet *pack)
     if (CROW_NODE_PROTOCOL == pack->type())
     {
         _in_undelivered_handler = true;
-        crow::node_protocol.undelivered(pack);
+        crow::node_protocol.undelivered(pack, *this);
         _in_undelivered_handler = false;
         return;
     }
@@ -942,7 +942,7 @@ void crow::Tower::undelivered(crow::packet *pack)
     else if (CROW_PUBSUB_PROTOCOL == pack->type())
     {
         _in_undelivered_handler = true;
-        crow::pubsub_protocol.undelivered(pack);
+        crow::pubsub_protocol.undelivered(pack, *this);
         _in_undelivered_handler = false;
         return;
     }

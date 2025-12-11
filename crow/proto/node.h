@@ -108,6 +108,39 @@ namespace crow
                                  uint16_t ackquant,
                                  bool async = false);
 
+        // New API with explicit Tower
+        static crow::packet_ptr send(Tower &tower,
+                                     nodeid_t sid,
+                                     nodeid_t rid,
+                                     const crow::hostaddr_view &addr,
+                                     const nos::buffer data,
+                                     uint8_t qos,
+                                     uint16_t ackquant,
+                                     bool async = false);
+
+        static crow::packet_ptr send_v(Tower &tower,
+                                       nodeid_t sid,
+                                       nodeid_t rid,
+                                       const crow::hostaddr_view &addr,
+                                       const nos::buffer *vec,
+                                       size_t veclen,
+                                       uint8_t qos,
+                                       uint16_t ackquant,
+                                       bool async = false);
+
+        static crow::packet_ptr send_vv(Tower &tower,
+                                        nodeid_t sid,
+                                        nodeid_t rid,
+                                        const crow::hostaddr_view &addr,
+                                        const nos::buffer *vec1,
+                                        size_t veclen1,
+                                        const nos::buffer *vec2,
+                                        size_t veclen2,
+                                        uint8_t qos,
+                                        uint16_t ackquant,
+                                        bool async = false);
+
+        // Deprecated: use overloads with explicit Tower parameter
         static crow::packet_ptr send(nodeid_t sid,
                                      nodeid_t rid,
                                      const crow::hostaddr_view &addr,

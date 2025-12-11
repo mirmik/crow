@@ -55,14 +55,14 @@ namespace crow
     {
     public:
         struct dlist_head subscribers = DLIST_HEAD_INIT(subscribers);
-        void (*incoming_handler)(crow::packet *) = nullptr;
-        void (*undelivered_handler)(crow::packet *) = nullptr;
+        void (*incoming_handler)(crow::packet *, Tower &) = nullptr;
+        void (*undelivered_handler)(crow::packet *, Tower &) = nullptr;
 
     public:
         pubsub_protocol_cls() {}
 
-        void incoming(crow::packet *pack) override;
-        void undelivered(crow::packet *pack) override;
+        void incoming(crow::packet *pack, Tower &tower) override;
+        void undelivered(crow::packet *pack, Tower &tower) override;
 
         static void start_resubscribe_thread(int millis);
         void resubscribe_all();
@@ -72,6 +72,33 @@ namespace crow
     };
     extern pubsub_protocol_cls pubsub_protocol;
 
+    // New API with explicit Tower
+    crow::packet_ptr
+    publish(Tower &tower,
+            const crow::hostaddr_view &addr,
+            const nos::buffer theme,
+            const nos::buffer data,
+            uint8_t qos,
+            uint16_t acktime,
+            uint8_t type = (uint8_t)crow::pubsub_type::PUBLISH);
+
+    crow::packet_ptr publish_v(Tower &tower,
+                               const crow::hostaddr_view &addr,
+                               const nos::buffer theme,
+                               const nos::buffer *vec,
+                               int vecsz,
+                               uint8_t qos,
+                               uint16_t acktime);
+
+    void subscribe(Tower &tower,
+                   const crow::hostaddr_view &addr,
+                   nos::buffer theme,
+                   uint8_t qos,
+                   uint16_t acktime,
+                   uint8_t rqos,
+                   uint16_t racktime);
+
+    // Deprecated: use overloads with explicit Tower parameter
     crow::packet_ptr
     publish(const crow::hostaddr_view &addr,
             const nos::buffer theme,
@@ -89,7 +116,7 @@ namespace crow
 
     void subscribe(const crow::hostaddr_view &addr,
                    nos::buffer theme,
-                   uint8_t qo0,
+                   uint8_t qos,
                    uint16_t acktime,
                    uint8_t rqos,
                    uint16_t racktime);

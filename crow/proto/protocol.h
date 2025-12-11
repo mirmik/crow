@@ -5,11 +5,13 @@
 
 namespace crow
 {
+    class Tower; // Forward declaration
+
     class protocol
     {
       public:
-        virtual void incoming(crow::packet *pack) = 0;
-        virtual void undelivered(crow::packet *pack) = 0;
+        virtual void incoming(crow::packet *pack, Tower &tower) = 0;
+        virtual void undelivered(crow::packet *pack, Tower &tower) = 0;
         virtual ~protocol() = default;
     };
 }
