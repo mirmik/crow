@@ -4,6 +4,7 @@
 #define CROW_PUBSUB_SUBSCRIBER_H
 
 #include "pubsub.h"
+#include <crow/tower_cls.h>
 
 namespace crow
 {
@@ -13,6 +14,7 @@ namespace crow
         dlist_head lnk = DLIST_HEAD_INIT(lnk);
 
     public:
+        Tower *_tower = nullptr;
         crow::hostaddr_view addr = {};
         const char *theme = nullptr;
         uint8_t qos = 0;
@@ -42,14 +44,15 @@ namespace crow
             this->dlg = dlg;
         }
 
-        subscriber(const crow::hostaddr_view &addr,
+        subscriber(Tower &tower,
+                   const crow::hostaddr_view &addr,
                    const char *theme,
                    uint8_t qos,
                    uint16_t ackquant,
                    uint8_t rqos,
                    uint16_t rackquant,
                    igris::delegate<void, crow::pubsub_packet_ptr> dlg)
-            : addr(addr)
+            : _tower(&tower), addr(addr)
         {
             this->theme = theme;
             this->qos = qos;
@@ -64,15 +67,15 @@ namespace crow
         }
         virtual ~subscriber() = default;
 
-        void subscribe(const crow::hostaddr_view &addr,
+        void subscribe(Tower &tower,
+                       const crow::hostaddr_view &addr,
                        const char *theme,
                        uint8_t qos,
                        uint16_t ackquant,
                        uint8_t rqos,
-                       uint16_t rackquant
-                       // igris::delegate<void, crow::pubsub_packet_ptr> dlg
-        )
+                       uint16_t rackquant)
         {
+            this->_tower = &tower;
             this->addr = addr;
             this->theme = theme;
             this->qos = qos;
@@ -89,7 +92,8 @@ namespace crow
 
         void resubscribe()
         {
-            crow::subscribe(addr, theme, qos, ackquant, rqos, rackquant);
+            if (_tower)
+                crow::subscribe(*_tower, addr, theme, qos, ackquant, rqos, rackquant);
         }
     };
 } // namespace crow

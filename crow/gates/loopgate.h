@@ -33,14 +33,6 @@ namespace crow
         void finish() override {}
     };
 
-    inline int create_loopgate(uint8_t id)
-    {
-        auto *gate = new loopgate;
-        gate->bind(id);
-
-        return 0;
-    }
-
     inline int create_loopgate(Tower &tower, uint8_t id)
     {
         auto *gate = new loopgate;

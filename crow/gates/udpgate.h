@@ -40,11 +40,6 @@ namespace crow
             close();
         }
 
-        int bind(int gate_no = CROW_UDPGATE_NO)
-        {
-            return gateway::bind(gate_no);
-        }
-
         int bind(Tower &tower, int gate_no = CROW_UDPGATE_NO)
         {
             return gateway::bind(tower, gate_no);
@@ -61,8 +56,7 @@ namespace crow
         }
     };
 
-    int create_udpgate(uint8_t id = CROW_UDPGATE_NO, uint16_t port = 0);
-    std::shared_ptr<crow::udpgate> create_udpgate_safe(uint8_t id,
+    std::shared_ptr<crow::udpgate> create_udpgate_safe(uint8_t id = CROW_UDPGATE_NO,
                                                        uint16_t port = 0);
 }
 

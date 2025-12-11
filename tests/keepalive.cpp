@@ -22,6 +22,12 @@ public:
     }
 
     void incoming_packet(crow::packet *) override {}
+
+    // Convenience wrapper that uses the node's tower
+    void install_keepalive(int64_t interval, bool immediate_call = true)
+    {
+        alived_object::install_keepalive(*_tower, interval, immediate_call);
+    }
 };
 
 TEST_CASE("keepalive" * doctest::timeout(5))
@@ -33,6 +39,9 @@ TEST_CASE("keepalive" * doctest::timeout(5))
 
         test_keepalive_node an(a);
         test_keepalive_node bn(b);
+
+        an.bind(tower, 100);
+        bn.bind(tower, 101);
 
         // Use longer intervals for more reliable timing
         an.install_keepalive(20);  // 20ms interval

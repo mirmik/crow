@@ -245,9 +245,6 @@ namespace crow
         void unsleep();
     };
 
-    // Get the default tower instance (lazy-initialized singleton)
-    Tower &default_tower();
-
 } // namespace crow
 
 #endif

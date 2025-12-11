@@ -19,14 +19,6 @@ int main(int argc, char** argv)
 	}
 #endif
 
-	// Reset state before running tests
-	crow::reset_for_test();
-
-	// Verify reset worked
-	if (crow::allocated_count() != 0) {
-		printf("WARNING: allocated_count=%d after reset!\n", crow::allocated_count());
-	}
-
 	doctest::Context context;
 	context.applyCommandLine(argc, argv);
 

@@ -44,71 +44,9 @@ void spin_with_select(Tower &tower)
     _spin_runned = false;
 }
 
-// Compatibility: uses default_tower()
-void spin_with_select()
-{
-    spin_with_select(default_tower());
-}
-
 void spin(Tower &tower)
 {
     spin_with_select(tower);
-}
-
-void spin()
-{
-    spin_with_select();
-}
-
-int start_spin_with_select()
-{
-    if (_spin_runned)
-    {
-        throw std::runtime_error("spin thread double start");
-    }
-
-    cancel_token = false;
-    _spin_runned_unbounded = true;
-    _spin_runned = true;
-    _thread = std::thread(static_cast<void(*)()>(spin_with_select));
-
-    return 0;
-}
-
-int start_spin()
-{
-    return start_spin_with_select();
-}
-
-int start_spin_without_select()
-{
-    if (_spin_runned)
-    {
-        return -1;
-    }
-
-    _spin_runned_unbounded = true;
-    _thread = std::thread(
-        []()
-        {
-            _spin_runned = true;
-
-            while (1)
-            {
-                if (cancel_token)
-                    break;
-
-                default_tower().onestep();
-
-                if (cancel_token)
-                    break;
-                std::this_thread::sleep_for(std::chrono::microseconds(1));
-            };
-
-            _spin_runned = false;
-        });
-
-    return 0;
 }
 
 int stop_spin(bool wait)
@@ -151,7 +89,10 @@ void set_spin_cancel_token()
 
 //#if defined(CROW_REALTIME_THREADS)
 #include <igris/osutil/realtime.h>
-void spin_with_select_realtime(int abort_on_fault)
+
+static Tower *_realtime_tower = nullptr;
+
+void spin_with_select_realtime_impl(int abort_on_fault)
 {
     int ret;
     if ((ret = this_thread_set_realtime_priority()))
@@ -162,27 +103,28 @@ void spin_with_select_realtime(int abort_on_fault)
             abort();
     }
 
-    spin_with_select(default_tower());
+    spin_with_select(*_realtime_tower);
 }
 
-int start_spin_with_select_realtime(int abort_on_fault)
+int start_spin_with_select_realtime(Tower &tower, int abort_on_fault)
 {
     if (_spin_runned)
     {
         throw std::runtime_error("spin thread double start");
     }
 
+    _realtime_tower = &tower;
     cancel_token = false;
     _spin_runned_unbounded = true;
     _spin_runned = true;
-    _thread = std::thread(spin_with_select_realtime, abort_on_fault);
+    _thread = std::thread(spin_with_select_realtime_impl, abort_on_fault);
 
     return 0;
 }
 
-int start_spin_realtime(int abort_on_fault)
+int start_spin_realtime(Tower &tower, int abort_on_fault)
 {
-    return start_spin_with_select_realtime(abort_on_fault);
+    return start_spin_with_select_realtime(tower, abort_on_fault);
 }
 //#endif
 

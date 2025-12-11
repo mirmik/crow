@@ -17,10 +17,10 @@ namespace crow
         {
         }
 
-        void init(int id, igris::delegate<crow::channel *> init_channel)
+        void init(Tower &tower, int id, igris::delegate<crow::channel *> init_channel)
         {
             this->init_channel = init_channel;
-            bind(id);
+            bind(tower, id);
         }
 
         void incoming_packet(crow::packet *pack) override;
@@ -30,10 +30,10 @@ namespace crow
     __BEGIN_DECLS
 
     static inline acceptor *
-    create_acceptor(uint16_t port, igris::delegate<crow::channel *> dlg)
+    create_acceptor(Tower &tower, uint16_t port, igris::delegate<crow::channel *> dlg)
     {
         auto asrv = new crow::acceptor(dlg);
-        asrv->bind(port);
+        asrv->bind(tower, port);
         return asrv;
     }
 

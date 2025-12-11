@@ -160,6 +160,7 @@ crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
                                                 const gstuff_context &gctx)
 {
     (void)baudrate;
+    (void)id; // gate id is set when binding to tower
     auto *g = new crow::serial_gstuff(gctx);
 
     g->debug = debug;
@@ -174,7 +175,6 @@ crow::serial_gstuff *crow::create_serial_gstuff(const char *path,
     }
 
     g->rpack = NULL;
-    g->bind(id);
 
     if (debug)
     {
@@ -322,6 +322,7 @@ crow::create_serial_gstuff_v0(const char *path, uint32_t baudrate, uint8_t id,
                               bool debug, const gstuff_context &gctx)
 {
     (void)baudrate;
+    (void)id; // gate id is set when binding to tower
     auto *g = new crow::serial_gstuff_v0(gctx);
 
     g->debug = debug;
@@ -336,7 +337,6 @@ crow::create_serial_gstuff_v0(const char *path, uint32_t baudrate, uint8_t id,
     }
 
     g->rpack = NULL;
-    g->bind(id);
 
     if (debug)
     {

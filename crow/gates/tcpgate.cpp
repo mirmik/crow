@@ -4,18 +4,10 @@
 std::shared_ptr<crow::tcpgate> crow::create_tcpgate_safe(uint8_t id,
                                                          uint16_t port)
 {
-    int sts;
+    (void)id; // gate id is set when binding to tower
 
     auto g = std::make_shared<crow::tcpgate>();
-    if ((sts = g->open(port)))
-        return g;
-
-    if ((sts = g->bind(id)))
-    {
-        g->close();
-        return g;
-    }
-
+    g->open(port);
     return g;
 }
 

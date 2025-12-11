@@ -130,37 +130,6 @@ void crow::subscribe(Tower &tower,
                  acktime);
 }
 
-// Deprecated: compatibility layer using default_tower()
-crow::packet_ptr crow::publish(const crow::hostaddr_view &addr,
-                               const nos::buffer theme,
-                               const nos::buffer data,
-                               uint8_t qos,
-                               uint16_t acktime,
-                               uint8_t type)
-{
-    return publish(default_tower(), addr, theme, data, qos, acktime, type);
-}
-
-crow::packet_ptr crow::publish_v(const crow::hostaddr_view &addr,
-                                 const nos::buffer theme,
-                                 const nos::buffer *vec,
-                                 int vecsz,
-                                 uint8_t qos,
-                                 uint16_t acktime)
-{
-    return publish_v(default_tower(), addr, theme, vec, vecsz, qos, acktime);
-}
-
-void crow::subscribe(const crow::hostaddr_view &addr,
-                     const nos::buffer theme,
-                     uint8_t qos,
-                     uint16_t acktime,
-                     uint8_t rqos,
-                     uint16_t racktime)
-{
-    subscribe(default_tower(), addr, theme, qos, acktime, rqos, racktime);
-}
-
 void crow::pubsub_protocol_cls::resubscribe_all()
 {
     crow::subscriber *sub;

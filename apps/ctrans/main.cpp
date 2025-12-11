@@ -444,7 +444,8 @@ void send_do(const std::string message)
 
         case protoopt_e::PROTOOPT_NODE:
         {
-            crow::node::send(1,
+            crow::node::send(tower,
+                             1,
                              nodeno,
                              address,
                              {message.data(), message.size()},
@@ -916,6 +917,7 @@ void create_serial_gate_v0(std::string path, int baud, char parity,
     }
     if (gate)
     {
+        gate->bind(tower, CTRANS_SERIAL_GATE_NO);
         gate->setup_serial_port(baud, parity, stopbits, databits);
         register_serial_gate_info(
             path, baud, parity, stopbits, databits, CTRANS_HEADER_V0,
@@ -939,6 +941,7 @@ void create_serial_gate_v1(std::string path, int baud, char parity,
     }
     if (gate)
     {
+        gate->bind(tower, CTRANS_SERIAL_GATE_NO);
         gate->setup_serial_port(baud, parity, stopbits, databits);
         register_serial_gate_info(
             path, baud, parity, stopbits, databits, CTRANS_HEADER_V1,
@@ -1182,7 +1185,7 @@ int main(int argc, char *argv[])
 
     if (acceptorno >= 0)
     {
-        acceptor.init(acceptorno, acceptor_create_channel);
+        acceptor.init(tower, acceptorno, acceptor_create_channel);
     }
 
     // Ветка обработки pulse мода.

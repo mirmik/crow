@@ -98,29 +98,6 @@ namespace crow
                    uint8_t rqos,
                    uint16_t racktime);
 
-    // Deprecated: use overloads with explicit Tower parameter
-    crow::packet_ptr
-    publish(const crow::hostaddr_view &addr,
-            const nos::buffer theme,
-            const nos::buffer data,
-            uint8_t qos,
-            uint16_t acktime,
-            uint8_t type = (uint8_t)crow::pubsub_type::PUBLISH);
-
-    crow::packet_ptr publish_v(const crow::hostaddr_view &addr,
-                               const nos::buffer theme,
-                               const nos::buffer *vec,
-                               int vecsz,
-                               uint8_t qos,
-                               uint16_t acktime);
-
-    void subscribe(const crow::hostaddr_view &addr,
-                   nos::buffer theme,
-                   uint8_t qos,
-                   uint16_t acktime,
-                   uint8_t rqos,
-                   uint16_t racktime);
-
     class pubsub_packet_ptr : public packet_ptr
     {
     public:

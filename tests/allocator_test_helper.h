@@ -18,7 +18,6 @@ struct AllocatorTestGuard
 
     AllocatorTestGuard(bool pool) : use_pool(pool)
     {
-        crow::reset_for_test();
         if (pool)
         {
             crow::engage_packet_pool(g_test_pool_buffer,
@@ -32,7 +31,6 @@ struct AllocatorTestGuard
         {
             crow::disengage_packet_pool();
         }
-        crow::reset_for_test();
     }
 };
 
@@ -49,7 +47,7 @@ struct TowerTestGuard
 
     TowerTestGuard(bool pool) : use_pool(pool)
     {
-        crow::reset_for_test();
+        tower.reset_for_test();
         if (pool)
         {
             crow::engage_packet_pool(g_test_pool_buffer,
@@ -65,7 +63,7 @@ struct TowerTestGuard
         {
             crow::disengage_packet_pool();
         }
-        crow::reset_for_test();
+        tower.reset_for_test();
     }
 };
 
@@ -82,7 +80,7 @@ struct TowerTestGuardWithUdp
 
     TowerTestGuardWithUdp(bool pool, uint16_t udp_port = 10099) : use_pool(pool)
     {
-        crow::reset_for_test();
+        tower.reset_for_test();
         if (pool)
         {
             crow::engage_packet_pool(g_test_pool_buffer,
@@ -101,7 +99,7 @@ struct TowerTestGuardWithUdp
         {
             crow::disengage_packet_pool();
         }
-        crow::reset_for_test();
+        tower.reset_for_test();
     }
 };
 

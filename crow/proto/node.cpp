@@ -19,8 +19,9 @@ crow::packet_ptr crow::node::send(nodeid_t rid,
                                   uint16_t ackquant,
                                   bool async)
 {
+    assert(_tower != nullptr && "Node must be bound to a tower before sending");
     if (id == 0)
-        bind();
+        bind_node_dynamic(this);
 
     crow::node_subheader sh;
     sh.sid = id;
@@ -42,8 +43,9 @@ crow::packet_ptr crow::node::send_v(nodeid_t rid,
                                     uint16_t ackquant,
                                     bool async)
 {
+    assert(_tower != nullptr && "Node must be bound to a tower before sending");
     if (id == 0)
-        bind();
+        bind_node_dynamic(this);
 
     crow::node_subheader sh;
     sh.sid = id;
@@ -66,8 +68,9 @@ crow::packet_ptr crow::node::send_vv(nodeid_t rid,
                                      uint16_t ackquant,
                                      bool async)
 {
+    assert(_tower != nullptr && "Node must be bound to a tower before sending");
     if (id == 0)
-        bind();
+        bind_node_dynamic(this);
 
     crow::node_subheader sh;
     sh.sid = id;
@@ -143,44 +146,6 @@ crow::packet_ptr crow::node::send_vv(Tower &tower,
 
     return tower.send_vvv(addr, iov, 1, vec1, veclen1, vec2, veclen2,
                           CROW_NODE_PROTOCOL, qos, ackquant, async);
-}
-
-// Deprecated: compatibility layer using default_tower()
-crow::packet_ptr crow::node::send(nodeid_t sid,
-                                  nodeid_t rid,
-                                  const crow::hostaddr_view &addr,
-                                  const nos::buffer data,
-                                  uint8_t qos,
-                                  uint16_t ackquant,
-                                  bool async)
-{
-    return send(default_tower(), sid, rid, addr, data, qos, ackquant, async);
-}
-
-crow::packet_ptr crow::node::send_v(nodeid_t sid,
-                                    nodeid_t rid,
-                                    const crow::hostaddr_view &addr,
-                                    const nos::buffer *vec,
-                                    size_t veclen,
-                                    uint8_t qos,
-                                    uint16_t ackquant,
-                                    bool async)
-{
-    return send_v(default_tower(), sid, rid, addr, vec, veclen, qos, ackquant, async);
-}
-
-crow::packet_ptr crow::node::send_vv(nodeid_t sid,
-                                     nodeid_t rid,
-                                     const crow::hostaddr_view &addr,
-                                     const nos::buffer *vec1,
-                                     size_t veclen1,
-                                     const nos::buffer *vec2,
-                                     size_t veclen2,
-                                     uint8_t qos,
-                                     uint16_t ackquant,
-                                     bool async)
-{
-    return send_vv(default_tower(), sid, rid, addr, vec1, veclen1, vec2, veclen2, qos, ackquant, async);
 }
 
 void crow::__link_node(crow::node *srv, uint16_t id)

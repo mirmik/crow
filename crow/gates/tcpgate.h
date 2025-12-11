@@ -36,11 +36,6 @@ namespace crow
             close();
         }
 
-        int bind(int gate_no = CROW_TCPGATE_NO)
-        {
-            return gateway::bind(gate_no);
-        }
-
         int bind(Tower &tower, int gate_no = CROW_TCPGATE_NO)
         {
             return gateway::bind(tower, gate_no);

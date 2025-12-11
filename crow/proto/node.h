@@ -51,22 +51,6 @@ namespace crow
         void notify_one(intptr_t future);
         void notify_all(intptr_t future);
 
-        node &bind(int addr)
-        {
-            _tower = &default_tower();
-            system_lock();
-            __link_node(this, addr);
-            system_unlock();
-            return *this;
-        };
-
-        node &bind()
-        {
-            _tower = &default_tower();
-            bind_node_dynamic(this);
-            return *this;
-        };
-
         node &bind(Tower &tower, int addr)
         {
             _tower = &tower;
@@ -108,7 +92,6 @@ namespace crow
                                  uint16_t ackquant,
                                  bool async = false);
 
-        // New API with explicit Tower
         static crow::packet_ptr send(Tower &tower,
                                      nodeid_t sid,
                                      nodeid_t rid,
@@ -130,35 +113,6 @@ namespace crow
 
         static crow::packet_ptr send_vv(Tower &tower,
                                         nodeid_t sid,
-                                        nodeid_t rid,
-                                        const crow::hostaddr_view &addr,
-                                        const nos::buffer *vec1,
-                                        size_t veclen1,
-                                        const nos::buffer *vec2,
-                                        size_t veclen2,
-                                        uint8_t qos,
-                                        uint16_t ackquant,
-                                        bool async = false);
-
-        // Deprecated: use overloads with explicit Tower parameter
-        static crow::packet_ptr send(nodeid_t sid,
-                                     nodeid_t rid,
-                                     const crow::hostaddr_view &addr,
-                                     const nos::buffer data,
-                                     uint8_t qos,
-                                     uint16_t ackquant,
-                                     bool async = false);
-
-        static crow::packet_ptr send_v(nodeid_t sid,
-                                       nodeid_t rid,
-                                       const crow::hostaddr_view &addr,
-                                       const nos::buffer *vec,
-                                       size_t veclen,
-                                       uint8_t qos,
-                                       uint16_t ackquant,
-                                       bool async = false);
-
-        static crow::packet_ptr send_vv(nodeid_t sid,
                                         nodeid_t rid,
                                         const crow::hostaddr_view &addr,
                                         const nos::buffer *vec1,
@@ -200,11 +154,13 @@ namespace crow
 
         virtual void keepalive_handle() {}
 
-        void install_keepalive(int64_t interval, bool immediate_call = true)
+        void install_keepalive(Tower &tower,
+                               int64_t interval,
+                               bool immediate_call = true)
         {
             crow::keepalive_timer_manager.plan(keepalive_timer, igris::millis(),
                                                interval);
-            crow::default_tower().unsleep();
+            tower.unsleep();
             if (immediate_call)
             {
                 keepalive_handle();

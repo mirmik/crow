@@ -16,18 +16,11 @@ def test_import():
 def test_tower_class():
     """Test that Tower class is available."""
     assert hasattr(pycrow, 'Tower')
-    assert hasattr(pycrow, 'default_tower')
 
 
 def test_create_tower():
     """Test creating a Tower instance."""
     tower = pycrow.Tower()
-    assert tower is not None
-
-
-def test_default_tower():
-    """Test default_tower() returns a Tower."""
-    tower = pycrow.default_tower()
     assert tower is not None
 
 

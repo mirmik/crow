@@ -61,10 +61,10 @@ namespace crow
         channel(const channel &) = delete;
         channel &operator=(const channel &) = delete;
 
-        void init(int id, incoming_handler_t incoming_handler)
+        void init(Tower &tower, int id, incoming_handler_t incoming_handler)
         {
             this->incoming_handler = incoming_handler;
-            this->bind(id);
+            this->bind(tower, id);
         }
 
         void set_addr_buffer(char *buf, size_t sz)

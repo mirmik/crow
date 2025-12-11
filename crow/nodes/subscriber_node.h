@@ -75,6 +75,12 @@ namespace crow
         {
             subscribe();
         }
+
+        // Convenience wrapper that uses the node's tower
+        void install_keepalive(int64_t interval, bool immediate_call = true)
+        {
+            alived_object::install_keepalive(*_tower, interval, immediate_call);
+        }
     };
 
     class subscriber_node : public crow::abstract_subscriber_node

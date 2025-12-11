@@ -10,7 +10,6 @@
 
 TEST_CASE("pool_allocator")
 {
-    crow::reset_for_test();
 
     // Size: packet + header_v1 + 256 bytes data
     const size_t elem_size =
@@ -183,5 +182,4 @@ TEST_CASE("pool_allocator")
 
     // Ensure we're back to malloc mode for other tests
     crow::disengage_packet_pool();
-    crow::reset_for_test();
 }

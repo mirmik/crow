@@ -27,20 +27,6 @@ void register_subscriber_class(py::module &m);
 void register_publisher_class(py::module &m);
 void register_requestor_class(py::module &m);
 
-/*py::function incoming_handler_bind;
-void incoming_handler_bind_invoke(crow::packet *pack)
-{
-    crow::packet_ptr control(pack);
-    incoming_handler_bind(control);
-}
-
-py::function subscribe_handler_bind;
-void subscribe_handler_bind_invoke(crow::packet *pack)
-{
-    crow::packet_ptr control(pack);
-    subscribe_handler_bind(control);
-}*/
-
 // Helper class for udpgate with Tower binding support
 class py_udpgate : public crow::udpgate
 {
@@ -86,11 +72,10 @@ PYBIND11_MODULE(libcrow, m)
         .def("get_retransling_allowed", &crow::Tower::get_retransling_allowed)
         .def("set_debug_data_size", &crow::Tower::set_debug_data_size)
         .def("get_debug_data_size", &crow::Tower::get_debug_data_size)
+        .def("enable_diagnostic", &crow::Tower::enable_diagnostic)
+        .def("diagnostic_enabled", &crow::Tower::diagnostic_enabled)
         .def("release",
              [](crow::Tower &self, crow::packet *pack) { self.release(pack); });
-
-    m.def("default_tower", &crow::default_tower,
-          py::return_value_policy::reference);
 
     auto pack = py::class_<packet_ptr>(m, "packet_ptr")
                     .def("rawdata",
@@ -122,7 +107,6 @@ PYBIND11_MODULE(libcrow, m)
     py::implicitly_convertible<crow::hostaddr, crow::hostaddr_view>();
 
     auto __gateway__ = py::class_<gateway>(m, "gateway")
-                           .def("bind", py::overload_cast<int>(&gateway::bind))
                            .def("finish", &gateway::finish);
 
     py::class_<py_udpgate>(m, "udpgate", __gateway__)
@@ -140,26 +124,11 @@ PYBIND11_MODULE(libcrow, m)
         .def("bind_to_tower", &py_loopgate::bind_to_tower,
              py::arg("tower"), py::arg("gate_no"));
 
-    m.def("send",
-          [](const crow::hostaddr_view &addr, const std::string &data,
-             uint8_t type, uint8_t qos, uint16_t ackquant, bool fastsend) {
-              return crow::send(addr, data, type, qos, ackquant);
-          });
-
-    m.def("create_udpgate", &crow::create_udpgate,
-          py::arg("id") = CROW_UDPGATE_NO, py::arg("port") = 0);
     m.def("crowker_address", &crow::crowker_address);
 
     m.def("address", [](std::string str) { return crow::address(str); });
 
-    m.def("diagnostic_setup", diagnostic_setup);
-    m.def("finish", finish);
-
     py::class_<crow::node>(m, "node")
-        .def("bind", py::overload_cast<>(&crow::node::bind),
-             py::return_value_policy::reference)
-        .def("bind", py::overload_cast<int>(&crow::node::bind),
-             py::return_value_policy::reference)
         .def("bind_to_tower",
              [](crow::node &self, crow::Tower &tower, int addr) -> crow::node & {
                  return self.bind(tower, addr);
@@ -188,36 +157,13 @@ PYBIND11_MODULE(libcrow, m)
         .def(py::init<std::function<void(crow::node_packet_ptr)>,
                       std::function<void(crow::node_packet_ptr)>>());
 
-    /*py::class_<crow::msgbox, crow::node>(m, "msgbox")
-        .def(py::init<>())
-        .def("query", &crow::msgbox::query, ungil())
-        .def("receive", &crow::msgbox::receive, ungil())
-        .def("reply", &crow::msgbox::reply, ungil())
-    ;*/
-
-    m.def("fully_empty", &crow::fully_empty);
-
     m.def("join_spin", &crow::join_spin,
           py::call_guard<py::gil_scoped_release>());
-    m.def("start_spin", &crow::start_spin);
     m.def("stop_spin", &crow::stop_spin, py::arg("wait") = true);
-    m.def("onestep", &crow::onestep);
-    m.def("spin", py::overload_cast<>(&crow::spin));
-    m.def("spin", py::overload_cast<crow::Tower &>(&crow::spin),
+    m.def("spin", [](crow::Tower &tower) { crow::spin(tower); },
           py::arg("tower"));
-
-    m.def("get_gateway", &crow::get_gateway);
-
-    // py::class_<crow::crowker>(m, "crowker")
-    //.def("instance", &crow::crowker::instance,
-    // py::return_value_policy::reference) .def("publish",
-    //&crow::crowker::publish) .def("set_info_mode",
-    //&crow::crowker::set_info_mode)
-    //;
 
     register_subscriber_class(m);
     register_publisher_class(m);
     register_requestor_class(m);
-    m.def("gates", &crow::gates);
-    m.def("nodes", &crow::nodes);
 }

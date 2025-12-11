@@ -27,19 +27,12 @@ struct crow_gateway
     uint8_t id; ///< номер врат.
 };
 
-// DEPRECATED: Use crow::default_tower().c_gateway_list() instead
-extern struct dlist_head &crow_gateway_list;
-
 __BEGIN_DECLS
 
 void crow_gateway_init(struct crow_gateway *gate,
                        struct crow_gateway_operations *ops);
 
-int crow_gateway_bind(struct crow_gateway *gate, int no);
-
 void crow_gateway_deinit(struct crow_gateway *gate);
-
-struct crow_gateway *crow_get_gateway(int no);
 
 __END_DECLS
 
@@ -67,7 +60,6 @@ namespace crow
         virtual void finish() = 0;
         virtual void nblock_onestep() {}
 
-        int bind(int gateno);
         int bind(Tower &tower, int gateno);
 
         Tower *tower() const { return _tower; }
@@ -81,11 +73,6 @@ namespace crow
             system_unlock();
         }
     };
-
-    gateway *get_gateway(int no);
-
-    // DEPRECATED: Use default_tower().gateway_list() instead
-    extern struct dlist_head &gateway_list;
 }
 
 #endif
