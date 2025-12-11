@@ -1,3 +1,4 @@
+import pycrow
 import pycrow.libcrow
 from pycrow.libcrow import *
 
@@ -10,14 +11,20 @@ def get_publisher(theme):
     if theme in PUBLISHERS:
         return PUBLISHERS[theme]
     crowker = pycrow.libcrow.crowker_address()
-    PUBLISHERS[theme] = pycrow.libcrow.publisher(crowker, theme)
+    tower = pycrow.get_default_tower()
+    pub = pycrow.libcrow.publisher(crowker, theme)
+    pub.bind_to_tower(tower)
+    PUBLISHERS[theme] = pub
     return PUBLISHERS[theme]
 
 
 def get_subscriber(theme, incoming):
     crowker = pycrow.libcrow.crowker_address()
-    SUBSCRIBERS[theme] = pycrow.libcrow.subscriber(incoming)
-    SUBSCRIBERS[theme].subscribe(crowker, theme)
+    tower = pycrow.get_default_tower()
+    sub = pycrow.libcrow.subscriber(incoming)
+    sub.bind_to_tower(tower)
+    sub.subscribe(crowker, theme)
+    SUBSCRIBERS[theme] = sub
     return SUBSCRIBERS[theme]
 
 

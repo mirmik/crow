@@ -18,6 +18,7 @@
 #include <crow/proto/node.h>
 #include <crow/tower.h>
 #include <crow/tower_cls.h>
+#include <crow/tower_thread_executor.h>
 
 using namespace crow;
 namespace py = pybind11;
@@ -162,6 +163,16 @@ PYBIND11_MODULE(libcrow, m)
     m.def("stop_spin", &crow::stop_spin, py::arg("wait") = true);
     m.def("spin", [](crow::Tower &tower) { crow::spin(tower); },
           py::arg("tower"));
+
+    // TowerThreadExecutor class
+    py::class_<crow::TowerThreadExecutor>(m, "TowerThreadExecutor")
+        .def(py::init<crow::Tower &>(), py::arg("tower"))
+        .def("start", &crow::TowerThreadExecutor::start)
+        .def("stop", &crow::TowerThreadExecutor::stop, py::arg("wait") = true,
+             py::call_guard<py::gil_scoped_release>())
+        .def("join", &crow::TowerThreadExecutor::join,
+             py::call_guard<py::gil_scoped_release>())
+        .def("running", &crow::TowerThreadExecutor::running);
 
     register_subscriber_class(m);
     register_publisher_class(m);
