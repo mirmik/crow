@@ -12,13 +12,15 @@ licant.include("crow")
 application("crowker",
             sources=[
                 "main.cpp",
-                "control_node.cpp"
+                "control_node.cpp",
+                "webui.cpp"
             ],
             mdepends=[
                 "crow",
                 "crow.crowker",
                 "crow.udpgate"
             ],
+            include_paths=["../../lib"],
             optimize="-O0",
             cc_flags="-flto -fPIC -Wextra -Wall -ffunction-sections -fdata-sections",
             cxx_flags="-flto -fPIC -Wextra -Wall -ffunction-sections -fdata-sections",

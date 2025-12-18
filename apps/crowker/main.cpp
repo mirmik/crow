@@ -16,6 +16,7 @@
 #include <random>
 
 #include "control_node.h"
+#include "webui.h"
 #include <crow/brocker/crowker.h>
 #include <crow/pubsub/pubsub.h>
 
@@ -30,10 +31,20 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <csignal>
+
+void signal_handler(int signum)
+{
+    (void)signum;
+    nos::println("\nReceived signal, shutting down...");
+    crowker_webui::stop();
+    crow::set_spin_cancel_token();
+}
 
 bool brocker_info = false;
 int udpport = -1;
 int tcpport = -1;
+int httpport = -1;
 bool quite = false;
 bool debug_mode = false;
 
@@ -148,6 +159,8 @@ void print_help()
            "\n"
            "Gate`s option list:\n"
            "  -u, --udp             set udp address (gate 12)\n"
+           "  -t, --tcp             set tcp port\n"
+           "  -w, --http            set web UI http port (default: 8080)\n"
            "  -S, --serial          make gate on serial device\n"
            "\n");
 }
@@ -172,6 +185,7 @@ int main(int argc, char *argv[])
         {"help", no_argument, NULL, 'h'},
         {"udp", required_argument, NULL, 'u'}, // crow udpgate port
         {"tcp", required_argument, NULL, 't'},
+        {"http", required_argument, NULL, 'w'}, // web UI http port
         {"debug", no_argument, NULL, 'd'}, // crow transport log
         {"binfo", no_argument, NULL, 'b'}, // brocker log
         {"version", no_argument, NULL, 'v'},
@@ -180,7 +194,7 @@ int main(int argc, char *argv[])
     int long_index = 0;
     int opt = 0;
 
-    while ((opt = getopt_long(argc, argv, "u:t:svdib", long_options,
+    while ((opt = getopt_long(argc, argv, "u:t:w:svdib", long_options,
                               &long_index)) != -1)
     {
         switch (opt)
@@ -195,6 +209,10 @@ int main(int argc, char *argv[])
 
             case 't':
                 tcpport = atoi(optarg);
+                break;
+
+            case 'w':
+                httpport = atoi(optarg);
                 break;
 
             case 'd':
@@ -238,6 +256,27 @@ int main(int argc, char *argv[])
         thr.detach();
     }
 
+    // Start web UI server
+    if (httpport != -1)
+    {
+        if (crowker_webui::start(httpport, brocker_info))
+        {
+            if (!quite)
+                nos::fprintln("Web UI started on http://0.0.0.0:{}", httpport);
+        }
+        else
+        {
+            nos::fprintln_to(nos::cerr, "Failed to start Web UI on port {}", httpport);
+        }
+    }
+
     init_control_node(tower);
+
+    // Регистрируем обработчик сигнала для корректного завершения
+    std::signal(SIGINT, signal_handler);
+    std::signal(SIGTERM, signal_handler);
+
     crow::spin_with_select(tower);
+
+    nos::println("Crowker stopped.");
 }

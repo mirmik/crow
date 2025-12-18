@@ -102,9 +102,13 @@ if(CROW_BUILD_APPS)
     add_executable(crowker
         apps/crowker/main.cpp
         apps/crowker/control_node.cpp
+        apps/crowker/webui.cpp
     )
     target_link_libraries(crowker PRIVATE crow)
-    target_include_directories(crowker PRIVATE apps/crowker)
+    target_include_directories(crowker PRIVATE
+        apps/crowker
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib
+    )
 endif()
 
 if(CROW_BUILD_TESTS)
