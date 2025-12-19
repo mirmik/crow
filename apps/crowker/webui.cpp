@@ -720,6 +720,10 @@ namespace crowker_webui
 
         current_port = port;
 
+        // Отключаем обработку сигналов в crowhttp, чтобы не блокировать
+        // главный поток при Ctrl+C
+        app->signal_clear();
+
         // Запуск сервера в отдельном потоке
         server_thread = std::thread([port]() {
             app->port(port).multithreaded().run();
