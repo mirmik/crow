@@ -38,6 +38,8 @@ endif()
 
 file(GLOB CROW_HEADERS
     crow/*.h
+    lib/include/*.h
+    lib/include/crowhttp/*.h
 )
 
 file(GLOB CROW_SOURCES CONFIGURE_DEPENDS
@@ -107,6 +109,7 @@ if(CROW_BUILD_APPS)
     target_link_libraries(crowker PRIVATE crow)
     target_include_directories(crowker PRIVATE
         apps/crowker
+        lib/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib
     )
 endif()
