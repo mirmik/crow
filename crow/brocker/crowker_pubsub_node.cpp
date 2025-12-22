@@ -10,17 +10,12 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
 {
     auto &s = pack->subheader<pubsub_subheader>();
 
-    nos::fprintln("crowker_pubsub: incoming type={} pack_size={}",
-                  (int)s.type, pack->datasize());
-
     switch (s.type)
     {
         case PubSubTypes::Publish:
         {
             auto &sh = pack->subheader<publish_subheader>();
             auto message = sh.message();
-            nos::fprintln("crowker_pubsub: Publish theme='{}' msg_size={}",
-                          sh.theme(), message.size());
             publish_to_theme(sh.theme(), std::make_shared<std::string>(
                                              message.data(), message.size()));
         };
@@ -153,9 +148,6 @@ void crow::crowker_pubsub_node::node_client::publish(
     const std::string &data,
     crowker_implementation::options opts)
 {
-    nos::fprintln("crowker_pubsub: sending to client node={} theme='{}' data_size={} qos={}",
-                  node, theme, data.size(), opts.qos);
-
     crow::consume_subheader sh;
 
     sh.type = PubSubTypes::Consume;
@@ -167,7 +159,6 @@ void crow::crowker_pubsub_node::node_client::publish(
     if (total_size > 1200 && crowker_node->chunk_size() > 0)
     {
         // Use chunked sending for large messages
-        // Build complete message buffer
         std::string message;
         message.reserve(total_size);
         message.append(reinterpret_cast<char *>(&sh) + sizeof(node_subheader),
@@ -175,7 +166,6 @@ void crow::crowker_pubsub_node::node_client::publish(
         message.append(theme);
         message.append(data);
 
-        nos::fprintln("crowker_pubsub: using chunked send, total_size={}", total_size);
         crowker_node->send_chunked(node, addr, message, opts.qos, opts.ackquant);
     }
     else

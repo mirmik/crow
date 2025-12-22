@@ -129,9 +129,6 @@ void crow::node_protocol_cls::handle_chunk(crow::packet *pack, Tower &tower)
     uint16_t chunk_id = chunk_hdr->chunk_id;
     bool has_more = sh.u.f.has_more;
 
-    nos::fprintln("node_protocol: chunk received sid={} rid={} chunk_id={} has_more={} size={}",
-                  sh.sid, sh.rid, chunk_id, has_more, pack->datasize());
-
     // Validate chunk_id
     if (chunk_id >= NODE_MAX_CHUNKS)
     {
@@ -188,21 +185,12 @@ void crow::node_protocol_cls::handle_chunk(crow::packet *pack, Tower &tower)
     // Try to assemble
     if (buffer.is_complete())
     {
-        nos::fprintln("node_protocol: assembling {} chunks, total_size={}",
-                      buffer.expected_chunks, buffer.total_payload_size);
         crow::packet *assembled = buffer.assemble(tower);
         _reassembly.erase(key);
 
         if (assembled)
         {
-            nos::fprintln("node_protocol: assembled packet size={}, delivering to node",
-                          assembled->datasize());
-            // Deliver assembled packet
             deliver_to_node(assembled, tower);
-        }
-        else
-        {
-            nos::fprintln("node_protocol: assembly failed!");
         }
     }
 }
