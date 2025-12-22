@@ -77,14 +77,23 @@ namespace std
     {
         size_t operator()(const crow::reassembly_key &k) const
         {
-            // Combine hashes using FNV-like mixing
-            size_t h = 14695981039346656037ULL;
+            // FNV-1a constants depend on platform word size
+#if SIZE_MAX == 0xFFFFFFFFFFFFFFFFULL
+            // 64-bit platform
+            constexpr size_t fnv_offset = 14695981039346656037ULL;
+            constexpr size_t fnv_prime = 1099511628211ULL;
+#else
+            // 32-bit platform
+            constexpr size_t fnv_offset = 2166136261U;
+            constexpr size_t fnv_prime = 16777619U;
+#endif
+            size_t h = fnv_offset;
             h ^= k.rid;
-            h *= 1099511628211ULL;
+            h *= fnv_prime;
             h ^= k.sid;
-            h *= 1099511628211ULL;
-            h ^= k.addr_hash;
-            h *= 1099511628211ULL;
+            h *= fnv_prime;
+            h ^= static_cast<size_t>(k.addr_hash);
+            h *= fnv_prime;
             return h;
         }
     };
