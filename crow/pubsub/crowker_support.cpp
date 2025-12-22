@@ -11,8 +11,6 @@
 void incoming_crowker_handler(crow::packet *pack, crow::Tower &tower)
 {
     (void)tower;
-    nos::fprintln("incoming_crowker_handler: pack type={} size={}",
-                  pack->type(), pack->datasize());
     crow::subheader_pubsub &shps = pack->subheader<crow::subheader_pubsub>();
 
     switch (shps.type)
