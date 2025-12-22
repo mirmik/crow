@@ -308,8 +308,18 @@ void output_do(nos::buffer data, crow::packet *pack)
     switch (outformat)
     {
         case output_format::OUTPUT_RAW:
-            ret = write(DATAOUTPUT_FILENO, data.data(), data.size());
-            break;
+        {
+            size_t written = 0;
+            while (written < data.size())
+            {
+                ssize_t n = write(DATAOUTPUT_FILENO, data.data() + written, data.size() - written);
+                if (n <= 0)
+                    break;
+                written += n;
+            }
+            ret = (int)written;
+        }
+        break;
 
         case output_format::OUTPUT_DSTRING:
             // Вывод в stdout информацию пакета.
