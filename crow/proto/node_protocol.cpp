@@ -4,6 +4,7 @@
 #include <crow/warn.h>
 #include <igris/time/systime.h>
 #include <nos/fprint.h>
+#include <vector>
 
 // ============================================================================
 // reassembly_buffer implementation
@@ -100,20 +101,23 @@ uint64_t crow::node_protocol_cls::hash_address(const uint8_t *addr, size_t len)
 
 void crow::node_protocol_cls::cleanup_stale_buffers(uint64_t now_ms)
 {
-    auto it = _reassembly.begin();
-    while (it != _reassembly.end())
+    // Collect keys to erase to avoid iterator ABI issues
+    std::vector<reassembly_key> to_erase;
+
+    for (auto &pair : _reassembly)
     {
-        if (now_ms - it->second.start_time_ms > _reassembly_timeout_ms)
+        if (now_ms - pair.second.start_time_ms > _reassembly_timeout_ms)
         {
             nos::fprintln("node_protocol: reassembly timeout for sid={} rid={}",
-                          it->first.sid, it->first.rid);
-            it->second.release_all();
-            it = _reassembly.erase(it);
+                          pair.first.sid, pair.first.rid);
+            pair.second.release_all();
+            to_erase.push_back(pair.first);
         }
-        else
-        {
-            ++it;
-        }
+    }
+
+    for (const auto &key : to_erase)
+    {
+        _reassembly.erase(key);
     }
 }
 
