@@ -10,12 +10,17 @@ void crow::crowker_pubsub_node::incoming_packet(crow::packet *pack)
 {
     auto &s = pack->subheader<pubsub_subheader>();
 
+    nos::fprintln("crowker_pubsub: incoming type={} pack_size={}",
+                  (int)s.type, pack->datasize());
+
     switch (s.type)
     {
         case PubSubTypes::Publish:
         {
             auto &sh = pack->subheader<publish_subheader>();
             auto message = sh.message();
+            nos::fprintln("crowker_pubsub: Publish theme='{}' msg_size={}",
+                          sh.theme(), message.size());
             publish_to_theme(sh.theme(), std::make_shared<std::string>(
                                              message.data(), message.size()));
         };
@@ -148,6 +153,9 @@ void crow::crowker_pubsub_node::node_client::publish(
     const std::string &data,
     crowker_implementation::options opts)
 {
+    nos::fprintln("crowker_pubsub: sending to client node={} theme='{}' data_size={} qos={}",
+                  node, theme, data.size(), opts.qos);
+
     crow::consume_subheader sh;
 
     sh.type = PubSubTypes::Consume;
