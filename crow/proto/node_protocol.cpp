@@ -129,6 +129,12 @@ void crow::node_protocol_cls::handle_chunk(crow::packet *pack, Tower &tower)
     uint16_t chunk_id = chunk_hdr->chunk_id;
     bool has_more = sh.u.f.has_more;
 
+    if (_debug)
+    {
+        nos::fprintln("node_protocol: handle_chunk chunk_id={} has_more={} payload_size={}",
+                      chunk_id, has_more, node_data(pack).size());
+    }
+
     // Validate chunk_id
     if (chunk_id >= NODE_MAX_CHUNKS)
     {
@@ -166,6 +172,12 @@ void crow::node_protocol_cls::handle_chunk(crow::packet *pack, Tower &tower)
     buffer.chunks[chunk_id] = pack;
     buffer.total_payload_size += node_data(pack).size();
 
+    if (_debug)
+    {
+        nos::fprintln("node_protocol: stored chunk {}, have {} chunks, expected={}",
+                      chunk_id, buffer.chunks.size(), buffer.expected_chunks);
+    }
+
     // Check max message size
     if (buffer.total_payload_size > _max_message_size)
     {
@@ -185,11 +197,21 @@ void crow::node_protocol_cls::handle_chunk(crow::packet *pack, Tower &tower)
     // Try to assemble
     if (buffer.is_complete())
     {
+        if (_debug)
+        {
+            nos::fprintln("node_protocol: assembling {} chunks, total_payload={}",
+                          buffer.expected_chunks, buffer.total_payload_size);
+        }
         crow::packet *assembled = buffer.assemble(tower);
         _reassembly.erase(key);
 
         if (assembled)
         {
+            if (_debug)
+            {
+                nos::fprintln("node_protocol: assembled packet datasize={}",
+                              assembled->datasize());
+            }
             deliver_to_node(assembled, tower);
         }
     }
@@ -211,9 +233,19 @@ void crow::node_protocol_cls::deliver_to_node(crow::packet *pack, Tower &tower)
 
     if (srv == nullptr)
     {
+        if (_debug)
+        {
+            nos::fprintln("node_protocol: no node for rid={}", sh.rid);
+        }
         send_node_error(pack, CROW_ERRNO_UNREGISTRED_RID, tower);
         Tower::release(pack);
         return;
+    }
+
+    if (_debug)
+    {
+        nos::fprintln("node_protocol: deliver_to_node rid={} type={} datasize={}",
+                      sh.rid, sh.u.f.type, pack->datasize());
     }
 
     switch (sh.u.f.type)
@@ -250,6 +282,12 @@ void crow::node_protocol_cls::send_node_error(crow::packet *pack, int errcode,
 void crow::node_protocol_cls::incoming(crow::packet *pack, Tower &tower)
 {
     auto &sh = pack->subheader<node_subheader>();
+
+    if (_debug)
+    {
+        nos::fprintln("node_protocol: incoming sid={} rid={} chunked={} has_more={} datasize={}",
+                      sh.sid, sh.rid, sh.u.f.chunked, sh.u.f.has_more, pack->datasize());
+    }
 
     // Handle chunked messages
     if (sh.u.f.chunked)

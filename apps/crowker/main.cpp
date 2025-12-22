@@ -2,6 +2,7 @@
 #include <crow/brocker/crowker_api.h>
 #include <crow/brocker/crowker_pubsub_node.h>
 #include <crow/gates/udpgate.h>
+#include <crow/proto/node_protocol.h>
 #include <crow/tower.h>
 #include <crow/tower_cls.h>
 
@@ -220,6 +221,7 @@ int main(int argc, char *argv[])
             case 'd':
                 debug_mode = 1;
                 tower.enable_diagnostic();
+                crow::node_protocol.set_debug(true);
                 break;
 
             case 'b':

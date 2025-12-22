@@ -131,6 +131,7 @@ namespace crow
         std::unordered_map<reassembly_key, reassembly_buffer> _reassembly;
         size_t _max_message_size = NODE_DEFAULT_MAX_MESSAGE_SIZE;
         uint32_t _reassembly_timeout_ms = NODE_DEFAULT_REASSEMBLY_TIMEOUT_MS;
+        bool _debug = false;
 
         void send_node_error(crow::packet *pack, int errcode, Tower &tower);
         void deliver_to_node(crow::packet *pack, Tower &tower);
@@ -152,6 +153,9 @@ namespace crow
 
         void set_reassembly_timeout(uint32_t ms) { _reassembly_timeout_ms = ms; }
         uint32_t reassembly_timeout() const { return _reassembly_timeout_ms; }
+
+        void set_debug(bool debug) { _debug = debug; }
+        bool debug() const { return _debug; }
 
         // Statistics
         size_t reassembly_sessions_count() const { return _reassembly.size(); }

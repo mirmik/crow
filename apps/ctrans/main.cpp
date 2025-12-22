@@ -11,6 +11,7 @@
 #include <crow/nodes/subscriber_node.h>
 #include <crow/proto/acceptor.h>
 #include <crow/proto/channel.h>
+#include <crow/proto/node_protocol.h>
 #include <crow/tower.h>
 #include <crow/tower_cls.h>
 #include <crow/asyncio.h>
@@ -814,6 +815,7 @@ void parse_options(int argc, char **argv)
             case 'd':
                 debug_mode = true;
                 tower.enable_diagnostic();
+                crow::node_protocol.set_debug(true);
                 break;
 
             case 'L':
