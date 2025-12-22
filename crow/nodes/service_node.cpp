@@ -3,7 +3,6 @@
 #include <crow/warn.h>
 #include <nos/print.h>
 #include <cstring>
-#include <vector>
 
 void crow::service_node::incoming_packet(crow::packet *pack)
 {
@@ -18,6 +17,10 @@ void crow::service_node::incoming_packet(crow::packet *pack)
     // release after reply
     _tower->release(pack);
 }
+
+// Static buffer for assembling chunked reply messages.
+// Size: max reply ~4KB + headers. Single-threaded use assumed.
+static char service_reply_buffer[4096 + 64];
 
 void crow::service_node::reply(const char *answ, size_t size)
 {
@@ -42,25 +45,35 @@ void crow::service_node::reply(const char *answ, size_t size)
         size_t pubsub_header_size = sizeof(sh) - sizeof(node_subheader);
         size_t total_size = pubsub_header_size + reply_theme.size() + size;
 
-        // Assemble complete message
-        std::vector<char> message_buf;
-        message_buf.reserve(total_size);
+        // Check buffer capacity
+        if (total_size > sizeof(service_reply_buffer))
+        {
+            crow::warn("service_node::reply: message too large, truncating");
+            size = sizeof(service_reply_buffer) - pubsub_header_size -
+                   reply_theme.size();
+            total_size = sizeof(service_reply_buffer);
+            sh.datsize = size;
+        }
+
+        // Assemble message into static buffer
+        char *ptr = service_reply_buffer;
 
         // Add pubsub header (excluding node_subheader part)
-        message_buf.insert(message_buf.end(),
-                           reinterpret_cast<char *>(&sh) + sizeof(node_subheader),
-                           reinterpret_cast<char *>(&sh) + sizeof(sh));
+        size_t header_part = sizeof(sh) - sizeof(node_subheader);
+        memcpy(ptr, reinterpret_cast<char *>(&sh) + sizeof(node_subheader),
+               header_part);
+        ptr += header_part;
 
         // Add theme
-        message_buf.insert(message_buf.end(), reply_theme.data(),
-                           reply_theme.data() + reply_theme.size());
+        memcpy(ptr, reply_theme.data(), reply_theme.size());
+        ptr += reply_theme.size();
 
         // Add data
-        message_buf.insert(message_buf.end(), answ, answ + size);
+        memcpy(ptr, answ, size);
 
         // Send using node-level chunking
         send_chunked(subheader.sid, curpack->addr(),
-                     {message_buf.data(), message_buf.size()}, qos, ackquant);
+                     {service_reply_buffer, total_size}, qos, ackquant);
     }
     else
     {
