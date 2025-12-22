@@ -162,15 +162,35 @@ void crow::crowker_pubsub_node::node_client::publish(
     sh.thmsize = theme.size();
     sh.datsize = data.size();
 
-    const nos::buffer iov[] = {
-        {(char *)&sh + sizeof(node_subheader),
-         sizeof(sh) - sizeof(node_subheader)},
-        theme,
-        data,
-    };
+    // Check if message needs chunking (UDP MTU is typically ~1400 usable bytes)
+    size_t total_size = sizeof(sh) - sizeof(node_subheader) + theme.size() + data.size();
+    if (total_size > 1200 && crowker_node->chunk_size() > 0)
+    {
+        // Use chunked sending for large messages
+        // Build complete message buffer
+        std::string message;
+        message.reserve(total_size);
+        message.append(reinterpret_cast<char *>(&sh) + sizeof(node_subheader),
+                       sizeof(sh) - sizeof(node_subheader));
+        message.append(theme);
+        message.append(data);
 
-    crowker_node->send_v(node, addr, iov, std::size(iov), opts.qos,
-                         opts.ackquant);
+        nos::fprintln("crowker_pubsub: using chunked send, total_size={}", total_size);
+        crowker_node->send_chunked(node, addr, message, opts.qos, opts.ackquant);
+    }
+    else
+    {
+        // Small message - send directly
+        const nos::buffer iov[] = {
+            {(char *)&sh + sizeof(node_subheader),
+             sizeof(sh) - sizeof(node_subheader)},
+            theme,
+            data,
+        };
+
+        crowker_node->send_v(node, addr, iov, std::size(iov), opts.qos,
+                             opts.ackquant);
+    }
 }
 
 std::vector<crowker_implementation::client *>

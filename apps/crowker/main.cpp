@@ -179,6 +179,8 @@ int main(int argc, char *argv[])
     crow::pubsub_protocol.enable_crowker_subsystem();
 #endif
     pubsub_node.bind(tower, CROWKER_SERVICE_BROCKER_NODE_NO);
+    // Enable chunking for large messages (UDP MTU is ~1400 bytes)
+    pubsub_node.set_chunk_size(1000);
     crow::crowker::instance()->add_api(&pubsub_node);
 
     const struct option long_options[] = {
