@@ -14,7 +14,6 @@
 
 #include <map>
 #include <string>
-#include <thread>
 #include <random>
 
 #include "control_node.h"
@@ -27,12 +26,6 @@
 #include <nos/print.h>
 #include <nos/io/stdfile.h>
 
-#include <nos/inet/tcp_client.h>
-#include <nos/inet/tcp_server.h>
-
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <csignal>
 
 void signal_handler(int signum)
@@ -45,8 +38,7 @@ void signal_handler(int signum)
 
 bool brocker_info = false;
 int udpport = -1;
-int crowtcpport = -1;  // crow protocol over TCP (gate 13)
-int tcpport = -1;      // legacy pubsub TCP protocol
+int tcpport = -1;
 int httpport = -1;
 bool quite = false;
 bool debug_mode = false;
@@ -55,101 +47,6 @@ const std::string VERSION = "2.1.0";
 
 crow::Tower tower;
 crow::crowker_pubsub_node pubsub_node;
-
-void tcp_client_listener(nos::inet::tcp_client client)
-{
-    char buf[1024];
-    nos::inet::netaddr addr = client.getaddr();
-
-    if (brocker_info)
-        nos::println_to(nos::cerr, "new tcp client from", addr);
-
-    while (1)
-    {
-        nos::expected<long unsigned int, nos::input_error> ret;
-        char cmd;
-        uint32_t datasize;
-        uint16_t thmsize;
-
-        std::string theme;
-
-        ret = client.recv(buf, 3, MSG_WAITALL);
-
-        if (ret.is_error())
-            break;
-
-        cmd = buf[0];
-        if (cmd != 's' && cmd != 'p')
-            goto clean;
-
-        buf[3] = 0;
-        thmsize = strtol(buf + 1, nullptr, 10);
-
-        if (thmsize == 0)
-            goto clean;
-
-        ret = client.recv(buf, thmsize, MSG_WAITALL);
-
-        if (ret.is_error())
-            break;
-
-        theme = std::string(buf, thmsize);
-
-        if (cmd == 's')
-        {
-            crow::crowker::instance()->tcp_subscribe(theme, &client);
-            continue;
-        }
-        else if (cmd == 'p')
-        {
-            ret = client.recv(buf, 6, MSG_WAITALL);
-            if (ret.is_error())
-                break;
-
-            buf[6] = 0;
-            datasize = strtol(buf, nullptr, 10);
-            if (datasize == 0)
-                goto clean;
-
-            ret = client.recv(buf, datasize, MSG_WAITALL);
-            if (ret.is_error())
-                break;
-
-            auto data = std::make_shared<std::string>(buf, datasize);
-
-            crow::crowker::instance()->publish(theme, data);
-            continue;
-        }
-
-    clean:
-    {
-        if (brocker_info)
-            nos::println_to(nos::cerr, "unresolved tcp command from", addr, cmd);
-
-        continue;
-    }
-    }
-
-    if (brocker_info)
-        nos::println_to(nos::cerr, "tcp connection was clossed", addr);
-}
-
-void tcp_listener(int port)
-{
-    nos::inet::tcp_server srv;
-    srv.init();
-    srv.reusing(true);
-    srv.bind("0.0.0.0", port);
-    srv.listen(10);
-
-    while (1)
-    {
-        auto client = srv.accept();
-
-        std::thread thr(tcp_client_listener, std::move(client));
-        thr.detach();
-    }
-}
 
 void print_help()
 {
@@ -162,8 +59,7 @@ void print_help()
            "\n"
            "Gate`s option list:\n"
            "  -u, --udp             set udp port (gate 12)\n"
-           "  -T, --crow-tcp        set crow TCP port (gate 13)\n"
-           "  -t, --tcp             set legacy pubsub tcp port\n"
+           "  -t, --tcp             set tcp port (gate 13)\n"
            "  -w, --http            set web UI http port (default: 8080)\n"
            "  -S, --serial          make gate on serial device\n"
            "\n");
@@ -189,19 +85,18 @@ int main(int argc, char *argv[])
 
     const struct option long_options[] = {
         {"help", no_argument, NULL, 'h'},
-        {"udp", required_argument, NULL, 'u'}, // crow udpgate port
-        {"crow-tcp", required_argument, NULL, 'T'}, // crow tcpgate port
-        {"tcp", required_argument, NULL, 't'}, // legacy pubsub tcp
-        {"http", required_argument, NULL, 'w'}, // web UI http port
-        {"debug", no_argument, NULL, 'd'}, // crow transport log
-        {"binfo", no_argument, NULL, 'b'}, // brocker log
+        {"udp", required_argument, NULL, 'u'},
+        {"tcp", required_argument, NULL, 't'},
+        {"http", required_argument, NULL, 'w'},
+        {"debug", no_argument, NULL, 'd'},
+        {"binfo", no_argument, NULL, 'b'},
         {"version", no_argument, NULL, 'v'},
         {NULL, 0, NULL, 0}};
 
     int long_index = 0;
     int opt = 0;
 
-    while ((opt = getopt_long(argc, argv, "u:T:t:w:svdib", long_options,
+    while ((opt = getopt_long(argc, argv, "u:t:w:svdib", long_options,
                               &long_index)) != -1)
     {
         switch (opt)
@@ -212,10 +107,6 @@ int main(int argc, char *argv[])
 
             case 'u':
                 udpport = atoi(optarg);
-                break;
-
-            case 'T':
-                crowtcpport = atoi(optarg);
                 break;
 
             case 't':
@@ -264,9 +155,9 @@ int main(int argc, char *argv[])
 
     // Create crow TCP gate if requested
     std::shared_ptr<crow::tcpgate> tcpgate;
-    if (crowtcpport != -1)
+    if (tcpport != -1)
     {
-        tcpgate = crow::create_tcpgate_safe(CROW_TCPGATE_NO, crowtcpport);
+        tcpgate = crow::create_tcpgate_safe(CROW_TCPGATE_NO, tcpport);
         if (!tcpgate || !tcpgate->opened())
         {
             perror("tcpgate open");
@@ -276,13 +167,7 @@ int main(int argc, char *argv[])
         if (debug_mode)
             tcpgate->debug(true);
         if (!quite)
-            nos::fprintln("Crow TCP gate listening on port {}", crowtcpport);
-    }
-
-    if (tcpport != -1)
-    {
-        std::thread thr(tcp_listener, tcpport);
-        thr.detach();
+            nos::fprintln("TCP gate listening on port {}", tcpport);
     }
 
     // Start web UI server

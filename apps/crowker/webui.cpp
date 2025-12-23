@@ -3,7 +3,6 @@
 #include "webui.h"
 #include <crow/brocker/crow_client.h>
 #include <crow/brocker/crowker.h>
-#include <crow/brocker/tcp_client.h>
 #include <crowhttp/app.h>
 #include <crowhttp/json.h>
 #include <igris/util/dstring.h>
@@ -538,12 +537,10 @@ namespace crowker_webui
             // Подсчёт клиентов
             size_t crow_clients =
                 crowker_implementation::crow_client::allsubs.size();
-            size_t tcp_clients =
-                crowker_implementation::tcp_client::allsubs.size();
 
             j["crow_clients_count"] = crow_clients;
-            j["tcp_clients_count"] = tcp_clients;
-            j["clients_count"] = crow_clients + tcp_clients;
+            j["tcp_clients_count"] = 0;
+            j["clients_count"] = crow_clients;
 
             return j;
         });
@@ -614,18 +611,6 @@ namespace crowker_webui
                 crowhttp::json::wvalue c;
                 c["type"] = "crow";
                 c["address"] = igris::dstring(addr);
-                c["name"] = client.name();
-                c["confirmed"] = client.is_confirmed();
-                c["activity_timestamp"] = client.activity_timestamp();
-                clients_arr.push_back(std::move(c));
-            }
-
-            // TCP клиенты
-            for (auto &[addr, client] : crowker_implementation::tcp_client::allsubs)
-            {
-                crowhttp::json::wvalue c;
-                c["type"] = "tcp";
-                c["address"] = nos::format("{}:{}", addr.addr.to_string(), addr.port);
                 c["name"] = client.name();
                 c["confirmed"] = client.is_confirmed();
                 c["activity_timestamp"] = client.activity_timestamp();

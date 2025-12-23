@@ -4,12 +4,10 @@
 #define CROW_BROCKER_CROWKER_H
 
 #include "crow_client.h"
-#include "tcp_client.h"
 #include "theme.h"
 #include <crow/hostaddr.h>
 #include <map>
 #include <memory>
-#include <nos/inet/tcp_client.h>
 #include <string>
 
 using namespace crowker_implementation;
@@ -59,9 +57,6 @@ namespace crow
                          client *cl,
                          uint32_t count_of_latest);
 
-        void tcp_subscribe(const std::string &theme,
-                           nos::inet::tcp_client *sock);
-
         void crow_subscribe(const crow::hostaddr_view &addr,
                             const std::string &theme,
                             uint8_t qos,
@@ -73,11 +68,6 @@ namespace crow
         void erase_crow_client(const std::string &addr)
         {
             crowker_implementation::crow_client::allsubs.erase(addr);
-        }
-
-        void erase_tcp_client(const nos::inet::netaddr &addr)
-        {
-            crowker_implementation::tcp_client::allsubs.erase(addr);
         }
 
         std::vector<client *> clients();

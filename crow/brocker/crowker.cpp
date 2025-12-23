@@ -5,7 +5,6 @@
 #include <crow/hostaddr_view.h>
 #include <igris/util/dstring.h>
 #include <nos/fprint.h>
-#include <nos/inet/tcp_client.h>
 #include <utility>
 
 void crow::crowker::publish(const std::string &theme,
@@ -89,22 +88,6 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
                           igris::dstring(addr.data(), addr.size()), qos,
                           ackquant, theme);
         }
-    }
-}
-
-void crow::crowker::tcp_subscribe(const std::string &theme,
-                                  nos::inet::tcp_client *sock)
-{
-    auto *thm = get_theme(theme);
-    auto *sub = crowker_implementation::tcp_client::get(sock->getaddr());
-    sub->sock = sock;
-
-    if (!thm->has_client(sub))
-    {
-        thm->link_client(sub);
-
-        if (brocker_info)
-            nos::fprintln("subscribe(tcp): a:{}", sock->getaddr());
     }
 }
 
