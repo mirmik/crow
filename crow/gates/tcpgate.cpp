@@ -19,6 +19,7 @@
 
 #include <cstring>
 #include <memory>
+#include <nos/io/stdfile.h>
 #include <nos/print.h>
 #include <nos/util/osutil.h>
 
@@ -92,7 +93,7 @@ int crow::tcpgate::open(uint16_t port)
 #endif
 
     if (_debug)
-        nos::println("tcpgate: listening on port ", port);
+        nos::println_to(nos::cerr, "tcpgate: listening on port ", port);
 
     return 0;
 }
@@ -127,7 +128,7 @@ void crow::tcpgate::accept_handler(int fd)
     {
         char ip_str[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &ip, ip_str, sizeof(ip_str));
-        nos::println("tcpgate: accepted connection from ", ip_str, ":", ntohs(port));
+        nos::println_to(nos::cerr, "tcpgate: accepted connection from ", ip_str, ":", ntohs(port));
     }
 
     // Store connection
@@ -146,6 +147,9 @@ void crow::tcpgate::accept_handler(int fd)
 
 void crow::tcpgate::read_handler(int fd)
 {
+    if (_debug)
+        nos::println_to(nos::cerr, "tcpgate: read_handler called for fd=", fd);
+
     // Find connection by fd
     uint64_t conn_key = 0;
     connection *conn = nullptr;
@@ -162,6 +166,8 @@ void crow::tcpgate::read_handler(int fd)
 
     if (!conn)
     {
+        if (_debug)
+            nos::println_to(nos::cerr, "tcpgate: unknown fd, discarding");
         // Unknown fd, just read and discard
         char buf[1024];
         read(fd, buf, sizeof(buf));
@@ -172,12 +178,15 @@ void crow::tcpgate::read_handler(int fd)
     char buf[4096];
     ssize_t len = read(fd, buf, sizeof(buf));
 
+    if (_debug)
+        nos::println_to(nos::cerr, "tcpgate: read ", len, " bytes from fd=", fd);
+
     if (len <= 0)
     {
         if (len == 0 || (errno != EAGAIN && errno != EWOULDBLOCK))
         {
             if (_debug)
-                nos::println("tcpgate: connection closed, fd=", fd);
+                nos::println_to(nos::cerr, "tcpgate: connection closed, fd=", fd);
             close_connection(conn_key);
         }
         return;
@@ -205,7 +214,14 @@ void crow::tcpgate::read_handler(int fd)
             conn->expected_size = ntohl(frame_len);
 
             if (_debug)
-                nos::println("tcpgate: frame header, size=", conn->expected_size);
+            {
+                nos::println_to(nos::cerr, "tcpgate: frame header raw bytes: ",
+                    (int)(unsigned char)conn->recv_buffer[0], " ",
+                    (int)(unsigned char)conn->recv_buffer[1], " ",
+                    (int)(unsigned char)conn->recv_buffer[2], " ",
+                    (int)(unsigned char)conn->recv_buffer[3]);
+                nos::println_to(nos::cerr, "tcpgate: frame header, size=", conn->expected_size);
+            }
         }
 
         // Check if we have complete frame
@@ -222,7 +238,7 @@ void crow::tcpgate::read_handler(int fd)
         if (frame_size < sizeof(header))
         {
             if (_debug)
-                nos::println("tcpgate: frame too small for header");
+                nos::println_to(nos::cerr, "tcpgate: frame too small for header");
             // Remove bad frame and continue
             conn->recv_buffer.resize(0);
             conn->expected_size = 0;
@@ -252,7 +268,7 @@ void crow::tcpgate::read_handler(int fd)
         pack->revert(vec, 3);
 
         if (_debug)
-            nos::println("tcpgate: received packet, size=", frame_size);
+            nos::println_to(nos::cerr, "tcpgate: received packet, size=", frame_size);
 
         // Pass to tower
         _tower->nocontrol_travel(pack, true);
@@ -298,7 +314,7 @@ int crow::tcpgate::get_or_create_connection(uint32_t ip, uint16_t port)
     {
         char ip_str[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &ip, ip_str, sizeof(ip_str));
-        nos::println("tcpgate: connecting to ", ip_str, ":", ntohs(port));
+        nos::println_to(nos::cerr, "tcpgate: connecting to ", ip_str, ":", ntohs(port));
     }
 
     if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
@@ -329,7 +345,7 @@ int crow::tcpgate::get_or_create_connection(uint32_t ip, uint16_t port)
 #endif
 
     if (_debug)
-        nos::println("tcpgate: connected, fd=", sock);
+        nos::println_to(nos::cerr, "tcpgate: connected, fd=", sock);
 
     return sock;
 }
@@ -340,9 +356,18 @@ void crow::tcpgate::send(crow::packet *pack)
     uint16_t port;
     parse_stage((uint8_t *)pack->stageptr(), ip, port);
 
+    if (_debug)
+    {
+        char ip_str[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &ip, ip_str, sizeof(ip_str));
+        nos::println_to(nos::cerr, "tcpgate::send: to ", ip_str, ":", ntohs(port));
+    }
+
     int sock = get_or_create_connection(ip, port);
     if (sock < 0)
     {
+        if (_debug)
+            nos::println_to(nos::cerr, "tcpgate::send: failed to get connection");
         _tower->return_to_tower(pack, CROW_WRONG_ADDRESS);
         return;
     }
@@ -391,7 +416,7 @@ void crow::tcpgate::send(crow::packet *pack)
     }
 
     if (_debug)
-        nos::println("tcpgate: sent frame, size=", packet_size);
+        nos::println_to(nos::cerr, "tcpgate: sent frame, size=", packet_size);
 
     _tower->return_to_tower(pack, CROW_SENDED);
 }

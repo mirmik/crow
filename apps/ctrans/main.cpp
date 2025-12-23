@@ -1114,6 +1114,8 @@ int main(int argc, char *argv[])
             exit(-1);
         }
         tcpgate->bind(tower, CROW_TCPGATE_NO);
+        if (gdebug)
+            tcpgate->debug(true);
         register_gate_info("tcpgate",
                            {{"gate_no", std::to_string(CROW_TCPGATE_NO)},
                             {"listen_port", describe_port(tcpport)},
