@@ -41,7 +41,6 @@ const std::string VERSION = "2.1.0";
 
 bool debug_mode = false;
 crow::hostaddr address;
-volatile bool cancel_token = false;
 
 bool userqos = false;
 uint8_t qos = 0;
@@ -347,7 +346,7 @@ void do_incom_data(nos::buffer incom_data)
     if (exit_on_receive)
     {
         crow::asyncio.cancel();
-        cancel_token = true;
+        crow::set_spin_cancel_token();
     }
 }
 
@@ -549,7 +548,7 @@ void console_read_handler(int fd)
         {
             // EOF on stdin - stop the event loop
             crow::asyncio.cancel();
-            cancel_token = true;
+            crow::set_spin_cancel_token();
         }
         // len < 0 means EAGAIN/EWOULDBLOCK for non-blocking fd, just return
         return;
