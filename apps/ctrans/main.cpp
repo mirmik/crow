@@ -576,8 +576,8 @@ void print_help()
         "  -h, --help            print this page\n"
         "\n"
         "Gate`s option list:\n"
-        "  -u, --udp             set udp address (gate 12)\n"
-        "  -c, --tcp             set tcp address (gate 13)\n"
+        "  -u, --udp             set udp port (gate 12)\n"
+        "  -c, --tcp             set tcp port (gate 13)\n"
         "  -S, --serial          make gate on serial device.\n"
         "                        Format:\n"
         "                          "
@@ -632,6 +632,8 @@ void print_help()
         "Examples:\n"
         "       .12.127.0.0.1:10009\n"
         "       UDP gate 12 → 127.0.0.1:10009\n"
+        "       .13.127.0.0.1:10010\n"
+        "       TCP gate 13 → 127.0.0.1:10010\n"
         "       #F2 .12.127.0.0.1 : 10009\n "
         "       Adds prefix byte F2 before the UDP gate\n");
 }

@@ -1,6 +1,7 @@
 #include <crow/address.h>
 #include <crow/brocker/crowker_api.h>
 #include <crow/brocker/crowker_pubsub_node.h>
+#include <crow/gates/tcpgate.h>
 #include <crow/gates/udpgate.h>
 #include <crow/proto/node_protocol.h>
 #include <crow/tower.h>
@@ -44,7 +45,8 @@ void signal_handler(int signum)
 
 bool brocker_info = false;
 int udpport = -1;
-int tcpport = -1;
+int crowtcpport = -1;  // crow protocol over TCP (gate 13)
+int tcpport = -1;      // legacy pubsub TCP protocol
 int httpport = -1;
 bool quite = false;
 bool debug_mode = false;
@@ -159,8 +161,9 @@ void print_help()
            "  -b, --binfo           enable info mode\n"
            "\n"
            "Gate`s option list:\n"
-           "  -u, --udp             set udp address (gate 12)\n"
-           "  -t, --tcp             set tcp port\n"
+           "  -u, --udp             set udp port (gate 12)\n"
+           "  -T, --crow-tcp        set crow TCP port (gate 13)\n"
+           "  -t, --tcp             set legacy pubsub tcp port\n"
            "  -w, --http            set web UI http port (default: 8080)\n"
            "  -S, --serial          make gate on serial device\n"
            "\n");
@@ -187,7 +190,8 @@ int main(int argc, char *argv[])
     const struct option long_options[] = {
         {"help", no_argument, NULL, 'h'},
         {"udp", required_argument, NULL, 'u'}, // crow udpgate port
-        {"tcp", required_argument, NULL, 't'},
+        {"crow-tcp", required_argument, NULL, 'T'}, // crow tcpgate port
+        {"tcp", required_argument, NULL, 't'}, // legacy pubsub tcp
         {"http", required_argument, NULL, 'w'}, // web UI http port
         {"debug", no_argument, NULL, 'd'}, // crow transport log
         {"binfo", no_argument, NULL, 'b'}, // brocker log
@@ -197,7 +201,7 @@ int main(int argc, char *argv[])
     int long_index = 0;
     int opt = 0;
 
-    while ((opt = getopt_long(argc, argv, "u:t:w:svdib", long_options,
+    while ((opt = getopt_long(argc, argv, "u:T:t:w:svdib", long_options,
                               &long_index)) != -1)
     {
         switch (opt)
@@ -208,6 +212,10 @@ int main(int argc, char *argv[])
 
             case 'u':
                 udpport = atoi(optarg);
+                break;
+
+            case 'T':
+                crowtcpport = atoi(optarg);
                 break;
 
             case 't':
@@ -253,6 +261,23 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     udpgate->bind(tower, CROW_UDPGATE_NO);
+
+    // Create crow TCP gate if requested
+    std::shared_ptr<crow::tcpgate> tcpgate;
+    if (crowtcpport != -1)
+    {
+        tcpgate = crow::create_tcpgate_safe(CROW_TCPGATE_NO, crowtcpport);
+        if (!tcpgate || !tcpgate->opened())
+        {
+            perror("tcpgate open");
+            exit(-1);
+        }
+        tcpgate->bind(tower, CROW_TCPGATE_NO);
+        if (debug_mode)
+            tcpgate->debug(true);
+        if (!quite)
+            nos::fprintln("Crow TCP gate listening on port {}", crowtcpport);
+    }
 
     if (tcpport != -1)
     {
