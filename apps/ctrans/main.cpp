@@ -345,6 +345,8 @@ void do_incom_data(nos::buffer incom_data)
     output_do(incom_data, nullptr);
     if (exit_on_receive)
     {
+        // Ensure output is flushed before exit
+        fsync(DATAOUTPUT_FILENO);
         crow::asyncio.cancel();
         crow::set_spin_cancel_token();
     }
