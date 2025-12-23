@@ -1,6 +1,7 @@
 #ifndef CROW_ASYNCIO_H
 #define CROW_ASYNCIO_H
 
+#include <algorithm>
 #include <stdint.h>
 #include <unistd.h>
 #include <unordered_map>
@@ -103,6 +104,14 @@ namespace crow
             dict[fd] = {fd, type, handler};
             fds.push_back(fd);
             unsleep();
+        }
+
+        void remove_iotask(int fd)
+        {
+            if (_debug)
+                nos::println("remove_iotask fd=", fd);
+            dict.erase(fd);
+            fds.erase(std::remove(fds.begin(), fds.end(), fd), fds.end());
         }
 
         void step(int64_t timeout_ms)

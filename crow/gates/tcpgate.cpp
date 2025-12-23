@@ -428,6 +428,9 @@ void crow::tcpgate::close_connection(uint64_t key)
     {
         if (it->second.fd >= 0)
         {
+#ifdef CROW_USE_ASYNCIO
+            crow::asyncio.remove_iotask(it->second.fd);
+#endif
             shutdown(it->second.fd, SHUT_RDWR);
             ::close(it->second.fd);
         }
@@ -442,6 +445,9 @@ void crow::tcpgate::close()
     {
         if (kv.second.fd >= 0)
         {
+#ifdef CROW_USE_ASYNCIO
+            crow::asyncio.remove_iotask(kv.second.fd);
+#endif
             shutdown(kv.second.fd, SHUT_RDWR);
             ::close(kv.second.fd);
         }
@@ -451,6 +457,9 @@ void crow::tcpgate::close()
     // Close server socket
     if (server_fd >= 0)
     {
+#ifdef CROW_USE_ASYNCIO
+        crow::asyncio.remove_iotask(server_fd);
+#endif
         shutdown(server_fd, SHUT_RDWR);
         ::close(server_fd);
         server_fd = -1;
