@@ -38,8 +38,8 @@ endif()
 
 file(GLOB CROW_HEADERS
     crow/*.h
-    lib/include/*.h
-    lib/include/crowhttp/*.h
+    libhttp/include/*.h
+    libhttp/include/crowhttp/*.h
 )
 
 file(GLOB CROW_SOURCES CONFIGURE_DEPENDS
