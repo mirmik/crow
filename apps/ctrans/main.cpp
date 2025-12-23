@@ -1204,6 +1204,9 @@ int main(int argc, char *argv[])
     // Ветка обработки pulse мода.
     if (pulse != "")
     {
+        // In pulse mode, disable console input to prevent EOF from killing us
+        noconsole = true;
+
         auto msgpair = input_do(pulse);
 
         if (msgpair.second)
