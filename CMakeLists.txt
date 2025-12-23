@@ -109,7 +109,7 @@ if(CROW_BUILD_APPS)
     target_link_libraries(crowker PRIVATE crow)
     target_include_directories(crowker PRIVATE
         apps/crowker
-        lib/include
+        libhttp/include
         ${CMAKE_CURRENT_SOURCE_DIR}/lib
     )
 endif()
