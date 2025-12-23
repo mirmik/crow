@@ -1292,5 +1292,5 @@ int main(int argc, char *argv[])
 
     // Run single-threaded event loop
     crow::spin_with_select(tower);
-    quick_exit(0);
+    exit(0);
 }
