@@ -270,10 +270,8 @@ void crow::tcpgate::read_handler(int fd)
         if (_debug)
             nos::println_to(nos::cerr, "tcpgate: received packet, size=", frame_size);
 
-        // Pass to tower
-        _tower->nocontrol_travel(pack, true);
-
-        // Remove processed frame from buffer
+        // Remove processed frame from buffer BEFORE calling tower
+        // (tower callback may modify connections map, invalidating conn pointer)
         size_t remaining = buf_size - total_needed;
         if (remaining > 0)
         {
@@ -283,6 +281,18 @@ void crow::tcpgate::read_handler(int fd)
         }
         conn->recv_buffer.resize(remaining);
         conn->expected_size = 0;
+
+        // Pass to tower (this may trigger send() which modifies connections)
+        _tower->nocontrol_travel(pack, true);
+
+        // Re-find connection after tower callback (map may have been modified)
+        auto it = connections.find(conn_key);
+        if (it == connections.end())
+        {
+            // Connection was closed during processing
+            return;
+        }
+        conn = &it->second;
     }
 }
 
