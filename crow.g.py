@@ -107,6 +107,9 @@ licant.modules.module("crow.allocator", "malloc",
 licant.modules.module("crow.allocator", "pool",
                       sources=["crow/src/variants/allocation_pool.cpp"])
 
+licant.modules.module("crow.allocator", "unified",
+                      sources=["crow/src/allocation.cpp"])
+
 #######################################GATES#########################################
 
 licant.modules.module("crow.udpgate",
