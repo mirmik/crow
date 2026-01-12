@@ -35,6 +35,8 @@ void crow::requestor_node::incoming_packet(crow::packet *pack)
             {
                 auto &sh = pack->subheader<consume_subheader>();
                 incoming(sh.message());
+                // Unsubscribe from reply theme after receiving response
+                unsubscribe_reply();
             };
             break;
 
@@ -52,6 +54,8 @@ void crow::requestor_node::incoming_packet(crow::packet *pack)
     else
     {
         dlist_move(&pack->ulnk, &incoming_list);
+        // Unsubscribe from reply theme after receiving response
+        unsubscribe_reply();
         notify_one(0);
     }
 }
@@ -123,4 +127,22 @@ void crow::requestor_node::undelivered_packet(crow::packet *pack)
     BUG();
     notify_one(-1);
     _tower->release(pack);
+}
+
+void crow::requestor_node::unsubscribe_reply()
+{
+    if (reply_theme.empty())
+        return;
+
+    crow::subscribe_subheader sh;
+    sh.type = PubSubTypes::Unsubscribe;
+    sh.rqos = rqos;
+    sh.rackquant = rackquant;
+    sh.thmsize = reply_theme.size();
+
+    const nos::buffer iov[] = {{(char *)&sh + sizeof(node_subheader),
+                                sizeof(sh) - sizeof(node_subheader)},
+                               {reply_theme.data(), reply_theme.size()}};
+
+    node::send_v(crowker_node, crowker_addr, iov, std::size(iov), qos, ackquant);
 }
