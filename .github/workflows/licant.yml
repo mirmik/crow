@@ -53,6 +53,9 @@ jobs:
     - name: Build
       run: python3 ./make.py
 
+    - name: Build tests
+      run: python3 ./make.py runtests
+
     - name: Test
       run: ./runtests
       
