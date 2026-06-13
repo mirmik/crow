@@ -17,9 +17,6 @@ if(CROW_TOP_LEVEL)
 endif()
 
 include(GNUInstallDirs)
-# Явные пути установки: библиотека в /usr/lib, заголовки в /usr/local/include
-set(CMAKE_INSTALL_LIBDIR "/usr/lib")
-set(CMAKE_INSTALL_INCLUDEDIR "/usr/local/include")
 find_package(Threads REQUIRED)
 
 option(CROW_BUILD_APPS "Build crow command line utilities" ${CROW_TOP_LEVEL})
@@ -66,7 +63,7 @@ add_library(crow SHARED ${CROW_SOURCES})
 target_include_directories(crow
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_FULL_INCLUDEDIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 if(ADDITIONAL_INCLUDES_IGRIS)
@@ -129,6 +126,8 @@ endif()
 
 install(TARGETS crow
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 install(DIRECTORY crow
