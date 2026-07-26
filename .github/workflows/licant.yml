@@ -2,60 +2,57 @@ name: Licant
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
-
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+    branches: [master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
         compiler:
-          - { CXX: g++, CC: gcc }
-          - { CXX: clang++, CC: clang }
+          - { cc: gcc, cxx: g++ }
+          - { cc: clang, cxx: clang++ }
+
+    env:
+      CC: ${{ matrix.compiler.cc }}
+      CXX: ${{ matrix.compiler.cxx }}
+      PREFIX: ${{ runner.temp }}/mirmik-stack
+      CPATH: ${{ runner.temp }}/mirmik-stack/include
+      LIBRARY_PATH: ${{ runner.temp }}/mirmik-stack/lib
+      LD_LIBRARY_PATH: ${{ runner.temp }}/mirmik-stack/lib
 
     steps:
-    - uses: actions/checkout@master
-      with:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: mirmik/licant
+          path: .ci/licant
+      - uses: actions/checkout@v4
+        with:
           repository: mirmik/igris
+          path: .ci/igris
+      - uses: actions/checkout@v4
+        with:
+          repository: mirmik/nos
+          path: .ci/nos
 
-    - uses: actions/checkout@v2
+      - name: Install licant
+        run: python3 -m pip install ./.ci/licant
 
-    - name: Setup dependencies
-      run: |
-        sudo apt-get update && sudo apt-get install -y g++ clang libasio-dev
-        sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/${{matrix.compiler.CXX}} 100
-        sudo update-alternatives --install /usr/bin/cc  cc  /usr/bin/${{matrix.compiler.CC}} 100
-        sudo python3 -m pip install licant
+      - name: Build and install igris
+        working-directory: .ci/igris
+        run: timeout 10m python3 ./make.py -j2 install
 
-    - name: Install igris library
-      run: |
-        git clone https://github.com/mirmik/igris
-        cd igris
-        ./make.py
-        sudo ./make.py install
-        cd ..
+      - name: Build and install nos
+        working-directory: .ci/nos
+        run: timeout 10m python3 ./make.py -j2 install
 
-    - name: Install nos library
-      run: |
-        git clone https://github.com/mirmik/nos
-        cd nos
-        ./make.py
-        sudo ./make.py install
-        cd ..
+      - name: Build tests
+        run: timeout 10m python3 ./make.py -j2 runtests
 
-    - name: Build
-      run: python3 ./make.py
-
-    - name: Build tests
-      run: python3 ./make.py runtests
-
-    - name: Test
-      run: ./runtests
-      
+      - name: Test
+        run: timeout 2m ./runtests

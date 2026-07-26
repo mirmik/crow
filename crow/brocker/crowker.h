@@ -57,7 +57,8 @@ namespace crow
                          client *cl,
                          uint32_t count_of_latest);
 
-        void crow_subscribe(const crow::hostaddr_view &addr,
+        void crow_subscribe(Tower &tower,
+                            const crow::hostaddr_view &addr,
                             const std::string &theme,
                             uint8_t qos,
                             uint16_t ackquant);

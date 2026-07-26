@@ -102,13 +102,13 @@ licant.modules.module("crow.include",
                       include_paths=["."])
 
 licant.modules.module("crow.allocator", "malloc",
-                      sources=["crow/src/variants/allocation_malloc.cpp"], default=True)
+                      sources=["crow/src/variants/allocation_malloc.cpp"])
 
 licant.modules.module("crow.allocator", "pool",
                       sources=["crow/src/variants/allocation_pool.cpp"])
 
 licant.modules.module("crow.allocator", "unified",
-                      sources=["crow/src/allocation.cpp"])
+                      sources=["crow/src/allocation.cpp"], default=True)
 
 #######################################GATES#########################################
 

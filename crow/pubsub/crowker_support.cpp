@@ -31,7 +31,7 @@ void incoming_crowker_handler(crow::packet *pack, crow::Tower &tower)
             std::string theme = shps_c.theme().to_string();
 
             crow::crowker::instance()->crow_subscribe(
-                {pack->addrptr(), pack->addrsize()}, theme, shps_c.qos,
+                tower, {pack->addrptr(), pack->addrsize()}, theme, shps_c.qos,
                 shps_c.ackquant);
         }
         break;

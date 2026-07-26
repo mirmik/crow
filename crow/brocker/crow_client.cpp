@@ -16,8 +16,11 @@ void crowker_implementation::crow_client::publish(
     (void)opts;
 
 #ifdef CROW_PUBSUB_PROTOCOL_SUPPORTED
-    ::crow::publish({(uint8_t *)addr.data(), addr.size()}, theme.c_str(),
-                    {data.data(), data.size()}, opts.qos, opts.ackquant,
-                    (uint8_t)crow::pubsub_type::MESSAGE);
+    if (tower != nullptr)
+    {
+        ::crow::publish(*tower, {(uint8_t *)addr.data(), addr.size()},
+                        theme.c_str(), {data.data(), data.size()}, opts.qos,
+                        opts.ackquant, (uint8_t)crow::pubsub_type::MESSAGE);
+    }
 #endif
 }

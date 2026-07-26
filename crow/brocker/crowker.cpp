@@ -51,7 +51,8 @@ void crow::crowker::subscribe(const std::string &theme,
         nos::fprintln("new subscribe(crow): t:{}", theme);
 }
 
-void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
+void crow::crowker::crow_subscribe(Tower &tower,
+                                   const crow::hostaddr_view &addr,
                                    const std::string &theme,
                                    uint8_t qos,
                                    uint16_t ackquant)
@@ -65,6 +66,7 @@ void crow::crowker::crow_subscribe(const crow::hostaddr_view &addr,
 
     // TODO: Перенести. Незачем перезаписывать адресс каждый раз.
     sub->addr = saddr;
+    sub->tower = &tower;
 
     if (!thm->has_client(sub))
     {
