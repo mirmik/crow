@@ -21,6 +21,10 @@ find_package(Threads REQUIRED)
 
 option(CROW_BUILD_APPS "Build crow command line utilities" ${CROW_TOP_LEVEL})
 option(CROW_BUILD_TESTS "Build crow tests" ${CROW_TOP_LEVEL})
+option(CROW_ENABLE_LEGACY_PUBSUB
+    "Enable the legacy type-4 PubSub protocol used by old Crow devices"
+    ON
+)
 
 if(STATIC_LIBS)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++")
@@ -59,6 +63,10 @@ if(NOT WIN32)
 endif()
 
 add_library(crow SHARED ${CROW_SOURCES})
+
+if(CROW_ENABLE_LEGACY_PUBSUB)
+    target_compile_definitions(crow PUBLIC CROW_PUBSUB_PROTOCOL_SUPPORTED=1)
+endif()
 
 target_include_directories(crow
     PUBLIC

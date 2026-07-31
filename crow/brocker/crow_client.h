@@ -9,12 +9,18 @@
 #include "client.h"
 #include "options.h"
 
+namespace crow
+{
+    class Tower;
+}
+
 namespace crowker_implementation
 {
     class crow_client : public client
     {
     public:
         std::string addr = {};
+        crow::Tower *tower = nullptr;
 
         static std::map<std::string, crow_client> allsubs;
         static crow_client *get(const std::string &addr)
