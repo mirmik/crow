@@ -15,6 +15,7 @@ licant.cxx_objects("crow-objects",
                    mdepends=[
                        "crow",
                        "crow.udpgate",
+                       "crow.tcpgate",
                        "crow.crowker",
                        "nos",
                        "nos.inet",

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.18)
 
 set(CROW_TOP_LEVEL OFF)
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
@@ -17,13 +17,14 @@ if(CROW_TOP_LEVEL)
 endif()
 
 include(GNUInstallDirs)
-# Явные пути установки: библиотека в /usr/lib, заголовки в /usr/local/include
-set(CMAKE_INSTALL_LIBDIR "/usr/lib")
-set(CMAKE_INSTALL_INCLUDEDIR "/usr/local/include")
 find_package(Threads REQUIRED)
 
 option(CROW_BUILD_APPS "Build crow command line utilities" ${CROW_TOP_LEVEL})
 option(CROW_BUILD_TESTS "Build crow tests" ${CROW_TOP_LEVEL})
+option(CROW_ENABLE_LEGACY_PUBSUB
+    "Enable the legacy type-4 PubSub protocol used by old Crow devices"
+    ON
+)
 
 if(STATIC_LIBS)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++")
@@ -63,10 +64,14 @@ endif()
 
 add_library(crow SHARED ${CROW_SOURCES})
 
+if(CROW_ENABLE_LEGACY_PUBSUB)
+    target_compile_definitions(crow PUBLIC CROW_PUBSUB_PROTOCOL_SUPPORTED=1)
+endif()
+
 target_include_directories(crow
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_FULL_INCLUDEDIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 if(ADDITIONAL_INCLUDES_IGRIS)
@@ -129,6 +134,8 @@ endif()
 
 install(TARGETS crow
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 install(DIRECTORY crow

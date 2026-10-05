@@ -56,6 +56,7 @@ licant.modules.module("crow",
                       srcdir="crow",
                       sources=[
                           "src/iter.cpp",
+                          "src/tower_thread_executor.cpp",
                           "proto/acceptor.cpp",
                           # "proto/socket.cpp",
                           "proto/msgbox.cpp",
@@ -84,7 +85,6 @@ licant.module("crow.crowker",
                   "brocker/theme.cpp",
                   "brocker/client.cpp",
                   "brocker/crow_client.cpp",
-                  "brocker/tcp_client.cpp",
                   "brocker/crowker_api.cpp",
                   "brocker/crowker_pubsub_node.cpp",
               ]
@@ -102,10 +102,13 @@ licant.modules.module("crow.include",
                       include_paths=["."])
 
 licant.modules.module("crow.allocator", "malloc",
-                      sources=["crow/src/variants/allocation_malloc.cpp"], default=True)
+                      sources=["crow/src/variants/allocation_malloc.cpp"])
 
 licant.modules.module("crow.allocator", "pool",
                       sources=["crow/src/variants/allocation_pool.cpp"])
+
+licant.modules.module("crow.allocator", "unified",
+                      sources=["crow/src/allocation.cpp"], default=True)
 
 #######################################GATES#########################################
 

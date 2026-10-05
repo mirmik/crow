@@ -20,7 +20,7 @@ application("crowker",
                 "crow.crowker",
                 "crow.udpgate"
             ],
-            include_paths=["../../lib"],
+            include_paths=["../../lib", "../../libhttp/include"],
             optimize="-O0",
             cc_flags="-flto -fPIC -Wextra -Wall -ffunction-sections -fdata-sections",
             cxx_flags="-flto -fPIC -Wextra -Wall -ffunction-sections -fdata-sections",

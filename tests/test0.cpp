@@ -13,7 +13,6 @@ using namespace std::chrono_literals;
 static auto addr = crow::address(".99");
 static auto addr2 = crow::address(".99.99");
 static int count = 0;
-static crow::Tower *g_tower = nullptr;
 
 void incoming(crow::packet *ptr)
 {
@@ -38,7 +37,7 @@ TEST_CASE("ptr")
 
 TEST_CASE("get_stage")
 {
-    FOR_EACH_ALLOCATOR_WITH_TOWER
+    FOR_EACH_ALLOCATOR
     {
         std::string data = "data";
         crow::packet *pack =

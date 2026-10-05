@@ -2,67 +2,57 @@ name: CMake
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
-
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+    branches: [master]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
-        compiler: 
-          - { CXX: g++-11, CC: gcc-11 } 
-          - { CXX: clang++-12, CC: clang-12 }
-          
+        compiler:
+          - { cc: gcc, cxx: g++ }
+          - { cc: clang, cxx: clang++ }
+
+    env:
+      CC: ${{ matrix.compiler.cc }}
+      CXX: ${{ matrix.compiler.cxx }}
+      PREFIX: ${{ runner.temp }}/mirmik-stack
+      CPATH: ${{ runner.temp }}/mirmik-stack/include
+      LIBRARY_PATH: ${{ runner.temp }}/mirmik-stack/lib
+      LD_LIBRARY_PATH: ${{ runner.temp }}/mirmik-stack/lib
+
     steps:
-    - uses: actions/checkout@master
-      with:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
           repository: mirmik/igris
+          path: .ci/igris
+      - uses: actions/checkout@v4
+        with:
+          repository: mirmik/nos
+          path: .ci/nos
 
-    - uses: actions/checkout@v2
+      - name: Build and install igris
+        run: |
+          cmake -S .ci/igris -B .ci/igris/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" -DIGRIS_BUILD_TESTS=OFF
+          cmake --build .ci/igris/build --parallel 2
+          cmake --install .ci/igris/build
 
-    - name: Setup dependencies
-      run: |
-        sudo apt-get install -y g++-11 clang-12
-        sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/${{matrix.compiler.CXX}} 100
-        sudo update-alternatives --install /usr/bin/cc  cc  /usr/bin/${{matrix.compiler.CC}} 100
+      - name: Build and install nos
+        run: |
+          cmake -S .ci/nos -B .ci/nos/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" -DNOS_BUILD_TESTS=OFF
+          cmake --build .ci/nos/build --parallel 2
+          cmake --install .ci/nos/build
 
-    - name: Install igris library
-      run: |
-        git clone https://github.com/mirmik/igris
-        cd igris
-        cmake .
-        cmake --build .
-        sudo cmake --install .
-        cd ..
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCROW_BUILD_APPS=OFF -DCROW_BUILD_TESTS=ON
 
-    - name: Install nos library
-      run: |
-        git clone https://github.com/mirmik/nos
-        cd nos
-        cmake .
-        cmake --build .
-        sudo cmake --install .
-        cd ..
+      - name: Build
+        run: cmake --build build --parallel 2
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.  
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
-      
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

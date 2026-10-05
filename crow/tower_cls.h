@@ -238,6 +238,14 @@ namespace crow
         // Reset for testing
         void reset_for_test();
 
+        // Diagnostic getters for internal state
+        size_t get_outters_count() const { return _outters_count; }
+        size_t get_incoming_count() const { return _incoming_count; }
+        size_t get_outters_htable_count() const { return _outters_htable.count(); }
+        size_t get_incoming_htable_count() const { return _incoming_htable.count(); }
+        size_t get_time_wait_count() const { return _time_wait_count; }
+        int get_travelled_count() { return dlist_size(&_travelled); }
+
         // Finish all gateways
         void finish();
 

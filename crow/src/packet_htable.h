@@ -77,6 +77,16 @@ namespace crow
         {
             return _count == 0;
         }
+
+        /// Clear all entries (does not deallocate packets!)
+        void clear()
+        {
+            for (size_t i = 0; i < PACKET_HTABLE_BUCKETS; ++i)
+            {
+                dlist_init(&_buckets[i]);
+            }
+            _count = 0;
+        }
     };
 }
 

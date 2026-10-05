@@ -1125,21 +1125,25 @@ void crow::Tower::reset_for_test()
         crow::deallocate_packet(pack);
     }
 
-    // Clear incoming list
+    // Clear incoming list and htable
     while (!dlist_empty(&_incoming))
     {
         crow::packet *pack = dlist_first_entry(&_incoming, crow::packet, lnk);
         dlist_del(&pack->lnk);
         crow::deallocate_packet(pack);
     }
+    _incoming_htable.clear();
+    _incoming_count = 0;
 
-    // Clear outters list
+    // Clear outters list and htable
     while (!dlist_empty(&_outters))
     {
         crow::packet *pack = dlist_first_entry(&_outters, crow::packet, lnk);
         dlist_del(&pack->lnk);
         crow::deallocate_packet(pack);
     }
+    _outters_htable.clear();
+    _outters_count = 0;
 
     _total_travelled = 0;
     crow::reset_allocated_count();

@@ -4,10 +4,12 @@
 #include <pybind11/stl.h>
 
 #include <crow/brocker/crowker.h>
+#include <crow/nodes/pubsub_defs.h>
 
 #include "pynode.h"
 #include <crow/address.h>
 #include <crow/gates/loopgate.h>
+#include <crow/gates/tcpgate.h>
 #include <crow/gates/udpgate.h>
 #include <crow/iter.h>
 #include <crow/nodes/publisher_node.h>
@@ -52,6 +54,18 @@ public:
     }
 };
 
+// Helper class for tcpgate with Tower binding support
+class py_tcpgate : public crow::tcpgate
+{
+public:
+    using crow::tcpgate::tcpgate;
+
+    int bind_to_tower(crow::Tower &tower, int gate_no = CROW_TCPGATE_NO)
+    {
+        return crow::gateway::bind(tower, gate_no);
+    }
+};
+
 PYBIND11_MODULE(libcrow, m)
 {
     // Tower class - for multiple independent towers
@@ -82,6 +96,13 @@ PYBIND11_MODULE(libcrow, m)
                     .def("rawdata",
                          [](packet_ptr &self) -> py::bytes {
                              nos::buffer buf = self->data();
+                             return {buf.data(), buf.size()};
+                         })
+                    .def("message",
+                         [](packet_ptr &self) -> py::bytes {
+                             // Extract message from consume subheader
+                             auto &sh = self->subheader<crow::consume_subheader>();
+                             nos::buffer buf = sh.message();
                              return {buf.data(), buf.size()};
                          })
                     .def("addr", [](packet_ptr &self) -> crow::hostaddr {
@@ -124,6 +145,14 @@ PYBIND11_MODULE(libcrow, m)
         .def(py::init<>())
         .def("bind_to_tower", &py_loopgate::bind_to_tower,
              py::arg("tower"), py::arg("gate_no"));
+
+    py::class_<py_tcpgate>(m, "tcpgate", __gateway__)
+        .def(py::init<>())
+        .def("open", &py_tcpgate::open, py::arg("port"))
+        .def("close", &py_tcpgate::close)
+        .def("debug", &py_tcpgate::debug, py::arg("en"))
+        .def("bind_to_tower", &py_tcpgate::bind_to_tower,
+             py::arg("tower"), py::arg("gate_no") = CROW_TCPGATE_NO);
 
     m.def("crowker_address", &crow::crowker_address);
 

@@ -72,6 +72,8 @@ namespace crow
             rackquant = _rackquant;
         }
 
+        void unsubscribe_reply();
+
     private:
         void incoming_packet(crow::packet *pack) override;
         void undelivered_packet(crow::packet *pack) override;
