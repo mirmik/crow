@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>apps/ctrans/test.txt</title>
+</head>
+<body>
+<!-- BEGIN SCAT CODE -->
+hello&nbsp;world<br>
+<!-- END SCAT CODE -->
+</body>
+</html>

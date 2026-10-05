@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>apps/ctrans/HIDE/binin.cpp</title>
+</head>
+<body>
+<!-- BEGIN SCAT CODE -->
+#include&nbsp;&quot;binin.h&quot;<br>
+#include&nbsp;&quot;bincommon.h&quot;<br>
+<br>
+#include&nbsp;&lt;igris/util/string.h&gt;<br>
+#include&nbsp;&lt;igris/dprint.h&gt;<br>
+<br>
+void&nbsp;flt32_conv(const&nbsp;std::string&nbsp;&amp;str,&nbsp;void&nbsp;*tgt)<br>
+{<br>
+	*(float&nbsp;*)tgt&nbsp;=&nbsp;(float)atof(str.c_str());<br>
+}<br>
+<br>
+void&nbsp;int64_conv(const&nbsp;std::string&nbsp;&amp;str,&nbsp;void&nbsp;*tgt)&nbsp;{&nbsp;*(int64_t&nbsp;*)tgt&nbsp;=&nbsp;atoi(str.c_str());&nbsp;}<br>
+void&nbsp;int32_conv(const&nbsp;std::string&nbsp;&amp;str,&nbsp;void&nbsp;*tgt)&nbsp;{&nbsp;*(int32_t&nbsp;*)tgt&nbsp;=&nbsp;atoi(str.c_str());&nbsp;}<br>
+void&nbsp;int16_conv(const&nbsp;std::string&nbsp;&amp;str,&nbsp;void&nbsp;*tgt)&nbsp;{&nbsp;*(int16_t&nbsp;*)tgt&nbsp;=&nbsp;atoi(str.c_str());&nbsp;}<br>
+void&nbsp;int8_conv&nbsp;(const&nbsp;std::string&nbsp;&amp;str,&nbsp;void&nbsp;*tgt)&nbsp;{&nbsp;*(int8_t&nbsp;*)tgt&nbsp;=&nbsp;&nbsp;atoi(str.c_str());&nbsp;}<br>
+<br>
+size_t&nbsp;binin_size&nbsp;=&nbsp;0;<br>
+std::vector&lt;size_t&gt;&nbsp;binin_sizes;<br>
+std::vector&lt;void(*)(const&nbsp;std::string&nbsp;&amp;,&nbsp;void&nbsp;*)&gt;&nbsp;binin_conves;<br>
+std::vector&lt;std::string&gt;&nbsp;binin_format;<br>
+<br>
+std::map&lt;std::string,&nbsp;void(*)(const&nbsp;std::string&nbsp;&amp;,&nbsp;void&nbsp;*)&gt;&nbsp;visitor_conv&nbsp;=<br>
+{<br>
+	{&quot;f32&quot;,&nbsp;flt32_conv},&nbsp;<br>
+	{&quot;i64&quot;,&nbsp;int64_conv},<br>
+	{&quot;i32&quot;,&nbsp;int32_conv},<br>
+	{&quot;i16&quot;,&nbsp;int16_conv},<br>
+	{&quot;i8&quot;,&nbsp;&nbsp;int8_conv}<br>
+};<br>
+<br>
+void&nbsp;binin_mode_prepare(std::string&nbsp;infmt)&nbsp;<br>
+{<br>
+	binin_format&nbsp;=&nbsp;igris::split(infmt,&nbsp;',');<br>
+<br>
+	for&nbsp;(auto&nbsp;&amp;str&nbsp;:&nbsp;binin_format)<br>
+	{<br>
+		binin_size&nbsp;+=&nbsp;visitor_size[str];<br>
+		binin_sizes.push_back(visitor_size[str]);<br>
+		binin_conves.push_back(visitor_conv[str]);<br>
+	}<br>
+}<br>
+<br>
+std::string&nbsp;input_binary(const&nbsp;std::string&amp;&nbsp;in)&nbsp;<br>
+{<br>
+	std::string&nbsp;ret;<br>
+	igris::strvec&nbsp;args&nbsp;=&nbsp;igris::split(in,&nbsp;',');<br>
+<br>
+	if&nbsp;(args.size()&nbsp;!=&nbsp;binin_format.size())&nbsp;&nbsp;<br>
+	{<br>
+		dprln(&quot;WARN:&quot;,&nbsp;&quot;wrong&nbsp;binary&nbsp;input&quot;);<br>
+		return&nbsp;std::string();<br>
+	}<br>
+<br>
+	ret.resize(binin_size);<br>
+	char&nbsp;*&nbsp;ptr&nbsp;=&nbsp;(char*)ret.data();<br>
+<br>
+	for&nbsp;(unsigned&nbsp;int&nbsp;i&nbsp;=&nbsp;0;&nbsp;i&nbsp;&lt;&nbsp;args.size();&nbsp;++i)<br>
+	{<br>
+		binin_conves[i](args[i],&nbsp;ptr);<br>
+		ptr&nbsp;+=&nbsp;binin_sizes[i];<br>
+	}<br>
+<br>
+	return&nbsp;ret;<br>
+}<br>
+<!-- END SCAT CODE -->
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>README.md</title>
+</head>
+<body>
+<!-- BEGIN SCAT CODE -->
+#&nbsp;Протокол&nbsp;датаграммной&nbsp;передачи&nbsp;crow.<br>
+<br>
+##&nbsp;Философия&nbsp;и&nbsp;концептуальное&nbsp;устройство.<br>
+Crow&nbsp;задуман&nbsp;как&nbsp;встраиваемая&nbsp;библиотека,&nbsp;реализующая&nbsp;надёжный&nbsp;протокол&nbsp;передачи&nbsp;поверх&nbsp;широкого&nbsp;класса&nbsp;каналов&nbsp;передачи&nbsp;информации&nbsp;и&nbsp;обеспечиающая&nbsp;гибкость&nbsp;в&nbsp;построении&nbsp;обработчиков&nbsp;такого&nbsp;типа&nbsp;запросов.<br>
+<br>
+Базовыми&nbsp;сущностями&nbsp;библиотеки&nbsp;crow&nbsp;являются:<br>
+-&nbsp;башня<br>
+-&nbsp;врата<br>
+-&nbsp;пакет<br>
+-&nbsp;протокол&nbsp;обработки<br>
+<br>
+Под&nbsp;башнями&nbsp;понимаются&nbsp;информационные&nbsp;процессы,&nbsp;обменивающиеся&nbsp;сообщениями&nbsp;в&nbsp;виде&nbsp;пакетов&nbsp;через&nbsp;драйверы&nbsp;каналов&nbsp;связи,&nbsp;именуемые&nbsp;вратами.&nbsp;По&nbsp;получению&nbsp;сообщения&nbsp;башня&nbsp;решает,&nbsp;что&nbsp;делать&nbsp;со&nbsp;входящей&nbsp;информацией&nbsp;исходя&nbsp;из&nbsp;заявленного&nbsp;типа&nbsp;протокола&nbsp;обработки.<br>
+<br>
+Пакеты&nbsp;могут&nbsp;пересылаться&nbsp;как&nbsp;соседней&nbsp;башне&nbsp;непосредственно&nbsp;достижимой&nbsp;через&nbsp;имеющиеся&nbsp;у&nbsp;неё&nbsp;врата,&nbsp;так&nbsp;и&nbsp;по&nbsp;цепочке&nbsp;врат.&nbsp;<br>
+Для&nbsp;управления&nbsp;движением&nbsp;пакета&nbsp;через&nbsp;различное&nbsp;количество&nbsp;врат&nbsp;различных&nbsp;типов,&nbsp;последний&nbsp;содержит&nbsp;поле&nbsp;адреса&nbsp;варьируемой&nbsp;длины.&nbsp;При&nbsp;прохождении&nbsp;через&nbsp;башню&nbsp;с&nbsp;адреса&nbsp;считывается&nbsp;индекс&nbsp;врат,&nbsp;через&nbsp;которые&nbsp;необходимо&nbsp;переслать&nbsp;пакет,&nbsp;а&nbsp;сами&nbsp;врата&nbsp;считывают&nbsp;адрес&nbsp;башни&nbsp;кодирующий&nbsp;способ&nbsp;достижения&nbsp;башни-адресата&nbsp;на&nbsp;управляемом&nbsp;вратами&nbsp;интерфейсе.<br>
+<br>
+##&nbsp;Качество&nbsp;обслуживания<br>
+Для&nbsp;надёжной&nbsp;доставки&nbsp;и&nbsp;гибкой&nbsp;настройки&nbsp;загрузки&nbsp;канала&nbsp;связи,&nbsp;протокол&nbsp;crow&nbsp;поддерживает&nbsp;3&nbsp;уровня&nbsp;подтверждения&nbsp;доставки&nbsp;пакетов.<br>
+<br>
+QOS_0&nbsp;-&nbsp;без&nbsp;подтверждение.&nbsp;Доставка&nbsp;производится&nbsp;не&nbsp;более&nbsp;одного&nbsp;раза.<br>
+QOS_1&nbsp;-&nbsp;одностороннее&nbsp;подтверждение.&nbsp;Доставка&nbsp;производится&nbsp;один&nbsp;или&nbsp;более&nbsp;раз.<br>
+QOS_2&nbsp;-&nbsp;двустороннее&nbsp;подтверждение.&nbsp;Доставка&nbsp;производится&nbsp;один&nbsp;раз.<br>
+<br>
+Варианты&nbsp;с&nbsp;доставкой&nbsp;предполагают&nbsp;отправку&nbsp;обратного&nbsp;ack-пакета.&nbsp;Если&nbsp;отправитель&nbsp;не&nbsp;получает&nbsp;ack&nbsp;пакет,&nbsp;он&nbsp;через&nbsp;интервал&nbsp;времени,&nbsp;определяемый&nbsp;параметром&nbsp;ackquant&nbsp;повторяет&nbsp;отправку&nbsp;пакета.&nbsp;Для&nbsp;QOS&nbsp;2&nbsp;также&nbsp;выполняется&nbsp;подтверждение&nbsp;прихода&nbsp;ack-пакета&nbsp;через&nbsp;отправку&nbsp;пакета&nbsp;ack2.&nbsp;Таким&nbsp;образом&nbsp;в&nbsp;идеальном&nbsp;случае&nbsp;через&nbsp;канал&nbsp;связи&nbsp;пойдёт&nbsp;для&nbsp;QOS_1&nbsp;x2&nbsp;пакетов,&nbsp;а&nbsp;для&nbsp;QOS_2&nbsp;x3.<br>
+<br>
+##&nbsp;Устройство&nbsp;пакета&nbsp;crow.<br>
+<br>
+Базовая&nbsp;структура&nbsp;пакета&nbsp;crow&nbsp;выглядит&nbsp;следующим&nbsp;образом:<br>
+<br>
+-&nbsp;Заголовок<br>
+	-&nbsp;Поле&nbsp;флагов<br>
+	-&nbsp;Длина&nbsp;поле&nbsp;адресса<br>
+	-&nbsp;Полная&nbsp;длина&nbsp;пакета<br>
+	-&nbsp;Маршрутный&nbsp;курсор<br>
+	-&nbsp;Идентификатор&nbsp;пакета<br>
+	-&nbsp;Поле&nbsp;качества&nbsp;обслуживания<br>
+	-&nbsp;Квант&nbsp;времени&nbsp;обслуживания<br>
+-&nbsp;Поле&nbsp;адреса<br>
+-&nbsp;Поле&nbsp;данных<br>
+<br>
+<br>
+##&nbsp;Врата&nbsp;(gateways)<br>
+Врата&nbsp;соединяют&nbsp;башни&nbsp;crow.&nbsp;Задача&nbsp;врат&nbsp;состоит&nbsp;в&nbsp;анализе&nbsp;адресной&nbsp;строки,&nbsp;выборе&nbsp;ноды&nbsp;получателя&nbsp;и&nbsp;отправке/получения&nbsp;сообщений&nbsp;через&nbsp;физическую&nbsp;среду.&nbsp;Врата&nbsp;регистрируются&nbsp;за&nbsp;определённым&nbsp;номером,&nbsp;который&nbsp;должен&nbsp;быть&nbsp;известен&nbsp;отправителю,&nbsp;чтобы&nbsp;башня&nbsp;могла&nbsp;перенаправить&nbsp;пакет&nbsp;через&nbsp;указанные&nbsp;врата.<br>
+<br>
+###&nbsp;Типы&nbsp;врат:<br>
+##&nbsp;UDP<br>
+Базовый&nbsp;тип&nbsp;врат,&nbsp;перекидывающий&nbsp;пакеты&nbsp;через&nbsp;UDP&nbsp;сокеты.<br>
+Стандартный&nbsp;номер&nbsp;для&nbsp;udp&nbsp;врат:&nbsp;12.<br>
+<br>
+##&nbsp;Serial<br>
+Врата&nbsp;для&nbsp;работы&nbsp;с&nbsp;физически&nbsp;зашумлённым&nbsp;каналом&nbsp;внешнего&nbsp;мира,&nbsp;например&nbsp;com&nbsp;портом.&nbsp;Для&nbsp;защиты&nbsp;данных&nbsp;используют&nbsp;протокол&nbsp;igris/protocols/gstuff.h<br>
+<br>
+##&nbsp;Serial_v1<br>
+Старая&nbsp;версия&nbsp;последовательных&nbsp;версия&nbsp;врат,&nbsp;использующая&nbsp;первую&nbsp;версию&nbsp;протокола&nbsp;gstuff.<br>
+<br>
+##&nbsp;Подпротоколы<br>
+###&nbsp;Брокер&nbsp;и&nbsp;Протокол&nbsp;pubsub.<br>
+Реализует&nbsp;доставку&nbsp;сообщений&nbsp;на&nbsp;основе&nbsp;брокера&nbsp;apps/crowker.<br>
+<br>
+###&nbsp;Протокол&nbsp;node.<br>
+Добавляет&nbsp;дополнительный&nbsp;слой&nbsp;нумерации&nbsp;-&nbsp;портов.&nbsp;Обработчик&nbsp;порта&nbsp;реализуется&nbsp;в&nbsp;виде&nbsp;объекта&nbsp;типа&nbsp;crow::node&nbsp;(crow/proto/node.h).&nbsp;Слой&nbsp;берёт&nbsp;на&nbsp;себя&nbsp;доставку&nbsp;сообщений.&nbsp;Логика&nbsp;обработки&nbsp;реализуется&nbsp;в&nbsp;подпротоколах.<br>
+<br>
+####&nbsp;(node)&nbsp;Подпротокол&nbsp;rpc&nbsp;-&nbsp;remote&nbsp;procedure&nbsp;call.<br>
+API&nbsp;для&nbsp;бинарного&nbsp;общения&nbsp;с&nbsp;удалёнными&nbsp;сервисами.&nbsp;Сервисы&nbsp;объявляют&nbsp;набор&nbsp;обработчиков,&nbsp;характеризуемых&nbsp;названием,&nbsp;параметрами&nbsp;и&nbsp;возвращаемым&nbsp;значением&nbsp;которым&nbsp;может&nbsp;обратиться&nbsp;удалённое&nbsp;устройство,&nbsp;используя&nbsp;один&nbsp;из&nbsp;двух&nbsp;протоколов.&nbsp;Отличие&nbsp;протоколов&nbsp;в&nbsp;известности&nbsp;типов&nbsp;аргументов&nbsp;и&nbsp;возвращаемого&nbsp;значения&nbsp;на&nbsp;стороне&nbsp;отправителя.&nbsp;Если&nbsp;типы&nbsp;указаны,&nbsp;аргументы&nbsp;передаются&nbsp;последовательной&nbsp;сериализацией&nbsp;igris::serialize&nbsp;и&nbsp;распаковываются&nbsp;процедурой&nbsp;igris::deserialize&nbsp;на&nbsp;обратной&nbsp;стороне.&nbsp;Если&nbsp;типы&nbsp;не&nbsp;указаны,&nbsp;аргументы&nbsp;передаются&nbsp;в&nbsp;в&nbsp;сериализованном&nbsp;объекте&nbsp;igris::trent,&nbsp;причём,&nbsp;высшим&nbsp;типом&nbsp;этого&nbsp;объекта&nbsp;должен&nbsp;юыть&nbsp;массив.&nbsp;На&nbsp;стороне&nbsp;получателя&nbsp;аргументы&nbsp;биндяться&nbsp;на&nbsp;параметры&nbsp;(см.&nbsp;процедуру&nbsp;\_\_bind).<br>
+<br>
+Подпротокол&nbsp;rpc&nbsp;использует&nbsp;стандартный&nbsp;nodeno&nbsp;:&nbsp;2.<br>
+<br>
+###&nbsp;(node)&nbsp;Подпротокол&nbsp;cli&nbsp;(а&nbsp;также&nbsp;genos::clinode).<br>
+Реализует&nbsp;удалённый&nbsp;сервис&nbsp;через&nbsp;имитацию&nbsp;текстового&nbsp;cli&nbsp;со&nbsp;стандартными&nbsp;параметрами&nbsp;argv,&nbsp;argc.&nbsp;В&nbsp;качестве&nbsp;данных&nbsp;передаются&nbsp;строковые&nbsp;запросы&nbsp;и&nbsp;в&nbsp;текстовой&nbsp;же&nbsp;форме&nbsp;воращается&nbsp;ответ.&nbsp;Удобен&nbsp;для&nbsp;реализации&nbsp;удалённой&nbsp;консоли.<br>
+<br>
+###&nbsp;(node)&nbsp;Подпротокол&nbsp;channel.<br>
+Реализация&nbsp;каналов&nbsp;аля&nbsp;TCP.&nbsp;Включает&nbsp;объекты&nbsp;channel,&nbsp;acceptor.<br>
+<br>
+###&nbsp;(node)&nbsp;Подпротокол&nbsp;msgbox.<br>
+Реализация&nbsp;паттерна&nbsp;Send-Receive-Reply.&nbsp;<br>
+	<br>
+<br>
+<br>
+<!-- END SCAT CODE -->
+</body>
+</html>
